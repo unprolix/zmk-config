@@ -27,10 +27,19 @@ manifest:
     - name: zmkfirmware
       url-base: https://github.com/zmkfirmware
 
+    # jjb - for eyelash_corne
+    - name: a741725193
+      url-base: https://github.com/a741725193
+
   projects:
     - name: zmk
       remote: zmkfirmware
       import: app/west.yml
+
+    # jjb - for eyelash_corne
+    - name: zmk-new_corne
+      remote: a741725193
+      revision: main
 
     # ZMK modules
     - name: zmk-adaptive-key

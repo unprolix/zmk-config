@@ -57,8 +57,18 @@ _build_single $board $shield $snippet $artifact *west_args:
         mkdir -p "{{ out }}" && cp "$build_dir/zephyr/zmk.bin" "{{ out }}/$artifact.bin"
     fi
 
+# check if west update is needed and run it if necessary
+_check_west_update:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    echo "Checking if west update is needed..."
+    if [ ! -d "zmk-new_corne" ] || [ -n "$(west list -f '{name} {revision} {path}' | grep 'needs update')" ]; then
+        echo "Running west update..."
+        west update --fetch-opt=--filter=blob:none
+    fi
+
 # build firmware for matching targets
-build expr *west_args: _parse_combos
+build expr *west_args: _parse_combos _check_west_update
     #!/usr/bin/env bash
     set -euo pipefail
     targets=$(just _parse_targets {{ expr }})
