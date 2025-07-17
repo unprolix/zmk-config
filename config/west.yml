@@ -36,7 +36,7 @@ manifest:
       remote: zmkfirmware
       import: app/west.yml
 
-    # jjb - for eyelash_corne
+    # jjb - for eyelash_corne. will this work for ergokeeb corne?
     - name: zmk-new_corne
       remote: a741725193
       revision: main
