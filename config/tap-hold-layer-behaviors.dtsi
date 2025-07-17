@@ -1,0 +1,105 @@
+// Hold-tap behaviors for each modifier
+tap_hold_layer_lctrl: tap_hold_layer_lctrl {
+    compatible = "zmk,behavior-hold-tap";
+    #binding-cells = <2>;
+    tapping-term-ms = <200>;
+    quick-tap-ms = <0>;
+    flavor = "tap-preferred";
+    bindings = <&layer_lctrl>, <&kp>;
+};
+
+tap_hold_layer_rctrl: tap_hold_layer_rctrl {
+    compatible = "zmk,behavior-hold-tap";
+    #binding-cells = <2>;
+    tapping-term-ms = <200>;
+    quick-tap-ms = <0>;
+    flavor = "tap-preferred";
+    bindings = <&layer_rctrl>, <&kp>;
+};
+
+tap_hold_layer_lshift: tap_hold_layer_lshift {
+    compatible = "zmk,behavior-hold-tap";
+    #binding-cells = <2>;
+    tapping-term-ms = <200>;
+    quick-tap-ms = <175>;
+    require-prior-idle-ms = <100>;
+    flavor = "balanced";
+    bindings = <&layer_lshift>, <&kp>;
+};
+
+tap_hold_layer_rshift: tap_hold_layer_rshift {
+    compatible = "zmk,behavior-hold-tap";
+    #binding-cells = <2>;
+    tapping-term-ms = <200>;
+    quick-tap-ms = <175>;
+    require-prior-idle-ms = <100>;
+    flavor = "balanced";
+    bindings = <&layer_rshift>, <&kp>;
+};
+
+tap_hold_layer_lalt: tap_hold_layer_lalt {
+    compatible = "zmk,behavior-hold-tap";
+    #binding-cells = <2>;
+    tapping-term-ms = <200>;
+    quick-tap-ms = <0>;
+    flavor = "tap-preferred";
+    bindings = <&layer_lalt>, <&kp>;
+};
+
+tap_hold_layer_ralt: tap_hold_layer_ralt {
+    compatible = "zmk,behavior-hold-tap";
+    #binding-cells = <2>;
+    tapping-term-ms = <200>;
+    quick-tap-ms = <0>;
+    flavor = "tap-preferred";
+    bindings = <&layer_ralt>, <&kp>;
+};
+
+/*
+ * tap_hold_layer_lgui: Tap for keypress, hold for layer activation with LGUI modifier
+ * 
+ * This behavior allows tapping a key for its normal function, while holding it
+ * activates both a layer and the LGUI (Left GUI/Windows/Command) modifier simultaneously.
+ * 
+ * Usage: &tap_hold_layer_lgui <LAYER_TO_ACTIVATE> <KEY_TO_TAP>
+ * Example: &tap_hold_layer_lgui NAVIGATION F  // Tap for F, hold for NAVIGATION layer + LGUI
+ */
+
+tap_hold_layer_lgui: tap_hold_layer_lgui {
+    compatible = "zmk,behavior-hold-tap";
+    #binding-cells = <2>;
+    tapping-term-ms = <200>;
+    quick-tap-ms = <175>;
+    require-prior-idle-ms = <100>;
+    flavor = "balanced";
+    bindings = <&layer_lgui>, <&kp>;
+};
+
+tap_hold_layer_rgui: tap_hold_layer_rgui {
+    compatible = "zmk,behavior-hold-tap";
+    #binding-cells = <2>;
+    tapping-term-ms = <200>;
+    quick-tap-ms = <175>;
+    require-prior-idle-ms = <100>;
+    flavor = "balanced";
+    bindings = <&layer_rgui>, <&kp>;
+};
+
+
+/*
+Usage examples in keymap:
+
+&tap_hold_layer_lgui NUMERIC F      // Tap F, hold for layer NUMERIC + LGUI
+&tap_hold_layer_lctrl SYMBOLS J     // Tap J, hold for layer SYMBOLS + LCTRL
+&tap_hold_layer_ralt FUNCTION K     // Tap K, hold for layer FUNCTION + RALT
+
+Available modifiers:
+- tap_hold_layer_lctrl
+- tap_hold_layer_rctrl  
+- tap_hold_layer_lshift
+- tap_hold_layer_rshift
+- tap_hold_layer_lalt
+- tap_hold_layer_ralt
+- tap_hold_layer_lgui
+- tap_hold_layer_rgui
+*/

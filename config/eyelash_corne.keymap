@@ -1,0 +1,448 @@
+SYNTAX ERROR TO SHOW WHEN THIS FILE IS ACTUALLY INCLUDED
+
+/*
+
+TODO:
+
+* investigate leader-key use
+
+* try finessing timings for tap/hold/doubletap to see if it can be made non-annoying
+
+* make layer switch combos toggle between base and the other layer?
+
+* holding backspace for repeating (backspaces) doesn't work
+
+* how to specify actions for turning the encoder on a particular layer
+
+* how to specify bluetooth-related functionality
+
+* how to specify underglow-related functionality
+
+* how to illuminate the RGB LED for a specific key
+
+* can i rearrange the layer definitions to remove the encoder and d-pad from their current positions and place them underneath? (it's confusing to have them in the middle)
+
+* tidying
+
+key numbers
+
+ 0  1  2  3  4  5          6       7  8  9 10 11 12
+13 14 15 16 17 18      19 20 21   22 23 24 25 26 27
+28 29 30 31 32 33   34    35      36 37 38 39 40 41
+         42 43 44                 45 46 47
+
+
+ 0  1  2  3  4  5          6       7  8  9 10 11 12
+    q  w  e  r  t                  y  u  i  o  p  '
+
+13 14 15 16 17 18      19 20 21   22 23 24 25 26 27
+    a  s  d  f  g                  h  j  k  l  ;  '
+
+28 29 30 31 32 33   34    35      36 37 38 39 40 41
+    z  x  c  v  b                  n  m  ,  .  /
+
+         42 43 44                 45 46 47
+
+*/
+
+#include <behaviors.dtsi>
+#include <dt-bindings/zmk/bt.h>
+#include <dt-bindings/zmk/keys.h>
+#include <dt-bindings/zmk/mouse.h>
+#include <dt-bindings/zmk/outputs.h>
+#include <dt-bindings/zmk/rgb.h>
+
+// No need for tap-hold-layer header with specialized behaviors
+
+
+#include <input/processors.dtsi>
+
+#define BASE 0
+#define NUMERIC 1
+#define NAVIGATION 2
+#define FN 3
+#define EXTRA 4
+#define SYSTEM 5
+#define MODIFIER_LEFT_NAV 6
+#define MODIFIER_RIGHT_NAV 7
+
+// short versions for helping things line up
+#define NUM NUMERIC
+#define NAV NAVIGATION
+#define LGUI_NAV_L MODIFIER_LEFT_NAV
+#define RGUI_NAV_R MODIFIER_RIGHT_NAV
+#define MENU K_APPLICATION
+
+
+#define HRM_TIMEOUT 400
+#define TAP_TIMEOUT 50
+#define FAST_TAP 230		// at 200, the double tap actions do not reliably trigger
+#define INTERRUPT_TAP 50        // very short window, for interrupting tap dance
+#define CHORD_TIMEOUT 50
+#define LONG_PAUSE 600		// e.g. before certain combos. 800 is too long
+
+/*
+
+   &mmv_input_listener {
+       input-processors = <&zip_xy_scaler 2 1>;
+   };
+
+   &msc_input_listener {
+       input-processors = <&zip_xy_scaler 2 1>;
+   };
+
+ */
+
+#define ZMK_MOUSE_DEFAULT_MOVE_VAL 1200  // 600
+#define ZMK_MOUSE_DEFAULT_SCRL_VAL 20    // 10
+
+#include "build_info.dtsi"
+//#include "tap-hold-layer.dtsi"
+
+&lt {
+    tapping-term-ms = <150>;
+    quick-tap-ms = <150>;
+    flavor = "tap-preferred";
+};
+
+/ {
+  macros {
+      #include "layer-mod-macros.dtsi"
+      #include "emoji.dtsi"
+  };
+};
+
+
+
+
+/ {
+    behaviors {
+
+        hm: homerow_mods {
+            compatible = "zmk,behavior-hold-tap";
+	    #binding-cells = <2>;
+ 	    tapping-term-ms = <280>; // 200 is too low
+	    quick-tap-ms = <175>;
+	    require-prior-idle-ms = <150>; // 100 is too low
+	    flavor = "balanced";
+	    bindings = <&kp>, <&kp>;
+	};
+
+	#include "tap-hold-layer-behaviors.dtsi"
+	#include "modifier-tap-doubletap-behaviors.dtsi"
+
+	// hold LGUI, tap for space, double tap for tab
+        lgui_space_tab: lgui_space_tab {
+            compatible = "zmk,behavior-tap-dance";
+            label = "LGUI_SPACE_TAB";
+            #binding-cells = <0>;
+            tapping-term-ms = <FAST_TAP>;
+            bindings = <&ht_mod_kp LGUI SPACE>, <&kp TAB>;
+        };
+
+	// hold RGUI, tap for space, double tap for return
+        rgui_space_ret: rgui_space_ret {
+            compatible = "zmk,behavior-tap-dance";
+            label = "RGUI_SPACE_RET";
+            #binding-cells = <0>;
+            tapping-term-ms = <FAST_TAP>;
+            bindings = <&ht_mod_kp RGUI SPACE>, <&kp RET>;
+        };
+
+        lt_simple: lt_simple {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            tapping-term-ms = <120>; // 200 too long
+            quick-tap-ms = <175>;
+            require-prior-idle-ms = <100>;
+            flavor = "balanced";
+            bindings = <&mo>, <&kp>;
+        };
+        LTS: LTS { // alias for lt_simple but it would be great if there were a better way to define it as such.
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            tapping-term-ms = <200>;
+            quick-tap-ms = <175>;
+            require-prior-idle-ms = <100>;
+            flavor = "balanced";
+            bindings = <&mo>, <&kp>;
+        };
+
+        num_menu_num: num_menu_num {
+            compatible = "zmk,behavior-tap-dance";
+            #binding-cells = <0>;
+            tapping-term-ms = <200>;
+            bindings = <&lt_simple NUMERIC MENU>, <&sl NUMERIC>;
+        };
+
+        num_sqt_num: num_sqt_num {
+            compatible = "zmk,behavior-tap-dance";
+            #binding-cells = <0>;
+            tapping-term-ms = <200>;             // Reduced from 250
+            bindings = <&lt_simple NUMERIC SQT>, <&sl NUMERIC>;
+        };
+
+        // Alternative: Use hold-tap with global-quick-tap for even faster response
+        lt_global_quick: lt_global_quick {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            tapping-term-ms = <120>;
+            quick-tap-ms = <120>;
+            global-quick-tap;                    // Any key press triggers quick-tap
+            flavor = "tap-preferred";
+            bindings = <&mo>, <&kp>;
+        };
+    };
+
+/* incomplete definition but should have basics for changing underglow while momentarily in a layer.
+   ideally would save/restore preexisting underglow color.
+   
+    mo_rgb: mo_rgb {
+        wait-ms = <0>;
+ 	tap-ms = <0>;
+	bindings
+	    = <&macro_press &mo 1>
+	        , <&macro_tap &rgb_ug RGB_COLOR_HSB(128,100,100)>
+		, <&macro_pause_for_release>
+		, <&macro_release &mo 1>
+		, <&macro_tap &rgb_ug RGB_COLOR_HSB(300,100,50)>
+	;
+    ;
+
+   there should also be a way of entering emoji via macros here. check https://zmk.dev/docs/keymaps/behaviors/macros
+
+*/
+
+    /* Using tap_hold_layer_lgui directly in the keymap instead of a custom f_key behavior */
+
+    rgb_encoder: rgb_encoder {
+        compatible = "zmk,behavior-sensor-rotate";
+        #sensor-binding-cells = <0>;
+        bindings = <&rgb_ug RGB_BRI>, <&rgb_ug RGB_BRD>;
+    };
+
+    scroll_encoder: scroll_encoder {
+        compatible = "zmk,behavior-sensor-rotate";
+        #sensor-binding-cells = <0>;
+        bindings = <&msc SCRL_DOWN>, <&msc SCRL_UP>;
+        tap-ms = <30>;
+    };
+
+
+// TODO: add helpers to make this easier to read/set up/verify
+    combos {
+        compatible = "zmk,combos";
+        
+        // bootloader with far left column
+        combo_bootloader_left {
+                timeout-ms = <CHORD_TIMEOUT>;
+                key-positions = <0 13 28>;
+                bindings = <&bootloader>;
+		require-prior-idle-ms = <LONG_PAUSE>;
+        };
+        // bootloader with far right column
+        combo_bootloader_right {
+                timeout-ms = <CHORD_TIMEOUT>;
+                key-positions = <12 27 41>;
+                bindings = <&bootloader>;
+		require-prior-idle-ms = <LONG_PAUSE>;
+        };
+
+
+        // ESC with tab+q
+        combo_esc {
+            timeout-ms = <CHORD_TIMEOUT>;
+            key-positions = <0 1>;
+            bindings = <&kp ESC>;
+ 	    require-prior-idle-ms = <LONG_PAUSE>;
+        };
+
+	// numeric with outer middle row keys: caps and comma
+        combo_numeric {
+            timeout-ms = <CHORD_TIMEOUT>;
+            key-positions = <13 27>;
+            bindings = <&to NUMERIC>;
+	    require-prior-idle-ms = <LONG_PAUSE>;
+        };
+
+	// navigation with second thumb keys
+        combo_nav {
+            timeout-ms = <CHORD_TIMEOUT>;
+            key-positions = <43 46>;
+            bindings = <&to NAVIGATION>;
+	    require-prior-idle-ms = <LONG_PAUSE>;
+        };
+
+	// base layer with inner thumb keys
+        combo_base {
+            timeout-ms = <CHORD_TIMEOUT>;
+            key-positions = <44 45>;
+            bindings = <&to BASE>;
+	    require-prior-idle-ms = <LONG_PAUSE>;
+        };
+
+	// --------------------------------------------------------------------------------
+	// ONE-SHOT MODIFIERS
+
+
+        // One-shot modifiers with dual key presses
+        oneshot_ctrl {
+            timeout-ms = <CHORD_TIMEOUT>;
+            key-positions = <14 26>;
+            bindings = <&sk LCTRL>;
+	    require-prior-idle-ms = <LONG_PAUSE>;
+        };
+
+        oneshot_alt {
+            timeout-ms = <CHORD_TIMEOUT>;
+            key-positions = <16 24>;
+            bindings = <&sk LALT>;
+	    require-prior-idle-ms = <LONG_PAUSE>;
+        };
+
+        oneshot_gui {
+            timeout-ms = <CHORD_TIMEOUT>;
+            key-positions = <17 23>;  // todo: change this to thumb keys
+            bindings = <&sk LGUI>;
+	    require-prior-idle-ms = <LONG_PAUSE>;
+        };
+
+        // Caps word with s+l
+        combo_caps_word {
+            timeout-ms = <CHORD_TIMEOUT>;
+            key-positions = <15 25>;
+            bindings = <&caps_word>;
+	    require-prior-idle-ms = <LONG_PAUSE>;
+        };
+
+        // Print screen (which i use for screenshot) — lower left two keys
+        combo_print {
+            timeout-ms = <CHORD_TIMEOUT>;
+            key-positions = <28 29>;
+            bindings = <&kp PRINTSCREEN>;
+	    require-prior-idle-ms = <LONG_PAUSE>;
+        };
+    };
+
+    keymap {
+        compatible = "zmk,keymap";
+
+        base_layer {
+            display-name = "base";
+            bindings = <
+
+&kp TAB       &build_time        &kp W         &kp E       &kp R                              &kp T			     &kp UP                  &kp Y  &kp U                              &kp I       &kp O         &kp P           &kp BSPC
+&num_menu_num  &hm LCTRL A  &hm LSHIFT S  &hm LALT D  &tap_hold_layer_lgui LGUI_NAV_L F  &kp G              &kp LEFT  &tog SYSTEM  &kp RIGHT  &kp H  &tap_hold_layer_rgui RGUI_NAV_R J  &hm RALT K  &hm RSHIFT L  &hm RCTRL SEMI  &num_sqt_num
+&kp LCTRL     &kp Z        &kp X         &kp C   &kp V                                  &kp B   &kp C_MUTE           &kp DOWN                &kp N  &kp M                              &kp COMMA   &kp DOT       &kp FSLH        &kp RET
+                                                         &LTS EXTRA ESC  &LTS NAV TAB  &lgui_space_tab                &rgui_space_ret     &LTS NAV BSPC    &LTS FN RETURN
+             >;
+            sensor-bindings = <&inc_dec_kp C_VOLUME_UP C_VOLUME_DOWN>;
+        };
+
+        numeric_layer {
+            display-name = "numeric";
+            bindings = <
+&kp GRAVE      &kp EXCL         &kp AT               &kp HASH      &kp DOLLAR   &kp PERCENT                            &mmv MOVE_UP                   &kp CARET &kp AMPS      &kp ASTERISK     &kp LPAR              &kp RPAR            &kp EQUAL
+&kp N0         &hm LCTRL N1     &hm LSHIFT N2        &hm LALT N3   &hm LGUI N4  &kp N5                  &mmv MOVE_LEFT &mkp LCLK      &mmv MOVE_RIGHT &kp N6    &hm RGUI N7   &hm RALT N8      &hm RSHIFT N9         &hm RCTRL N0              &kp MINUS
+//&trans &trans &trans &trans &trans &trans        &trans &trans &trans    &trans &trans &trans  &trans &hm RCTRL N0  &kp MINUS
+&kp LEFT_BRACE &kp LEFT_BRACKET &kp LEFT_PARENTHESIS &kp LESS_THAN &kp SLASH    &kp MINUS    &kp C_MUTE                &mmv MOVE_DOWN                 &kp PLUS  &kp BACKSLASH &kp GREATER_THAN &kp RIGHT_PARENTHESIS &kp RIGHT_BRACKET   &kp RIGHT_BRACE
+                                                     &kp PIPE      &kp TAB      &kp SPACE                                                             &kp SPACE &kp BACKSPACE &kp PERIOD
+            >;
+            sensor-bindings = <&scroll_encoder>;
+        };
+
+        navigation_layer {
+            display-name = "navigation";
+            bindings = <
+&kp HOME  &kp PG_UP        &kp INSERT             &kp UP_ARROW         &kp DELETE            &msc SCRL_UP                             &mmv MOVE_UP                   &msc SCRL_UP    &kp INSERT            &kp UP_ARROW         &kp DELETE              &kp PG_UP         &kp HOME
+&kp END   &hm LCTRL PG_DN  &hm LSHIFT LEFT_ARROW  &hm LALT DOWN_ARROW  &hm LGUI RIGHT_ARROW  &msc SCRL_DOWN            &mmv MOVE_LEFT &kp HOME      &mmv MOVE_RIGHT  &msc SCRL_DOWN  &hm RGUI LEFT_ARROW   &hm RALT DOWN_ARROW  &hm RSHIFT RIGHT_ARROW  &hm RCTRL PG_DN   &kp END
+&trans    &trans           &trans                 &trans               &trans                &trans          &kp HOME                 &mmv MOVE_DOWN                 &trans            &trans         &trans         &trans          &trans      &trans
+                                                  &trans               &trans                &LTS BASE SPACE                                                          &LTS BASE SPACE   &trans         &trans
+            >;
+            sensor-bindings = <&scroll_encoder>;
+        };
+
+        function_layer {
+            display-name = "function";
+            bindings = <
+&kp F1   &kp F2         &kp F3          &kp F4        &kp F5        &kp F6                           &mmv MOVE_UP                     &kp F7   &kp F8         &kp F9          &kp F10       &kp F11         &kp F12
+&kp F13  &hm LCTRL F14  &hm LSHIFT F15  &hm LALT F16  &hm LGUI F17  &kp F18          &mmv MOVE_LEFT  &mkp LCLK       &mmv MOVE_RIGHT  &kp F19  &hm RCTRL F20  &hm RSHIFT F21  &hm RALT F22  &hm RGUI F23    &kp F24
+&trans   &sys_reset     &trans          &bootloader   &trans        &mkp MB5  &kp C_MUTE             &mmv MOVE_DOWN                   &trans   &trans         &bootloader     &sys_reset    &kp SCROLLLOCK  &kp PAUSE_BREAK
+                                                    &trans  &trans  &build_time                                                       &build_time  &trans  &trans
+            >;
+            sensor-bindings = <&scroll_encoder>;
+        };
+
+
+/* todo: single tap is one shot layer change, double is &to new layer*/
+        extra_layer {
+            display-name = "extra";
+            bindings = <
+&trans &trans &trans &trans &trans &trans                 &trans          &trans &trans &trans &trans &trans &trans 
+&oneshot_or_to_NUMERIC &trans &trans &trans &trans &trans          &trans &trans &trans   &trans &trans &trans &trans &trans &oneshot_or_to_NUMERIC
+&trans &trans &trans &trans &trans &trans   &trans        &trans          &trans &trans &trans &trans &trans &key_repeat
+                     &trans &oneshot_or_to_NAVIGATION &trans  		  &trans &oneshot_or_to_NAVIGATION &trans
+            >;
+            sensor-bindings = <&scroll_encoder>;
+        };
+
+        system_layer {
+            display-name = "system";
+            bindings = <
+&bt BT_CLR       &bt BT_CLR_ALL  &kp F3        &kp F4        &kp F5        &kp F6                                      &mmv MOVE_UP                     &kp F7           &kp F8           &kp F9           &kp F10          &kp F11   &kp F12
+&bt BT_SEL 0     &bt BT_SEL 1    &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4  &bt BT_SEL 5                &mmv MOVE_LEFT  &tog SYSTEM     &mmv MOVE_RIGHT  &kp LEFT         &kp DOWN         &kp UP           &kp RIGHT        &kp HOME  &kp PG_UP
+&trans           &rgb_ug RGB_OFF &rgb_ug RGB_ON  &trans        &trans            &rgb_ug RGB_EFF  &kp C_MUTE                 &mmv MOVE_DOWN                   &rgb_ug RGB_EFR  &rgb_ug RGB_SPI  &rgb_ug RGB_BRI  &rgb_ug RGB_BRD  &kp END   &kp PG_DN
+                                           &trans        &trans            &trans                                                                       &trans           &trans           &trans
+            >;
+            sensor-bindings = <&scroll_encoder>;
+        };
+
+
+        mod_l_nav_layer {
+            display-name = "L GUI+nav";
+            bindings = <
+&kp LG(TAB)  &kp LG(Q)        &kp LG(W)         &kp LG(E)       &kp LG(R)    &kp LG(T)                             &mmv MOVE_UP                     &msc LG(SCRL_UP)    &kp LG(INSERT)      &kp LG(UP_ARROW)    &kp LG(DELETE)       &kp LG(PG_UP)  &kp LG(HOME)
+&trans       &hm LCTRL LG(A)  &hm LSHIFT LG(S)  &hm LALT LG(D)  &trans       &kp LG(G)              &mmv MOVE_LEFT &kp HOME        &mmv MOVE_RIGHT  &msc LG(SCRL_DOWN)  &kp LG(LEFT_ARROW)  &kp LG(DOWN_ARROW)  &kp LG(RIGHT_ARROW)  &kp LG(PG_DN)  &kp LG(END)
+&trans       &kp LG(Z)        &kp LG(X)         &kp LG(C)       &kp LG(V)    &kp LG(B)    &kp HOME                 &mmv MOVE_DOWN                   &kp LG(N)           &kp LG(M)           &kp LG(COMMA)       &kp LG(DOT)          &kp LG(FSLH)   &kp LG(RET)
+                                                &kp LG(ESC)     &kp LG(TAB)  &to BASE                                                               &to BASE            &kp LG(BSPC)        &kp LG(RET)
+            >;
+            sensor-bindings = <&scroll_encoder>;
+        };
+
+
+        mod_r_nav_layer {
+            display-name = "R GUI+nav";
+            bindings = <
+&kp RG(HOME)  &kp RG(PG_UP)  &kp RG(INSERT)      &kp RG(UP_ARROW)    &kp RG(DELETE)       &msc RG(SCRL_UP)                              &mmv MOVE_UP                     &kp RG(Y)  &kp RG(U)     &kp RG(I)       &kp RG(O) &kp RG(P) &kp RG(BSPC)
+&kp RG(END)   &kp RG(PG_DN)  &kp RG(LEFT_ARROW)  &kp RG(DOWN_ARROW)  &kp RG(RIGHT_ARROW)  &msc RG(SCRL_DOWN)             &mmv MOVE_LEFT &kp HOME        &mmv MOVE_RIGHT  &kp RG(H)  &trans        &hm RALT RG(K)  &hm RSHIFT RG(L)  &hm RCTRL RG(SEMI)  &kp RG(SQT)
+&kp RG(LCTRL) &kp RG(Z)      &kp RG(X)           &kp RG(C)	     &kp RG(V)  	  &kp RG(B)            &kp HOME                 &mmv MOVE_DOWN                   &kp RG(N)  &kp RG(M)     &kp RG(COMMA)   &kp RG(DOT)       &kp RG(FSLH)        &kp RG(RET)
+                                                 &kp LG(ESC)         &kp LG(TAB)          &to BASE                                                                       &to BASE   &kp LG(BSPC)  &kp LG(RET)
+            >;
+            sensor-bindings = <&scroll_encoder>;
+        };
+
+
+
+
+/*
+
+
+
+
+        empty_layer {
+            display-name = "empty";
+            bindings = <
+&trans &trans &trans &trans &trans &trans                  &trans          &trans &trans &trans &trans &trans &trans 
+&trans &trans &trans &trans &trans &trans           &trans &trans &trans   &trans &trans &trans &trans &trans &trans 
+&trans &trans &trans &trans &trans &trans   &trans         &trans          &trans &trans &trans &trans &trans &trans 
+                     &trans &trans &trans                                  &trans &trans &trans 
+            >;
+            sensor-bindings = <&scroll_encoder>;
+        };
+*/
+
+
+
+
+     }; /* keymap */
+};
