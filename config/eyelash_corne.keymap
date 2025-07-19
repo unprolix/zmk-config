@@ -8,9 +8,9 @@
                  LM RM                                                         \
                  LB RB                                                         \
                  LH RH                                                         \
-	            JS0							       \
+	                JS0							       \
         LEC     JS1 JS2 JS3						       \
-		    JS4							       \
+		            JS4							       \
     )
 
 #include "zmk-helpers/key-labels/eyelash42.h"
