@@ -111,7 +111,7 @@ key numbers
 #define FAST_TAP 230		// at 200, the double tap actions do not reliably trigger
 #define INTERRUPT_TAP 50        // very short window, for interrupting tap dance
 #define CHORD_TIMEOUT 50
-#define LONG_PAUSE 600		// e.g. before certain combos. 800 is too long
+#define LONG_PAUSE 500		// e.g. before certain combos. 800 is too long. so is 600
 
 /*
 
@@ -429,6 +429,8 @@ MAKE_HRM(hmr, &kp, &kp, KEYS_L THUMBS) // Right-hand HRMs.
             >;
             sensor-bindings = <&scroll_encoder>;
         };
+
+
 
         system_layer {
             display-name = "system";
