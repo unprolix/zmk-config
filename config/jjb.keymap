@@ -174,6 +174,13 @@ MAKE_HRM(hmr, &kp, &kp, KEYS_L THUMBS) // Right-hand HRMs.
 	#include "tap-hold-layer-behaviors.dtsi"
 	#include "modifier-tap-doubletap-behaviors.dtsi"
 
+	menu_smart_num: menu_smart_num {
+	    compatible = "zmk,behavior-tap-dance";
+	    #binding-cells = <0>;
+	    tapping-term-ms = <250>;
+	    bindings = <&kp MENU>, <&smart_num NUM 0>;
+	};
+
 	// hold LGUI, tap for space, double tap for tab
         lgui_space_tab: lgui_space_tab {
             compatible = "zmk,behavior-tap-dance";
@@ -201,6 +208,7 @@ MAKE_HRM(hmr, &kp, &kp, KEYS_L THUMBS) // Right-hand HRMs.
             flavor = "balanced";
             bindings = <&mo>, <&kp>;
         };
+
         LTS: LTS { // alias for lt_simple but it would be great if there were a better way to define it as such.
             compatible = "zmk,behavior-hold-tap";
             #binding-cells = <2>;
@@ -376,7 +384,7 @@ MAKE_HRM(hmr, &kp, &kp, KEYS_L THUMBS) // Right-hand HRMs.
             bindings = <
 
 &kp TAB       &kp Q        &kp W         &kp E       &kp R                              &kp T			     &kp UP                  &kp Y  &kp U                              &kp I       &kp O         &kp P           &kp BSPC
-&lt_simple NUMERIC MENU  &hml LCTRL A  &hml LSHIFT S  &hml LALT D  &tap_hold_layer_lgui LGUI_NAV_L F  &kp G              &kp LEFT  &tog SYSTEM  &kp RIGHT  &kp H  &tap_hold_layer_rgui RGUI_NAV_R J  &hmr RALT K  &hmr RSHIFT L  &hmr RCTRL SEMI  &lt_simple NUMERIC SQT
+&menu_smart_num  &hml LCTRL A  &hml LSHIFT S  &hml LALT D  &tap_hold_layer_lgui LGUI_NAV_L F  &kp G              &kp LEFT  &tog SYSTEM  &kp RIGHT  &kp H  &tap_hold_layer_rgui RGUI_NAV_R J  &hmr RALT K  &hmr RSHIFT L  &hmr RCTRL SEMI  &lt_simple NUMERIC SQT
 &kp LCTRL     &kp Z        &kp X         &kp C   &kp V                                  &kp B   &kp C_MUTE           &kp DOWN                &kp N  &kp M                              &kp COMMA   &kp DOT       &kp FSLH        &kp RET
                                                          &LTS EXTRA ESC  &LTS NAV TAB  &lgui_space_tab                &rgui_space_ret     &LTS NAV BSPC    &LTS FN RETURN
              >;
@@ -424,7 +432,7 @@ MAKE_HRM(hmr, &kp, &kp, KEYS_L THUMBS) // Right-hand HRMs.
             bindings = <
 &trans &trans &trans &trans &trans &trans                 &trans          &trans &trans &trans &trans &trans &trans 
 &oneshot_or_to_NUMERIC &trans &trans &trans &trans &trans          &trans &trans &trans   &trans &trans &trans &trans &trans &oneshot_or_to_NUMERIC
-&trans &trans &trans &trans &trans &trans   &trans        &trans          &trans &trans &trans &trans &trans &key_repeat
+SMART_NUM &trans &trans &trans &trans &trans   &trans        &trans          &trans &trans &trans &trans &trans &key_repeat
                      &trans &oneshot_or_to_NAVIGATION &trans  		  &trans &oneshot_or_to_NAVIGATION &trans
             >;
             sensor-bindings = <&scroll_encoder>;
