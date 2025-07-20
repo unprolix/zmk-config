@@ -7,7 +7,7 @@
         compatible = "zmk,behavior-tap-dance"; \
         #binding-cells = <0>; \
         tapping-term-ms = <TAP_DANCE_TAPPING>; \
-        bindings = <&sl layer>, <&to layer>; \
+        bindings = <&sl layer>, <&tog layer>; \
     };
 
 ONESHOT_OR_TO(NUMERIC)
