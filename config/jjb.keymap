@@ -384,7 +384,7 @@ MAKE_HRM(hmr, &kp, &kp, KEYS_L THUMBS) // Right-hand HRMs.
             bindings = <
 
 &kp TAB       &kp Q        &kp W         &kp E       &kp R                              &kp T			     &kp UP                  &kp Y  &kp U                              &kp I       &kp O         &kp P           &kp BSPC
-&menu_smart_num  &hml LCTRL A  &hml LSHIFT S  &hml LALT D  &tap_hold_layer_lgui LGUI_NAV_L F  &kp G              &kp LEFT  &tog SYSTEM  &kp RIGHT  &kp H  &tap_hold_layer_rgui RGUI_NAV_R J  &hmr RALT K  &hmr RSHIFT L  &hmr RCTRL SEMI  &lt_simple NUMERIC SQT
+&menu_hold_mo NUM 0  &hml LCTRL A  &hml LSHIFT S  &hml LALT D  &tap_hold_layer_lgui LGUI_NAV_L F  &kp G              &kp LEFT  &tog SYSTEM  &kp RIGHT  &kp H  &tap_hold_layer_rgui RGUI_NAV_R J  &hmr RALT K  &hmr RSHIFT L  &hmr RCTRL SEMI  &sqt_hold_mo NUM SQT
 &kp LCTRL     &kp Z        &kp X         &kp C   &kp V                                  &kp B   &kp C_MUTE           &kp DOWN                &kp N  &kp M                              &kp COMMA   &kp DOT       &kp FSLH        &kp RET
                                                          &LTS EXTRA ESC  &LTS NAV TAB  &lgui_space_tab                &rgui_space_ret     &LTS NAV BSPC    &LTS FN RETURN
              >;

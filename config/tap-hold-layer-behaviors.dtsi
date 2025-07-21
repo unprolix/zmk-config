@@ -1,3 +1,38 @@
+
+menu_layer: menu_layer {
+    compatible = "zmk,behavior-tap-dance";
+    #binding-cells = <0>;
+    tapping-term-ms = <250>; // 200 is too low
+    bindings = <&kp MENU>, <&num_word NUM>;
+};
+        
+menu_hold_mo: menu_hold_mo {
+    compatible = "zmk,behavior-hold-tap";
+    #binding-cells = <2>;
+    tapping-term-ms = <200>;
+    quick-tap-ms = <0>;
+    flavor = "tap-preferred";
+    bindings = <&mo>, <&menu_layer>;
+};
+
+sqt_layer: sqt_layer {
+    compatible = "zmk,behavior-tap-dance";
+    #binding-cells = <0>;
+    tapping-term-ms = <250>; // 200 is too low
+    bindings = <&kp SQT>, <&num_word NUM>;
+};
+        
+sqt_hold_mo: sqt_hold_mo {
+    compatible = "zmk,behavior-hold-tap";
+    #binding-cells = <2>;
+    tapping-term-ms = <200>;
+    quick-tap-ms = <0>;
+    flavor = "tap-preferred";
+    bindings = <&mo>, <&sqt_layer>;
+};
+
+
+
 // Hold-tap behaviors for each modifier
 tap_hold_layer_lctrl: tap_hold_layer_lctrl {
     compatible = "zmk,behavior-hold-tap";
