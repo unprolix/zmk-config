@@ -112,7 +112,7 @@ key numbers
 #define INTERRUPT_TAP 50        // very short window, for interrupting tap dance
 #define CHORD_TIMEOUT 50
 #define LONG_PAUSE 500		// e.g. before certain combos. 800 is too long. so is 600
-
+#define PRE_CHORD_PAUSE 200
 /*
 
    &mmv_input_listener {
@@ -138,8 +138,8 @@ ZMK_TAP_DANCE(num_dance, bindings = <&num_word NUM>, <&sl NUM>;
 
 #define MAKE_HRM(NAME, HOLD, TAP, TRIGGER_POS)                                 \
   ZMK_HOLD_TAP(NAME, bindings = <HOLD>, <TAP>; flavor = "balanced";            \
-               tapping-term-ms = <280>; quick-tap-ms = <QUICK_TAP_MS>;         \
-               require-prior-idle-ms = <150>; hold-trigger-on-release;         \
+               tapping-term-ms = <200>; quick-tap-ms = <QUICK_TAP_MS>;         \
+               require-prior-idle-ms = <100>; hold-trigger-on-release;         \
                hold-trigger-key-positions = <TRIGGER_POS>;)
 
 
@@ -165,8 +165,6 @@ MAKE_HRM(hmr, &kp, &kp, KEYS_L THUMBS) // Right-hand HRMs.
       #include "emoji.dtsi"
   };
 };
-
-
 
 
 / {
@@ -284,7 +282,9 @@ MAKE_HRM(hmr, &kp, &kp, KEYS_L THUMBS) // Right-hand HRMs.
 // TODO: add helpers to make this easier to read/set up/verify
     combos {
         compatible = "zmk,combos";
-        
+
+ 	#include "combos_brackets.dtsi"
+
         // bootloader with far left column
         combo_bootloader_left {
                 timeout-ms = <CHORD_TIMEOUT>;
@@ -309,11 +309,11 @@ MAKE_HRM(hmr, &kp, &kp, KEYS_L THUMBS) // Right-hand HRMs.
  	    require-prior-idle-ms = <LONG_PAUSE>;
         };
 
-	// numeric with outer middle row keys: caps and comma
+	// caps word with leftmost two keys on middle row
         combo_numeric {
             timeout-ms = <CHORD_TIMEOUT>;
-            key-positions = <13 27>;
-            bindings = <&to NUMERIC>;
+            key-positions = <13 14>;
+            bindings = <&caps_word>;
 	    require-prior-idle-ms = <LONG_PAUSE>;
         };
 
@@ -330,40 +330,6 @@ MAKE_HRM(hmr, &kp, &kp, KEYS_L THUMBS) // Right-hand HRMs.
             timeout-ms = <CHORD_TIMEOUT>;
             key-positions = <44 45>;
             bindings = <&to BASE>;
-	    require-prior-idle-ms = <LONG_PAUSE>;
-        };
-
-	// --------------------------------------------------------------------------------
-	// ONE-SHOT MODIFIERS
-
-
-        // One-shot modifiers with dual key presses
-        oneshot_ctrl {
-            timeout-ms = <CHORD_TIMEOUT>;
-            key-positions = <14 26>;
-            bindings = <&sk LCTRL>;
-	    require-prior-idle-ms = <LONG_PAUSE>;
-        };
-
-        oneshot_alt {
-            timeout-ms = <CHORD_TIMEOUT>;
-            key-positions = <16 24>;
-            bindings = <&sk LALT>;
-	    require-prior-idle-ms = <LONG_PAUSE>;
-        };
-
-        oneshot_gui {
-            timeout-ms = <CHORD_TIMEOUT>;
-            key-positions = <17 23>;  // todo: change this to thumb keys
-            bindings = <&sk LGUI>;
-	    require-prior-idle-ms = <LONG_PAUSE>;
-        };
-
-        // Caps word with s+l
-        combo_caps_word {
-            timeout-ms = <CHORD_TIMEOUT>;
-            key-positions = <15 25>;
-            bindings = <&caps_word>;
 	    require-prior-idle-ms = <LONG_PAUSE>;
         };
 
