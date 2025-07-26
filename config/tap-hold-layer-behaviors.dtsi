@@ -1,3 +1,23 @@
+/* todo: when a hrm is held for more than ... a second? it becomes sticky. cancel it with position 0? */
+
+td_shift_word: tap_dance_shift_word {
+        compatible = "zmk,behavior-tap-dance";
+        #binding-cells = <0>;
+        tapping-term-ms = <200>;
+        bindings = <&sk LSHFT>, <&caps_word>;
+};
+
+ht_shift_caps: hold_tap_shift_caps {
+        compatible = "zmk,behavior-hold-tap";
+        #binding-cells = <2>;
+        tapping-term-ms = <1000>;
+        quick-tap-ms = <200>;
+        flavor = "tap-preferred";
+        bindings = <&kp>, <&td_shift_word>;
+};
+
+
+
 
 menu_layer: menu_layer {
     compatible = "zmk,behavior-tap-dance";
