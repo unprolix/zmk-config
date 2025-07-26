@@ -13,7 +13,7 @@ ht_shift_caps: hold_tap_shift_caps {
         tapping-term-ms = <1000>;
         quick-tap-ms = <200>;
         flavor = "tap-preferred";
-        bindings = <&kp>, <&td_shift_word>;
+        bindings = <&caps_toggle>, <&td_shift_word>;
 };
 
 
