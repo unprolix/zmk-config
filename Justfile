@@ -6,6 +6,9 @@ build := absolute_path('.build')
 out := absolute_path('firmware')
 draw := absolute_path('draw')
 
+_generate_build_info:
+    scripts/generate_build_info.sh
+
 # parse combos.dtsi and adjust settings to not run out of slots
 _parse_combos:
     #!/usr/bin/env bash
@@ -68,7 +71,7 @@ _check_west_update:
     fi
 
 # build firmware for matching targets
-build expr *west_args: _parse_combos _check_west_update
+build expr *west_args: _parse_combos _check_west_update _generate_build_info
     #!/usr/bin/env bash
     set -euo pipefail
     targets=$(just _parse_targets {{ expr }})

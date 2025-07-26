@@ -2,7 +2,6 @@
 
 ht_mod_kp: ht_mod_kp {
     compatible = "zmk,behavior-hold-tap";
-    label = "HT_MOD_KP";
     #binding-cells = <2>;
     flavor = "tap-preferred";
     tapping-term-ms = <200>;
