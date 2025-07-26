@@ -104,6 +104,8 @@ key numbers
 #define SYSTEM 5
 #define MODIFIER_LEFT_NAV 6
 #define MODIFIER_RIGHT_NAV 7
+#define CAPS_LAYER 8
+
 
 // short versions for helping things line up
 #define NUM NUMERIC
@@ -168,6 +170,7 @@ MAKE_HRM(hmr, &kp, &kp, KEYS_L THUMBS) // Right-hand HRMs.
 
 / {
   macros {
+		#include "macros.dtsi"
       #include "layer-mod-macros.dtsi"
       #include "emoji.dtsi"
   };
@@ -338,7 +341,7 @@ MAKE_HRM(hmr, &kp, &kp, KEYS_L THUMBS) // Right-hand HRMs.
 
 &kp ESC       &kp Q        &kp W         &kp E       &kp R                              &kp T			     &kp UP                  &kp Y  &kp U                              &kp I       &kp O         &kp P           &kp BSPC
 &menu_hold_mo NUM 0  &hml LCTRL A  &hml LSHIFT S  &hml LALT D  &tap_hold_layer_lgui LGUI_NAV_L F  &kp G              &kp LEFT  &tog SYSTEM  &kp RIGHT  &kp H  &tap_hold_layer_rgui RGUI_NAV_R J  &hmr RALT K  &hmr RSHIFT L  &hmr RCTRL SEMI  &sqt_hold_mo NUM SQT
-&ht_shift_caps CAPS 0     &kp Z        &kp X         &kp C   &kp V                                  &kp B   &kp C_MUTE           &kp DOWN                &kp N  &kp M                              &kp COMMA   &kp DOT       &kp FSLH        &kp RET
+&ht_shift_caps 0 0     &kp Z        &kp X         &kp C   &kp V                                  &kp B   &kp C_MUTE           &kp DOWN                &kp N  &kp M                              &kp COMMA   &kp DOT       &kp FSLH        &kp RET
                                                          &LTS EXTRA ESC  &LTS NAV TAB  &lgui_space_tab                &rgui_space_ret     &LTS NAV BSPC    &LTS FN RETURN
              >;
             sensor-bindings = <&inc_dec_kp C_VOLUME_UP C_VOLUME_DOWN>;
@@ -428,7 +431,16 @@ SMART_NUM &trans &trans &trans &trans &trans   &trans        &trans          &tr
         };
 
 
-
+	caps_layer {
+				display-name = "caps";
+				bindings = <
+				&caps_toggle &trans &trans &trans &trans &trans                  &trans          &trans &trans &trans &trans &trans &trans 
+				&trans &trans &trans &trans &trans &trans           &trans &trans &trans   &trans &trans &trans &trans &trans &trans 
+				&trans &trans &trans &trans &trans &trans   &trans         &trans          &trans &trans &trans &trans &trans &trans 
+				&trans &trans &trans                                  &trans &trans &trans
+				>;
+				
+	};
 
 /*
 

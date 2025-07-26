@@ -1,0 +1,5 @@
+caps_toggle: caps_toggle {
+        compatible = "zmk,behavior-macro";
+        #binding-cells = <0>;
+        bindings = <&kp CAPS>, <&tog CAPS_LAYER>;
+};
