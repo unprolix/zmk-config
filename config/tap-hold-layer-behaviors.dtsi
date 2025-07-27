@@ -1,4 +1,18 @@
-/* todo: when a hrm is held for more than ... a second? it becomes sticky. cancel it with position 0? */
+        tt_5s: timed_toggle_5s {
+            compatible = "zmk,behavior-timed-toggle";
+            #binding-cells = <1>;
+            timeout-ms = <5000>;
+        };
+        
+        nav_key_tt: nav_key_tt {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            flavor = "tap-preferred";
+            tapping-term-ms = <200>;
+            bindings = <&tt_5s>, <&kp>;
+        };
+
+
 
 td_shift_word: tap_dance_shift_word {
         compatible = "zmk,behavior-tap-dance";

@@ -3,3 +3,4 @@ caps_toggle: caps_toggle {
         #binding-cells = <0>;
         bindings = <&kp CAPS>, <&tog CAPS_LAYER>;
 };
+
