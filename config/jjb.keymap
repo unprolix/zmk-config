@@ -291,45 +291,6 @@ MAKE_HRM(hmr, &kp, &kp, KEYS_L THUMBS) // Right-hand HRMs.
         };
 
 
-        // ESC with tab+q
-        combo_esc {
-            timeout-ms = <CHORD_TIMEOUT>;
-            key-positions = <0 1>;
-            bindings = <&kp ESC>;
- 	    require-prior-idle-ms = <LONG_PAUSE>;
-        };
-
-	// caps word with leftmost two keys on middle row
-        combo_numeric {
-            timeout-ms = <CHORD_TIMEOUT>;
-            key-positions = <13 14>;
-            bindings = <&caps_word>;
-	    require-prior-idle-ms = <LONG_PAUSE>;
-        };
-
-	// navigation with second thumb keys
-        combo_nav {
-            timeout-ms = <CHORD_TIMEOUT>;
-            key-positions = <43 46>;
-            bindings = <&to NAVIGATION>;
-	    require-prior-idle-ms = <LONG_PAUSE>;
-        };
-
-	// base layer with inner thumb keys
-        combo_base {
-            timeout-ms = <CHORD_TIMEOUT>;
-            key-positions = <44 45>;
-            bindings = <&to BASE>;
-	    require-prior-idle-ms = <LONG_PAUSE>;
-        };
-
-        // Print screen (which i use for screenshot) — lower left two keys
-        combo_print {
-            timeout-ms = <CHORD_TIMEOUT>;
-            key-positions = <28 29>;
-            bindings = <&kp PRINTSCREEN>;
-	    require-prior-idle-ms = <LONG_PAUSE>;
-        };
     };
 
     keymap {
