@@ -1,3 +1,5 @@
+// -*- mode: dts -*-
+
 #define ZMK_COMBO_SIMPLE(name, keycode, pos1, pos2) \
     combo_##name { \
         timeout-ms = <CHORD_TIMEOUT>; \
@@ -31,16 +33,17 @@
 /* top row */
 ZMK_COMBO_SIMPLE(tilde, TILDE, 0, 1)
 ZMK_COMBO_SIMPLE(curlybracket_open, LEFT_BRACE, 1, 2)
-ZMK_COMBO_SIMPLE(curlybracket_close, RIGHT_BRACE, 10, 11)
 ZMK_COMBO_SIMPLE(square_open, LEFT_BRACKET, 2, 3)
-ZMK_COMBO_SIMPLE(square_close, RIGHT_BRACKET, 9, 10)
 ZMK_COMBO_SIMPLE(paren_open, LEFT_PARENTHESIS, 3, 4)
-ZMK_COMBO_SIMPLE(paren_close, RIGHT_PARENTHESIS, 8, 9)
 ZMK_COMBO_SIMPLE(less_than, LESS_THAN, 4, 5)
+
 ZMK_COMBO_SIMPLE(greater_than, GREATER_THAN, 6, 7)
+ZMK_COMBO_SIMPLE(paren_close, RIGHT_PARENTHESIS, 8, 9)
+ZMK_COMBO_SIMPLE(square_close, RIGHT_BRACKET, 9, 10)
+ZMK_COMBO_SIMPLE(curlybracket_close, RIGHT_BRACE, 10, 11)
+ZMK_COMBO_SIMPLE(underscore, UNDERSCORE, 11, 12)
 
 /* middle row */
-ZMK_COMBO_SIMPLE(underscore, UNDERSCORE, 11, 12)
 ZMK_COMBO_SIMPLE(minus, MINUS, 26, 27)
 
 /* bottom row */
@@ -50,8 +53,24 @@ ZMK_COMBO_SIMPLE(slash, FSLH, 40, 41)
 ZMK_COMBO_SIMPLE(comma, COMMA, 29, 30)
 ZMK_COMBO_SIMPLE(dot, DOT, 39, 40)
 
-ZMK_COMBO_PLUS(caps_word, &caps_word, 13, 14)
-ZMK_COMBO_PLUS(navigation, &to NAVIGATION, 43, 46)
-ZMK_COMBO_PLUS(base, &to BASE, 44, 45)
-ZMK_COMBO_SIMPLE(printscreen, PRINTSCREEN, 42, 47) /* screenshot */
+ZMK_COMBO_PLUS(smart_num, SMART_NUM, 13, 14)
+ZMK_COMBO_PLUS(caps_word, &caps_word, 14, 15)
+ZMK_COMBO_PLUS(base, &to BASE, 44, 45) /* inner thumb keys */
+ZMK_COMBO_PLUS(navigation, &to NAVIGATION, 43, 46) /* middle thumb keys */
+ZMK_COMBO_SIMPLE(printscreen, PRINTSCREEN, 42, 47) /* outer thumb keys; screenshot */
 
+
+// bootloader with far left column
+combo_bootloader_left {
+	timeout-ms = <CHORD_TIMEOUT>;
+        key-positions = <0 13 28>;
+        bindings = <&bootloader>;
+	require-prior-idle-ms = <LONG_PAUSE>;
+};
+// bootloader with far right column
+combo_bootloader_right {
+        timeout-ms = <CHORD_TIMEOUT>;
+        key-positions = <12 27 41>;
+        bindings = <&bootloader>;
+	require-prior-idle-ms = <LONG_PAUSE>;
+};

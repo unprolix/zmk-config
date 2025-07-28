@@ -171,7 +171,7 @@ MAKE_HRM(hmr, &kp, &kp, KEYS_L THUMBS) // Right-hand HRMs.
 
 / {
   macros {
-  	#include "macros.dtsi"
+ #include "macros.dtsi"
       #include "layer-mod-macros.dtsi"
       #include "emoji.dtsi"
   };
@@ -223,16 +223,6 @@ MAKE_HRM(hmr, &kp, &kp, KEYS_L THUMBS) // Right-hand HRMs.
             bindings = <&mo>, <&kp>;
         };
 
-        // Alternative: Use hold-tap with global-quick-tap for even faster response
-        lt_global_quick: lt_global_quick {
-            compatible = "zmk,behavior-hold-tap";
-            #binding-cells = <2>;
-            tapping-term-ms = <120>;
-            quick-tap-ms = <120>;
-            global-quick-tap;                    // Any key press triggers quick-tap
-            flavor = "tap-preferred";
-            bindings = <&mo>, <&kp>;
-        };
     };
 
     /* incomplete definition but should have basics for changing underglow while momentarily in a layer.
@@ -276,20 +266,6 @@ MAKE_HRM(hmr, &kp, &kp, KEYS_L THUMBS) // Right-hand HRMs.
 
  	#include "combos_jjb.dtsi"
 
-        // bootloader with far left column
-        combo_bootloader_left {
-                timeout-ms = <CHORD_TIMEOUT>;
-                key-positions = <0 13 28>;
-                bindings = <&bootloader>;
-		require-prior-idle-ms = <LONG_PAUSE>;
-        };
-        // bootloader with far right column
-        combo_bootloader_right {
-                timeout-ms = <CHORD_TIMEOUT>;
-                key-positions = <12 27 41>;
-                bindings = <&bootloader>;
-		require-prior-idle-ms = <LONG_PAUSE>;
-        };
 
 
     };
