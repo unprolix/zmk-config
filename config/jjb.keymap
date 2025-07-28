@@ -1,3 +1,4 @@
+// -*- mode: dts -*-
 #include <behaviors.dtsi>
 #include <behaviors/num_word.dtsi> // Requires auto-layer module.
 #include <dt-bindings/zmk/keys.h>
@@ -170,7 +171,7 @@ MAKE_HRM(hmr, &kp, &kp, KEYS_L THUMBS) // Right-hand HRMs.
 
 / {
   macros {
-		#include "macros.dtsi"
+  	#include "macros.dtsi"
       #include "layer-mod-macros.dtsi"
       #include "emoji.dtsi"
   };
@@ -346,7 +347,7 @@ MAKE_HRM(hmr, &kp, &kp, KEYS_L THUMBS) // Right-hand HRMs.
         extra_layer {
             display-name = "extra";
             bindings = <
-&trans &trans &trans &trans &trans &trans                 &trans          &trans &trans &trans &trans &trans &trans 
+&trans &trans &at_wgyl_org &trans &trans &trans                 &trans          &trans &trans &trans &trans &trans &trans 
 &oneshot_or_to_NUMERIC &trans &trans &trans &trans &trans          &trans &trans &trans   &trans &trans &trans &trans &trans &oneshot_or_to_NUMERIC
 SMART_NUM &trans &trans &trans &trans &trans   &trans        &trans          &trans &trans &trans &trans &trans &key_repeat
                      &trans &oneshot_or_to_NAVIGATION &trans  		  &trans &oneshot_or_to_NAVIGATION &trans

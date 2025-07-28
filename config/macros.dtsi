@@ -4,3 +4,8 @@ caps_toggle: caps_toggle {
         bindings = <&kp CAPS>, <&tog CAPS_LAYER>;
 };
 
+at_wgyl_org: at_wgyl_org {
+	compatible = "zmk,behavior-macro";
+	#binding-cells = <0>;
+	bindings = <&kp AT>, <&kp W>, <&kp G>, <&kp Y>, <&kp L>, <&kp DOT>, <&kp O>, <&kp R>, <&kp G>;
+};
