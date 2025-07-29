@@ -5,9 +5,7 @@ import sys
 import argparse
 import subprocess
 import tempfile
-import shutil
 import time
-import threading
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -70,7 +68,7 @@ def check_zmk_criteria(mount_point, verbose=False):
        file_path = mount_path / filename
        if not file_path.exists():
            if verbose:
-               print(f"  Missing required file: {filename}")
+               print(f"Missing required file: {filename}")
            return False
    
    # Check INFO_UF2.TXT content
@@ -82,12 +80,12 @@ def check_zmk_criteria(mount_point, verbose=False):
        found_fields = sum(1 for field in INFO_FILE_FIELDS if field in content)
        if found_fields < len(INFO_FILE_FIELDS) - 1:  # Allow one missing field
            if verbose:
-               print(f"  INFO_UF2.TXT missing expected fields (found {found_fields}/{len(INFO_FILE_FIELDS)})")
+               print(f"INFO_UF2.TXT missing expected fields (found {found_fields}/{len(INFO_FILE_FIELDS)})")
            return False
            
    except Exception as e:
        if verbose:
-           print(f"  Error reading INFO_UF2.TXT: {e}")
+           print(f"Error reading INFO_UF2.TXT: {e}")
        return False
    
    return True
@@ -100,7 +98,7 @@ def check_device_zmk(device, size_mb, verbose=False):
    # Skip if already mounted
    if is_mounted(device):
        if verbose:
-           print(f"  Device already mounted")
+           print(f"Device already mounted")
        return False, None
    
    # Create temporary mount point
@@ -111,11 +109,10 @@ def check_device_zmk(device, size_mb, verbose=False):
        success, error = mount_device(device, temp_mount)
        if not success:
            if verbose:
-               print(f"  Failed to mount: {error}")
+               print(f"Failed to mount: {error}")
            os.rmdir(temp_mount)
            return False, None
        
-       # Check if it meets ZMK criteria
        is_zmk = check_zmk_criteria(temp_mount, verbose)
        
        # Always unmount temp mount
@@ -123,15 +120,15 @@ def check_device_zmk(device, size_mb, verbose=False):
        os.rmdir(temp_mount)
        
        if is_zmk and verbose:
-           print(f"  ✓ ZMK bootloader device detected")
+           print(f"ZMK bootloader device detected")
        elif verbose:
-           print(f"  Not a ZMK bootloader device")
+           print(f"Not a ZMK bootloader device")
            
        return is_zmk, device
        
    except Exception as e:
        if verbose:
-           print(f"  Error processing device: {e}")
+           print(f"Error processing device: {e}")
        try:
            unmount_device(temp_mount)
            os.rmdir(temp_mount)
