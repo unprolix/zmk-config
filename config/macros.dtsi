@@ -9,3 +9,10 @@ at_wgyl_org: at_wgyl_org {
 	#binding-cells = <0>;
 	bindings = <&kp AT>, <&kp W>, <&kp G>, <&kp Y>, <&kp L>, <&kp DOT>, <&kp O>, <&kp R>, <&kp G>;
 };
+
+
+azrael: azrael {
+	compatible = "zmk,behavior-macro";
+	#binding-cells = <0>;
+	bindings = <&kp A>, <&kp Z>, <&kp R>, <&kp A>, <&fr_e_diaeresis>, <&kp L>;
+};
