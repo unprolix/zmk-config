@@ -18,7 +18,7 @@ INFO_FILE_FIELDS = ['UF2 Bootloader', 'Model:', 'Board-ID:', 'Date:']
 MOUNT_OPTIONS = ['rw', 'uid=1000', 'gid=1000']
 DEFAULT_WAIT_SECONDS = 5
 DEVICE_CHECK_INTERVAL = 0.5  # How often to check for new devices
-MAX_PARALLEL_MOUNTS = 4  # Maximum concurrent mount attempts
+MAX_PARALLEL_MOUNTS = 8  # Maximum concurrent mount attempts
 
 def run_command(cmd, check=True):
    """Execute shell command and return output"""

@@ -14,5 +14,11 @@ at_wgyl_org: at_wgyl_org {
 azrael: azrael {
 	compatible = "zmk,behavior-macro";
 	#binding-cells = <0>;
-	bindings = <&kp A>, <&kp Z>, <&kp R>, <&kp A>, <&fr_e_diaeresis>, <&kp L>;
+	bindings = <&kp A>, <&kp Z>, <&kp R>, <&kp A>, <&kp MENU>, <&kp DQT>, <&kp E>, <&kp L>;
+};
+
+anais: anais {
+	compatible = "zmk,behavior-macro";
+	#binding-cells = <0>;
+	bindings = <&kp A>, <&kp N>, <&kp A>, <&kp MENU>, <&kp DQT>, <&kp I>, <&kp S>;
 };
