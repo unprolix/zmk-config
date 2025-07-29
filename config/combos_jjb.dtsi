@@ -37,7 +37,7 @@ ZMK_COMBO_SIMPLE(square_open, LEFT_BRACKET, 2, 3)
 ZMK_COMBO_SIMPLE(paren_open, LEFT_PARENTHESIS, 3, 4)
 ZMK_COMBO_SIMPLE(less_than, LESS_THAN, 4, 5)
 
-ZMK_COMBO_SIMPLE(greater_than, GREATER_THAN, 6, 7)
+ZMK_COMBO_SIMPLE(greater_than, GREATER_THAN, 7, 8)
 ZMK_COMBO_SIMPLE(paren_close, RIGHT_PARENTHESIS, 8, 9)
 ZMK_COMBO_SIMPLE(square_close, RIGHT_BRACKET, 9, 10)
 ZMK_COMBO_SIMPLE(curlybracket_close, RIGHT_BRACE, 10, 11)
@@ -59,6 +59,10 @@ ZMK_COMBO_PLUS(base, &to BASE, 44, 45) /* inner thumb keys */
 ZMK_COMBO_PLUS(navigation, &to NAVIGATION, 43, 46) /* middle thumb keys */
 ZMK_COMBO_SIMPLE(printscreen, PRINTSCREEN, 42, 47) /* outer thumb keys; screenshot */
 
+
+/* vertical shapes */
+
+ZMK_COMBO_PLUS(leader, &leader, 13, 28)  /* middle and bottom leftmost keys */
 
 // bootloader with far left column
 combo_bootloader_left {

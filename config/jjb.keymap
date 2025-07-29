@@ -1,4 +1,6 @@
 // -*- mode: dts -*-
+#define HOST_OS 1 // linux. impacts unicode entry. anything else?
+
 #include <behaviors.dtsi>
 #include <behaviors/num_word.dtsi> // Requires auto-layer module.
 #include <dt-bindings/zmk/keys.h>
@@ -16,6 +18,9 @@
 
 
 #include "zmk-helpers/helper.h"
+#include "zmk-helpers/unicode-chars/greek.dtsi"
+#include "zmk-helpers/unicode-chars/french.dtsi"
+#include "zmk-helpers/unicode-chars/german.dtsi"
 
 
 /*
@@ -52,8 +57,6 @@ TODO:
 	* typing at normal speed often places a space after the character before which it was intended. example: "this is" might come out as "thisi s"
 
 * hrms should pass mod to combos, esp those defined with ZMK_COMBO_SIMPLE
-
-* investigate leader-key use
 
 * try finessing timings for tap/hold/doubletap to see if it can be made non-annoying
 
@@ -178,6 +181,9 @@ MAKE_HRM(hmr, &kp, &kp, KEYS_L THUMBS) // Right-hand HRMs.
 };
 
 
+#include "leader_jjb.dtsi"
+
+
 / {
     behaviors {
 	#include "tap-hold-layer-behaviors.dtsi"
@@ -260,15 +266,11 @@ MAKE_HRM(hmr, &kp, &kp, KEYS_L THUMBS) // Right-hand HRMs.
     };
 
 
-// TODO: add helpers to make this easier to read/set up/verify
     combos {
         compatible = "zmk,combos";
-
  	#include "combos_jjb.dtsi"
-
-
-
     };
+
 
     keymap {
         compatible = "zmk,keymap";
