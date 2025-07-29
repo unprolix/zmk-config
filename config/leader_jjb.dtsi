@@ -1,3 +1,5 @@
+// note: leader key sequences can currently have a maximum of five letters
+
 #undef ZMK_LEADER_SEQUENCE
 #define ZMK_LEADER_SEQUENCE(name, leader_bindings, leader_sequence) \
     / { \
@@ -16,6 +18,7 @@
 
 
 ZMK_LEADER_SEQUENCE(azrael,     &azrael,        A Z)  // azraël
+ZMK_LEADER_SEQUENCE(anais,     &anais,        A N)  // anaïs
 
 ZMK_LEADER_SEQUENCE(gr_phi,     &el_phi,        G F)  // ϕ
 
@@ -74,6 +77,6 @@ ZMK_LEADER_UNICODE_DUAL_4_4(red_heart, H E A R T, N2, N7, N6, N4, F, E, N0, F)
     UC_MACRO(name ## _uc, &name1 ## _uc &name2 ## _uc &name3 ## _uc) \
     ZMK_LEADER_SEQUENCE(name, &name ## _uc, sequence)
 
-// this does not quite work: the heart is white and there is a space before the ewe.
+// TODO: this does not quite work: the heart is white and there is a space before the ewe.
 ZMK_LEADER_UNICODE_MULTI_3(love, L O V E, eye, red_heart, ewe)
 
