@@ -44,7 +44,17 @@ ZMK_COMBO_SIMPLE(curlybracket_close, RIGHT_BRACE, 10, 11)
 ZMK_COMBO_SIMPLE(underscore, UNDERSCORE, 11, 12)
 
 /* middle row */
-ZMK_COMBO_SIMPLE(minus, MINUS, 26, 27)
+// available: 13, 14
+ZMK_COMBO_PLUS(smart_num_l, &smart_num_lock_dance, 14, 15)
+ZMK_COMBO_PLUS(control_l, &sk LCTRL, 15, 16)
+ZMK_COMBO_PLUS(caps_word_l, &caps_word_lock_dance, 16, 17)
+
+ZMK_COMBO_PLUS(caps_word_r, &caps_word_lock_dance, 23, 24)
+ZMK_COMBO_PLUS(control_r, &sk RCTRL, 24, 25)
+ZMK_COMBO_PLUS(smart_num_r, &smart_num_lock_dance, 25, 26)
+// available: 26, 27
+
+
 
 /* bottom row */
 ZMK_COMBO_SIMPLE(backslash, BSLH, 28, 29)
@@ -53,8 +63,6 @@ ZMK_COMBO_SIMPLE(slash, FSLH, 40, 41)
 ZMK_COMBO_SIMPLE(comma, COMMA, 29, 30)
 ZMK_COMBO_SIMPLE(dot, DOT, 39, 40)
 
-ZMK_COMBO_PLUS(smart_num, SMART_NUM, 13, 14)
-ZMK_COMBO_PLUS(caps_word, &caps_word_lock_dance, 14, 15)
 ZMK_COMBO_PLUS(base, &to BASE, 44, 45) /* inner thumb keys */
 ZMK_COMBO_PLUS(navigation, &to NAVIGATION, 43, 46) /* middle thumb keys */
 ZMK_COMBO_SIMPLE(printscreen, PRINTSCREEN, 42, 47) /* outer thumb keys; screenshot */
