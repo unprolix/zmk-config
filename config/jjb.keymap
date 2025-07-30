@@ -1,3 +1,6 @@
+//navigation: add tab and return
+//numeric: remove the hold, just one shot, smart num, and tog.
+
 // -*- mode: dts -*-
 #define HOST_OS 1 // linux. impacts unicode entry. anything else?
 
@@ -50,6 +53,8 @@ ZMK_BASE_LAYER(Base,
 /*
 
 TODO:
+
+* how to make comma and dot combos active while smart num is active, without deactivating it?
 
 * timing issues:
 	* typing bigrams at normal speed often erroneously activates the combo on those keys. example: "re" may produce open parenthesis instead of the letters r and e.
@@ -149,7 +154,9 @@ ZMK_HOLD_TAP(smart_num, bindings = <&mo>, <&num_dance>; flavor = "balanced";
 ZMK_TAP_DANCE(num_dance, bindings = <&num_word NUM>, <&sl NUM>;
               tapping-term-ms = <200>;)
 
-ZMK_TAP_DANCE(caps_word_lock_dance, bindings = <&caps_word>, <&kp CAPS>;
+ZMK_TAP_DANCE(caps_word_lock_dance, bindings = <&sk LSHIFT>, <&caps_word>, <&kp CAPS>;
+              tapping-term-ms = <300>;)
+ZMK_TAP_DANCE(smart_num_lock_dance, bindings = <&sl NUM>, <&num_word NUM>, <&tog NUM>;
               tapping-term-ms = <300>;)
 
 
