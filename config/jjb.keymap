@@ -365,12 +365,12 @@ smart_nav_thumb: smart_nav_thumb {
         rgb_layer {
             display-name = "rgb";
             bindings = <
-&trans       &trans  &trans        &trans        &trans        &trans                                      &trans                     &trans           &trans           &trans           &trans          &trans   &trans
-&trans     &trans    &trans  &trans  &trans  &trans                &trans  &to BASE     &trans   &trans         &trans         &trans           &trans        &trans  &trans
-&trans           &rgb_ug RGB_OFF &rgb_ug RGB_ON  &trans        &trans            &rgb_ug RGB_EFF  &kp C_MUTE                 &mmv MOVE_DOWN                   &rgb_ug RGB_EFR  &rgb_ug RGB_SPI  &rgb_ug RGB_BRI  &rgb_ug RGB_BRD  &kp END   &kp PG_DN
+&trans  &trans  &trans  &trans  &trans  &trans                                    &rgb_ug RGB_SPI                    &rgb_ug RGB_HUI  &rgb_ug RGB_SAI  &trans  &trans  &trans  &trans
+&trans  &trans  &trans  &trans  &trans  &trans                   &rgb_ug RGB_EFR  &to BASE         &rgb_ug RGB_EFF   &rgb_ug RGB_HUD  &rgb_ug RGB_SAD  &trans  &trans  &trans  &trans
+&trans  &trans  &trans  &trans  &trans  &trans  &rgb_ug RGB_TOG                   &rgb_ug RGB_SPD                    &trans           &trans           &trans  &trans  &trans  &trans
                                            &trans        &trans            &trans                                                                       &trans           &trans           &trans
             >;
-            sensor-bindings = <&scroll_encoder>;
+            sensor-bindings = <&rgb_encoder>;
         };
 
 
