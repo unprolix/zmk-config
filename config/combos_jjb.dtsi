@@ -70,7 +70,18 @@ ZMK_COMBO_SIMPLE(printscreen, PRINTSCREEN, 42, 47) /* outer thumb keys; screensh
 
 /* vertical shapes */
 
+ZMK_COMBO_PLUS(menu, &kp MENU, 0, 13)  /* top and middle leftmost keys */
 ZMK_COMBO_PLUS(leader, &leader, 13, 28)  /* middle and bottom leftmost keys */
+
+// system layer. would have been with all six thumb keys but that is at least too many for the default config
+// so this just uses the outer four
+combo_system {
+	timeout-ms = <CHORD_TIMEOUT>;
+        key-positions = <42 43 46 47>;
+        bindings = <&to SYSTEM>;
+	require-prior-idle-ms = <LONG_PAUSE>;
+};
+
 
 // bootloader with far left column
 combo_bootloader_left {
