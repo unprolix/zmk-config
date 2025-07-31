@@ -53,8 +53,6 @@ TODO:
 
 * super specific "smart" nav keys: shift into nav, hit an arrow key: arrows stay active until a non-arrow is pressed. same or page up/page down. or should they be the same?
 
-* insert and delete keys are misplaced on nav layer. they should probably go somewhere else instead.
-
 * how to make comma and dot combos active while smart num is active, without deactivating it?
 
 * timing issues:
@@ -70,11 +68,7 @@ TODO:
 
 * holding backspace for repeating (backspaces) doesn't work
 
-* how to specify actions for turning the encoder on a particular layer
-
 * how to specify bluetooth-related functionality
-
-* how to specify underglow-related functionality
 
 * how to illuminate the RGB LED for a specific key
 
@@ -365,9 +359,9 @@ smart_nav_thumb: smart_nav_thumb {
         rgb_layer {
             display-name = "rgb";
             bindings = <
-&trans  &trans  &trans  &trans  &trans  &trans                                    &rgb_ug RGB_SPI                    &rgb_ug RGB_HUI  &rgb_ug RGB_SAI  &trans  &trans  &trans  &trans
-&trans  &trans  &trans  &trans  &trans  &trans                   &rgb_ug RGB_EFR  &to BASE         &rgb_ug RGB_EFF   &rgb_ug RGB_HUD  &rgb_ug RGB_SAD  &trans  &trans  &trans  &trans
-&trans  &trans  &trans  &trans  &trans  &trans  &rgb_ug RGB_TOG                   &rgb_ug RGB_SPD                    &trans           &trans           &trans  &trans  &trans  &trans
+&trans  &trans  &trans  &trans  &trans  &trans                                    &rgb_ug RGB_SPI                    &rgb_ug RGB_HUI  &rgb_ug RGB_SAI  &trans  &trans  &trans  &rgb_ug RGB_COLOR_HSB(275,100,100)
+&trans  &trans  &trans  &trans  &trans  &trans                   &rgb_ug RGB_EFR  &to BASE         &rgb_ug RGB_EFF   &rgb_ug RGB_HUD  &rgb_ug RGB_SAD  &trans  &trans  &trans  &rgb_ug RGB_COLOR_HSB(186,100,100)
+&trans  &trans  &trans  &trans  &trans  &trans  &rgb_ug RGB_TOG                   &rgb_ug RGB_SPD                    &trans           &trans           &trans  &trans  &trans  &rgb_ug RGB_COLOR_HSB(317,100,100)
                                            &trans        &trans            &trans                                                                       &trans           &trans           &trans
             >;
             sensor-bindings = <&rgb_encoder>;
