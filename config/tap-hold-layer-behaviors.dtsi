@@ -21,6 +21,8 @@ td_shift_word: tap_dance_shift_word {
         bindings = <&sk LSHFT>, <&caps_word>;
 };
 
+
+// no longer used
 ht_shift_caps: hold_tap_shift_caps {
         compatible = "zmk,behavior-hold-tap";
         #binding-cells = <2>;

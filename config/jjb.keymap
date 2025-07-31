@@ -1,6 +1,3 @@
-//navigation: add tab and return
-//numeric: remove the hold, just one shot, smart num, and tog.
-
 // -*- mode: dts -*-
 #define HOST_OS 1 // linux. impacts unicode entry. anything else?
 
@@ -53,6 +50,10 @@ ZMK_BASE_LAYER(Base,
 /*
 
 TODO:
+
+* super specific "smart" nav keys: shift into nav, hit an arrow key: arrows stay active until a non-arrow is pressed. same or page up/page down. or should they be the same?
+
+* insert and delete keys are misplaced on nav layer. they should probably go somewhere else instead.
 
 * how to make comma and dot combos active while smart num is active, without deactivating it?
 
@@ -110,10 +111,11 @@ key numbers
 #define NAVIGATION 2
 #define FN 3
 #define EXTRA 4
-#define SYSTEM 5
-#define MODIFIER_LEFT_NAV 6
-#define MODIFIER_RIGHT_NAV 7
-#define CAPS_LAYER 8
+#define RGB 5
+#define SYSTEM 6
+#define MODIFIER_LEFT_NAV 7
+#define MODIFIER_RIGHT_NAV 8
+#define CAPS_LAYER 9
 
 
 // short versions for helping things line up
@@ -196,9 +198,22 @@ MAKE_HRM(hmr, &kp, &kp, KEYS_L THUMBS) // Right-hand HRMs.
 
 
 / {
-    behaviors {
+	behaviors {
+
 	#include "tap-hold-layer-behaviors.dtsi"
 	#include "modifier-tap-doubletap-behaviors.dtsi"
+
+smart_nav_thumb: smart_nav_thumb {
+    compatible = "zmk,behavior-hold-tap";
+    #binding-cells = <2>;
+    flavor = "hold-preferred";
+    tapping-term-ms = <200>;
+    quick-tap-ms = <175>;
+    bindings = <&sl>, <&kp>;
+		};
+
+
+		
 
 	menu_smart_num: menu_smart_num {
 	    compatible = "zmk,behavior-tap-dance";
@@ -291,9 +306,9 @@ MAKE_HRM(hmr, &kp, &kp, KEYS_L THUMBS) // Right-hand HRMs.
             bindings = <
 
 &kp ESC       &kp Q        &kp W         &kp E       &kp R                              &kp T			     &kp UP                  &kp Y  &kp U                              &kp I       &kp O         &kp P           &kp BSPC
-&menu_hold_mo NUM 0  &hml LCTRL A  &hml LSHIFT S  &hml LALT D  &tap_hold_layer_lgui LGUI_NAV_L F  &kp G              &kp LEFT  &tog SYSTEM  &kp RIGHT  &kp H  &tap_hold_layer_rgui RGUI_NAV_R J  &hmr RALT K  &hmr RSHIFT L  &hmr RCTRL SEMI  &sqt_hold_mo NUM SQT
-&ht_shift_caps 0 0     &kp Z        &kp X         &kp C   &kp V                                  &kp B   &kp C_MUTE           &kp DOWN                &kp N  &kp M                              &kp COMMA   &kp DOT       &kp FSLH        &kp RET
-                                                         &LTS EXTRA ESC  &LTS NAV TAB  &lgui_space_tab                &rgui_space_ret     &LTS NAV BSPC    &LTS FN RETURN
+&trans  &hml LCTRL A  &hml LSHIFT S  &hml LALT D  &tap_hold_layer_lgui LGUI_NAV_L F  &kp G              &kp LEFT  &to RGB   &kp RIGHT  &kp H  &tap_hold_layer_rgui RGUI_NAV_R J  &hmr RALT K  &hmr RSHIFT L  &hmr RCTRL SEMI  &sqt_hold_mo NUM SQT
+&trans     &kp Z        &kp X         &kp C   &kp V                                  &kp B   &kp C_MUTE           &kp DOWN                &kp N  &kp M                              &kp COMMA   &kp DOT       &kp FSLH        &kp RET
+                                                         &LTS EXTRA ESC  &smart_nav_thumb NAV TAB  &lgui_space_tab                &rgui_space_ret     &smart_nav_thumb NAV BSPC    &LTS FN RETURN
              >;
             sensor-bindings = <&inc_dec_kp C_VOLUME_UP C_VOLUME_DOWN>;
         };
@@ -312,9 +327,10 @@ MAKE_HRM(hmr, &kp, &kp, KEYS_L THUMBS) // Right-hand HRMs.
         navigation_layer {
             display-name = "navigation";
             bindings = <
-&kp HOME  &kp PG_UP        &kp INSERT             &kp UP_ARROW         &kp DELETE            &msc SCRL_UP                             &mmv MOVE_UP                   &msc SCRL_UP    &kp INSERT            &kp UP_ARROW         &kp DELETE              &kp PG_UP         &kp HOME
-&kp END   &hml LCTRL PG_DN  &hml LSHIFT LEFT_ARROW  &hml LALT DOWN_ARROW  &hml LGUI RIGHT_ARROW  &msc SCRL_DOWN            &mmv MOVE_LEFT &kp HOME      &mmv MOVE_RIGHT  &msc SCRL_DOWN  &hmr RGUI LEFT_ARROW   &hmr RALT DOWN_ARROW  &hmr RSHIFT RIGHT_ARROW  &hmr RCTRL PG_DN   &kp END
-&trans    &trans           &trans                 &trans               &trans                &trans          &kp HOME                 &mmv MOVE_DOWN                 &trans            &trans         &trans         &trans          &trans      &trans
+&kp HOME  &kp PG_UP         &trans                  &kp UP_ARROW          &trans                 &msc SCRL_UP                             &mmv MOVE_UP                     &msc SCRL_UP    &trans                &kp UP_ARROW          &trans                   &kp PG_UP         &kp HOME
+&kp END   &hml LCTRL PG_DN  &hml LSHIFT LEFT_ARROW  &hml LALT DOWN_ARROW  &hml LGUI RIGHT_ARROW  &msc SCRL_DOWN            &mmv MOVE_LEFT &mkp MB1        &mmv MOVE_RIGHT  &msc SCRL_DOWN  &hmr RGUI LEFT_ARROW  &hmr RALT DOWN_ARROW  &hmr RSHIFT RIGHT_ARROW  &hmr RCTRL PG_DN  &kp END
+&trans    &trans            &trans                  &trans                &trans                 &trans          &trans                   &mmv MOVE_DOWN                   &mkp MB2        &mkp MB3              &mkp MB4              &mkp MB5                 &trans            &trans
+//&mkp MBl        &mkp MB2              &mkp MB3              &mkp MB4                 &mkp MB5          &trans
                                                   &trans               &trans                &LTS BASE SPACE                                                          &LTS BASE SPACE   &trans         &trans
             >;
             sensor-bindings = <&scroll_encoder>;
@@ -337,8 +353,8 @@ MAKE_HRM(hmr, &kp, &kp, KEYS_L THUMBS) // Right-hand HRMs.
             display-name = "extra";
             bindings = <
 &trans &trans &at_wgyl_org &trans &trans &trans                 &trans          &trans &trans &trans &trans &trans &trans 
-&oneshot_or_to_NUMERIC &trans &trans &trans &trans &trans          &trans &trans &trans   &trans &trans &trans &trans &trans &oneshot_or_to_NUMERIC
-SMART_NUM &trans &trans &trans &trans &trans   &trans        &trans          &trans &trans &trans &trans &trans &key_repeat
+&trans &trans &trans &trans &trans &kp DELETE          &trans &trans &trans   &kp INSERT &trans &trans &trans &trans &trans
+&trans &trans &trans &trans &trans &trans   &trans        &trans          &trans &trans &trans &trans &trans &key_repeat
                      &trans &oneshot_or_to_NAVIGATION &trans  		  &trans &oneshot_or_to_NAVIGATION &trans
             >;
             sensor-bindings = <&scroll_encoder>;
@@ -346,16 +362,29 @@ SMART_NUM &trans &trans &trans &trans &trans   &trans        &trans          &tr
 
 
 
-        system_layer {
-            display-name = "system";
+        rgb_layer {
+            display-name = "rgb";
             bindings = <
-&bt BT_CLR       &bt BT_CLR_ALL  &kp F3        &kp F4        &kp F5        &kp F6                                      &mmv MOVE_UP                     &kp F7           &kp F8           &kp F9           &kp F10          &kp F11   &kp F12
-&bt BT_SEL 0     &bt BT_SEL 1    &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4  &bt BT_SEL 5                &mmv MOVE_LEFT  &tog SYSTEM     &mmv MOVE_RIGHT  &kp LEFT         &kp DOWN         &kp UP           &kp RIGHT        &kp HOME  &kp PG_UP
+&trans       &trans  &trans        &trans        &trans        &trans                                      &trans                     &trans           &trans           &trans           &trans          &trans   &trans
+&trans     &trans    &trans  &trans  &trans  &trans                &trans  &to BASE     &trans   &trans         &trans         &trans           &trans        &trans  &trans
 &trans           &rgb_ug RGB_OFF &rgb_ug RGB_ON  &trans        &trans            &rgb_ug RGB_EFF  &kp C_MUTE                 &mmv MOVE_DOWN                   &rgb_ug RGB_EFR  &rgb_ug RGB_SPI  &rgb_ug RGB_BRI  &rgb_ug RGB_BRD  &kp END   &kp PG_DN
                                            &trans        &trans            &trans                                                                       &trans           &trans           &trans
             >;
             sensor-bindings = <&scroll_encoder>;
         };
+
+
+        system_layer {
+            display-name = "system";
+            bindings = <
+&bt BT_CLR       &bt BT_CLR_ALL  &trans        &trans        &trans        &trans                                      &mmv MOVE_UP                     &trans           &trans           &trans           &trans          &trans   &trans
+&bt BT_SEL 0     &bt BT_SEL 1    &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4  &bt BT_SEL 5                &mmv MOVE_LEFT  &to BASE     &mmv MOVE_RIGHT  &trans         &trans         &trans           &trans        &trans  &trans
+&trans           &rgb_ug RGB_OFF &rgb_ug RGB_ON  &trans        &trans            &rgb_ug RGB_EFF  &kp C_MUTE                 &mmv MOVE_DOWN                   &rgb_ug RGB_EFR  &rgb_ug RGB_SPI  &rgb_ug RGB_BRI  &rgb_ug RGB_BRD  &kp END   &kp PG_DN
+                                           &trans        &trans            &trans                                                                       &trans           &trans           &trans
+            >;
+            sensor-bindings = <&scroll_encoder>;
+        };
+
 
 
         mod_l_nav_layer {
