@@ -190,12 +190,21 @@ MAKE_HRM(hmr, &kp, &kp, KEYS_L THUMBS) // Right-hand HRMs.
 
 #include "leader_jjb.dtsi"
 
+ZMK_UNICODE_SINGLE(em_dash, N2, N0, N1, N4)
 
 / {
 	behaviors {
 
 	#include "tap-hold-layer-behaviors.dtsi"
 	#include "modifier-tap-doubletap-behaviors.dtsi"
+
+dash_emdash: dash_emdash {
+    compatible = "zmk,behavior-mod-morph";
+    #binding-cells = <0>;
+    bindings = <&kp MINUS>, <&em_dash>;
+    mods = <(MOD_LSFT|MOD_RSFT)>;
+};
+
 
 smart_nav_thumb: smart_nav_thumb {
     compatible = "zmk,behavior-hold-tap";

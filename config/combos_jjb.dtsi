@@ -31,53 +31,56 @@
 
 
 /* top row */
-ZMK_COMBO_SIMPLE(tilde, TILDE, 0, 1)
-ZMK_COMBO_SIMPLE(curlybracket_open, LEFT_BRACE, 1, 2)
-ZMK_COMBO_SIMPLE(square_open, LEFT_BRACKET, 2, 3)
-ZMK_COMBO_SIMPLE(paren_open, LEFT_PARENTHESIS, 3, 4)
-ZMK_COMBO_SIMPLE(less_than, LESS_THAN, 4, 5)
+ZMK_COMBO_SIMPLE(tilde, TILDE, LT5, LT4)
+ZMK_COMBO_SIMPLE(curlybracket_open, LEFT_BRACE, LT4, LT3)
+ZMK_COMBO_SIMPLE(square_open, LEFT_BRACKET, LT3, LT2)
+ZMK_COMBO_SIMPLE(paren_open, LEFT_PARENTHESIS, LT2, LT1)
+ZMK_COMBO_SIMPLE(less_than, LESS_THAN, LT1, LT0)
 
-ZMK_COMBO_SIMPLE(greater_than, GREATER_THAN, 7, 8)
-ZMK_COMBO_SIMPLE(paren_close, RIGHT_PARENTHESIS, 8, 9)
-ZMK_COMBO_SIMPLE(square_close, RIGHT_BRACKET, 9, 10)
-ZMK_COMBO_SIMPLE(curlybracket_close, RIGHT_BRACE, 10, 11)
-ZMK_COMBO_SIMPLE(underscore, UNDERSCORE, 11, 12)
+ZMK_COMBO_SIMPLE(greater_than, GREATER_THAN, RT0, RT1)
+ZMK_COMBO_SIMPLE(paren_close, RIGHT_PARENTHESIS, RT1, RT2)
+ZMK_COMBO_SIMPLE(square_close, RIGHT_BRACKET, RT2, RT3)
+ZMK_COMBO_SIMPLE(curlybracket_close, RIGHT_BRACE, RT3, RT4)
+ZMK_COMBO_SIMPLE(underscore, UNDERSCORE, RT4, RT5)
 
 /* middle row */
-// available: 13, 14
-ZMK_COMBO_PLUS(smart_num_l, &smart_num_lock_dance, 14, 15)
-ZMK_COMBO_PLUS(control_l, &sk LCTRL, 15, 16)
-ZMK_COMBO_PLUS(caps_word_l, &caps_word_lock_dance, 16, 17)
+// available: LM5, LM4
+ZMK_COMBO_PLUS(smart_num_l, &smart_num_lock_dance, LM4, LM3)
+ZMK_COMBO_PLUS(control_l, &sk LCTRL, LM3, LM2)
+ZMK_COMBO_PLUS(caps_word_l, &caps_word_lock_dance, LM2, LM1)
 
-ZMK_COMBO_PLUS(caps_word_r, &caps_word_lock_dance, 23, 24)
-ZMK_COMBO_PLUS(control_r, &sk RCTRL, 24, 25)
-ZMK_COMBO_PLUS(smart_num_r, &smart_num_lock_dance, 25, 26)
-// available: 26, 27
+ZMK_COMBO_PLUS(caps_word_r, &caps_word_lock_dance, RM1, RM2)
+ZMK_COMBO_PLUS(control_r, &sk RCTRL, RM2, RM3)
+ZMK_COMBO_PLUS(smart_num_r, &smart_num_lock_dance, RM3, RM4)
+ZMK_COMBO_PLUS(dash, &kp MINUS, RM4, RM5)
 
 
 
 /* bottom row */
-ZMK_COMBO_SIMPLE(backslash, BSLH, 28, 29)
-ZMK_COMBO_SIMPLE(slash, FSLH, 40, 41)
+ZMK_COMBO_SIMPLE(backslash, BSLH, LB5, LB4)
+ZMK_COMBO_SIMPLE(slash, FSLH, RB4, RB5)
 
-ZMK_COMBO_SIMPLE(comma, COMMA, 29, 30)
-ZMK_COMBO_SIMPLE(dot, DOT, 39, 40)
+ZMK_COMBO_SIMPLE(comma, COMMA, RB2, RB3)
+ZMK_COMBO_SIMPLE(dot, DOT, RB3, RB4)
 
-ZMK_COMBO_PLUS(base, &to BASE, 44, 45) /* inner thumb keys */
-ZMK_COMBO_PLUS(navigation, &to NAVIGATION, 43, 46) /* middle thumb keys */
-ZMK_COMBO_SIMPLE(printscreen, PRINTSCREEN, 42, 47) /* outer thumb keys; screenshot */
+ZMK_COMBO_PLUS(base, &to BASE, LH0, RH0) /* inner thumb keys */
+ZMK_COMBO_PLUS(navigation, &to NAVIGATION, LH1, RH1) /* middle thumb keys */
+ZMK_COMBO_SIMPLE(printscreen, PRINTSCREEN, LH2, RH2) /* outer thumb keys; screenshot */
 
 
 /* vertical shapes */
 
-ZMK_COMBO_PLUS(menu, &kp MENU, 0, 13)  /* top and middle leftmost keys */
-ZMK_COMBO_PLUS(leader, &leader, 13, 28)  /* middle and bottom leftmost keys */
+//ZMK_COMBO_PLUS(menu, &kp MENU, 0, 13)  /* top and middle leftmost keys */
+ZMK_COMBO_PLUS(leader, &leader, LM5, LB5)  /* middle and bottom leftmost keys */
+ZMK_COMBO_PLUS(menu, &kp MENU, LM0, LB0)  /* middle and bottom inner rightmost keys */
+
+
 
 // system layer. would have been with all six thumb keys but that is at least too many for the default config
 // so this just uses the outer four
 combo_system {
 	timeout-ms = <CHORD_TIMEOUT>;
-        key-positions = <42 43 46 47>;
+        key-positions = <LH2 LH1 RH1 RH2>;
         bindings = <&to SYSTEM>;
 	require-prior-idle-ms = <LONG_PAUSE>;
 };
@@ -86,14 +89,14 @@ combo_system {
 // bootloader with far left column
 combo_bootloader_left {
 	timeout-ms = <CHORD_TIMEOUT>;
-        key-positions = <0 13 28>;
+        key-positions = <LT5 LM5 LB5>;
         bindings = <&bootloader>;
 	require-prior-idle-ms = <LONG_PAUSE>;
 };
 // bootloader with far right column
 combo_bootloader_right {
         timeout-ms = <CHORD_TIMEOUT>;
-        key-positions = <12 27 41>;
+        key-positions = <RT5 RM5 RB5>;
         bindings = <&bootloader>;
 	require-prior-idle-ms = <LONG_PAUSE>;
 };

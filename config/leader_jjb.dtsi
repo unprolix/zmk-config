@@ -27,6 +27,7 @@ ZMK_LEADER_SEQUENCE(gr_phi,     &el_phi,        G F)  // ϕ
 //ZMK_LEADER_SEQUENCE(red_heart, &red_heart,     H E A R T)
 
 
+
 ZMK_LEADER_SEQUENCE(reset,      &sys_reset,     R E S E T)
 ZMK_LEADER_SEQUENCE(boot,       &bootloader,    B O O T)
 
@@ -59,7 +60,8 @@ ZMK_LEADER_UNICODE_5(eye, E Y E, N1, F, N4, N4, N1) // 👁
 ZMK_LEADER_UNICODE_5(ewe, E W E, N1, F, N4, N1, N1) // 🐑
 
 ZMK_LEADER_UNICODE_5(rictus, R I C T U, N1, F, N6, N2, C) // 😬
-
+ZMK_LEADER_UNICODE_5(halo, H A L O, N1, F, N6, N0, N7) // 😇
+ZMK_LEADER_UNICODE_5(fingers, F I N, N1, F, N9, N1, E) // 🤞
 
 
 #define ZMK_LEADER_UNICODE_DUAL_4_4(name, sequence, u0, u1, u2, u3, u4, u5, u6, u7) \
