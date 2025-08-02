@@ -26,7 +26,7 @@ ZMK_LEADER_SEQUENCE(gr_phi,     &el_phi,        G F)  // ϕ
 //ZMK_UNICODE_SINGLE(red_heart, N2, N7, N6, N4)
 //ZMK_LEADER_SEQUENCE(red_heart, &red_heart,     H E A R T)
 
-
+ZMK_LEADER_SEQUENCE(gaming,      &to GAMING,     G A M E)
 
 ZMK_LEADER_SEQUENCE(reset,      &sys_reset,     R E S E T)
 ZMK_LEADER_SEQUENCE(boot,       &bootloader,    B O O T)
