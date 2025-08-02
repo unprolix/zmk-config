@@ -101,15 +101,16 @@ key numbers
 #include <input/processors.dtsi>
 
 #define BASE 0
-#define NUMERIC 1
-#define NAVIGATION 2
-#define FN 3
-#define EXTRA 4
-#define RGB 5
-#define SYSTEM 6
-#define MODIFIER_LEFT_NAV 7
-#define MODIFIER_RIGHT_NAV 8
-#define CAPS_LAYER 9
+#define GAMING 1
+#define NUMERIC 2
+#define NAVIGATION 3
+#define FN 4
+#define EXTRA 5
+#define RGB 6
+#define SYSTEM 7
+#define MODIFIER_LEFT_NAV 8
+#define MODIFIER_RIGHT_NAV 9
+#define CAPS_LAYER 10
 
 
 // short versions for helping things line up
@@ -213,7 +214,7 @@ smart_nav_thumb: smart_nav_thumb {
     tapping-term-ms = <200>;
     quick-tap-ms = <175>;
     bindings = <&sl>, <&kp>;
-		};
+};
 
 
 		
@@ -316,6 +317,18 @@ smart_nav_thumb: smart_nav_thumb {
             sensor-bindings = <&inc_dec_kp C_VOLUME_UP C_VOLUME_DOWN>;
         };
 
+        gaming_layer {
+            display-name = "gaming";
+            bindings = <
+
+&kp ESC     &kp Q  &kp W  &kp E  &kp R  &kp T		              &kp UP                &kp Y  &kp U  &kp I      &kp O    &kp P     &kp BSPC
+&kp CAPS    &kp A  &kp S  &kp D  &kp F  &kp G               &kp LEFT  &to RGB   &kp RIGHT   &kp H  &kp J  &kp K      &kp L    &kp SEMI  &kp SQT
+&kp LSHIFT  &kp Z  &kp X  &kp C  &kp V  &kp B   &kp C_MUTE            &kp DOWN              &kp N  &kp M  &kp COMMA  &kp DOT  &kp FSLH  &kp RSHIFT
+                                     &kp ESC  &kp TAB  &kp SPACE                &kp SPACE     &kp BSPC    &kp RETURN
+             >;
+            sensor-bindings = <&inc_dec_kp C_VOLUME_UP C_VOLUME_DOWN>;
+        };
+
         numeric_layer {
             display-name = "numeric";
             bindings = <
@@ -355,8 +368,8 @@ smart_nav_thumb: smart_nav_thumb {
         extra_layer {
             display-name = "extra";
             bindings = <
-&trans &trans &at_wgyl_org &trans &trans &trans                 &trans          &trans &trans &trans &trans &trans &trans 
-&trans &trans &trans &trans &trans &kp DELETE          &trans &trans &trans   &kp INSERT &trans &trans &trans &trans &trans
+&em_dash &trans &at_wgyl_org &trans &trans &trans                 &trans          &trans &trans &trans &trans &trans &trans 
+&dash_emdash &trans &trans &trans &trans &kp DELETE          &trans &trans &trans   &kp INSERT &trans &trans &trans &trans &trans
 &trans &trans &trans &trans &trans &trans   &trans        &trans          &trans &trans &trans &trans &trans &key_repeat
                      &trans &oneshot_or_to_NAVIGATION &trans  		  &trans &oneshot_or_to_NAVIGATION &trans
             >;

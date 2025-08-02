@@ -52,7 +52,7 @@ ZMK_COMBO_PLUS(caps_word_l, &caps_word_lock_dance, LM2, LM1)
 ZMK_COMBO_PLUS(caps_word_r, &caps_word_lock_dance, RM1, RM2)
 ZMK_COMBO_PLUS(control_r, &sk RCTRL, RM2, RM3)
 ZMK_COMBO_PLUS(smart_num_r, &smart_num_lock_dance, RM3, RM4)
-ZMK_COMBO_PLUS(dash, &kp MINUS, RM4, RM5)
+ZMK_COMBO_PLUS(dash, &dash_emdash, RM4, RM5)
 
 
 
