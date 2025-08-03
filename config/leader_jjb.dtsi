@@ -31,6 +31,11 @@ ZMK_LEADER_SEQUENCE(gaming,      &to GAMING,     G A M E)
 ZMK_LEADER_SEQUENCE(reset,      &sys_reset,     R E S E T)
 ZMK_LEADER_SEQUENCE(boot,       &bootloader,    B O O T)
 
+// debugging use
+ZMK_LEADER_SEQUENCE(caps_word,  &caps_word,     C W)
+
+// -----------------------------------------------------------------------------
+
 #define ZMK_LEADER_UNICODE_4(name, sequence, u0, u1, u2, u3) \
     UC_MACRO(name ## _uc, &kp u0 &kp u1 &kp u2 &kp u3) \
     ZMK_LEADER_SEQUENCE(name, &name ## _uc, sequence)

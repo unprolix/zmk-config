@@ -102,15 +102,16 @@ key numbers
 
 #define BASE 0
 #define GAMING 1
-#define NUMERIC 2
-#define NAVIGATION 3
-#define FN 4
-#define EXTRA 5
-#define RGB 6
-#define SYSTEM 7
-#define MODIFIER_LEFT_NAV 8
-#define MODIFIER_RIGHT_NAV 9
-#define CAPS_LAYER 10
+#define NEW_ALPHA 2
+#define CAPS_LAYER 3
+#define NUMERIC 4
+#define NAVIGATION 5
+#define FN 6
+#define EXTRA 7
+#define RGB 8
+#define SYSTEM 9
+#define MODIFIER_LEFT_NAV 10
+#define MODIFIER_RIGHT_NAV 11
 
 
 // short versions for helping things line up
@@ -127,7 +128,7 @@ key numbers
 #define INTERRUPT_TAP 50        // very short window, for interrupting tap dance
 #define CHORD_TIMEOUT 45 	// getting false positives at 50
 #define LONG_PAUSE 500		// e.g. before certain combos. 800 is too long. so is 600
-#define PRE_CHORD_PAUSE 250
+#define PRE_CHORD_PAUSE 200	// 250 is too long as it sometimes causes false negatives
 /*
 
    &mmv_input_listener {
@@ -276,8 +277,6 @@ smart_nav_thumb: smart_nav_thumb {
 	;
     ;
 
-   there should also be a way of entering emoji via macros here. check https://zmk.dev/docs/keymaps/behaviors/macros
-
 */
 
     /* Using tap_hold_layer_lgui directly in the keymap instead of a custom f_key behavior */
@@ -309,7 +308,7 @@ smart_nav_thumb: smart_nav_thumb {
             display-name = "base";
             bindings = <
 
-&kp ESC       &kp Q        &kp W         &kp E       &kp R                              &kp T			     &kp UP                  &kp Y  &kp U                              &kp I       &kp O         &kp P           &kp BSPC
+&kp TAB       &kp Q        &kp W         &kp E       &kp R                              &kp T			     &kp UP                  &kp Y  &kp U                              &kp I       &kp O         &kp P           &kp BSPC
 &trans  &hml LCTRL A  &hml LSHIFT S  &hml LALT D  &tap_hold_layer_lgui LGUI_NAV_L F  &kp G              &kp LEFT  &to RGB   &kp RIGHT  &kp H  &tap_hold_layer_rgui RGUI_NAV_R J  &hmr RALT K  &hmr RSHIFT L  &hmr RCTRL SEMI  &sqt_hold_mo NUM SQT
 &trans     &kp Z        &kp X         &kp C   &kp V                                  &kp B   &kp C_MUTE           &kp DOWN                &kp N  &kp M                              &kp COMMA   &kp DOT       &kp FSLH        &kp RET
                                                          &LTS EXTRA ESC  &smart_nav_thumb NAV TAB  &lgui_space_tab                &rgui_space_ret     &smart_nav_thumb NAV BSPC    &LTS FN RETURN
@@ -324,10 +323,32 @@ smart_nav_thumb: smart_nav_thumb {
 &kp ESC     &kp Q  &kp W  &kp E  &kp R  &kp T		              &kp UP                &kp Y  &kp U  &kp I      &kp O    &kp P     &kp BSPC
 &kp CAPS    &kp A  &kp S  &kp D  &kp F  &kp G               &kp LEFT  &to RGB   &kp RIGHT   &kp H  &kp J  &kp K      &kp L    &kp SEMI  &kp SQT
 &kp LSHIFT  &kp Z  &kp X  &kp C  &kp V  &kp B   &kp C_MUTE            &kp DOWN              &kp N  &kp M  &kp COMMA  &kp DOT  &kp FSLH  &kp RSHIFT
-                                     &kp ESC  &kp TAB  &kp SPACE                &kp SPACE     &kp BSPC    &kp RETURN
+                                     &kp LCTRL  &kp TAB  &kp SPACE                &kp SPACE     &kp BSPC    &kp RETURN
              >;
             sensor-bindings = <&inc_dec_kp C_VOLUME_UP C_VOLUME_DOWN>;
         };
+
+	new_alpha {
+				display-name = "new_alpha";
+				bindings = <
+				&caps_toggle &trans &trans &trans &trans &trans                  &trans          &trans &trans &trans &trans &trans &trans 
+				&trans &trans &trans &trans &trans &trans           &trans &trans &trans   &trans &trans &trans &trans &trans &trans 
+				&trans &trans &trans &trans &trans &trans   &trans         &trans          &trans &trans &trans &trans &trans &trans 
+				&trans &trans &trans                                  &trans &trans &trans
+				>;
+				
+	};
+
+	caps_layer {
+				display-name = "caps";
+				bindings = <
+				&caps_toggle &trans &trans &trans &trans &trans                  &trans          &trans &trans &trans &trans &trans &trans 
+				&trans &trans &trans &trans &trans &trans           &trans &trans &trans   &trans &trans &trans &trans &trans &trans 
+				&trans &trans &trans &trans &trans &trans   &trans         &trans          &trans &trans &trans &trans &trans &trans 
+				&trans &trans &trans                                  &trans &trans &trans
+				>;
+				
+	};
 
         numeric_layer {
             display-name = "numeric";
@@ -347,7 +368,7 @@ smart_nav_thumb: smart_nav_thumb {
 &kp END   &hml LCTRL PG_DN  &hml LSHIFT LEFT_ARROW  &hml LALT DOWN_ARROW  &hml LGUI RIGHT_ARROW  &msc SCRL_DOWN            &mmv MOVE_LEFT &mkp MB1        &mmv MOVE_RIGHT  &msc SCRL_DOWN  &hmr RGUI LEFT_ARROW  &hmr RALT DOWN_ARROW  &hmr RSHIFT RIGHT_ARROW  &hmr RCTRL PG_DN  &kp END
 &trans    &trans            &trans                  &trans                &trans                 &trans          &trans                   &mmv MOVE_DOWN                   &mkp MB2        &mkp MB3              &mkp MB4              &mkp MB5                 &trans            &trans
 //&mkp MBl        &mkp MB2              &mkp MB3              &mkp MB4                 &mkp MB5          &trans
-                                                  &trans               &trans                &LTS BASE SPACE                                                          &LTS BASE SPACE   &trans         &trans
+                                                  &trans               &trans                &kp SPACE                                                          &kp SPACE   &trans         &trans
             >;
             sensor-bindings = <&scroll_encoder>;
         };
@@ -381,9 +402,9 @@ smart_nav_thumb: smart_nav_thumb {
         rgb_layer {
             display-name = "rgb";
             bindings = <
-&trans  &trans  &trans  &trans  &trans  &trans                                    &rgb_ug RGB_SPI                    &rgb_ug RGB_HUI  &rgb_ug RGB_SAI  &trans  &trans  &trans  &rgb_ug RGB_COLOR_HSB(275,100,100)
-&trans  &trans  &trans  &trans  &trans  &trans                   &rgb_ug RGB_EFR  &to BASE         &rgb_ug RGB_EFF   &rgb_ug RGB_HUD  &rgb_ug RGB_SAD  &trans  &trans  &trans  &rgb_ug RGB_COLOR_HSB(186,100,100)
-&trans  &trans  &trans  &trans  &trans  &trans  &rgb_ug RGB_TOG                   &rgb_ug RGB_SPD                    &trans           &trans           &trans  &trans  &trans  &rgb_ug RGB_COLOR_HSB(317,100,100)
+&trans  &trans  &trans  &trans  &trans  &trans                                    &rgb_ug RGB_SPI                    &rgb_ug RGB_HUI  &rgb_ug RGB_SAI  &trans  &trans  &rgb_ug RGB_COLOR_HSB(0,100,100)    &rgb_ug RGB_COLOR_HSB(275,100,100)
+&trans  &trans  &trans  &trans  &trans  &trans                   &rgb_ug RGB_EFR  &to BASE         &rgb_ug RGB_EFF   &rgb_ug RGB_HUD  &rgb_ug RGB_SAD  &trans  &trans  &rgb_ug RGB_COLOR_HSB(90,100,100)   &rgb_ug RGB_COLOR_HSB(186,100,100)
+&trans  &trans  &trans  &trans  &trans  &trans  &rgb_ug RGB_TOG                   &rgb_ug RGB_SPD                    &trans           &trans           &trans  &trans  &rgb_ug RGB_COLOR_HSB(270,100,100)  &rgb_ug RGB_COLOR_HSB(317,100,100)
                                            &trans        &trans            &trans                                                                       &trans           &trans           &trans
             >;
             sensor-bindings = <&rgb_encoder>;
@@ -427,16 +448,6 @@ smart_nav_thumb: smart_nav_thumb {
         };
 
 
-	caps_layer {
-				display-name = "caps";
-				bindings = <
-				&caps_toggle &trans &trans &trans &trans &trans                  &trans          &trans &trans &trans &trans &trans &trans 
-				&trans &trans &trans &trans &trans &trans           &trans &trans &trans   &trans &trans &trans &trans &trans &trans 
-				&trans &trans &trans &trans &trans &trans   &trans         &trans          &trans &trans &trans &trans &trans &trans 
-				&trans &trans &trans                                  &trans &trans &trans
-				>;
-				
-	};
 
 /*
 
