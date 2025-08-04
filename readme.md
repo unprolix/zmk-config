@@ -5,7 +5,7 @@ configuration. It consists of a 6x3x2 base layout that is used for the eyelash c
 I originally forked this from urob's config and use many of his features but have edited enough that documentation has suffered. I exclusively use local builds but am attempting to keep the github workflow functional to allow other folks to play with it with minimum effort required. The local build uses a dynamically-generated macro that tells me when the build happened and includes some macros with more personal information, the "real" version of which is not checked in to this repository.
 
 
-My configuration currently builds against `v0.2` of upstream ZMK.
+My configuration currently builds against `v0.3` of upstream ZMK.
 Custom functionality is added through various
 [ZMK modules](https://github.com/search?q=topic%3Azmk-module+fork%3Atrue+owner%3Aurob+&type=repositories).
 The state of the entire firmware is pinned in my `west`
