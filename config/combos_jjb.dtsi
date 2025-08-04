@@ -26,6 +26,14 @@
         require-prior-idle-ms = <PRE_CHORD_PAUSE>; \
     };
 
+#define ZMK_COMBO_3_PLUS(name, behavior, pos1, pos2, pos3) \
+    combo_##name { \
+        timeout-ms = <CHORD_TIMEOUT>; \
+        key-positions = <pos1 pos2 pos3>; \
+        bindings = <behavior>; \
+        require-prior-idle-ms = <PRE_CHORD_PAUSE>; \
+    };
+
 
 
 
@@ -53,17 +61,29 @@ ZMK_COMBO_PLUS(caps_word_l, &caps_word_lock_dance, LM2, LM1)
 ZMK_COMBO_PLUS(caps_word_r, &caps_word_lock_dance, RM1, RM2)
 ZMK_COMBO_PLUS(control_r, &sk RCTRL, RM2, RM3)
 ZMK_COMBO_PLUS(smart_num_r, &smart_num_lock_dance, RM3, RM4)
-ZMK_COMBO_PLUS(dash, &dash_emdash, RM4, RM5)
+ZMK_COMBO_SIMPLE(dash, MINUS, RM4, RM5)
+ZMK_COMBO_3_PLUS(emdash_alt, &em_dash, RM3, RM4, RM5)
 
 
 
 /* bottom row */
 ZMK_COMBO_SIMPLE(backslash, BSLH, LB5, LB4)
-ZMK_COMBO_SIMPLE(slash, FSLH, RB4, RB5)
+//ZMK_COMBO_SIMPLE(, , LB4, LB3)
+//ZMK_COMBO_SIMPLE(, , LB3, LB2)
+//ZMK_COMBO_SIMPLE(, , LB2, LB1)
+ZMK_COMBO_SIMPLE(minus, MINUS, LB1, LB0)
+ZMK_COMBO_3_PLUS(emdash, &em_dash, LB2, LB1, LB0)
 
+
+ZMK_COMBO_SIMPLE(plus, PLUS, RB0, RB1)
+ZMK_COMBO_SIMPLE(equal, EQUAL, RB1, RB2)
 ZMK_COMBO_SIMPLE(comma, COMMA, RB2, RB3)
 ZMK_COMBO_SIMPLE(dot, DOT, RB3, RB4)
+ZMK_COMBO_SIMPLE(slash, FSLH, RB4, RB5)
 
+
+
+/* thumbs */
 ZMK_COMBO_PLUS(base, &to BASE, LH0, RH0) /* inner thumb keys */
 ZMK_COMBO_PLUS(navigation, &to NAVIGATION, LH1, RH1) /* middle thumb keys */
 ZMK_COMBO_SIMPLE(printscreen, PRINTSCREEN, LH2, RH2) /* outer thumb keys; screenshot */
@@ -71,9 +91,36 @@ ZMK_COMBO_SIMPLE(printscreen, PRINTSCREEN, LH2, RH2) /* outer thumb keys; screen
 
 /* vertical shapes */
 
-//ZMK_COMBO_PLUS(menu, &kp MENU, 0, 13)  /* top and middle leftmost keys */
+/* top two rows */
+ZMK_COMBO_PLUS(grave, &kp GRAVE, LT5, LM5)
+ZMK_COMBO_PLUS(excl, &kp EXCL, LT4, LM4)
+ZMK_COMBO_PLUS(at, &kp AT, LT3, LM3)
+ZMK_COMBO_PLUS(hash, &kp HASH, LT2, LM2)
+ZMK_COMBO_PLUS(dollar, &kp DOLLAR, LT1, LM1)
+ZMK_COMBO_PLUS(tab, &kp TAB, LT0, LM0)	/* top and middle innermost left */
+
+ZMK_COMBO_SIMPLE(backspace, BSPC, RT0, RM0)	/* top and middle innermost right */
+ZMK_COMBO_SIMPLE(amps, AMPS, RT1, RM1)
+ZMK_COMBO_SIMPLE(asterisk, ASTERISK, RT2, RM2)
+ZMK_COMBO_SIMPLE(caret, CARET, RT3, RM3)
+ZMK_COMBO_SIMPLE(percent, PERCENT, RT4, RM4)
+ZMK_COMBO_SIMPLE(pipe, PIPE, RT5, RM5)
+
+
+/* bottom two rows */
 ZMK_COMBO_PLUS(leader, &leader, LM5, LB5)  /* middle and bottom leftmost keys */
-ZMK_COMBO_PLUS(menu, &kp MENU, LM0, LB0)  /* middle and bottom inner rightmost keys */
+// LM4, LB4
+// LM3, LB3
+// LM2, LB2
+// LM1, LB1
+ZMK_COMBO_SIMPLE(menu, MENU, LM0, LB0)  /* middle and bottom inner rightmost keys */
+
+// RM0, RB0
+// RM1, RB1
+ZMK_COMBO_SIMPLE(semicolon, SEMICOLON, RM2, RB2)
+ZMK_COMBO_SIMPLE(colon, COLON, RM3, RB3)
+// RM4, RB4
+// RM5, RB5
 
 
 
