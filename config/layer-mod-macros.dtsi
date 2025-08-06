@@ -1,7 +1,6 @@
 // tap once is a one shot from the layer.
 // tap twice switches to it.
 
-#define TAP_DANCE_TAPPING	250  	/* 200 seemed difficult to achieve */
 #define ONESHOT_OR_TO(layer) \
     oneshot_or_to_##layer: oneshot_or_to_##layer { \
         compatible = "zmk,behavior-tap-dance"; \
