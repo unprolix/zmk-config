@@ -52,18 +52,26 @@ ZMK_COMBO_SIMPLE(square_close, RIGHT_BRACKET, RT2, RT3)
 ZMK_COMBO_SIMPLE(curlybracket_close, RIGHT_BRACE, RT3, RT4)
 ZMK_COMBO_SIMPLE(underscore, UNDERSCORE, RT4, RT5)
 
-/* middle row */
-// available: LM5, LM4
-ZMK_COMBO_PLUS(smart_num_l, &smart_num_lock_dance, LM4, LM3)
-ZMK_COMBO_PLUS(control_l, &sk LCTRL, LM3, LM2)
-ZMK_COMBO_PLUS(caps_word_l, &caps_word_lock_dance, LM2, LM1)
 
-ZMK_COMBO_PLUS(caps_word_r, &caps_word_lock_dance, RM1, RM2)
-ZMK_COMBO_PLUS(control_r, &sk RCTRL, RM2, RM3)
-ZMK_COMBO_PLUS(smart_num_r, &smart_num_lock_dance, RM3, RM4)
-ZMK_COMBO_SIMPLE(dash, MINUS, RM4, RM5)
+/* middle row */
+ZMK_COMBO_PLUS(gui_l, &sk LGUI, LM4, LM5)
+ZMK_COMBO_PLUS(alt_l, &sk LALT, LM3, LM4)
+ZMK_COMBO_PLUS(caps_word_l, &caps_word_lock_dance, LM2, LM3)
+ZMK_COMBO_PLUS(control_l, &sk LCTRL, LM1, LM2)
+ZMK_COMBO_PLUS(nav_l, &sl NAVIGATION, LM0, LM1)
+
+ZMK_COMBO_PLUS(nav_r, &sl NAVIGATION, RM0, RM1)
+ZMK_COMBO_PLUS(control_r, &sk RCTRL, RM1, RM2)
+ZMK_COMBO_PLUS(caps_word_r, &caps_word_lock_dance, RM2, RM3)
+ZMK_COMBO_PLUS(alt_r, &sk RALT, RM3, RM4)
+ZMK_COMBO_PLUS(gui_r, &sk RGUI, RM4, RM5)
+
 ZMK_COMBO_3_PLUS(emdash_alt, &em_dash, RM3, RM4, RM5)
 
+// middle row skips
+
+ZMK_COMBO_PLUS(smart_num_l, &smart_num_lock_dance, LM1, LM3)  // skip!
+ZMK_COMBO_PLUS(smart_num_r, &smart_num_lock_dance, RM1, RM3)  // skip!
 
 
 /* bottom row */

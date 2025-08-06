@@ -1,16 +1,20 @@
-        tt_5s: timed_toggle_5s {
-            compatible = "zmk,behavior-timed-toggle";
-            #binding-cells = <1>;
-            timeout-ms = <5000>;
-        };
-        
-        nav_key_tt: nav_key_tt {
-            compatible = "zmk,behavior-hold-tap";
-            #binding-cells = <2>;
-            flavor = "tap-preferred";
-            tapping-term-ms = <200>;
-            bindings = <&tt_5s>, <&kp>;
-        };
+// define a behavior key_layer_<layer>_<key> which produces <&kp key>
+// on single tap, <&mo layer> on hold, and <&tog layer> on double-tap
+    kl_ht: kl_ht {
+        compatible = "zmk,behavior-hold-tap";
+        #binding-cells = <2>;
+        tapping-term-ms = <FAST_TAP>;
+        flavor = "tap-preferred";
+        bindings = <&mo>, <&kp>;
+    };
+
+#define ZMK_KEY_LAYER(key, layer) \
+    key_layer_##key##_##layer: key_layer_##key##_##layer { \
+        compatible = "zmk,behavior-tap-dance"; \
+        #binding-cells = <0>; \
+        tapping-term-ms = <FAST_TAP>; \
+        bindings = <&kl_ht layer key>, <&tog layer>; \
+    };
 
 
 
@@ -20,18 +24,6 @@ td_shift_word: tap_dance_shift_word {
         tapping-term-ms = <200>;
         bindings = <&sk LSHFT>, <&caps_word>;
 };
-
-
-// no longer used
-ht_shift_caps: hold_tap_shift_caps {
-        compatible = "zmk,behavior-hold-tap";
-        #binding-cells = <2>;
-        tapping-term-ms = <1000>;
-        quick-tap-ms = <200>;
-        flavor = "tap-preferred";
-        bindings = <&caps_toggle>, <&td_shift_word>;
-};
-
 
 
 
@@ -67,64 +59,6 @@ sqt_hold_mo: sqt_hold_mo {
     bindings = <&mo>, <&sqt_layer>;
 };
 
-
-
-// Hold-tap behaviors for each modifier
-tap_hold_layer_lctrl: tap_hold_layer_lctrl {
-    compatible = "zmk,behavior-hold-tap";
-    #binding-cells = <2>;
-    tapping-term-ms = <200>;
-    quick-tap-ms = <0>;
-    flavor = "tap-preferred";
-    bindings = <&layer_lctrl>, <&kp>;
-};
-
-tap_hold_layer_rctrl: tap_hold_layer_rctrl {
-    compatible = "zmk,behavior-hold-tap";
-    #binding-cells = <2>;
-    tapping-term-ms = <200>;
-    quick-tap-ms = <0>;
-    flavor = "tap-preferred";
-    bindings = <&layer_rctrl>, <&kp>;
-};
-
-tap_hold_layer_lshift: tap_hold_layer_lshift {
-    compatible = "zmk,behavior-hold-tap";
-    #binding-cells = <2>;
-    tapping-term-ms = <200>;
-    quick-tap-ms = <175>;
-    require-prior-idle-ms = <100>;
-    flavor = "balanced";
-    bindings = <&layer_lshift>, <&kp>;
-};
-
-tap_hold_layer_rshift: tap_hold_layer_rshift {
-    compatible = "zmk,behavior-hold-tap";
-    #binding-cells = <2>;
-    tapping-term-ms = <200>;
-    quick-tap-ms = <175>;
-    require-prior-idle-ms = <100>;
-    flavor = "balanced";
-    bindings = <&layer_rshift>, <&kp>;
-};
-
-tap_hold_layer_lalt: tap_hold_layer_lalt {
-    compatible = "zmk,behavior-hold-tap";
-    #binding-cells = <2>;
-    tapping-term-ms = <200>;
-    quick-tap-ms = <0>;
-    flavor = "tap-preferred";
-    bindings = <&layer_lalt>, <&kp>;
-};
-
-tap_hold_layer_ralt: tap_hold_layer_ralt {
-    compatible = "zmk,behavior-hold-tap";
-    #binding-cells = <2>;
-    tapping-term-ms = <200>;
-    quick-tap-ms = <0>;
-    flavor = "tap-preferred";
-    bindings = <&layer_ralt>, <&kp>;
-};
 
 /*
  * tap_hold_layer_lgui: Tap for keypress, hold for layer activation with LGUI modifier
@@ -162,15 +96,8 @@ Usage examples in keymap:
 
 &tap_hold_layer_lgui NUMERIC F      // Tap F, hold for layer NUMERIC + LGUI
 &tap_hold_layer_lctrl SYMBOLS J     // Tap J, hold for layer SYMBOLS + LCTRL
-&tap_hold_layer_ralt FUNCTION K     // Tap K, hold for layer FUNCTION + RALT
 
 Available modifiers:
-- tap_hold_layer_lctrl
-- tap_hold_layer_rctrl  
-- tap_hold_layer_lshift
-- tap_hold_layer_rshift
-- tap_hold_layer_lalt
-- tap_hold_layer_ralt
 - tap_hold_layer_lgui
 - tap_hold_layer_rgui
 */
