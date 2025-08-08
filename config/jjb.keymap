@@ -272,13 +272,6 @@ smart_nav_thumb: smart_nav_thumb {
 	    bindings = <&kp MENU>, <&smart_num NUM 0>;
 	};
 
- 	n0_cancel: n0_cancel {
-            compatible = "zmk,behavior-tap-dance";
- 	    #binding-cells = <0>;
-            tapping-term-ms = <200>;
-   	    bindings = <&kp N0>, <&to BASE>;
- 	};
-
 	// hold LGUI, tap for space, double tap for tab
         lgui_space_tab: lgui_space_tab {
             compatible = "zmk,behavior-tap-dance";
@@ -354,9 +347,9 @@ smart_nav_thumb: smart_nav_thumb {
             display-name = "base";
             bindings = <
 
-&kp TAB  &kp Q                              &kp W        &kp E        &kp R        &kp T                        &kp UP               &kp Y  &kp U        &kp I        &kp O        &kp P                                 &kp BSPC
-&key_layer_SQT_NUM   &tap_hold_layer_lgui LGUI_NAV_L A  &hml L_M3 S  &hml L_M2 D  &hml L_M1 F  &kp G              &kp LEFT  &to RGB   &kp RIGHT  &kp H  &hmr R_M1 J  &hmr R_M2 K  &hmr R_M3 L  &tap_hold_layer_rgui RGUI_NAV_R SEMI  &key_layer_DQT_NUM
-&trans   &kp Z                              &kp X        &kp C        &kp V        &kp B   &kp C_MUTE           &kp DOWN             &kp N  &kp M        &kp COMMA    &kp DOT      &kp FSLH                              &kp RET
+&kp TAB             &kp Q                              &kp W        &kp E        &kp R        &kp T                        &kp UP               &kp Y  &kp U        &kp I        &kp O        &kp P                                 &kp BSPC
+&key_layer_SQT_NUM  &tap_hold_layer_lgui LGUI_NAV_L A  &hml L_M3 S  &hml L_M2 D  &hml L_M1 F  &kp G              &kp LEFT  &to RGB   &kp RIGHT  &kp H  &hmr R_M1 J  &hmr R_M2 K  &hmr R_M3 L  &tap_hold_layer_rgui RGUI_NAV_R SEMI  &key_layer_DQT_NUM
+&trans              &kp Z                              &kp X        &kp C        &kp V        &kp B   &kp C_MUTE           &kp DOWN             &kp N  &kp M        &kp COMMA    &kp DOT      &kp FSLH                              &kp RET
                                                          &LTS EXTRA ESC  &smart_nav_thumb NAV TAB  &lgui_space_tab                &rgui_space_ret     &smart_nav_thumb NAV BSPC    &LTS FN RETURN
 				>;
 				
@@ -399,10 +392,10 @@ smart_nav_thumb: smart_nav_thumb {
         numeric_layer {
             display-name = "numeric";
             bindings = <
-&kp GRAVE   &kp EXCL         &kp AT               &kp HASH       &kp DOLLAR    &kp PERCENT                            &mmv MOVE_UP                   &kp CARET &kp AMPS      &kp ASTERISK  &kp LPAR      &kp RPAR      &kp EQUAL
-&n0_cancel  &hml L_M4 N1     &hml L_M3 N2         &hml L_M2 N3   &hml L_M1 N4  &kp N5                  &mmv MOVE_LEFT &mkp LCLK      &mmv MOVE_RIGHT &kp N6    &hmr R_M1 N7  &hmr R_M2 N8  &hmr R_M3 N9  &hmr R_M4 N0  &kp MINUS
-&kp BSLH    &kp LEFT_BRACKET &kp LEFT_PARENTHESIS &kp LESS_THAN   &kp SLASH    &kp MINUS    &kp C_MUTE                &mmv MOVE_DOWN                 &kp PLUS  &kp PLUS      &trans        &trans        &trans        &trans
-                                                     &kp PIPE      &kp TAB      &kp SPACE                                                             &kp SPACE &kp BACKSPACE &kp PERIOD
+&kp GRAVE  &kp EXCL         &kp AT        &kp HASH      &kp DOLLAR    &kp PERCENT                         &mmv MOVE_UP                   &kp CARET  &kp AMPS      &kp ASTERISK  &kp LPAR      &kp RPAR      &kp EQUAL
+&kp N0     &hml L_M4 N1     &hml L_M3 N2  &hml L_M2 N3  &hml L_M1 N4  &kp N5               &mmv MOVE_LEFT &mkp LCLK      &mmv MOVE_RIGHT &kp N6     &hmr R_M1 N7  &hmr R_M2 N8  &hmr R_M3 N9  &hmr R_M4 N0  &kp MINUS
+&cancel    &trans           &trans        &trans        &trans        &trans       &trans                 &mmv MOVE_DOWN                 &trans     &trans        &trans        &trans        &trans        &cancel
+                                                     &trans      &trans      &trans                                                             &kp SPACE &kp BACKSPACE &kp PERIOD
             >;
             sensor-bindings = <&scroll_encoder>;
         };

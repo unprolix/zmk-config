@@ -20,6 +20,12 @@
     };
 
 
+cancel: cancel {
+        compatible = "zmk,behavior-macro";
+        #binding-cells = <0>;
+        bindings = <&none>, <&to BASE>;
+};
+
 caps_toggle: caps_toggle {
         compatible = "zmk,behavior-macro";
         #binding-cells = <0>;
