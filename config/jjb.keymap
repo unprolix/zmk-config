@@ -140,11 +140,9 @@ key numbers
 #define HRM_TIMEOUT 400
 #define TAP_TIMEOUT 50
 #define TAP_DANCE_TAPPING 250  	/* 200 seemed difficult to achieve */
-#define FAST_TAP 215		// at 200, the double tap actions do not reliably trigger. at 230 it feels slow.
+#define FAST_TAP 230		// at 200, the double tap actions do not reliably trigger
 #define INTERRUPT_TAP 50        // very short window, for interrupting tap dance
-#define CHORD_TIMEOUT 45 	// getting false positives at 50
 #define LONG_PAUSE 500		// e.g. before certain combos. 800 is too long. so is 600
-#define PRE_CHORD_PAUSE 180	// 250 is too long as it sometimes causes false negatives. 200 too, but might be the practical minimum
 /*
 
    &mmv_input_listener {
@@ -169,17 +167,9 @@ ZMK_TAP_DANCE(num_dance, bindings = <&num_word NUM>, <&sl NUM>;
               tapping-term-ms = <200>;)
 
 ZMK_TAP_DANCE(caps_word_lock_dance, bindings = <&sk LSHIFT>, <&caps_word>, <&kp CAPS>;
-              tapping-term-ms = <FAST_TAP>;)
-ZMK_TAP_DANCE(smart_num_lock_dance, bindings = <&sl NUM>, <&num_word NUM>, <&tog NUM>;
-              tapping-term-ms = <FAST_TAP>;)
-
-
-ZMK_TAP_DANCE(sqt_num, bindings = <&kp SQT>, <&mo NUM>, <&num_word NUM>;
-              tapping-term-ms = <FAST_TAP>;)
-ZMK_TAP_DANCE(dqt_num, bindings = <&kp DQT>, <&mo NUM>, <&num_word NUM>;
-              tapping-term-ms = <FAST_TAP>;)
-
-
+              tapping-term-ms = <300>;)
+ZMK_TAP_DANCE(smart_num_lock_dance, bindings = <&sl NUM>, <&num_word NUM>, <&rgb_tog_num>;
+              tapping-term-ms = <300>;)
 
 
 #define MAKE_HRM(NAME, HOLD, TAP, TRIGGER_POS)                                 \
@@ -213,7 +203,7 @@ MAKE_HRM(hmr, &kp, &kp, KEYS_L THUMBS) // Right-hand HRMs.
 };
 
 
-#include "leader_jjb.dtsi"
+#include "leader.dtsi"
 
 ZMK_UNICODE_SINGLE(em_dash, N2, N0, N1, N4)
 
@@ -272,9 +262,8 @@ smart_nav_thumb: smart_nav_thumb {
     bindings = <&sl>, <&kp>;
 };
 
-ZMK_KEY_LAYER(TAB, NAV)
-ZMK_KEY_LAYER(BSPC, NAV)
-//ZMK_KEY_MOD_KEY(SPACE, LGUI, TAB)		
+
+		
 
 	menu_smart_num: menu_smart_num {
 	    compatible = "zmk,behavior-tap-dance";
@@ -354,7 +343,7 @@ ZMK_KEY_LAYER(BSPC, NAV)
 
     combos {
         compatible = "zmk,combos";
- 	#include "combos_jjb.dtsi"
+ 	#include "combos.dtsi"
     };
 
 
@@ -368,8 +357,9 @@ ZMK_KEY_LAYER(BSPC, NAV)
 &kp TAB  &kp Q                              &kp W        &kp E        &kp R        &kp T                        &kp UP               &kp Y  &kp U        &kp I        &kp O        &kp P                                 &kp BSPC
 &key_layer_SQT_NUM   &tap_hold_layer_lgui LGUI_NAV_L A  &hml L_M3 S  &hml L_M2 D  &hml L_M1 F  &kp G              &kp LEFT  &to RGB   &kp RIGHT  &kp H  &hmr R_M1 J  &hmr R_M2 K  &hmr R_M3 L  &tap_hold_layer_rgui RGUI_NAV_R SEMI  &key_layer_DQT_NUM
 &trans   &kp Z                              &kp X        &kp C        &kp V        &kp B   &kp C_MUTE           &kp DOWN             &kp N  &kp M        &kp COMMA    &kp DOT      &kp FSLH                              &kp RET
-                                                         &LTS EXTRA ESC  &key_layer_TAB_NAV  &lgui_space_tab                &rgui_space_ret     &key_layer_BSPC_NAV    &LTS FN RETURN
-             >;
+                                                         &LTS EXTRA ESC  &smart_nav_thumb NAV TAB  &lgui_space_tab                &rgui_space_ret     &smart_nav_thumb NAV BSPC    &LTS FN RETURN
+				>;
+				
             sensor-bindings = <&inc_dec_kp C_VOLUME_UP C_VOLUME_DOWN>;
         };
 
@@ -379,8 +369,7 @@ ZMK_KEY_LAYER(BSPC, NAV)
 
 &kp ESC     &kp Q  &kp W  &kp E  &kp R  &kp T		              &kp UP                &kp Y  &kp U  &kp I      &kp O    &kp P     &kp BSPC
 &kp CAPS    &kp A  &kp S  &kp D  &kp F  &kp G               &kp LEFT  &to RGB   &kp RIGHT   &kp H  &kp J  &kp K      &kp L    &kp SEMI  &kp SQT
-&kp LSHIFT  &kp Z  &kp X  &kp C  &kp V  &kp B   &kp C_MUTE            &kp DOWN              &kp N  &kp M  &kp COMMA  &kp DOT  &kp FSLH  &kp RSHIFT
-                                     &kp LCTRL  &kp TAB  &kp SPACE                &kp SPACE     &kp BSPC    &kp RETURN
+&kp LSHIFT  &kp Z  &kp X  &kp C  &kp V  &kp B   &kp C_MUTE            &kp DOWN              &kp N  &kp M  &kp COMMA  &kp DOT  &kp FSLH  &kp RSHIFT                                     &kp LCTRL  &kp TAB  &kp SPACE                &kp SPACE     &kp BSPC    &kp RETURN
              >;
             sensor-bindings = <&inc_dec_kp C_VOLUME_UP C_VOLUME_DOWN>;
         };
@@ -421,9 +410,9 @@ ZMK_KEY_LAYER(BSPC, NAV)
         navigation_layer {
             display-name = "navigation";
             bindings = <
-&kp HOME  &kp PG_UP        &trans                &kp UP_ARROW          &trans                 &msc SCRL_UP                             &mmv MOVE_UP                     &msc SCRL_UP    &trans                &kp UP_ARROW          &trans                 &kp PG_UP        &kp HOME
-&kp END   &hml L_M4 PG_DN  &hml L_M3 LEFT_ARROW  &hml L_M2 DOWN_ARROW  &hml L_M1 RIGHT_ARROW  &msc SCRL_DOWN            &mmv MOVE_LEFT &mkp MB1        &mmv MOVE_RIGHT  &msc SCRL_DOWN  &hmr R_M1 LEFT_ARROW  &hmr R_M2 DOWN_ARROW  &hmr R_M3 RIGHT_ARROW  &hmr R_M4 PG_DN  &kp END
-&trans    &trans           &trans                &trans                &trans                 &trans          &trans                   &mmv MOVE_DOWN                   &mkp MB2        &mkp MB3              &mkp MB4              &mkp MB5               &trans           &trans
+&trans  &kp PG_UP        &kp END               &kp UP_ARROW          &kp HOME               &msc SCRL_UP                             &mmv MOVE_UP                     &msc SCRL_UP    &kp HOME              &kp UP_ARROW          &kp END                &kp PG_UP        &trans
+&trans  &hml L_M4 PG_DN  &hml L_M3 LEFT_ARROW  &hml L_M2 DOWN_ARROW  &hml L_M1 RIGHT_ARROW  &msc SCRL_DOWN            &mmv MOVE_LEFT &mkp MB1        &mmv MOVE_RIGHT  &msc SCRL_DOWN  &hmr R_M1 LEFT_ARROW  &hmr R_M2 DOWN_ARROW  &hmr R_M3 RIGHT_ARROW  &hmr R_M4 PG_DN  &trans
+&trans  &trans           &trans                &trans                &trans                 &trans          &trans                   &mmv MOVE_DOWN                   &mkp MB2        &mkp MB3              &mkp MB4              &mkp MB5               &trans           &trans
 //&mkp MBl        &mkp MB2              &mkp MB3              &mkp MB4                 &mkp MB5          &trans
                                                   &trans               &trans                &kp SPACE                                                          &kp SPACE   &trans         &trans
             >;
@@ -446,8 +435,8 @@ ZMK_KEY_LAYER(BSPC, NAV)
         extra_layer {
             display-name = "extra";
             bindings = <
-&em_dash &trans &at_wgyl_org &trans &trans &trans                 &trans          &trans &trans &trans &trans &trans &trans 
-&dash_emdash &trans &trans &trans &trans &kp DELETE          &trans &trans &trans   &kp INSERT &trans &trans &trans &trans &trans
+&em_dash &trans &at_wgyl_org &trans &trans &trans                 &trans          &trans &trans &trans &trans &phone_alt &trans
+&dash_emdash &one_urie &trans &trans &trans &kp DELETE          &trans &trans &trans   &kp INSERT &trans &trans &trans &trans &trans
 &trans &trans &trans &trans &trans &trans   &trans        &trans          &trans &trans &trans &trans &trans &key_repeat
                      &trans &oneshot_or_to_NAVIGATION &trans  		  &trans &oneshot_or_to_NAVIGATION &trans
             >;
@@ -460,7 +449,7 @@ ZMK_KEY_LAYER(BSPC, NAV)
             display-name = "rgb";
             bindings = <
 &delayed_rgb_on 1000  &trans  &trans  &trans  &trans  &trans                                    &rgb_ug RGB_SPI                    &rgb_ug RGB_HUI  &rgb_ug RGB_SAI  &trans  &trans  &rgb_ug RGB_COLOR_HSB(0,100,100)    &rgb_ug RGB_COLOR_HSB(275,100,100)
-&trans  &trans  &trans  &trans  &trans  &trans                   &rgb_ug RGB_EFR  &to BASE         &rgb_ug RGB_EFF   &rgb_ug RGB_HUD  &rgb_ug RGB_SAD  &trans  &trans  &rgb_ug RGB_COLOR_HSB(90,100,100)   &rgb_ug RGB_COLOR_HSB(186,100,100)
+&delayed_rgb_off 1000  &trans  &trans  &trans  &trans  &trans                   &rgb_ug RGB_EFR  &to BASE         &rgb_ug RGB_EFF   &rgb_ug RGB_HUD  &rgb_ug RGB_SAD  &trans  &trans  &rgb_ug RGB_COLOR_HSB(90,100,100)   &rgb_ug RGB_COLOR_HSB(186,100,100)
 &trans  &trans  &trans  &trans  &trans  &trans  &rgb_ug RGB_TOG                   &rgb_ug RGB_SPD                    &trans           &trans           &trans  &trans  &rgb_ug RGB_COLOR_HSB(270,100,100)  &rgb_ug RGB_COLOR_HSB(317,100,100)
                                            &trans        &trans            &trans                                                                       &trans           &trans           &trans
             >;
@@ -484,9 +473,9 @@ ZMK_KEY_LAYER(BSPC, NAV)
         mod_l_nav_layer {
             display-name = "L GUI+nav";
             bindings = <
-&kp LG(TAB)  &kp LG(Q)        &kp LG(W)        &kp LG(E)        &kp LG(R)    &kp LG(T)                             &mmv MOVE_UP                     &msc LG(SCRL_UP)    &kp LG(INSERT)      &kp LG(UP_ARROW)    &kp LG(DELETE)       &kp LG(PG_UP)  &kp LG(HOME)
-&trans       &hml L_M4 LG(A)  &hml L_M3 LG(S)  &hml L_M2 LG(D)  &trans       &kp LG(G)              &mmv MOVE_LEFT &kp HOME        &mmv MOVE_RIGHT  &msc LG(SCRL_DOWN)  &kp LG(LEFT_ARROW)  &kp LG(DOWN_ARROW)  &kp LG(RIGHT_ARROW)  &kp LG(PG_DN)  &kp LG(END)
-&trans       &kp LG(Z)        &kp LG(X)        &kp LG(C)        &kp LG(V)    &kp LG(B)    &kp HOME                 &mmv MOVE_DOWN                   &kp LG(N)           &kp LG(M)           &kp LG(COMMA)       &kp LG(DOT)          &kp LG(FSLH)   &kp LG(RET)
+&kp LG(TAB)    &kp LG(Q)  &kp LG(W)        &kp LG(E)        &kp LG(R)     &kp LG(T)                             &mmv MOVE_UP                     &msc LG(SCRL_UP)    &kp LG(HOME)        &kp LG(UP_ARROW)    &kp LG(END)          &kp LG(PG_UP)  &kp LG(BSPC)
+&trans         &trans     &hml L_M3 LG(S)  &hml L_M2 LG(D)  &hml L_M1(F)  &kp LG(G)              &mmv MOVE_LEFT &kp HOME        &mmv MOVE_RIGHT  &msc LG(SCRL_DOWN)  &kp LG(LEFT_ARROW)  &kp LG(DOWN_ARROW)  &kp LG(RIGHT_ARROW)  &kp LG(PG_DN)  &kp LG(SQT)
+&kp LG(LCTRL)  &kp LG(Z)  &kp LG(X)        &kp LG(C)        &kp LG(V)     &kp LG(B)    &kp HOME                 &mmv MOVE_DOWN                   &kp LG(N)           &kp LG(M)           &kp LG(COMMA)       &kp LG(DOT)          &kp LG(FSLH)   &kp LG(RET)
                                                &kp LG(ESC)      &kp LG(TAB)  &to BASE                                                               &to BASE            &kp LG(BSPC)        &kp LG(RET)
             >;
             sensor-bindings = <&scroll_encoder>;
@@ -496,9 +485,9 @@ ZMK_KEY_LAYER(BSPC, NAV)
         mod_r_nav_layer {
             display-name = "R GUI+nav";
             bindings = <
-&kp RG(HOME)  &kp RG(PG_UP)  &kp RG(INSERT)      &kp RG(UP_ARROW)    &kp RG(DELETE)       &msc RG(SCRL_UP)                              &mmv MOVE_UP                     &kp RG(Y)  &kp RG(U)     &kp RG(I)        &kp RG(O)        &kp RG(P)           &kp RG(BSPC)
-&kp RG(END)   &kp RG(PG_DN)  &kp RG(LEFT_ARROW)  &kp RG(DOWN_ARROW)  &kp RG(RIGHT_ARROW)  &msc RG(SCRL_DOWN)             &mmv MOVE_LEFT &kp HOME        &mmv MOVE_RIGHT  &kp RG(H)  &trans        &hmr R_M2 RG(K)  &hmr R_M3 RG(L)  &hmr R_M4 RG(SEMI)  &kp RG(SQT)
-&kp RG(LCTRL) &kp RG(Z)      &kp RG(X)           &kp RG(C)	     &kp RG(V)  	  &kp RG(B)            &kp HOME                 &mmv MOVE_DOWN                   &kp RG(N)  &kp RG(M)     &kp RG(COMMA)    &kp RG(DOT)      &kp RG(FSLH)        &kp RG(RET)
+&kp RG(ESC)   &kp RG(PG_UP)  &kp RG(DELETE)      &kp RG(UP_ARROW)    &kp RG(HOME)         &msc RG(SCRL_UP)                              &mmv MOVE_UP                     &kp RG(Y)  &kp RG(U)     &kp RG(I)        &kp RG(O)        &kp RG(P)     &kp RG(BSPC)
+&trans        &kp RG(PG_DN)  &kp RG(LEFT_ARROW)  &kp RG(DOWN_ARROW)  &kp RG(RIGHT_ARROW)  &msc RG(SCRL_DOWN)             &mmv MOVE_LEFT &kp HOME        &mmv MOVE_RIGHT  &kp RG(H)  &hmr R_M1(J)  &hmr R_M2 RG(K)  &hmr R_M3 RG(L)  &trans        &kp RG(SQT)
+&kp RG(LCTRL) &kp RG(Z)      &kp RG(X)           &kp RG(C)	     &kp RG(V)  	  &kp RG(B)            &kp HOME                 &mmv MOVE_DOWN                   &kp RG(N)  &kp RG(M)     &kp RG(COMMA)    &kp RG(DOT)      &kp RG(FSLH)  &kp RG(RET)
                                                  &kp LG(ESC)         &kp LG(TAB)          &to BASE                                                                       &to BASE   &kp LG(BSPC)  &kp LG(RET)
             >;
             sensor-bindings = <&scroll_encoder>;

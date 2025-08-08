@@ -1,0 +1,18 @@
+phone_alt: phone_alt {
+	compatible = "zmk,behavior-macro";
+	#binding-cells = <0>;
+	bindings = <&trans>;
+};
+
+one_urie: one_urie {
+	compatible = "zmk,behavior-macro";
+	#binding-cells = <0>;
+	bindings = <&trans>;
+};
+
+// for standard web forms
+home_address_web: home_address_web {
+	compatible = "zmk,behavior-macro";
+	#binding-cells = <0>;
+	bindings = <&trans>;
+};

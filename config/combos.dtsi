@@ -1,66 +1,179 @@
-/*                KEY POSITIONS
+// -*- mode: dts -*-
 
-  ╭─────────────────────╮ ╭─────────────────────╮
-  │ LT4 LT3 LT2 LT1 LT0 │ │ RT0 RT1 RT2 RT3 RT4 │
-  │ LM4 LM3 LM2 LM1 LM0 │ │ RM0 RM1 RM2 RM3 RM4 │
-  │ LB4 LB3 LB2 LB1 LB0 │ │ RB0 RB1 RB2 RB3 RB4 │
-  ╰───────╮ LH2 LH1 LH0 │ │ RH0 RH1 RH2 ╭───────╯
-          ╰─────────────╯ ╰─────────────╯ */
+#define CHORD_TIMEOUT 45 	// getting false positives at 50
+#define PRE_CHORD_PAUSE 180	// 250 is too long as it sometimes causes false negatives. 200 too, but might be the practical minimum
 
-#define COMBO_TERM_FAST 18
-#define COMBO_TERM_SLOW 30
 
-#define COMBO_IDLE_FAST 150
-#define COMBO_IDLE_SLOW 50
+#define COMBO_TIMEOUT_FAST 18
+#define COMBO_PREIDLE_FAST 150
 
-/* Horizontal combos - left hand */
-ZMK_COMBO(esc,   &kp ESC,      LT3 LT2,     DEF NAV NUM, COMBO_TERM_FAST, COMBO_IDLE_FAST)
-ZMK_COMBO(mouse, &smart_mouse, LT2 LT1,     DEF NAV NUM, COMBO_TERM_FAST, COMBO_IDLE_FAST)
 
-// Combos overlapping HRMs are set up as hold-taps themselves to allow for instantaneous
-// chording of mods. Custom hold-tap instances can be bootstrapped on the go using the
-// 8-argument version of ZMK_COMBO defined in base.keymap.
-ZMK_COMBO(tab,   &hml LS(LALT)TAB, LM3 LM2, DEF NAV NUM, COMBO_TERM_FAST, COMBO_IDLE_FAST)
-ZMK_COMBO(ldr,   &leader,      LM2 LM1,     DEF NAV NUM, COMBO_TERM_FAST, COMBO_IDLE_FAST, LS(LCTRL),    KEYS_R)
-ZMK_COMBO(ldrsh, &leader_sft,  LM3 LM2 LM1, DEF NAV NUM, COMBO_TERM_FAST, COMBO_IDLE_FAST, LS(LC(LALT)), KEYS_R)
+#define COMBO_TIMEOUT_SLOW 30
+#define COMBO_PREIDLE_SLOW 50
 
-ZMK_COMBO(cut,   &kp LC(X),    LB3 LB1,     DEF NAV NUM, COMBO_TERM_FAST, COMBO_IDLE_FAST)
-ZMK_COMBO(copy,  &kp LC(INS),  LB3 LB2,     DEF NAV NUM, COMBO_TERM_FAST, COMBO_IDLE_FAST)
-ZMK_COMBO(paste, &kp LS(INS),  LB2 LB1,     DEF NAV NUM, COMBO_TERM_FAST, COMBO_IDLE_FAST)
 
-/* Horizontal combos - right hand */
-ZMK_COMBO(bspc,  &kp BSPC,     RT1 RT2,     DEF NAV NUM, COMBO_TERM_FAST, COMBO_IDLE_FAST)
-ZMK_COMBO(del,   &kp DEL,      RT2 RT3,     DEF NAV NUM, COMBO_TERM_FAST, COMBO_IDLE_FAST)
 
-ZMK_COMBO(lpar,  &lpar_lt,     RM1 RM2,     DEF     NUM, COMBO_TERM_FAST, COMBO_IDLE_FAST, RS(LCTRL),    KEYS_L)
-ZMK_COMBO(rpar,  &rpar_gt,     RM2 RM3,     DEF     NUM, COMBO_TERM_FAST, COMBO_IDLE_FAST, RS(LALT),     KEYS_L)
-ZMK_COMBO(lt,    &kp LT,       RM1 RM2,         NAV    , COMBO_TERM_FAST, COMBO_IDLE_FAST)
-ZMK_COMBO(gt,    &kp GT,       RM2 RM3,         NAV    , COMBO_TERM_FAST, COMBO_IDLE_FAST)
 
-ZMK_COMBO(lbkt,  &kp LBKT,     RB1 RB2,     DEF     NUM, COMBO_TERM_FAST, COMBO_IDLE_FAST)
-ZMK_COMBO(rbkt,  &kp RBKT,     RB2 RB3,     DEF     NUM, COMBO_TERM_FAST, COMBO_IDLE_FAST)
-ZMK_COMBO(lbrc,  &kp LBRC,     RB1 RB2,         NAV    , COMBO_TERM_FAST, COMBO_IDLE_FAST)
-ZMK_COMBO(rbrc,  &kp RBRC,     RB2 RB3,         NAV    , COMBO_TERM_FAST, COMBO_IDLE_FAST)
+#define ZMK_COMBO_SIMPLE(name, keycode, pos1, pos2) \
+    combo_##name { \
+        timeout-ms = <CHORD_TIMEOUT>; \
+        key-positions = <pos1 pos2>; \
+        bindings = <&kp keycode>; \
+        require-prior-idle-ms = <PRE_CHORD_PAUSE>; \
+    };
 
-/* Vertical combos - left hand */
-ZMK_COMBO(at,    &kp AT,       LT3 LM3,     DEF NAV NUM, COMBO_TERM_SLOW, COMBO_IDLE_SLOW)
-ZMK_COMBO(hash,  &kp HASH,     LT2 LM2,     DEF NAV NUM, COMBO_TERM_SLOW, COMBO_IDLE_SLOW)
-ZMK_COMBO(dllr,  &kp DLLR,     LT1 LM1,     DEF NAV NUM, COMBO_TERM_SLOW, COMBO_IDLE_SLOW)
-ZMK_COMBO(prcnt, &kp PRCNT,    LT0 LM0,     DEF NAV NUM, COMBO_TERM_SLOW, COMBO_IDLE_SLOW)
 
-ZMK_COMBO(grave, &kp GRAVE,    LM3 LB3,     DEF NAV NUM, COMBO_TERM_SLOW, COMBO_IDLE_SLOW)
-ZMK_COMBO(bslh,  &kp BSLH,     LM2 LB2,     DEF NAV NUM, COMBO_TERM_SLOW, COMBO_IDLE_SLOW)
-ZMK_COMBO(equal, &kp EQUAL,    LM1 LB1,     DEF NAV NUM, COMBO_TERM_SLOW, COMBO_IDLE_SLOW)
-ZMK_COMBO(tilde, &kp TILDE,    LM0 LB0,     DEF NAV NUM, COMBO_TERM_SLOW, COMBO_IDLE_SLOW)
+#define ZMK_COMBO_FAST(name, keycode, pos1, pos2) \
+    combo_##name { \
+        timeout-ms = <COMBO_TIMEOUT_FAST>; \
+        key-positions = <pos1 pos2>; \
+        bindings = <&kp keycode>; \
+        require-prior-idle-ms = <COMBO_PREIDLE_FAST>; \
+    };
 
-/* Vertical combos - right hand */
-ZMK_COMBO(caret, &kp CARET,    RT0 RM0,     DEF NAV NUM, COMBO_TERM_SLOW, COMBO_IDLE_SLOW)
-ZMK_COMBO(plus,  &kp PLUS,     RT1 RM1,     DEF NAV NUM, COMBO_TERM_SLOW, COMBO_IDLE_SLOW)
-ZMK_COMBO(star,  &kp STAR,     RT2 RM2,     DEF NAV NUM, COMBO_TERM_SLOW, COMBO_IDLE_SLOW)
-ZMK_COMBO(amps,  &kp AMPS,     RT3 RM3,     DEF NAV NUM, COMBO_TERM_SLOW, COMBO_IDLE_SLOW)
+#define ZMK_COMBO_SLOW(name, keycode, pos1, pos2) \
+    combo_##name { \
+        timeout-ms = <COMBO_TIMEOUT_SLOW>; \
+        key-positions = <pos1 pos2>; \
+        bindings = <&kp keycode>; \
+        require-prior-idle-ms = <COMBO_PREIDLE_SLOW>; \
+    };
 
-ZMK_COMBO(under, &kp UNDER,    RM0 RB0,     DEF NAV NUM, COMBO_TERM_SLOW, COMBO_IDLE_SLOW)
-ZMK_COMBO(minus, &kp MINUS,    RM1 RB1,     DEF NAV NUM, COMBO_TERM_SLOW, COMBO_IDLE_SLOW)
-ZMK_COMBO(fslh,  &kp FSLH,     RM2 RB2,     DEF NAV NUM, COMBO_TERM_SLOW, COMBO_IDLE_SLOW)
-ZMK_COMBO(pipe,  &kp PIPE,     RM3 RB3,     DEF NAV NUM, COMBO_TERM_SLOW, COMBO_IDLE_SLOW)
 
+
+
+
+#define ZMK_COMBO_ADVANCED(name, keycode, pos1, pos2, layers, timeout, idle) \
+    combo_##name { \
+        timeout-ms = <timeout>; \
+        key-positions = <pos1 pos2>; \
+        bindings = <&kp keycode>; \
+        layers = <layers>; \
+        require-prior-idle-ms = <idle>; \
+    };
+
+#define ZMK_COMBO_PLUS(name, behavior, pos1, pos2) \
+    combo_##name { \
+        timeout-ms = <CHORD_TIMEOUT>; \
+        key-positions = <pos1 pos2>; \
+        bindings = <behavior>; \
+        require-prior-idle-ms = <PRE_CHORD_PAUSE>; \
+    };
+
+#define ZMK_COMBO_3_PLUS(name, behavior, pos1, pos2, pos3) \
+    combo_##name { \
+        timeout-ms = <CHORD_TIMEOUT>; \
+        key-positions = <pos1 pos2 pos3>; \
+        bindings = <behavior>; \
+        require-prior-idle-ms = <PRE_CHORD_PAUSE>; \
+    };
+
+
+
+
+
+/* top row */
+ZMK_COMBO_FAST(esc, ESC, LT5, LT4)
+ZMK_COMBO_FAST(tilde, TILDE, LT5, LT3)
+ZMK_COMBO_FAST(curlybracket_open, LEFT_BRACE, LT4, LT3)
+ZMK_COMBO_FAST(square_open, LEFT_BRACKET, LT3, LT2)
+ZMK_COMBO_FAST(paren_open, LEFT_PARENTHESIS, LT2, LT1)
+ZMK_COMBO_FAST(less_than, LESS_THAN, LT1, LT0)
+
+ZMK_COMBO_FAST(greater_than, GREATER_THAN, RT0, RT1)
+ZMK_COMBO_FAST(paren_close, RIGHT_PARENTHESIS, RT1, RT2)
+ZMK_COMBO_FAST(square_close, RIGHT_BRACKET, RT2, RT3)
+ZMK_COMBO_FAST(curlybracket_close, RIGHT_BRACE, RT3, RT4)
+ZMK_COMBO_FAST(underscore, UNDERSCORE, RT4, RT5)
+
+ZMK_COMBO_3_PLUS(nothing, &none, LT5, LT4, LT3)
+
+
+
+/* middle row */
+ZMK_COMBO_PLUS(gui_l, &sk LGUI, LM4, LM5)
+ZMK_COMBO_PLUS(alt_l, &sk LALT, LM3, LM4)
+ZMK_COMBO_PLUS(caps_word_l, &caps_word_lock_dance, LM2, LM3)
+ZMK_COMBO_PLUS(control_l, &sk LCTRL, LM1, LM2)
+ZMK_COMBO_PLUS(nav_l, &sl NAVIGATION, LM0, LM1)
+
+ZMK_COMBO_PLUS(nav_r, &sl NAVIGATION, RM0, RM1)
+ZMK_COMBO_PLUS(control_r, &sk RCTRL, RM1, RM2)
+ZMK_COMBO_PLUS(caps_word_r, &caps_word_lock_dance, RM2, RM3)
+ZMK_COMBO_PLUS(alt_r, &sk RALT, RM3, RM4)
+ZMK_COMBO_PLUS(gui_r, &sk RGUI, RM4, RM5)
+
+ZMK_COMBO_3_PLUS(emdash_alt, &em_dash, RM3, RM4, RM5)
+
+// middle row skips
+
+ZMK_COMBO_PLUS(smart_num_l, &smart_num_lock_dance, LM1, LM3)  // skip!
+ZMK_COMBO_PLUS(smart_num_r, &smart_num_lock_dance, RM1, RM3)  // skip!
+
+
+/* bottom row */
+ZMK_COMBO_FAST(backslash, BSLH, LB5, LB4)
+//ZMK_COMBO_FAST(, , LB4, LB3)
+//ZMK_COMBO_FAST(, , LB3, LB2)
+//ZMK_COMBO_FAST(, , LB2, LB1)
+ZMK_COMBO_FAST(minus, MINUS, LB1, LB0)
+ZMK_COMBO_3_PLUS(emdash, &em_dash, LB2, LB1, LB0)
+
+
+ZMK_COMBO_FAST(plus, PLUS, RB0, RB1)
+ZMK_COMBO_FAST(equal, EQUAL, RB1, RB2)
+ZMK_COMBO_FAST(comma, COMMA, RB2, RB3)
+ZMK_COMBO_FAST(dot, DOT, RB3, RB4)
+ZMK_COMBO_FAST(slash, FSLH, RB4, RB5)
+
+
+
+/* thumbs */
+ZMK_COMBO_PLUS(base, &to BASE, LH0, RH0) /* inner thumb keys */
+ZMK_COMBO_PLUS(navigation, &to NAVIGATION, LH1, RH1) /* middle thumb keys */
+ZMK_COMBO_FAST(printscreen, PRINTSCREEN, LH2, RH2) /* outer thumb keys; screenshot */
+
+
+/* vertical shapes */
+
+/* top two rows */
+ZMK_COMBO_PLUS(grave, &kp GRAVE, LT5, LM5)
+ZMK_COMBO_PLUS(excl, &kp EXCL, LT4, LM4)
+ZMK_COMBO_PLUS(at, &kp AT, LT3, LM3)
+ZMK_COMBO_PLUS(hash, &kp HASH, LT2, LM2)
+ZMK_COMBO_PLUS(dollar, &kp DOLLAR, LT1, LM1)
+ZMK_COMBO_PLUS(tab, &kp TAB, LT0, LM0)	/* top and middle innermost left */
+
+ZMK_COMBO_SLOW(backspace, BSPC, RT0, RM0)	/* top and middle innermost right */
+ZMK_COMBO_SLOW(amps, AMPS, RT1, RM1)
+ZMK_COMBO_SLOW(asterisk, ASTERISK, RT2, RM2)
+ZMK_COMBO_SLOW(caret, CARET, RT3, RM3)
+ZMK_COMBO_SLOW(percent, PERCENT, RT4, RM4)
+ZMK_COMBO_SLOW(pipe, PIPE, RT5, RM5)
+
+
+/* bottom two rows */
+ZMK_COMBO_PLUS(leader, &leader, LM5, LB5)  /* middle and bottom leftmost keys */
+// LM4, LB4
+// LM3, LB3
+// LM2, LB2
+// LM1, LB1
+ZMK_COMBO_SLOW(menu, MENU, LM0, LB0)  /* middle and bottom inner rightmost keys */
+
+// RM0, RB0
+// RM1, RB1
+ZMK_COMBO_SLOW(semicolon, SEMICOLON, RM2, RB2)
+ZMK_COMBO_SLOW(colon, COLON, RM3, RB3)
+// RM4, RB4
+// RM5, RB5
+
+
+
+// system layer. would have been with all six thumb keys but that is at least too many for the default config
+// so this just uses the outer four
+combo_system {
+	timeout-ms = <CHORD_TIMEOUT>;
+        key-positions = <LH2 LH1 RH1 RH2>;
+        bindings = <&to SYSTEM>;
+	require-prior-idle-ms = <LONG_PAUSE>;
+};
