@@ -1,15 +1,13 @@
 // -*- mode: dts -*-
 
 #define CHORD_TIMEOUT 45 	// getting false positives at 50
-#define PRE_CHORD_PAUSE 180	// 250 is too long as it sometimes causes false negatives. 200 too, but might be the practical minimum
-
 
 #define COMBO_TIMEOUT_FAST 18
 #define COMBO_PREIDLE_FAST 150
 
-
 #define COMBO_TIMEOUT_SLOW 30
 #define COMBO_PREIDLE_SLOW 50
+#define COMBO_PREIDLE_SUPERSLOW 30
 
 
 
@@ -19,7 +17,7 @@
         timeout-ms = <CHORD_TIMEOUT>; \
         key-positions = <pos1 pos2>; \
         bindings = <&kp keycode>; \
-        require-prior-idle-ms = <PRE_CHORD_PAUSE>; \
+        require-prior-idle-ms = <COMBO_PREIDLE_SLOW>; \
     };
 
 
@@ -39,10 +37,6 @@
         require-prior-idle-ms = <COMBO_PREIDLE_SLOW>; \
     };
 
-
-
-
-
 #define ZMK_COMBO_ADVANCED(name, keycode, pos1, pos2, layers, timeout, idle) \
     combo_##name { \
         timeout-ms = <timeout>; \
@@ -57,7 +51,15 @@
         timeout-ms = <CHORD_TIMEOUT>; \
         key-positions = <pos1 pos2>; \
         bindings = <behavior>; \
-        require-prior-idle-ms = <PRE_CHORD_PAUSE>; \
+        require-prior-idle-ms = <COMBO_PREIDLE_FAST>; \
+    };
+
+#define ZMK_COMBO_PLUS_SLOW(name, behavior, pos1, pos2) \
+    combo_##name { \
+        timeout-ms = <COMBO_TIMEOUT_SLOW>; \
+        key-positions = <pos1 pos2>; \
+        bindings = <behavior>; \
+        require-prior-idle-ms = <COMBO_PREIDLE_SUPERSLOW>; \
     };
 
 #define ZMK_COMBO_3_PLUS(name, behavior, pos1, pos2, pos3) \
@@ -65,7 +67,15 @@
         timeout-ms = <CHORD_TIMEOUT>; \
         key-positions = <pos1 pos2 pos3>; \
         bindings = <behavior>; \
-        require-prior-idle-ms = <PRE_CHORD_PAUSE>; \
+        require-prior-idle-ms = <COMBO_PREIDLE_FAST>; \
+    };
+
+#define ZMK_COMBO_3_PLUS_SLOW(name, behavior, pos1, pos2, pos3) \
+    combo_##name { \
+        timeout-ms = <COMBO_TIMEOUT_SLOW>; \
+        key-positions = <pos1 pos2 pos3>; \
+        bindings = <behavior>; \
+        require-prior-idle-ms = <COMBO_PREIDLE_SLOW>; \
     };
 
 
@@ -91,7 +101,7 @@ ZMK_COMBO_3_PLUS(nothing, &none, LT5, LT4, LT3)
 
 
 /* middle row */
-ZMK_COMBO_PLUS(gui_l, &sk LGUI, LM4, LM5)
+ZMK_COMBO_PLUS_SLOW(gui_l, &sk LGUI, LM4, LM5)
 ZMK_COMBO_PLUS(alt_l, &sk LALT, LM3, LM4)
 ZMK_COMBO_PLUS(caps_word_l, &caps_word_lock_dance, LM2, LM3)
 ZMK_COMBO_PLUS(control_l, &sk LCTRL, LM1, LM2)
@@ -101,9 +111,9 @@ ZMK_COMBO_PLUS(nav_r, &sl NAVIGATION, RM0, RM1)
 ZMK_COMBO_PLUS(control_r, &sk RCTRL, RM1, RM2)
 ZMK_COMBO_PLUS(caps_word_r, &caps_word_lock_dance, RM2, RM3)
 ZMK_COMBO_PLUS(alt_r, &sk RALT, RM3, RM4)
-ZMK_COMBO_PLUS(gui_r, &sk RGUI, RM4, RM5)
+ZMK_COMBO_PLUS_SLOW(gui_r, &sk RGUI, RM4, RM5)
 
-ZMK_COMBO_3_PLUS(emdash_alt, &em_dash, RM3, RM4, RM5)
+ZMK_COMBO_3_PLUS_SLOW(emdash_alt, &em_dash, RM3, RM4, RM5)
 
 // middle row skips
 
@@ -137,7 +147,7 @@ ZMK_COMBO_FAST(printscreen, PRINTSCREEN, LH2, RH2) /* outer thumb keys; screensh
 /* vertical shapes */
 
 /* top two rows */
-ZMK_COMBO_PLUS(grave, &kp GRAVE, LT5, LM5)
+ZMK_COMBO_PLUS_SLOW(grave, &kp GRAVE, LT5, LM5)
 ZMK_COMBO_PLUS(excl, &kp EXCL, LT4, LM4)
 ZMK_COMBO_PLUS(at, &kp AT, LT3, LM3)
 ZMK_COMBO_PLUS(hash, &kp HASH, LT2, LM2)
@@ -153,7 +163,7 @@ ZMK_COMBO_SLOW(pipe, PIPE, RT5, RM5)
 
 
 /* bottom two rows */
-ZMK_COMBO_PLUS(leader, &leader, LM5, LB5)  /* middle and bottom leftmost keys */
+ZMK_COMBO_PLUS_SLOW(leader, &leader, LM5, LB5)  /* middle and bottom leftmost keys */
 // LM4, LB4
 // LM3, LB3
 // LM2, LB2
