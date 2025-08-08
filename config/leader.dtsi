@@ -1,3 +1,5 @@
+// note: leader key sequences can currently have a maximum of five letters
+
 #undef ZMK_LEADER_SEQUENCE
 #define ZMK_LEADER_SEQUENCE(name, leader_bindings, leader_sequence) \
     / { \
@@ -14,43 +16,77 @@
         }; \
     };
 
-/* German umlauts */
-ZMK_LEADER_SEQUENCE(de_ae,      &de_ae,         A)  // ä
-ZMK_LEADER_SEQUENCE(de_oe,      &de_oe,         O)  // ö
-ZMK_LEADER_SEQUENCE(de_ue,      &de_ue,         U)  // ü
-ZMK_LEADER_SEQUENCE(de_eszett,  &de_eszett,     S)  // ß
 
-/* Greek letters */
-ZMK_LEADER_SEQUENCE(el_alpha,   &el_alpha,      E A)  // α
-ZMK_LEADER_SEQUENCE(el_beta,    &el_beta,       E B)  // β
-ZMK_LEADER_SEQUENCE(el_gamma,   &el_gamma,      E G)  // γ
-ZMK_LEADER_SEQUENCE(el_delta,   &el_delta,      E D)  // δ
-ZMK_LEADER_SEQUENCE(el_epsilon, &el_epsilon,    E E)  // ε
-ZMK_LEADER_SEQUENCE(el_zeta,    &el_zeta,       E Z)  // ζ
-ZMK_LEADER_SEQUENCE(el_eta,     &el_eta,        E H)  // η
-ZMK_LEADER_SEQUENCE(el_theta,   &el_theta,      E V)  // θ
-ZMK_LEADER_SEQUENCE(el_iota,    &el_iota,       E I)  // ι
-ZMK_LEADER_SEQUENCE(el_kappa,   &el_kappa,      E K)  // κ
-ZMK_LEADER_SEQUENCE(el_lambda,  &el_lambda,     E L)  // λ
-ZMK_LEADER_SEQUENCE(el_mu,      &el_mu,         E M)  // μ
-ZMK_LEADER_SEQUENCE(el_nu,      &el_nu,         E N)  // ν
-ZMK_LEADER_SEQUENCE(el_xi,      &el_xi,         E X)  // ξ
-ZMK_LEADER_SEQUENCE(el_omikron, &el_omikron,    E O)  // ο
-ZMK_LEADER_SEQUENCE(el_pi,      &el_pi,         E P)  // π
-ZMK_LEADER_SEQUENCE(el_rho,     &el_rho,        E R)  // ρ
-ZMK_LEADER_SEQUENCE(el_sigma,   &el_sigma,      E S)  // σ
-ZMK_LEADER_SEQUENCE(el_tau,     &el_tau,        E T)  // τ
-ZMK_LEADER_SEQUENCE(el_upsilon, &el_upsilon,    E U)  // υ
-ZMK_LEADER_SEQUENCE(el_phi,     &el_phi,        E F)  // ϕ
-ZMK_LEADER_SEQUENCE(el_chi,     &el_chi,        E C)  // χ
-ZMK_LEADER_SEQUENCE(el_psi,     &el_psi,        E Y)  // ψ
-ZMK_LEADER_SEQUENCE(el_omega,   &el_omega,      E W)  // ω
+// for standardized address entry web forms
+ZMK_LEADER_SEQUENCE(home_address_web, &home_address_web, H O M E)
 
-// BLE and USB
-#ifdef CONFIG_WIRELESS
-ZMK_LEADER_SEQUENCE(usb,        &out OUT_USB,   U S B)
-ZMK_LEADER_SEQUENCE(ble,        &out OUT_BLE,   B L E)
-#endif // CONFIG_WIRELESS
+ZMK_LEADER_SEQUENCE(azrael,     &azrael,        A Z)  // azraël
+ZMK_LEADER_SEQUENCE(anais,     &anais,        A N)  // anaïs
+
+ZMK_LEADER_SEQUENCE(gr_phi,     &el_phi,        G F)  // ϕ
+
+
+//ZMK_UNICODE_SINGLE(red_heart, N2, N7, N6, N4)
+//ZMK_LEADER_SEQUENCE(red_heart, &red_heart,     H E A R T)
+
+ZMK_LEADER_SEQUENCE(gaming,      &to GAMING,     G A M E)
+
 ZMK_LEADER_SEQUENCE(reset,      &sys_reset,     R E S E T)
 ZMK_LEADER_SEQUENCE(boot,       &bootloader,    B O O T)
+
+// debugging use
+ZMK_LEADER_SEQUENCE(caps_word,  &caps_word,     C W)
+
+// -----------------------------------------------------------------------------
+
+#define ZMK_LEADER_UNICODE_4(name, sequence, u0, u1, u2, u3) \
+    UC_MACRO(name ## _uc, &kp u0 &kp u1 &kp u2 &kp u3) \
+    ZMK_LEADER_SEQUENCE(name, &name ## _uc, sequence)
+
+#define ZMK_LEADER_UNICODE_5(name, sequence, u0, u1, u2, u3, u4) \
+    UC_MACRO(name ## _uc, &kp u0 &kp u1 &kp u2 &kp u3 &kp u4) \
+    ZMK_LEADER_SEQUENCE(name, &name ## _uc, sequence)
+
+#define ZMK_LEADER_UNICODE_8(name, sequence, u0, u1, u2, u3, u4, u5, u6, u7) \
+    UC_MACRO(name ## _uc, &kp u0 &kp u1 &kp u2 &kp u3 &kp u4 &kp u5 &kp u6 &kp u7) \
+    ZMK_LEADER_SEQUENCE(name, &name ## _uc, sequence)
+
+
+/*
+ZMK_LEADER_UNICODE_4(heart, W H E A R, N2, N7, N6, N4)
+*/
+
+ZMK_LEADER_UNICODE_5(smile, S M I L E, N1, F, N6, N0, A)
+ZMK_LEADER_UNICODE_5(thumb, T H U M B, N1, F, N4, N4, D)
+
+ZMK_LEADER_UNICODE_5(amour, A M O U R, N1, F, N6, N0, D)  // 😍
+ZMK_LEADER_UNICODE_5(brain, B R A I N, N1, F, N9, E, N0) // 🧠
+ZMK_LEADER_UNICODE_5(cry, C R Y, N1, F, N6, N2, N2) // 😢
+ZMK_LEADER_UNICODE_5(kiss, K I S S, N1, F, N6, N1, N8) // 😘
+ZMK_LEADER_UNICODE_5(pour, P O U R, N1, F, A, D, N7) // 🫗
+ZMK_LEADER_UNICODE_5(eye, E Y E, N1, F, N4, N4, N1) // 👁
+ZMK_LEADER_UNICODE_5(ewe, E W E, N1, F, N4, N1, N1) // 🐑
+
+ZMK_LEADER_UNICODE_5(rictus, R I C T U, N1, F, N6, N2, C) // 😬
+ZMK_LEADER_UNICODE_5(halo, H A L O, N1, F, N6, N0, N7) // 😇
+ZMK_LEADER_UNICODE_5(fingers, F I N, N1, F, N9, N1, E) // 🤞
+ZMK_LEADER_UNICODE_5(roll, R O L L, N1, F, N6, N4, N4) // 🙄
+
+#define ZMK_LEADER_UNICODE_DUAL_4_4(name, sequence, u0, u1, u2, u3, u4, u5, u6, u7) \
+    UC_MACRO(name ## _uc1, &kp u0 &kp u1 &kp u2 &kp u3) \
+    UC_MACRO(name ## _uc2, &kp u4 &kp u5 &kp u6 &kp u7) \
+    ZMK_MACRO(name ## _uc, bindings = <&name ## _uc1 &name ## _uc2>;) \
+    ZMK_LEADER_SEQUENCE(name, &name ## _uc, sequence)
+
+
+ZMK_LEADER_UNICODE_DUAL_4_4(red_heart, H E A R T, N2, N7, N6, N4, F, E, N0, F)
+
+
+
+#define ZMK_LEADER_UNICODE_MULTI_3(name, sequence, name1, name2, name3) \
+    UC_MACRO(name ## _uc, &name1 ## _uc &name2 ## _uc &name3 ## _uc) \
+    ZMK_LEADER_SEQUENCE(name, &name ## _uc, sequence)
+
+// TODO: this does not quite work: the heart is white and there is a space before the ewe.
+ZMK_LEADER_UNICODE_MULTI_3(love, L O V E, eye, red_heart, ewe)
 

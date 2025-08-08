@@ -1,3 +1,25 @@
+#define ZMK_TAP_HOLD_DOUBLE(name, tap_binding, hold_binding, double_tap_binding) \
+    / { \
+        behaviors { \
+            name##_ht: name##_ht { \
+                compatible = "zmk,behavior-hold-tap"; \
+                #binding-cells = <2>; \
+                flavor = "tap-preferred"; \
+                tapping-term-ms = <200>; \
+                quick-tap-ms = <150>; \
+                bindings = <hold_binding>, <tap_binding>; \
+            }; \
+            \
+            name: name { \
+                compatible = "zmk,behavior-tap-dance"; \
+                #binding-cells = <0>; \
+                tapping-term-ms = <200>; \
+                bindings = <&name##_ht 0 0>, <double_tap_binding>; \
+            }; \
+        }; \
+    };
+
+
 caps_toggle: caps_toggle {
         compatible = "zmk,behavior-macro";
         #binding-cells = <0>;
@@ -7,8 +29,10 @@ caps_toggle: caps_toggle {
 at_wgyl_org: at_wgyl_org {
 	compatible = "zmk,behavior-macro";
 	#binding-cells = <0>;
-	bindings = <&kp AT>, <&kp W>, <&kp G>, <&kp Y>, <&kp L>, <&kp DOT>, <&kp O>, <&kp R>, <&kp G>;
+	bindings = <&kp AT>, <&kp W>, <&kp G>, <&kp Y>, <&kp L>, <&kp DOT>, <&kp O>, <&kp R>, <&kp G>, <&kp TAB>;
 };
+
+#include "personal.dtsi"
 
 
 azrael: azrael {
@@ -22,3 +46,36 @@ anais: anais {
 	#binding-cells = <0>;
 	bindings = <&kp A>, <&kp N>, <&kp A>, <&kp MENU>, <&kp DQT>, <&kp I>, <&kp S>;
 };
+
+
+rgb_tog_num: rgb_tog_num {
+    compatible = "zmk,behavior-macro";
+    wait-ms = <10>;
+    tap-ms = <10>;
+    #binding-cells = <0>;
+    bindings
+        = <&macro_tap &rgb_ug RGB_ON>
+          , <&macro_tap &rgb_ug RGB_COLOR_HSB(43,100,100)>
+        ;
+};
+
+
+
+
+underglow_on: underglow_on {
+    compatible = "zmk,behavior-macro-one-param";
+    wait-ms = <10>;
+    tap-ms = <10>;
+    #binding-cells = <1>;
+    bindings
+        = <&macro_tap &rgb_ug RGB_ON>
+// adding these causes compile error:
+//        , <&macro_param_1to1>
+//        , <&macro_tap &rgb_ug MACRO_PLACEHOLDER>
+        ;
+};
+//	    = <&rgb_ug RGB_ON>,
+//              <&macro_param_1to1>,
+//              <&rgb_ug MACRO_PLACEHOLDER>,
+// 	      <&rgb_ug RGB_OFF>;
+
