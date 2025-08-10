@@ -21,7 +21,7 @@
 #include "zmk-helpers/unicode-chars/greek.dtsi"
 #include "zmk-helpers/unicode-chars/french.dtsi"
 #include "zmk-helpers/unicode-chars/german.dtsi"
-
+#include "elpekenin/behaviors.dtsi"
 
 /*
 I can't get this to work but it would be great to have it work like this:
@@ -66,8 +66,6 @@ TODO:
 
 * make layer switch combos toggle between base and the other layer?
 
-* holding backspace for repeating (backspaces) doesn't work
-
 * how to specify bluetooth-related functionality
 
 * how to illuminate the RGB LED for a specific key
@@ -102,7 +100,7 @@ key numbers
 
 #define BASE 0
 #define GAMING 1
-#define NEW_ALPHA 2
+#define ALT_ALPHA 2
 #define CAPS_LAYER 3
 #define NUMERIC 4
 #define NAVIGATION 5
@@ -210,38 +208,47 @@ ZMK_UNICODE_SINGLE(em_dash, N2, N0, N1, N4)
 / {
 	behaviors {
 
-	#include "tap-hold-layer-behaviors.dtsi"
-	#include "modifier-tap-doubletap-behaviors.dtsi"
+#include "tap-hold-layer-behaviors.dtsi"
+#include "modifier-tap-doubletap-behaviors.dtsi"
+
 ZMK_KEY_LAYER(SQT,NUM)
 ZMK_KEY_LAYER(DQT,NUM)
 
-        // RGB control behaviors for delayed activation
-        rgb_on_behavior: rgb_on_behavior {
-            compatible = "zmk,behavior-macro";
-            #binding-cells = <0>;
-            bindings = <&rgb_ug RGB_ON>;
-        };
+// RGB control behaviors for delayed activation
+rgb_on_behavior: rgb_on_behavior {
+    compatible = "zmk,behavior-macro";
+    #binding-cells = <0>;
+    bindings = <&rgb_ug RGB_ON>;
+};
         
-        rgb_off_behavior: rgb_off_behavior {
-            compatible = "zmk,behavior-macro";
-            #binding-cells = <0>;
-            bindings = <&rgb_ug RGB_OFF>;
-        };
+rgb_off_behavior: rgb_off_behavior {
+    compatible = "zmk,behavior-macro";
+    #binding-cells = <0>;
+    bindings = <&rgb_ug RGB_OFF>;
+};
         
-        // Delayed RGB behaviors
-        delayed_rgb_on: delayed_rgb_on {
-            compatible = "zmk,behavior-delayed";
-            #binding-cells = <1>;  // delay in milliseconds
-            bindings = <&rgb_on_behavior>;
-            delay-ms = <1000>; // Default delay if not specified in binding
-        };
+to_nav: to_nav {
+    compatible = "zmk,behavior-macro";
+    #binding-cells = <0>;
+    wait-ms = <1000>;
+    bindings = <&to NAV>, <&rgb_ug RGB_ON>, <&rgb_ug RGB_OFF>;
+};
+
+
+// for testing behavior-delayed, which does not currently work
+delayed_rgb_on: delayed_rgb_on {
+    compatible = "zmk,behavior-delayed";
+    #binding-cells = <1>;  // delay in milliseconds
+    bindings = <&rgb_on_behavior>;
+    delay-ms = <1000>; // Default delay if not specified in binding
+};
         
-        delayed_rgb_off: delayed_rgb_off {
-            compatible = "zmk,behavior-delayed";
-            #binding-cells = <1>;  // delay in milliseconds
-            bindings = <&rgb_off_behavior>;
-            delay-ms = <1000>;
-        };
+delayed_rgb_off: delayed_rgb_off {
+    compatible = "zmk,behavior-delayed";
+    #binding-cells = <1>;  // delay in milliseconds
+    bindings = <&rgb_off_behavior>;
+    delay-ms = <1000>;
+};
 
 
 
@@ -260,6 +267,24 @@ smart_nav_thumb: smart_nav_thumb {
     tapping-term-ms = <200>;
     quick-tap-ms = <175>;
     bindings = <&sl>, <&kp>;
+};
+
+arcane_nav_l: arcane_nav_l {
+    compatible = "zmk,behavior-hold-tap";
+    #binding-cells = <2>;
+    flavor = "hold-preferred";
+    tapping-term-ms = <200>;
+    quick-tap-ms = <175>;
+    bindings = <&sl>, <&arcane_l>;
+};
+
+arcane_nav_r: arcane_nav_r {
+    compatible = "zmk,behavior-hold-tap";
+    #binding-cells = <2>;
+    flavor = "hold-preferred";
+    tapping-term-ms = <200>;
+    quick-tap-ms = <175>;
+    bindings = <&sl>, <&arcane_r>;
 };
 
 
@@ -367,13 +392,14 @@ smart_nav_thumb: smart_nav_thumb {
             sensor-bindings = <&inc_dec_kp C_VOLUME_UP C_VOLUME_DOWN>;
         };
 
-	new_alpha {
-				display-name = "new_alpha";
+	alt_alpha {
+				display-name = "alt_alpha";
 				bindings = <
-				&caps_toggle &trans &trans &trans &trans &trans                  &trans          &trans &trans &trans &trans &trans &trans 
-				&trans &trans &trans &trans &trans &trans           &trans &trans &trans   &trans &trans &trans &trans &trans &trans 
-				&trans &trans &trans &trans &trans &trans   &trans         &trans          &trans &trans &trans &trans &trans &trans 
-				&trans &trans &trans                                  &trans &trans &trans
+
+&kp TAB             &kp F                              &kp Y        &kp U        &kp X        &kp Q                        &kp UP              &kp G  &kp W        &kp D        &kp L        &kp B                              &kp BSPC
+&key_layer_SQT_NUM  &tap_hold_layer_lgui LGUI_NAV_L H  &hml L_M3 I  &hml L_M2 E  &hml L_M1 A  &kp Z              &kp LEFT  &to RGB &kp RIGHT   &kp M  &hmr R_M1 S  &hmr R_M2 T  &hmr R_M3 R  &tap_hold_layer_rgui RGUI_NAV_R N  &key_layer_DQT_NUM
+&kp COMMA           &kp SEMI                           &kp BSLH     &kp K        &kp O        &kp J   &kp C_MUTE           &kp DOWN            &kp V  &kp C        &kp P        &kp FSLH     &kp COLON                          &kp DOT
+				&LTS EXTRA ESC  &arcane_nav_l NAV 0  &lgui_space_tab                                   &rgui_space_ret  &arcane_nav_r NAV 0  &LTS FN RETURN 
 				>;
 				
 	};
@@ -430,7 +456,7 @@ smart_nav_thumb: smart_nav_thumb {
             bindings = <
 &em_dash &trans &at_wgyl_org &trans &trans &trans                 &trans          &trans &trans &trans &trans &phone_alt &trans
 &dash_emdash &one_urie &trans &trans &trans &kp DELETE          &trans &trans &trans   &kp INSERT &trans &trans &trans &trans &trans
-&trans &trans &trans &trans &trans &trans   &trans        &trans          &trans &trans &trans &trans &trans &key_repeat
+&to_nav &trans &trans &trans &trans &trans   &trans        &trans          &trans &trans &trans &trans &trans &key_repeat
                      &trans &oneshot_or_to_NAVIGATION &trans  		  &trans &oneshot_or_to_NAVIGATION &trans
             >;
             sensor-bindings = <&scroll_encoder>;
