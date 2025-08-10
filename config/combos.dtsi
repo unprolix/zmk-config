@@ -173,11 +173,11 @@ ZMK_COMBO_SLOW(menu, MENU, LM0, LB0)  /* middle and bottom inner rightmost keys 
 // RM0, RB0
 // RM1, RB1
 ZMK_COMBO_SLOW(semicolon, SEMICOLON, RM2, RB2)
-ZMK_COMBO_SLOW(colon, COLON, RM3, RB3)
-// RM4, RB4
+ZMK_COMBO_SLOW(colon, COLON, RM3, RB3)  // this does not work. why?
+ZMK_COMBO_SLOW(colon_alt, COLON, RM4, RB4)
 // RM5, RB5
 
-
+ZMK_COMBO_PLUS_SLOW(alt_alpha, &to ALT_ALPHA, LB5, RB5)
 
 // system layer. would have been with all six thumb keys but that is at least too many for the default config
 // so this just uses the outer four

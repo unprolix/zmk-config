@@ -27,25 +27,38 @@ manifest:
     - name: zmkfirmware
       url-base: https://github.com/zmkfirmware
 
-    # jjb - for eyelash_corne
+    # for eyelash_corne
     - name: a741725193
       url-base: https://github.com/a741725193
 
-    # jjb
+    # for usb raw hid (not yet used)
     - name: zzeneg
       url-base: https://github.com/zzeneg
+
+    # for default layer behavior
+    - name: elpekenin
+      url-base: https://github.com/elpekenin
+
+    # for antecedent-morph
+    - name: ssbb
+      url-base: https://github.com/ssbb
 
   projects:
     - name: zmk
       remote: zmkfirmware
       import: app/west.yml
 
-    # jjb - for eyelash_corne
+    # for eyelash_corne
     - name: zmk-new_corne
       remote: a741725193
       revision: main
+      
+    # for default layer
+    - name: zmk-userspace
+      remote: elpekenin
+      revision: main
+      path: modules/zmk/zmk-userspace
 
-    # ZMK modules
     - name: zmk-adaptive-key
       path: modules/zmk/adaptive-key
     - name: zmk-auto-layer
@@ -60,6 +73,12 @@ manifest:
     - name: zmk-raw-hid
       remote: zzeneg
       revision: main
+      path: modules/zmk/zmk-raw-hid
+
+    - name: zmk-antecedent-morph
+      remote: ssbb
+      revision: v1
+      path: modules/zmk/zmk-antecedent-morph
 
     # Temporarily overload Zephyr until
     # https://github.com/zmkfirmware/zephyr/pull/40 is merged.
