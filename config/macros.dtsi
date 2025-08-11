@@ -20,19 +20,6 @@
     };
 
 
-arcane_l: arcane_l {
-        compatible = "zmk,behavior-macro";
-        #binding-cells = <0>;
-        bindings = <&key_repeat>;
-};
-
-arcane_r: arcane_r {
-        compatible = "zmk,behavior-macro";
-        #binding-cells = <0>;
-        bindings = <&key_repeat>;
-};
-
-
 cancel: cancel {
         compatible = "zmk,behavior-macro";
         #binding-cells = <0>;
