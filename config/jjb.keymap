@@ -276,7 +276,7 @@ arcane_nav_l: arcane_nav_l {
     flavor = "hold-preferred";
     tapping-term-ms = <200>;
     quick-tap-ms = <175>;
-    bindings = <&sl>, <&arcane_l>;
+    bindings = <&sl>, <&arcane_left>;
 };
 
 arcane_nav_r: arcane_nav_r {
@@ -285,7 +285,7 @@ arcane_nav_r: arcane_nav_r {
     flavor = "hold-preferred";
     tapping-term-ms = <200>;
     quick-tap-ms = <175>;
-    bindings = <&sl>, <&arcane_r>;
+    bindings = <&sl>, <&arcane_right>;
 };
 
 
@@ -455,7 +455,7 @@ arcane_nav_r: arcane_nav_r {
         extra_layer {
             display-name = "extra";
             bindings = <
-&arcane_l_new &trans &at_wgyl_org &trans &trans &trans                 &trans          &trans &trans &trans &trans &phone_alt &trans
+&trans &trans &at_wgyl_org &trans &trans &trans                 &trans          &trans &trans &trans &trans &phone_alt &trans
 &dash_emdash &one_urie &trans &trans &trans &kp DELETE          &trans &trans &trans   &kp INSERT &trans &trans &trans &trans &trans
 &to_nav &trans &trans &trans &trans &trans   &trans        &trans          &trans &trans &trans &trans &trans &key_repeat
                      &trans &oneshot_or_to_NAVIGATION &trans  		  &trans &oneshot_or_to_NAVIGATION &trans

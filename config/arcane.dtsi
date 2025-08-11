@@ -1,9 +1,44 @@
-arcane_l_new: arcane_l_new {
+// todo: some preprocess scripting to make this nicer to read and maintain
+
+#define ARCANE_EXPANSION(name, ...) \
+    arcane_##name: arcane_##name { \
+        compatible = "zmk,behavior-macro"; \
+        #binding-cells = <0>; \
+        bindings = __VA_ARGS__; \
+    };
+
+
+
+ARCANE_EXPANSION(a, <&kp N>, <&kp D>)
+ARCANE_EXPANSION(b, <&kp E>, <&kp C>, <&kp A>, <&kp U>, <&kp S>, <&kp E>)
+ARCANE_EXPANSION(c, <&kp A>, <&kp N>)
+ARCANE_EXPANSION(g, <&kp E>, <&kp N>, <&kp E>, <&kp R>, <&kp A>, <&kp L>)
+ARCANE_EXPANSION(j, <&kp U>, <&kp S>, <&kp T>)
+ARCANE_EXPANSION(m, <&kp M>, <&kp E>, <&kp N>, <&kp T>)
+ARCANE_EXPANSION(n, <&kp I>, <&kp O>, <&kp N>)
+ARCANE_EXPANSION(p, <&kp A>, <&kp S>)
+ARCANE_EXPANSION(q, <&kp U>, <&kp E>)
+ARCANE_EXPANSION(v, <&kp E>, <&kp R>, <&kp S>, <&kp I>, <&kp O>, <&kp N>)
+ARCANE_EXPANSION(w, <&kp H>, <&kp I>, <&kp C>, <&kp H>)
+ARCANE_EXPANSION(y, <&kp E>, <&kp A>, <&kp H>)
+
+// to consider: special values for non-alphabetic keys
+
+
+arcane_left: arcane_left {
         compatible = "zmk,behavior-antecedent-morph";
-        label = "ADAPTIVE_A";
         #binding-cells = <0>;
-        defaults = <&kp A>;
-        bindings = <&kp U>, <&kp O>;
-        antecedents = <Q Z>;
+        defaults = <&key_repeat>;
+	bindings = <&arcane_g>, <&arcane_w>, <&key_repeat>, <&key_repeat>, <&arcane_b>, <&arcane_m>, <&key_repeat>, <&key_repeat>, <&key_repeat>, <&arcane_n>, <&arcane_v>, <&arcane_c>, <&arcane_p>;
+        antecedents = <G W D L B M S T R N V C P>;
+        max-delay-ms = <250>;
+};
+
+arcane_right: arcane_right {
+        compatible = "zmk,behavior-antecedent-morph";
+        #binding-cells = <0>;
+        defaults = <&key_repeat>;
+	bindings = <&key_repeat>, <&arcane_y>, <&key_repeat>, <&key_repeat>, <&arcane_q>, <&key_repeat>, <&key_repeat>, <&key_repeat>, <&arcane_a>, <&key_repeat>, <&key_repeat>, <&key_repeat>, <&arcane_j>;
+        antecedents = <F Y U X Q H I E A Z K O J>;
         max-delay-ms = <250>;
 };
