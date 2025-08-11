@@ -1,0 +1,9 @@
+arcane_l_new: arcane_l_new {
+        compatible = "zmk,behavior-antecedent-morph";
+        label = "ADAPTIVE_A";
+        #binding-cells = <0>;
+        defaults = <&kp A>;
+        bindings = <&kp U>, <&kp O>;
+        antecedents = <Q Z>;
+        max-delay-ms = <250>;
+};
