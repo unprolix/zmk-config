@@ -143,13 +143,13 @@ ZMK_COMBO_PLUS_SLOW(tab_horiz, &kp TAB, LM4, LM5)
 ZMK_COMBO_PLUS(alt_l, &sk LALT, LM3, LM4)
 ZMK_COMBO_PLUS(caps_word_l, &caps_word_lock_dance, LM2, LM3)
 ZMK_COMBO_PLUS(control_l, &sk LCTRL, LM1, LM2)
-ZMK_COMBO_PLUS(nav_l, &sl NAVIGATION, LM0, LM1)
+ZMK_COMBO_PLUS(enter_nav_l, &key_layer_ENTER_NAV, LM0, LM1)
 
-ZMK_COMBO_PLUS(nav_r, &sl NAVIGATION, RM0, RM1)
+ZMK_COMBO_PLUS(enter_nav_r, &key_layer_ENTER_NAV, RM0, RM1)
 ZMK_COMBO_PLUS(control_r, &sk RCTRL, RM1, RM2)
 ZMK_COMBO_PLUS(caps_word_r, &caps_word_lock_dance, RM2, RM3)
 ZMK_COMBO_PLUS(alt_r, &sk RALT, RM3, RM4)
-ZMK_COMBO_PLUS_SLOW(enter, &kp ENTER, RM4, RM5)
+ZMK_COMBO_PLUS_SLOW(dash, &kp MINUS, RM4, RM5)
 
 ZMK_COMBO_3_PLUS_FAST(emdash_alt, &em_dash, RM3, RM4, RM5) // does not trigger if _SLOW
 
@@ -197,7 +197,7 @@ ZMK_COMBO_PLUS(tab_vert, &kp TAB, LT0, LM0)	/* top and middle innermost left */
 ZMK_COMBO_SLOW(backspace, BSPC, RT0, RM0)	/* top and middle innermost right */
 ZMK_COMBO_SLOW(amps, AMPS, RT1, RM1)
 ZMK_COMBO_SLOW(asterisk, ASTERISK, RT2, RM2)
-ZMK_COMBO_SLOW(caret, CARET, RT3, RM3)
+ZMK_COMBO_SLOW(caret, CARET, RM3, RT3)	// test to see if it works like this (key numbers reversed)
 ZMK_COMBO_SLOW(percent, PERCENT, RT4, RM4)
 ZMK_COMBO_SLOW(pipe, PIPE, RT5, RM5)
 

@@ -71,6 +71,8 @@ ZMK_LEADER_UNICODE_5(rictus, R I C T U, N1, F, N6, N2, C) // 😬
 ZMK_LEADER_UNICODE_5(halo, H A L O, N1, F, N6, N0, N7) // 😇
 ZMK_LEADER_UNICODE_5(fingers, F I N, N1, F, N9, N1, E) // 🤞
 ZMK_LEADER_UNICODE_5(roll, R O L L, N1, F, N6, N4, N4) // 🙄
+ZMK_LEADER_UNICODE_5(tldr, T L D R, N1, F, N4, D, C) // 📜
+
 
 #define ZMK_LEADER_UNICODE_DUAL_4_4(name, sequence, u0, u1, u2, u3, u4, u5, u6, u7) \
     UC_MACRO(name ## _uc1, &kp u0 &kp u1 &kp u2 &kp u3) \
