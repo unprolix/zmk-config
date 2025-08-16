@@ -189,7 +189,7 @@ ZMK_COMBO_FAST(printscreen, PRINTSCREEN, LH2, RH2) /* outer thumb keys; screensh
 /* top two rows */
 ZMK_COMBO_PLUS_SLOW(grave, &kp GRAVE, LT5, LM5)
 ZMK_COMBO_PLUS(excl, &kp EXCL, LT4, LM4)
-ZMK_COMBO_PLUS(at, &kp AT, LT3, LM3)
+ZMK_COMBO_PLUS(at, &kp AT, LM3, LT3) // does not work in either order. TODO: fix.
 ZMK_COMBO_PLUS(hash, &kp HASH, LT2, LM2)
 ZMK_COMBO_PLUS(dollar, &kp DOLLAR, LT1, LM1)
 ZMK_COMBO_PLUS(tab_vert, &kp TAB, LT0, LM0)	/* top and middle innermost left */
@@ -197,7 +197,7 @@ ZMK_COMBO_PLUS(tab_vert, &kp TAB, LT0, LM0)	/* top and middle innermost left */
 ZMK_COMBO_SLOW(backspace, BSPC, RT0, RM0)	/* top and middle innermost right */
 ZMK_COMBO_SLOW(amps, AMPS, RT1, RM1)
 ZMK_COMBO_SLOW(asterisk, ASTERISK, RT2, RM2)
-ZMK_COMBO_SLOW(caret, CARET, RM3, RT3)	// test to see if it works like this (key numbers reversed)
+ZMK_COMBO_FAST(caret, CARET, RT3, RM3)	// TODO: fix. does not work with zmk_combo_slow or _fast in either key order
 ZMK_COMBO_SLOW(percent, PERCENT, RT4, RM4)
 ZMK_COMBO_SLOW(pipe, PIPE, RT5, RM5)
 
