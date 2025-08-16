@@ -470,8 +470,8 @@ arcane_nav_r: arcane_nav_r {
         rgb_layer {
             display-name = "rgb";
             bindings = <
-&delayed_rgb_on 1000  &trans  &trans  &trans  &trans  &trans                                    &rgb_ug RGB_SPI                    &rgb_ug RGB_HUI  &rgb_ug RGB_SAI  &trans  &trans  &rgb_ug RGB_COLOR_HSB(0,100,100)    &rgb_ug RGB_COLOR_HSB(275,100,100)
-&delayed_rgb_off 1000  &trans  &trans  &trans  &trans  &trans                   &rgb_ug RGB_EFR  &to BASE         &rgb_ug RGB_EFF   &rgb_ug RGB_HUD  &rgb_ug RGB_SAD  &trans  &trans  &rgb_ug RGB_COLOR_HSB(90,100,100)   &rgb_ug RGB_COLOR_HSB(186,100,100)
+&trans  &trans  &trans  &trans  &trans  &trans                                    &rgb_ug RGB_SPI                    &rgb_ug RGB_HUI  &rgb_ug RGB_SAI  &trans  &trans  &rgb_ug RGB_COLOR_HSB(0,100,100)    &rgb_ug RGB_COLOR_HSB(275,100,100)
+&trans  &trans  &trans  &trans  &trans  &trans                   &rgb_ug RGB_EFR  &to BASE         &rgb_ug RGB_EFF   &rgb_ug RGB_HUD  &rgb_ug RGB_SAD  &trans  &trans  &rgb_ug RGB_COLOR_HSB(90,100,100)   &rgb_ug RGB_COLOR_HSB(186,100,100)
 &trans  &trans  &trans  &trans  &trans  &trans  &rgb_ug RGB_TOG                   &rgb_ug RGB_SPD                    &trans           &trans           &trans  &trans  &rgb_ug RGB_COLOR_HSB(270,100,100)  &rgb_ug RGB_COLOR_HSB(317,100,100)
                                            &trans        &trans            &trans                                                                       &trans           &trans           &trans
             >;
