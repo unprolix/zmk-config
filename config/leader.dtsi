@@ -16,6 +16,26 @@
         }; \
     };
 
+#define ZMK_LEADER_UNICODE_DUAL_4_4(name, sequence, u0, u1, u2, u3, u4, u5, u6, u7) \
+    UC_MACRO(name ## _uc1, &kp u0 &kp u1 &kp u2 &kp u3) \
+    UC_MACRO(name ## _uc2, &kp u4 &kp u5 &kp u6 &kp u7) \
+    ZMK_MACRO(name ## _uc, bindings = <&name ## _uc1 &name ## _uc2>;) \
+    ZMK_LEADER_SEQUENCE(name, &name ## _uc, sequence)
+
+#define ZMK_LEADER_UNICODE_4(name, sequence, u0, u1, u2, u3) \
+    UC_MACRO(name ## _uc, &kp u0 &kp u1 &kp u2 &kp u3) \
+    ZMK_LEADER_SEQUENCE(name, &name ## _uc, sequence)
+
+#define ZMK_LEADER_UNICODE_5(name, sequence, u0, u1, u2, u3, u4) \
+    UC_MACRO(name ## _uc, &kp u0 &kp u1 &kp u2 &kp u3 &kp u4) \
+    ZMK_LEADER_SEQUENCE(name, &name ## _uc, sequence)
+
+// this apparently does not work?
+#define ZMK_LEADER_UNICODE_8(name, sequence, u0, u1, u2, u3, u4, u5, u6, u7) \
+    UC_MACRO(name ## _uc, &kp u0 &kp u1 &kp u2 &kp u3 &kp u4 &kp u5 &kp u6 &kp u7) \
+    ZMK_LEADER_SEQUENCE(name, &name ## _uc, sequence)
+
+
 
 // for standardized address entry web forms
 ZMK_LEADER_SEQUENCE(home_address_web, &home_address_web, H O M E)
@@ -39,18 +59,6 @@ ZMK_LEADER_SEQUENCE(caps_word,  &caps_word,     C W)
 
 // -----------------------------------------------------------------------------
 
-#define ZMK_LEADER_UNICODE_4(name, sequence, u0, u1, u2, u3) \
-    UC_MACRO(name ## _uc, &kp u0 &kp u1 &kp u2 &kp u3) \
-    ZMK_LEADER_SEQUENCE(name, &name ## _uc, sequence)
-
-#define ZMK_LEADER_UNICODE_5(name, sequence, u0, u1, u2, u3, u4) \
-    UC_MACRO(name ## _uc, &kp u0 &kp u1 &kp u2 &kp u3 &kp u4) \
-    ZMK_LEADER_SEQUENCE(name, &name ## _uc, sequence)
-
-#define ZMK_LEADER_UNICODE_8(name, sequence, u0, u1, u2, u3, u4, u5, u6, u7) \
-    UC_MACRO(name ## _uc, &kp u0 &kp u1 &kp u2 &kp u3 &kp u4 &kp u5 &kp u6 &kp u7) \
-    ZMK_LEADER_SEQUENCE(name, &name ## _uc, sequence)
-
 
 /*
 ZMK_LEADER_UNICODE_4(heart, W H E A R, N2, N7, N6, N4)
@@ -72,13 +80,35 @@ ZMK_LEADER_UNICODE_5(halo, H A L O, N1, F, N6, N0, N7) // 😇
 ZMK_LEADER_UNICODE_5(fingers, F I N, N1, F, N9, N1, E) // 🤞
 ZMK_LEADER_UNICODE_5(roll, R O L L, N1, F, N6, N4, N4) // 🙄
 ZMK_LEADER_UNICODE_5(tldr, T L D R, N1, F, N4, D, C) // 📜
+ZMK_LEADER_UNICODE_5(wave, W A V E, N1, F, N4, N4, B) // 👋
+
+// Flag emojis (dual 4-byte sequences)
+ZMK_LEADER_UNICODE_DUAL_4_4(fr, F R,    N1, F, N1, E, N6, N1, F, N7) // 🇫🇷
+ZMK_LEADER_UNICODE_DUAL_4_4(aus, A U S, N1, F, N1, E, N6, N1, F, N1) // 🇦🇺
+
+// Single emojis (5-byte sequences)
+ZMK_LEADER_UNICODE_5(koala, K O A L A, N1, F, N4, N2, N8) // 🐨
+ZMK_LEADER_UNICODE_5(kanga, K A N G A, N1, F, N9, N9, N8) // 🦘
+ZMK_LEADER_UNICODE_5(east, E A S T, N1, F, N5, F, F) // 🗿
+ZMK_LEADER_UNICODE_5(cro, C R O, N1, F, N9, N5, N0) // 🥐
+ZMK_LEADER_UNICODE_5(snak, S N A K, N1, F, N4, N0, D) // 🐍
+ZMK_LEADER_UNICODE_5(piz, P I Z, N1, F, N3, N5, N5) // 🍕
+ZMK_LEADER_UNICODE_5(vin, V I N, N1, F, N3, N7, N7) // 🍷
+ZMK_LEADER_UNICODE_5(steak, S T E A K, N1, F, N9, N6, N9) // 🥩
+ZMK_LEADER_UNICODE_5(kiwi, K I W I, N1, F, N9, N5, D) // 🥝
+ZMK_LEADER_UNICODE_5(crepe, C R E P E, N1, F, N9, N5, E) // 🥞
+ZMK_LEADER_UNICODE_5(lapin, L A P I N, N1, F, N4, N0, N7) // 🐇
+ZMK_LEADER_UNICODE_5(chick, C H I C K, N1, F, N4, N2, N5) // 🐥
+ZMK_LEADER_UNICODE_5(duck, D U C K, N1, F, N9, N8, N6) // 🦆
+ZMK_LEADER_UNICODE_5(drums, D R U M S, N1, F, N3, N5, N7) // 🍗
 
 
-#define ZMK_LEADER_UNICODE_DUAL_4_4(name, sequence, u0, u1, u2, u3, u4, u5, u6, u7) \
-    UC_MACRO(name ## _uc1, &kp u0 &kp u1 &kp u2 &kp u3) \
-    UC_MACRO(name ## _uc2, &kp u4 &kp u5 &kp u6 &kp u7) \
-    ZMK_MACRO(name ## _uc, bindings = <&name ## _uc1 &name ## _uc2>;) \
-    ZMK_LEADER_SEQUENCE(name, &name ## _uc, sequence)
+
+
+
+
+
+
 
 
 ZMK_LEADER_UNICODE_DUAL_4_4(red_heart, H E A R T, N2, N7, N6, N4, F, E, N0, F)
@@ -89,6 +119,6 @@ ZMK_LEADER_UNICODE_DUAL_4_4(red_heart, H E A R T, N2, N7, N6, N4, F, E, N0, F)
     UC_MACRO(name ## _uc, &name1 ## _uc &name2 ## _uc &name3 ## _uc) \
     ZMK_LEADER_SEQUENCE(name, &name ## _uc, sequence)
 
-// TODO: this does not quite work: the heart is white and there is a space before the ewe.
+
 ZMK_LEADER_UNICODE_MULTI_3(love, L O V E, eye, red_heart, ewe)
 

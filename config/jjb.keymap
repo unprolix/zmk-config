@@ -399,9 +399,9 @@ arcane_nav_r: arcane_nav_r {
 				display-name = "alt_alpha";
 				bindings = <
 
-&kp TAB             &kp F                              &kp Y        &kp U        &kp X        &kp Q                        &kp UP              &kp G  &kp W        &kp D        &kp L        &kp B                              &kp BSPC
-&key_layer_SQT_NUM  &tap_hold_layer_lgui LGUI_NAV_L H  &hml L_M3 I  &hml L_M2 E  &hml L_M1 A  &kp Z              &kp LEFT  &to RGB &kp RIGHT   &kp M  &hmr R_M1 S  &hmr R_M2 T  &hmr R_M3 R  &tap_hold_layer_rgui RGUI_NAV_R N  &key_layer_DQT_NUM
-&kp COMMA           &kp SEMI                           &kp BSLH     &kp K        &kp O        &kp J   &kp C_MUTE           &kp DOWN            &kp V  &kp C        &kp P        &kp FSLH     &kp COLON                          &kp DOT
+&kp TAB             &kp F                              &kp Z        &kp U        &kp Q        &kp BSPC                     &kp UP              &kp RETURN  &kp W        &kp D        &kp L        &kp B                              &kp SEMI
+&key_layer_SQT_NUM  &tap_hold_layer_lgui LGUI_NAV_L H  &hml L_M3 I  &hml L_M2 E  &hml L_M1 A  &kp P              &kp LEFT  &to RGB &kp RIGHT   &kp G       &hmr R_M1 S  &hmr R_M2 T  &hmr R_M3 R  &tap_hold_layer_rgui RGUI_NAV_R N  &key_layer_DQT_NUM
+&kp BSLH            &kp COMMA                          &kp Y        &kp K        &kp O        &kp X   &kp C_MUTE           &kp DOWN            &kp V       &kp C        &kp M        &kp J        &kp DOT                            &kp FSLH
 				&LTS EXTRA ESC  &arcane_nav_l NAV 0  &lgui_space_tab                                   &rgui_space_ret  &arcane_nav_r NAV 0  &LTS FN RETURN 
 				>;
 				
