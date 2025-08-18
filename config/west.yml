@@ -31,6 +31,11 @@ manifest:
     - name: a741725193
       url-base: https://github.com/a741725193
 
+    # for ergomech.store sofle hybrid
+    - name: ergomechstore
+      url-base: https://github.com/ergomechstore
+
+
     # for usb raw hid (not yet used)
     - name: zzeneg
       url-base: https://github.com/zzeneg
@@ -53,6 +58,12 @@ manifest:
       remote: a741725193
       revision: main
       
+    # for sofle hybrid (no idea if this will work)
+    - name: sofle-hybrid-ergomech-zmk
+      remote: ergomechstore
+      path: modules/vendors/ergomech-sofle
+      revision: master
+
     # for default layer
     - name: zmk-userspace
       remote: elpekenin
