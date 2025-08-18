@@ -1,5 +1,10 @@
 // note: leader key sequences can currently have a maximum of five letters
 
+// the limit of sequences per leader key is CONFIG_ZMK_LEADER_MAX_SEQUENCES. defining more will result in runtime crashes.
+// the limit must be defined in the .conf file for whatever you're building.
+
+
+
 #undef ZMK_LEADER_SEQUENCE
 #define ZMK_LEADER_SEQUENCE(name, leader_bindings, leader_sequence) \
     / { \
@@ -33,6 +38,10 @@
 // this apparently does not work?
 #define ZMK_LEADER_UNICODE_8(name, sequence, u0, u1, u2, u3, u4, u5, u6, u7) \
     UC_MACRO(name ## _uc, &kp u0 &kp u1 &kp u2 &kp u3 &kp u4 &kp u5 &kp u6 &kp u7) \
+    ZMK_LEADER_SEQUENCE(name, &name ## _uc, sequence)
+
+#define ZMK_LEADER_UNICODE_MULTI_3(name, sequence, name1, name2, name3) \
+    UC_MACRO(name ## _uc, &name1 ## _uc &name2 ## _uc &name3 ## _uc) \
     ZMK_LEADER_SEQUENCE(name, &name ## _uc, sequence)
 
 
@@ -86,15 +95,17 @@ ZMK_LEADER_UNICODE_5(wave, W A V E, N1, F, N4, N4, B) // 👋
 ZMK_LEADER_UNICODE_DUAL_4_4(fr, F R,    N1, F, N1, E, N6, N1, F, N7) // 🇫🇷
 ZMK_LEADER_UNICODE_DUAL_4_4(aus, A U S, N1, F, N1, E, N6, N1, F, N1) // 🇦🇺
 
+
 // Single emojis (5-byte sequences)
 ZMK_LEADER_UNICODE_5(koala, K O A L A, N1, F, N4, N2, N8) // 🐨
 ZMK_LEADER_UNICODE_5(kanga, K A N G A, N1, F, N9, N9, N8) // 🦘
 ZMK_LEADER_UNICODE_5(east, E A S T, N1, F, N5, F, F) // 🗿
 ZMK_LEADER_UNICODE_5(cro, C R O, N1, F, N9, N5, N0) // 🥐
 ZMK_LEADER_UNICODE_5(snak, S N A K, N1, F, N4, N0, D) // 🐍
-ZMK_LEADER_UNICODE_5(piz, P I Z, N1, F, N3, N5, N5) // 🍕
 ZMK_LEADER_UNICODE_5(vin, V I N, N1, F, N3, N7, N7) // 🍷
+ZMK_LEADER_UNICODE_5(piz, P I Z, N1, F, N3, N5, N5) // 🍕
 ZMK_LEADER_UNICODE_5(steak, S T E A K, N1, F, N9, N6, N9) // 🥩
+
 ZMK_LEADER_UNICODE_5(kiwi, K I W I, N1, F, N9, N5, D) // 🥝
 ZMK_LEADER_UNICODE_5(crepe, C R E P E, N1, F, N9, N5, E) // 🥞
 ZMK_LEADER_UNICODE_5(lapin, L A P I N, N1, F, N4, N0, N7) // 🐇
@@ -104,20 +115,9 @@ ZMK_LEADER_UNICODE_5(drums, D R U M S, N1, F, N3, N5, N7) // 🍗
 
 
 
-
-
-
-
-
-
-
 ZMK_LEADER_UNICODE_DUAL_4_4(red_heart, H E A R T, N2, N7, N6, N4, F, E, N0, F)
 
 
-
-#define ZMK_LEADER_UNICODE_MULTI_3(name, sequence, name1, name2, name3) \
-    UC_MACRO(name ## _uc, &name1 ## _uc &name2 ## _uc &name3 ## _uc) \
-    ZMK_LEADER_SEQUENCE(name, &name ## _uc, sequence)
 
 
 ZMK_LEADER_UNICODE_MULTI_3(love, L O V E, eye, red_heart, ewe)

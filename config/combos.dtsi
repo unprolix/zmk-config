@@ -160,6 +160,10 @@ ZMK_COMBO_PLUS(smart_num_r, &smart_num_lock_dance, RM1, RM3)  // skip!
 ZMK_COMBO_PLUS_FAST(gui_l, &sk LGUI, LM1, LM4)	// double skip!
 ZMK_COMBO_PLUS_FAST(gui_r, &sk RGUI, RM1, RM4)	// double skip!
 
+// middle and top, staggered
+ZMK_COMBO_PLUS(backspace_stagger_l, &kp BSPC, LT0, LM2)  // skip+stagger
+ZMK_COMBO_PLUS(return_stagger_r, &kp ENTER, RT0, RM2)  // skip+stagger
+
 
 /* bottom row */
 ZMK_COMBO_FAST(backslash, BSLH, LB5, LB4)
