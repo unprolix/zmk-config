@@ -368,17 +368,183 @@ arcane_nav_r: arcane_nav_r {
     };
 
 
+// ****************************************** BASE layer
+
+#define BASE_LT &kp TAB  &kp Q  &kp W  &kp E  &kp R  &kp T
+#define BASE_RT &kp Y    &kp U  &kp I  &kp O  &kp P  &kp BSPC
+
+#define BASE_LM &key_layer_SQT_NUM  &tap_hold_layer_lgui LGUI_NAV_L A  &hml L_M3 S  &hml L_M2 D  &hml L_M1 F  &kp G
+#define BASE_RM &kp H  &hmr R_M1 J  &hmr R_M2 K  &hmr R_M3 L  &tap_hold_layer_rgui RGUI_NAV_R SEMI  &key_layer_DQT_NUM
+
+#define BASE_LB &trans &kp Z  &kp X  &kp C  &kp V  &kp B
+#define BASE_RB &kp N  &kp M  &kp COMMA  &kp DOT  &kp FSLH  &kp RET
+
+#define BASE_LH &LTS EXTRA ESC  &smart_nav_thumb NAV TAB  &lgui_space_tab
+#define BASE_RH &rgui_space_ret  &smart_nav_thumb NAV BSPC  &LTS FN RETURN
+
+
+// ****************************************** GAMING layer
+
+#define GAMING_LT &kp ESC  &kp Q  &kp W  &kp E  &kp R  &kp T		         
+#define GAMING_RT &kp Y  &kp U  &kp I  &kp O  &kp P  &kp BSPC
+
+#define GAMING_LM &kp CAPS  &kp A  &kp S  &kp D  &kp F  &kp G
+#define GAMING_RM &kp H  &kp J  &kp K  &kp L  &kp SEMI  &kp SQT
+
+#define GAMING_LB &kp LSHIFT  &kp Z  &kp X  &kp C  &kp V  &kp B   
+#define GAMING_RB &kp N  &kp M  &kp COMMA  &kp DOT  &kp FSLH  &kp RSHIFT
+
+#define GAMING_LH &kp LCTRL  &kp TAB  &kp SPACE                
+#define GAMING_RH &kp SPACE  &kp BSPC  &kp RETURN
+
+
+/*
+// ******************************************  layer
+
+#define _LT
+#define _RT
+
+#define _LM
+#define _RM
+
+#define _LB
+#define _RB
+
+#define _LH
+#define _RH
+
+*/
+
+/*
+// ******************************************  layer
+
+#define _LT
+#define _RT
+
+#define _LM
+#define _RM
+
+#define _LB
+#define _RB
+
+#define _LH
+#define _RH
+
+*/
+
+/*
+// ******************************************  layer
+
+#define _LT
+#define _RT
+
+#define _LM
+#define _RM
+
+#define _LB
+#define _RB
+
+#define _LH
+#define _RH
+
+*/
+
+/*
+// ******************************************  layer
+
+#define _LT
+#define _RT
+
+#define _LM
+#define _RM
+
+#define _LB
+#define _RB
+
+#define _LH
+#define _RH
+
+*/
+
+/*
+// ******************************************  layer
+
+#define _LT
+#define _RT
+
+#define _LM
+#define _RM
+
+#define _LB
+#define _RB
+
+#define _LH
+#define _RH
+
+*/
+
+/*
+// ******************************************  layer
+
+#define _LT
+#define _RT
+
+#define _LM
+#define _RM
+
+#define _LB
+#define _RB
+
+#define _LH
+#define _RH
+
+*/
+
+/*
+// ******************************************  layer
+
+#define _LT
+#define _RT
+
+#define _LM
+#define _RM
+
+#define _LB
+#define _RB
+
+#define _LH
+#define _RH
+
+*/
+
+/*
+// ******************************************  layer
+
+#define _LT
+#define _RT
+
+#define _LM
+#define _RM
+
+#define _LB
+#define _RB
+
+#define _LH
+#define _RH
+
+*/
+
+
     keymap {
         compatible = "zmk,keymap";
 
         base_layer {
             display-name = "base";
             bindings = <
-
-&kp TAB             &kp Q                              &kp W        &kp E        &kp R        &kp T                        &kp UP               &kp Y  &kp U        &kp I        &kp O        &kp P                                 &kp BSPC
-&key_layer_SQT_NUM  &tap_hold_layer_lgui LGUI_NAV_L A  &hml L_M3 S  &hml L_M2 D  &hml L_M1 F  &kp G              &kp LEFT  &to RGB   &kp RIGHT  &kp H  &hmr R_M1 J  &hmr R_M2 K  &hmr R_M3 L  &tap_hold_layer_rgui RGUI_NAV_R SEMI  &key_layer_DQT_NUM
-&trans              &kp Z                              &kp X        &kp C        &kp V        &kp B   &kp C_MUTE           &kp DOWN             &kp N  &kp M        &kp COMMA    &kp DOT      &kp FSLH                              &kp RET
-                                                         &LTS EXTRA ESC  &smart_nav_thumb NAV TAB  &lgui_space_tab                &rgui_space_ret     &smart_nav_thumb NAV BSPC    &LTS FN RETURN
+BASE_LT                       &kp UP              BASE_RT
+BASE_LM             &kp LEFT  &to RGB   &kp RIGHT BASE_RM
+BASE_LB &kp C_MUTE            &kp DOWN            BASE_RB
+BASE_LH BASE_RH
 				>;
 				
             sensor-bindings = <&inc_dec_kp C_VOLUME_UP C_VOLUME_DOWN>;
@@ -387,10 +553,10 @@ arcane_nav_r: arcane_nav_r {
         gaming_layer {
             display-name = "gaming";
             bindings = <
-
-&kp ESC     &kp Q  &kp W  &kp E  &kp R  &kp T		              &kp UP                &kp Y  &kp U  &kp I      &kp O    &kp P     &kp BSPC
-&kp CAPS    &kp A  &kp S  &kp D  &kp F  &kp G               &kp LEFT  &to RGB   &kp RIGHT   &kp H  &kp J  &kp K      &kp L    &kp SEMI  &kp SQT
-&kp LSHIFT  &kp Z  &kp X  &kp C  &kp V  &kp B   &kp C_MUTE            &kp DOWN              &kp N  &kp M  &kp COMMA  &kp DOT  &kp FSLH  &kp RSHIFT                                     &kp LCTRL  &kp TAB  &kp SPACE                &kp SPACE     &kp BSPC    &kp RETURN
+GAMING_LT                       &kp UP              GAMING_RT
+GAMING_LM             &kp LEFT  &to RGB   &kp RIGHT GAMING_RM
+GAMING_LB &kp C_MUTE            &kp DOWN            GAMING_RB
+GAMING_LH GAMING_RH
              >;
             sensor-bindings = <&inc_dec_kp C_VOLUME_UP C_VOLUME_DOWN>;
         };
