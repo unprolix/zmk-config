@@ -112,6 +112,8 @@ ZMK_LEADER_UNICODE_5(snak, S N A K, N1, F, N4, N0, D) // 🐍
 ZMK_LEADER_UNICODE_5(vin, V I N, N1, F, N3, N7, N7) // 🍷
 ZMK_LEADER_UNICODE_5(piz, P I Z, N1, F, N3, N5, N5) // 🍕
 ZMK_LEADER_UNICODE_5(steak, S T E A K, N1, F, N9, N6, N9) // 🥩
+ZMK_LEADER_UNICODE_5(zzz, Z Z Z, N1, F, N4, A, N4) // 💤
+
 
 ZMK_LEADER_UNICODE_5(kiwi, K I W I, N1, F, N9, N5, D) // 🥝
 ZMK_LEADER_UNICODE_5(crepe, C R E P E, N1, F, N9, N5, E) // 🥞
