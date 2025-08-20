@@ -170,10 +170,12 @@ ZMK_TAP_DANCE(smart_num_lock_dance, bindings = <&sl NUM>, <&num_word NUM>, <&rgb
               tapping-term-ms = <300>;)
 
 
-#define MAKE_HRM(NAME, HOLD, TAP, TRIGGER_POS)                                 \
-  ZMK_HOLD_TAP(NAME, bindings = <HOLD>, <TAP>; flavor = "balanced";            \
-               tapping-term-ms = <200>; quick-tap-ms = <QUICK_TAP_MS>;         \
-               require-prior-idle-ms = <100>; hold-trigger-on-release;         \
+#define HRM_PRIOR_IDLE 80	// 100 caused false taps over holds, particularly with LCTRL. maybe this will be better. but note i seem to roll AR while normal typing which causes problems for accidental LGUI activation
+
+#define MAKE_HRM(NAME, HOLD, TAP, TRIGGER_POS)                                    \
+  ZMK_HOLD_TAP(NAME, bindings = <HOLD>, <TAP>; flavor = "balanced";               \
+               tapping-term-ms = <200>; quick-tap-ms = <QUICK_TAP_MS>;            \
+               require-prior-idle-ms = <HRM_PRIOR_IDLE>; hold-trigger-on-release; \
                hold-trigger-key-positions = <TRIGGER_POS>;)
 
 
@@ -398,7 +400,127 @@ arcane_nav_r: arcane_nav_r {
 #define GAMING_RH &kp SPACE  &kp BSPC  &kp RETURN
 
 
+// ******************************************  hierophant (alt_alpha) layer
+
+#define HIEROPHANT_LT &kp TAB  &kp F  &kp Z  &kp U  &kp Q  &kp BSPC
+#define HIEROPHANT_RT &kp RETURN  &kp W  &kp D  &kp L  &kp B  &kp SEMI
+
+#define HIEROPHANT_LM &key_layer_SQT_NUM  &tap_hold_layer_lgui LGUI_NAV_L H  &hml L_M3 I  &hml L_M2 E  &hml L_M1 A  &kp P
+#define HIEROPHANT_RM &kp G  &hmr R_M1 S  &hmr R_M2 T  &hmr R_M3 R  &tap_hold_layer_rgui RGUI_NAV_R N  &key_layer_DQT_NUM
+
+#define HIEROPHANT_LB &kp BSLH  &kp COMMA  &kp Y  &kp K  &kp O  &kp X
+#define HIEROPHANT_RB &kp V  &kp C  &kp M  &kp J  &kp DOT  &kp FSLH
+
+#define HIEROPHANT_LH &LTS EXTRA ESC  &arcane_nav_l NAV 0  &lgui_space_tab
+#define HIEROPHANT_RH &rgui_space_ret  &arcane_nav_r NAV 0  &LTS FN RETURN
+
+
+// ****************************************** CAPS layer
+
+#define CAPS_LT &caps_toggle &trans &trans &trans &trans &trans
+#define CAPS_RT &trans &trans &trans &trans &trans &trans
+
+#define CAPS_LM &trans &trans &trans &trans &trans &trans
+#define CAPS_RM &trans &trans &trans &trans &trans &trans
+
+#define CAPS_LB &trans &trans &trans &trans &trans &trans
+#define CAPS_RB &trans &trans &trans &trans &trans &trans
+
+#define CAPS_LH &trans &trans &trans
+#define CAPS_RH &trans &trans &trans
+
+
+// ******************************************  NUMERIC layer
+
+#define NUMERIC_LT &kp GRAVE  &kp EXCL  &kp AT        &kp HASH  &kp DOLLAR  &kp PERCENT
+#define NUMERIC_RT &kp CARET  &kp AMPS  &kp ASTERISK  &kp LPAR  &kp RPAR    &kp EQUAL
+
+#define NUMERIC_LM &kp N0  &hml L_M4 N1  &hml L_M3 N2  &hml L_M2 N3  &hml L_M1 N4  &kp N5
+#define NUMERIC_RM &kp N6  &hmr R_M1 N7  &hmr R_M2 N8  &hmr R_M3 N9  &hmr R_M4 N0  &kp MINUS
+
+#define NUMERIC_LB &cancel  &trans  &trans  &trans  &trans  &trans
+#define NUMERIC_RB &trans  &trans  &trans  &trans  &trans  &cancel
+
+#define NUMERIC_LH &trans  &trans  &trans                                                             
+#define NUMERIC_RH &kp SPACE  &kp BACKSPACE  &kp PERIOD
+
+
+
+// ******************************************  NAVIGATION layer
+
+#define NAVIGATION_LT &trans  &kp PG_UP  &kp END  &kp UP_ARROW  &kp HOME  &msc SCRL_UP
+#define NAVIGATION_RT &msc SCRL_UP  &kp HOME  &kp UP_ARROW  &kp END  &kp PG_UP  &trans
+
+#define NAVIGATION_LM &trans  &hml L_M4 PG_DN  &hml L_M3 LEFT_ARROW  &hml L_M2 DOWN_ARROW  &hml L_M1 RIGHT_ARROW  &msc SCRL_DOWN
+#define NAVIGATION_RM &msc SCRL_DOWN  &hmr R_M1 LEFT_ARROW  &hmr R_M2 DOWN_ARROW  &hmr R_M3 RIGHT_ARROW  &hmr R_M4 PG_DN  &trans
+
+#define NAVIGATION_LB &trans  &trans  &trans  &trans  &trans  &trans
+#define NAVIGATION_RB &mkp MB2  &mkp MB3  &mkp MB4  &mkp MB5  &trans  &trans
+
+#define NAVIGATION_LH &trans  &trans  &kp SPACE                                                          
+#define NAVIGATION_RH &kp SPACE  &trans  &trans
+
+
+
+// ******************************************  FUNCTION layer
+
+#define FUNCTION_LT &kp F1  &kp F2  &kp F3  &kp F4  &kp F5  &kp F6
+#define FUNCTION_RT &kp F7  &kp F8  &kp F9  &kp F10  &kp F11  &kp F12
+
+#define FUNCTION_LM &kp F13  &hml L_M4 F14  &hml L_M3 F15  &hml L_M2 F16  &hml L_M1 F17  &kp F18
+#define FUNCTION_RM &kp F19  &hmr R_M1 F20  &hmr R_M2 F21  &hmr R_M3 F22  &hmr R_M4 F23  &kp F24
+
+#define FUNCTION_LB &trans  &sys_reset  &trans  &bootloader  &trans  &mkp MB5 
+#define FUNCTION_RB &trans  &trans  &bootloader  &sys_reset  &kp SCROLLLOCK  &kp PAUSE_BREAK
+
+#define FUNCTION_LH &trans &trans &build_time
+#define FUNCTION_RH &build_time  &trans  &trans
+
+
+// ******************************************  EXTRA layer
+
+#define EXTRA_LT &trans &trans &at_wgyl_org &trans &trans &trans
+#define EXTRA_RT &trans &trans &trans &trans &phone_alt &trans
+
+#define EXTRA_LM &dash_emdash &one_urie &trans &trans &trans &kp DELETE
+#define EXTRA_RM &kp INSERT &trans &trans &trans &trans &trans
+
+#define EXTRA_LB &to_nav &trans &trans &trans &trans &trans
+#define EXTRA_RB &trans &trans &trans &trans &trans &key_repeat
+
+#define EXTRA_LH                      &trans &oneshot_or_to_NAVIGATION &trans
+#define EXTRA_RH   		  &trans &oneshot_or_to_NAVIGATION &trans
+
+
+
+// ******************************************  RGB layer
+
+#define RGB_LT &trans  &trans  &trans  &trans  &trans  &trans
+#define RGB_RT &rgb_ug RGB_HUI  &rgb_ug RGB_SAI  &trans  &trans  &rgb_ug RGB_COLOR_HSB(0,100,100)    &rgb_ug RGB_COLOR_HSB(275,100,100)
+
+#define RGB_LM &trans  &trans  &trans  &trans  &trans  &trans
+#define RGB_RM &rgb_ug RGB_HUD  &rgb_ug RGB_SAD  &trans  &trans  &rgb_ug RGB_COLOR_HSB(90,100,100)   &rgb_ug RGB_COLOR_HSB(186,100,100)
+
+#define RGB_LB &trans &trans &trans &trans &trans &trans
+#define RGB_RB &trans &trans &trans &trans &rgb_ug RGB_COLOR_HSB(270,100,100) &rgb_ug RGB_COLOR_HSB(317,100,100)
+
+#define RGB_LH &trans &trans &trans
+#define RGB_RH &trans &trans &trans
+
 /*
+
+        system_layer {
+            display-name = "system";
+            bindings = <
+&bt BT_CLR       &bt BT_CLR_ALL  &trans        &trans        &trans        &trans                                      &mmv MOVE_UP                     &trans           &trans           &trans           &trans          &trans   &trans
+&bt BT_SEL 0     &bt BT_SEL 1    &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4  &bt BT_SEL 5                &mmv MOVE_LEFT  &to BASE     &mmv MOVE_RIGHT  &trans         &trans         &trans           &trans        &trans  &trans
+&trans           &rgb_ug RGB_OFF &rgb_ug RGB_ON  &trans        &trans            &rgb_ug RGB_EFF  &kp C_MUTE                 &mmv MOVE_DOWN                   &rgb_ug RGB_EFR  &rgb_ug RGB_SPI  &rgb_ug RGB_BRI  &rgb_ug RGB_BRD  &kp END   &kp PG_DN
+                                           &trans        &trans            &trans                                                                       &trans           &trans           &trans
+            >;
+            sensor-bindings = <&scroll_encoder>;
+        };
+
+
 // ******************************************  layer
 
 #define _LT
@@ -413,9 +535,17 @@ arcane_nav_r: arcane_nav_r {
 #define _LH
 #define _RH
 
-*/
+        mod_l_nav_layer {
+            display-name = "L GUI+nav";
+            bindings = <
+&kp LG(TAB)    &kp LG(Q)  &kp LG(W)        &kp LG(E)        &kp LG(R)     &kp LG(T)                             &mmv MOVE_UP                     &msc LG(SCRL_UP)    &kp LG(HOME)        &kp LG(UP_ARROW)    &kp LG(END)          &kp LG(PG_UP)  &kp LG(BSPC)
+&trans         &trans     &hml L_M3 LG(S)  &hml L_M2 LG(D)  &hml L_M1(F)  &kp LG(G)              &mmv MOVE_LEFT &kp HOME        &mmv MOVE_RIGHT  &msc LG(SCRL_DOWN)  &kp LG(LEFT_ARROW)  &kp LG(DOWN_ARROW)  &kp LG(RIGHT_ARROW)  &kp LG(PG_DN)  &kp LG(SQT)
+&kp LG(LCTRL)  &kp LG(Z)  &kp LG(X)        &kp LG(C)        &kp LG(V)     &kp LG(B)    &kp HOME                 &mmv MOVE_DOWN                   &kp LG(N)           &kp LG(M)           &kp LG(COMMA)       &kp LG(DOT)          &kp LG(FSLH)   &kp LG(RET)
+                                               &kp LG(ESC)      &kp LG(TAB)  &to BASE                                                               &to BASE            &kp LG(BSPC)        &kp LG(RET)
+            >;
+            sensor-bindings = <&scroll_encoder>;
+        };
 
-/*
 // ******************************************  layer
 
 #define _LT
@@ -430,9 +560,17 @@ arcane_nav_r: arcane_nav_r {
 #define _LH
 #define _RH
 
-*/
+        mod_r_nav_layer {
+            display-name = "R GUI+nav";
+            bindings = <
+&kp RG(ESC)   &kp RG(PG_UP)  &kp RG(DELETE)      &kp RG(UP_ARROW)    &kp RG(HOME)         &msc RG(SCRL_UP)                              &mmv MOVE_UP                     &kp RG(Y)  &kp RG(U)     &kp RG(I)        &kp RG(O)        &kp RG(P)     &kp RG(BSPC)
+&trans        &kp RG(PG_DN)  &kp RG(LEFT_ARROW)  &kp RG(DOWN_ARROW)  &kp RG(RIGHT_ARROW)  &msc RG(SCRL_DOWN)             &mmv MOVE_LEFT &kp HOME        &mmv MOVE_RIGHT  &kp RG(H)  &hmr R_M1(J)  &hmr R_M2 RG(K)  &hmr R_M3 RG(L)  &trans        &kp RG(SQT)
+&kp RG(LCTRL) &kp RG(Z)      &kp RG(X)           &kp RG(C)	     &kp RG(V)  	  &kp RG(B)            &kp HOME                 &mmv MOVE_DOWN                   &kp RG(N)  &kp RG(M)     &kp RG(COMMA)    &kp RG(DOT)      &kp RG(FSLH)  &kp RG(RET)
+                                                 &kp LG(ESC)         &kp LG(TAB)          &to BASE                                                                       &to BASE   &kp LG(BSPC)  &kp LG(RET)
+            >;
+            sensor-bindings = <&scroll_encoder>;
+        };
 
-/*
 // ******************************************  layer
 
 #define _LT
@@ -447,56 +585,17 @@ arcane_nav_r: arcane_nav_r {
 #define _LH
 #define _RH
 
-*/
 
-/*
-// ******************************************  layer
+        empty_layer {
+            display-name = "empty";
+            bindings = <
+&trans &trans &trans &trans &trans &trans                  &trans          &trans &trans &trans &trans &trans &trans 
+&trans &trans &trans &trans &trans &trans           &trans &trans &trans   &trans &trans &trans &trans &trans &trans 
+&trans &trans &trans &trans &trans &trans   &trans         &trans          &trans &trans &trans &trans &trans &trans 
+                     &trans &trans &trans                                  &trans &trans &trans 
 
-#define _LT
-#define _RT
 
-#define _LM
-#define _RM
 
-#define _LB
-#define _RB
-
-#define _LH
-#define _RH
-
-*/
-
-/*
-// ******************************************  layer
-
-#define _LT
-#define _RT
-
-#define _LM
-#define _RM
-
-#define _LB
-#define _RB
-
-#define _LH
-#define _RH
-
-*/
-
-/*
-// ******************************************  layer
-
-#define _LT
-#define _RT
-
-#define _LM
-#define _RM
-
-#define _LB
-#define _RB
-
-#define _LH
-#define _RH
 
 */
 
@@ -562,13 +661,12 @@ GAMING_LH GAMING_RH
         };
 
 	alt_alpha {
-				display-name = "alt_alpha";
+				display-name = "hierophant";
 				bindings = <
-
-&kp TAB             &kp F                              &kp Z        &kp U        &kp Q        &kp BSPC                     &kp UP              &kp RETURN  &kp W        &kp D        &kp L        &kp B                              &kp SEMI
-&key_layer_SQT_NUM  &tap_hold_layer_lgui LGUI_NAV_L H  &hml L_M3 I  &hml L_M2 E  &hml L_M1 A  &kp P              &kp LEFT  &to RGB &kp RIGHT   &kp G       &hmr R_M1 S  &hmr R_M2 T  &hmr R_M3 R  &tap_hold_layer_rgui RGUI_NAV_R N  &key_layer_DQT_NUM
-&kp BSLH            &kp COMMA                          &kp Y        &kp K        &kp O        &kp X   &kp C_MUTE           &kp DOWN            &kp V       &kp C        &kp M        &kp J        &kp DOT                            &kp FSLH
-				&LTS EXTRA ESC  &arcane_nav_l NAV 0  &lgui_space_tab                                   &rgui_space_ret  &arcane_nav_r NAV 0  &LTS FN RETURN 
+HIEROPHANT_LT                       &kp UP              HIEROPHANT_RT
+HIEROPHANT_LM             &kp LEFT  &to RGB   &kp RIGHT HIEROPHANT_RM
+HIEROPHANT_LB &kp C_MUTE            &kp DOWN            HIEROPHANT_RB
+HIEROPHANT_LH HIEROPHANT_RH
 				>;
 				
 	};
@@ -576,10 +674,10 @@ GAMING_LH GAMING_RH
 	caps_layer {
 				display-name = "caps";
 				bindings = <
-				&caps_toggle &trans &trans &trans &trans &trans                  &trans          &trans &trans &trans &trans &trans &trans 
-				&trans &trans &trans &trans &trans &trans           &trans &trans &trans   &trans &trans &trans &trans &trans &trans 
-				&trans &trans &trans &trans &trans &trans   &trans         &trans          &trans &trans &trans &trans &trans &trans 
-				&trans &trans &trans                                  &trans &trans &trans
+CAPS_LT                &trans        CAPS_RT
+CAPS_LM         &trans &trans &trans CAPS_RM
+CAPS_LB &trans         &trans        CAPS_RB
+CAPS_LH CAPS_RH
 				>;
 				
 	};
@@ -587,10 +685,10 @@ GAMING_LH GAMING_RH
         numeric_layer {
             display-name = "numeric";
             bindings = <
-&kp GRAVE  &kp EXCL         &kp AT        &kp HASH      &kp DOLLAR    &kp PERCENT                         &mmv MOVE_UP                   &kp CARET  &kp AMPS      &kp ASTERISK  &kp LPAR      &kp RPAR      &kp EQUAL
-&kp N0     &hml L_M4 N1     &hml L_M3 N2  &hml L_M2 N3  &hml L_M1 N4  &kp N5               &mmv MOVE_LEFT &mkp LCLK      &mmv MOVE_RIGHT &kp N6     &hmr R_M1 N7  &hmr R_M2 N8  &hmr R_M3 N9  &hmr R_M4 N0  &kp MINUS
-&cancel    &trans           &trans        &trans        &trans        &trans       &trans                 &mmv MOVE_DOWN                 &trans     &trans        &trans        &trans        &trans        &cancel
-                                                     &trans      &trans      &trans                                                             &kp SPACE &kp BACKSPACE &kp PERIOD
+NUMERIC_LT                        &mmv MOVE_UP                NUMERIC_RT
+NUMERIC_LM         &mmv MOVE_LEFT &mkp LCLK  &mmv MOVE_RIGHT  NUMERIC_RM
+NUMERIC_LB &trans                 &mmv MOVE_DOWN              NUMERIC_RB
+NUMERIC_LH NUMERIC_RH
             >;
             sensor-bindings = <&scroll_encoder>;
         };
@@ -598,11 +696,10 @@ GAMING_LH GAMING_RH
         navigation_layer {
             display-name = "navigation";
             bindings = <
-&trans  &kp PG_UP        &kp END               &kp UP_ARROW          &kp HOME               &msc SCRL_UP                             &mmv MOVE_UP                     &msc SCRL_UP    &kp HOME              &kp UP_ARROW          &kp END                &kp PG_UP        &trans
-&trans  &hml L_M4 PG_DN  &hml L_M3 LEFT_ARROW  &hml L_M2 DOWN_ARROW  &hml L_M1 RIGHT_ARROW  &msc SCRL_DOWN            &mmv MOVE_LEFT &mkp MB1        &mmv MOVE_RIGHT  &msc SCRL_DOWN  &hmr R_M1 LEFT_ARROW  &hmr R_M2 DOWN_ARROW  &hmr R_M3 RIGHT_ARROW  &hmr R_M4 PG_DN  &trans
-&trans  &trans           &trans                &trans                &trans                 &trans          &trans                   &mmv MOVE_DOWN                   &mkp MB2        &mkp MB3              &mkp MB4              &mkp MB5               &trans           &trans
-//&mkp MBl        &mkp MB2              &mkp MB3              &mkp MB4                 &mkp MB5          &trans
-                                                  &trans               &trans                &kp SPACE                                                          &kp SPACE   &trans         &trans
+NAVIGATION_LT                        &mmv MOVE_UP                NAVIGATION_RT
+NAVIGATION_LM         &mmv MOVE_LEFT &mkp MB1   &mmv MOVE_RIGHT  NAVIGATION_RM
+NAVIGATION_LB &trans                 &mmv MOVE_DOWN              NAVIGATION_RB
+NAVIGATION_LH NAVIGATION_RH
             >;
             sensor-bindings = <&scroll_encoder>;
         };
@@ -610,36 +707,32 @@ GAMING_LH GAMING_RH
         function_layer {
             display-name = "function";
             bindings = <
-&kp F1   &kp F2         &kp F3         &kp F4         &kp F5         &kp F6                           &mmv MOVE_UP                     &kp F7   &kp F8         &kp F9         &kp F10        &kp F11         &kp F12
-&kp F13  &hml L_M4 F14  &hml L_M3 F15  &hml L_M2 F16  &hml L_M1 F17  &kp F18          &mmv MOVE_LEFT  &mkp LCLK       &mmv MOVE_RIGHT  &kp F19  &hmr R_M1 F20  &hmr R_M2 F21  &hmr R_M3 F22  &hmr R_M4 F23   &kp F24
-&trans   &sys_reset     &trans         &bootloader    &trans         &mkp MB5  &kp C_MUTE             &mmv MOVE_DOWN                   &trans   &trans         &bootloader    &sys_reset     &kp SCROLLLOCK  &kp PAUSE_BREAK
-                                                    &trans  &trans  &build_time                                                       &build_time  &trans  &trans
+FUNCTION_LT                        &mmv MOVE_UP                FUNCTION_RT
+FUNCTION_LM         &mmv MOVE_LEFT &mkp MB1   &mmv MOVE_RIGHT  FUNCTION_RM
+FUNCTION_LB &trans                 &mmv MOVE_DOWN              FUNCTION_RB
+FUNCTION_LH FUNCTION_RH
             >;
             sensor-bindings = <&scroll_encoder>;
         };
 
-
-/* todo: single tap is one shot layer change, double is &to new layer*/
         extra_layer {
             display-name = "extra";
             bindings = <
-&trans &trans &at_wgyl_org &trans &trans &trans                 &trans          &trans &trans &trans &trans &phone_alt &trans
-&dash_emdash &one_urie &trans &trans &trans &kp DELETE          &trans &trans &trans   &kp INSERT &trans &trans &trans &trans &trans
-&to_nav &trans &trans &trans &trans &trans   &trans        &trans          &trans &trans &trans &trans &trans &key_repeat
-                     &trans &oneshot_or_to_NAVIGATION &trans  		  &trans &oneshot_or_to_NAVIGATION &trans
+EXTRA_LT                &trans         EXTRA_RT
+EXTRA_LM         &trans &trans &trans  EXTRA_RM
+EXTRA_LB &trans         &trans         EXTRA_RB
+EXTRA_LH EXTRA_RH
             >;
             sensor-bindings = <&scroll_encoder>;
         };
-
-
 
         rgb_layer {
             display-name = "rgb";
             bindings = <
-&trans  &trans  &trans  &trans  &trans  &trans                                    &rgb_ug RGB_SPI                    &rgb_ug RGB_HUI  &rgb_ug RGB_SAI  &trans  &trans  &rgb_ug RGB_COLOR_HSB(0,100,100)    &rgb_ug RGB_COLOR_HSB(275,100,100)
-&trans  &trans  &trans  &trans  &trans  &trans                   &rgb_ug RGB_EFR  &to BASE         &rgb_ug RGB_EFF   &rgb_ug RGB_HUD  &rgb_ug RGB_SAD  &trans  &trans  &rgb_ug RGB_COLOR_HSB(90,100,100)   &rgb_ug RGB_COLOR_HSB(186,100,100)
-&trans  &trans  &trans  &trans  &trans  &trans  &rgb_ug RGB_TOG                   &rgb_ug RGB_SPD                    &trans           &trans           &trans  &trans  &rgb_ug RGB_COLOR_HSB(270,100,100)  &rgb_ug RGB_COLOR_HSB(317,100,100)
-                                           &trans        &trans            &trans                                                                       &trans           &trans           &trans
+RGB_LT                                    &rgb_ug RGB_SPI                    RGB_RT
+RGB_LM                   &rgb_ug RGB_EFR  &to BASE         &rgb_ug RGB_EFF   RGB_RM
+RGB_LB  &rgb_ug RGB_TOG                   &rgb_ug RGB_SPD                    RGB_RB
+RGB_LH RGB_RH
             >;
             sensor-bindings = <&rgb_encoder>;
         };

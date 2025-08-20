@@ -54,11 +54,15 @@
 
 // for standardized address entry web forms
 ZMK_LEADER_SEQUENCE(home_address_web, &home_address_web, H O M E)
+ZMK_LEADER_SEQUENCE(phone, &phone, P H O N E)
+ZMK_LEADER_SEQUENCE(phone_alt, &phone_alt, T E L)
 
-ZMK_LEADER_SEQUENCE(azrael,     &azrael,        A Z)  // azraël
-ZMK_LEADER_SEQUENCE(anais,     &anais,        A N)  // anaïs
 
-ZMK_LEADER_SEQUENCE(gr_phi,     &el_phi,        G F)  // ϕ
+
+ZMK_LEADER_SEQUENCE(azrael, &azrael, A Z)  // azraël
+ZMK_LEADER_SEQUENCE(anais, &anais, A N)  // anaïs
+
+ZMK_LEADER_SEQUENCE(gr_phi, &el_phi, P H I)  // ϕ
 
 
 //ZMK_UNICODE_SINGLE(red_heart, N2, N7, N6, N4)
