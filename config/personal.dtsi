@@ -1,3 +1,9 @@
+phone: phone {
+	compatible = "zmk,behavior-macro";
+	#binding-cells = <0>;
+	bindings = <&trans>;
+};
+
 phone_alt: phone_alt {
 	compatible = "zmk,behavior-macro";
 	#binding-cells = <0>;
