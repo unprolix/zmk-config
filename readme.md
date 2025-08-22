@@ -16,7 +16,7 @@ The state of the entire firmware is pinned in my `west`
 - smart numbers and caps need some care, particularly an explicit cancel key.
 - look into how urob does smart mouse layer
 - consider using long press on page up/down for home/end
-- some combos do not fire. notably, those for @, ^, 9, and the bottom row em-dash. these do not seem to be timing- or HRM-related (i tested with a wide range of timing settings as well as on the gaming layer which lacks HRMs. in addition, the colon combo only works with the keys specified in a particular order: reversing them in the macro invocation means the combo does not work.
+- some combos do not fire. notably, those for @, ^, and the bottom row em-dash. these do not seem to be timing- or HRM-related (i tested with a wide range of timing settings as well as on the gaming layer which lacks HRMs. in addition, the colon combo only works with the keys specified in a particular order: reversing them in the macro invocation means the combo does not work.
 - the remainder of this doc is mostly edited notes from urob's original; I've edited out many things that are already integrated into my usage, and just left things I want to investigte (further) or of which I might want to remind myself later.
 
 
