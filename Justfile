@@ -43,8 +43,63 @@ _check_west_update:
         west update --fetch-opt=--filter=blob:none
     fi
 
+# check for new upstream commits since last sync
+_check_upstream:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    
+    # Find the latest upstream-sync tag
+    latest_tag=$(git tag -l "upstream-sync-*" | sort -V | tail -1 || echo "")
+    
+    if [[ -z "$latest_tag" ]]; then
+        echo "⚠️  No upstream-sync tags found. Run 'just upstream-status' to see all upstream commits."
+        return
+    fi
+    
+    echo "🔍 Checking for upstream updates since $latest_tag..."
+    git fetch upstream --quiet 2>/dev/null || echo "📡 Fetching upstream..."
+    
+    # Get commits we've integrated (from tag message and git log)
+    integrated_shas=""
+    if git tag -l "$latest_tag" >/dev/null 2>&1; then
+        # Extract SHAs from tag message (format: local_sha->upstream_sha)
+        integrated_shas=$(git tag -n99 "$latest_tag" | grep -oE '[a-f0-9]{7,}->[a-f0-9]{7,}' | cut -d'>' -f2 | tr '\n' ' ' || echo "")
+    fi
+    
+    # Get upstream commits since divergence point
+    merge_base=$(git merge-base main upstream/main 2>/dev/null || echo "")
+    if [[ -n "$merge_base" ]]; then
+        all_upstream=$(git log --pretty=format:"%ad %h %s" --date=short upstream/main ^$merge_base 2>/dev/null || echo "")
+    else
+        all_upstream=$(git log --pretty=format:"%ad %h %s" --date=short upstream/main -20 2>/dev/null || echo "")
+    fi
+    
+    # Filter out integrated commits
+    new_commits=""
+    if [[ -n "$all_upstream" ]]; then
+        while read -r line; do
+            commit_sha=$(echo "$line" | cut -d' ' -f2)
+            if [[ ! " $integrated_shas " =~ " $commit_sha " ]]; then
+                new_commits="$new_commits$line"$'\n'
+            fi
+        done <<< "$all_upstream"
+        new_commits=$(echo "$new_commits" | head -n -1) # remove trailing newline
+    fi
+    
+    if [[ -z "$new_commits" ]]; then
+        echo "✅ Up to date with upstream"
+    else
+        echo "🆕 New upstream commits available:"
+        echo "$new_commits" | head -10
+        if [[ $(echo "$new_commits" | wc -l) -gt 10 ]]; then
+            echo "   ... and $(($(echo "$new_commits" | wc -l) - 10)) more"
+        fi
+        echo ""
+        echo "💡 Run 'just upstream-status' for details or 'git cherry-pick <commit>' to integrate"
+    fi
+
 # build firmware for matching targets
-build expr *west_args: _check_west_update _generate_build_info
+build expr *west_args: _check_upstream _check_west_update _generate_build_info
     #!/usr/bin/env bash
     set -euo pipefail
     targets=$(just _parse_targets {{ expr }})
@@ -91,6 +146,66 @@ update:
 # upgrade zephyr-sdk and python dependencies
 upgrade-sdk:
     nix flake update --flake .
+
+# check for new upstream commits (quick check)
+upstream-check:
+    @just _check_upstream
+
+# show detailed upstream status and commits
+upstream-status:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    
+    latest_tag=$(git tag -l "upstream-sync-*" | sort -V | tail -1 || echo "")
+    
+    echo "📊 Upstream Status"
+    echo "==================="
+    
+    if [[ -z "$latest_tag" ]]; then
+        echo "⚠️  No upstream-sync tags found"
+        echo "🔍 Showing last 10 upstream commits:"
+        git log --pretty=format:"%ad %h %s" --date=short upstream/main -10
+    else
+        echo "🏷️  Last sync: $latest_tag"
+        echo ""
+        
+        # Get upstream commits since divergence point
+        merge_base=$(git merge-base main upstream/main 2>/dev/null || echo "")
+        if [[ -n "$merge_base" ]]; then
+            all_upstream=$(git log --pretty=format:"%ad %h %s" --date=short upstream/main ^$merge_base 2>/dev/null || echo "")
+        else
+            all_upstream=$(git log --pretty=format:"%ad %h %s" --date=short upstream/main -20 2>/dev/null || echo "")
+        fi
+        
+        # Get commits we've integrated (from tag message)
+        integrated_shas=""
+        if git tag -l "$latest_tag" >/dev/null 2>&1; then
+            # Extract SHAs from tag message (format: local_sha->upstream_sha)
+            integrated_shas=$(git tag -n99 "$latest_tag" | grep -oE '[a-f0-9]{7,}->[a-f0-9]{7,}' | cut -d'>' -f2 | tr '\n' ' ' || echo "")
+        fi
+        
+        # Filter out integrated commits
+        new_commits=""
+        if [[ -n "$all_upstream" ]]; then
+            while read -r line; do
+                commit_sha=$(echo "$line" | cut -d' ' -f2)
+                if [[ ! " $integrated_shas " =~ " $commit_sha " ]]; then
+                    new_commits="$new_commits$line"$'\n'
+                fi
+            done <<< "$all_upstream"
+            new_commits=$(echo "$new_commits" | head -n -1) # remove trailing newline
+        fi
+        
+        if [[ -z "$new_commits" ]]; then
+            echo "✅ Up to date with upstream"
+        else
+            echo "🆕 New commits since $latest_tag:"
+            echo "$new_commits"
+            echo ""
+            echo "💡 To integrate: git cherry-pick <commit-sha>"
+            echo "💡 After integration: git tag -a upstream-sync-$(date +%Y-%m-%d) -m \"Integrated: <description>\""
+        fi
+    fi
 
 [no-cd]
 test $testpath *FLAGS:
