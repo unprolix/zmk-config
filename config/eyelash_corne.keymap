@@ -16,5 +16,160 @@
 #include "zmk-helpers/key-labels/eyelash42.h"
 #include "jjb.keymap"
 
-/{ chosen { zmk,physical-layout = &default_layout; }; };
+    keymap {
+        compatible = "zmk,keymap";
+
+        base_layer {
+            display-name = "base";
+            bindings = <
+BASE_LT                       &kp UP              BASE_RT
+BASE_LM             &kp LEFT  &to RGB   &kp RIGHT BASE_RM
+BASE_LB &kp C_MUTE            &kp DOWN            BASE_RB
+BASE_LH BASE_RH
+				>;
+				
+            sensor-bindings = <&inc_dec_kp C_VOLUME_UP C_VOLUME_DOWN>;
+        };
+
+        gaming_layer {
+            display-name = "gaming";
+            bindings = <
+GAMING_LT                       &kp UP              GAMING_RT
+GAMING_LM             &kp LEFT  &to RGB   &kp RIGHT GAMING_RM
+GAMING_LB &kp C_MUTE            &kp DOWN            GAMING_RB
+GAMING_LH GAMING_RH
+             >;
+            sensor-bindings = <&inc_dec_kp C_VOLUME_UP C_VOLUME_DOWN>;
+        };
+
+	alt_alpha {
+				display-name = "hierophant";
+				bindings = <
+HIEROPHANT_LT                       &kp UP              HIEROPHANT_RT
+HIEROPHANT_LM             &kp LEFT  &to RGB   &kp RIGHT HIEROPHANT_RM
+HIEROPHANT_LB &kp C_MUTE            &kp DOWN            HIEROPHANT_RB
+HIEROPHANT_LH HIEROPHANT_RH
+				>;
+				
+	};
+
+	caps_layer {
+				display-name = "caps";
+				bindings = <
+CAPS_LT                &trans        CAPS_RT
+CAPS_LM         &trans &trans &trans CAPS_RM
+CAPS_LB &trans         &trans        CAPS_RB
+CAPS_LH CAPS_RH
+				>;
+				
+	};
+
+        numeric_layer {
+            display-name = "numeric";
+            bindings = <
+NUMERIC_LT                        &mmv MOVE_UP                NUMERIC_RT
+NUMERIC_LM         &mmv MOVE_LEFT &mkp LCLK  &mmv MOVE_RIGHT  NUMERIC_RM
+NUMERIC_LB &trans                 &mmv MOVE_DOWN              NUMERIC_RB
+NUMERIC_LH NUMERIC_RH
+            >;
+            sensor-bindings = <&scroll_encoder>;
+        };
+
+        navigation_layer {
+            display-name = "navigation";
+            bindings = <
+NAVIGATION_LT                        &mmv MOVE_UP                NAVIGATION_RT
+NAVIGATION_LM         &mmv MOVE_LEFT &mkp MB1   &mmv MOVE_RIGHT  NAVIGATION_RM
+NAVIGATION_LB &trans                 &mmv MOVE_DOWN              NAVIGATION_RB
+NAVIGATION_LH NAVIGATION_RH
+            >;
+            sensor-bindings = <&scroll_encoder>;
+        };
+
+        function_layer {
+            display-name = "function";
+            bindings = <
+FUNCTION_LT                        &mmv MOVE_UP                FUNCTION_RT
+FUNCTION_LM         &mmv MOVE_LEFT &mkp MB1   &mmv MOVE_RIGHT  FUNCTION_RM
+FUNCTION_LB &trans                 &mmv MOVE_DOWN              FUNCTION_RB
+FUNCTION_LH FUNCTION_RH
+            >;
+            sensor-bindings = <&scroll_encoder>;
+        };
+
+        extra_layer {
+            display-name = "extra";
+            bindings = <
+EXTRA_LT                &trans         EXTRA_RT
+EXTRA_LM         &trans &trans &trans  EXTRA_RM
+EXTRA_LB &trans         &trans         EXTRA_RB
+EXTRA_LH EXTRA_RH
+            >;
+            sensor-bindings = <&scroll_encoder>;
+        };
+
+        rgb_layer {
+            display-name = "rgb";
+            bindings = <
+RGB_LT                                    &rgb_ug RGB_SPI                    RGB_RT
+RGB_LM                   &rgb_ug RGB_EFR  &to BASE         &rgb_ug RGB_EFF   RGB_RM
+RGB_LB  &rgb_ug RGB_TOG                   &rgb_ug RGB_SPD                    RGB_RB
+RGB_LH RGB_RH
+            >;
+            sensor-bindings = <&rgb_encoder>;
+        };
+
+
+        system_layer {
+            display-name = "system";
+            bindings = <
+SYSTEM_LT                              &mmv MOVE_UP                     SYSTEM_RT
+SYSTEM_LM              &mmv MOVE_LEFT  &to BASE        &mmv MOVE_RIGHT  SYSTEM_RM
+SYSTEM_LB  &kp C_MUTE                  &mmv MOVE_DOWN                   SYSTEM_RB
+SYSTEM_LH SYSTEM_RH
+            >;
+            sensor-bindings = <&scroll_encoder>;
+        };
+
+
+
+        mod_l_nav_layer {
+            display-name = "L GUI+nav";
+            bindings = <
+LGN_LT                          &mmv MOVE_UP                      LGN_RT
+LGN_LM            &mmv MOVE_LEFT &kp HOME        &mmv MOVE_RIGHT  LGN_RM
+LGN_LB  &kp HOME                &mmv MOVE_DOWN                    LGN_RB
+LGN_LH LGN_RH
+            >;
+            sensor-bindings = <&scroll_encoder>;
+        };
+
+
+        mod_r_nav_layer {
+            display-name = "R GUI+nav";
+            bindings = <
+RGN_LT                          &mmv MOVE_UP                      RGN_RT
+RGN_LM            &mmv MOVE_LEFT &kp HOME        &mmv MOVE_RIGHT  RGN_RM
+RGN_LB  &kp HOME                &mmv MOVE_DOWN                    RGN_RB
+RGN_LH RGN_RH
+            >;
+            sensor-bindings = <&scroll_encoder>;
+        };
+
+/*
+        empty_layer {
+            display-name = "empty";
+            bindings = <
+EMPTY_LT                  &trans          EMPTY_RT
+EMPTY_LM          &trans  &trans  &trans  EMPTY_RM
+EMPTY_LB  &trans          &trans          EMPTY_RB
+EMPTY_LH EMPTY_RH
+            >;
+            sensor-bindings = <&scroll_encoder>;
+        };
+*/
+
+     }; /* keymap */
+};
+
 

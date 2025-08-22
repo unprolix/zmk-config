@@ -303,6 +303,7 @@ arcane_nav_r: arcane_nav_r {
 	};
 
 	// hold LGUI, tap for space, double tap for tab
+	// BUT using this may make spaces slooow so we'll switch to something else soon
         lgui_space_tab: lgui_space_tab {
             compatible = "zmk,behavior-tap-dance";
             #binding-cells = <0>;
@@ -311,6 +312,7 @@ arcane_nav_r: arcane_nav_r {
         };
 
 	// hold RGUI, tap for space, double tap for return
+	// BUT using this may make spaces slooow so we'll switch to something else soon
         rgui_space_ret: rgui_space_ret {
             compatible = "zmk,behavior-tap-dance";
             #binding-cells = <0>;
@@ -372,6 +374,9 @@ arcane_nav_r: arcane_nav_r {
 
 // ****************************************** BASE layer
 
+#define BASE_LZ &trans &trans &trans &trans &trans &trans
+#define BASE_RZ &trans &trans &trans &trans &trans &trans
+
 #define BASE_LT &kp TAB  &kp Q  &kp W  &kp E  &kp R  &kp T
 #define BASE_RT &kp Y    &kp U  &kp I  &kp O  &kp P  &kp BSPC
 
@@ -384,8 +389,13 @@ arcane_nav_r: arcane_nav_r {
 #define BASE_LH &LTS EXTRA ESC  &smart_nav_thumb NAV TAB  &lgui_space_tab
 #define BASE_RH &rgui_space_ret  &smart_nav_thumb NAV BSPC  &LTS FN RETURN
 
+#define BASE_LH_5 &trans &trans BASE_LH
+#define BASE_RH_5 &trans &trans BASE_RH
 
 // ****************************************** GAMING layer
+
+#define GAMING_LZ &trans &trans &trans &trans &trans &trans
+#define GAMING_RZ &trans &trans &trans &trans &trans &trans
 
 #define GAMING_LT &kp ESC  &kp Q  &kp W  &kp E  &kp R  &kp T		         
 #define GAMING_RT &kp Y  &kp U  &kp I  &kp O  &kp P  &kp BSPC
@@ -399,8 +409,13 @@ arcane_nav_r: arcane_nav_r {
 #define GAMING_LH &kp LCTRL  &kp TAB  &kp SPACE                
 #define GAMING_RH &kp SPACE  &kp BSPC  &kp RETURN
 
+#define GAMING_LH_5 &trans &trans GAMING_LH
+#define GAMING_RH_5 &trans &trans GAMING_RH
 
 // ******************************************  hierophant (alt_alpha) layer
+
+#define HIEROPHANT_LZ &trans &trans &trans &trans &trans &trans
+#define HIEROPHANT_RZ &trans &trans &trans &trans &trans &trans
 
 #define HIEROPHANT_LT &kp TAB  &kp F  &kp Z  &kp U  &kp Q  &kp BSPC
 #define HIEROPHANT_RT &kp RETURN  &kp W  &kp D  &kp L  &kp B  &kp SEMI
@@ -414,8 +429,14 @@ arcane_nav_r: arcane_nav_r {
 #define HIEROPHANT_LH &LTS EXTRA ESC  &arcane_nav_l NAV 0  &lgui_space_tab
 #define HIEROPHANT_RH &rgui_space_ret  &arcane_nav_r NAV 0  &LTS FN RETURN
 
+#define HIEROPHANT_LH_5 &trans &trans HIEROPHANT_LH
+#define HIEROPHANT_RH_5 &trans &trans HIEROPHANT_RH
+
 
 // ****************************************** CAPS layer
+
+#define CAPS_LZ &trans &trans &trans &trans &trans &trans
+#define CAPS_RZ &trans &trans &trans &trans &trans &trans
 
 #define CAPS_LT &caps_toggle &trans &trans &trans &trans &trans
 #define CAPS_RT &trans &trans &trans &trans &trans &trans
@@ -429,8 +450,14 @@ arcane_nav_r: arcane_nav_r {
 #define CAPS_LH &trans &trans &trans
 #define CAPS_RH &trans &trans &trans
 
+#define CAPS_LH_5 &trans &trans CAPS_LH
+#define CAPS_RH_5 &trans &trans CAPS_RH
+
 
 // ******************************************  NUMERIC layer
+
+#define NUMERIC_LZ &trans &trans &trans &trans &trans &trans
+#define NUMERIC_RZ &trans &trans &trans &trans &trans &trans
 
 #define NUMERIC_LT &kp GRAVE  &kp EXCL  &kp AT        &kp HASH  &kp DOLLAR  &kp PERCENT
 #define NUMERIC_RT &kp CARET  &kp AMPS  &kp ASTERISK  &kp LPAR  &kp RPAR    &kp EQUAL
@@ -444,9 +471,15 @@ arcane_nav_r: arcane_nav_r {
 #define NUMERIC_LH &trans  &trans  &trans                                                             
 #define NUMERIC_RH &kp SPACE  &kp BACKSPACE  &kp PERIOD
 
+#define NUMERIC_LH_5 &trans &trans NUMERIC_LH
+#define NUMERIC_RH_5 &trans &trans NUMERIC_RH
+
 
 
 // ******************************************  NAVIGATION layer
+
+#define NAVIGATION_LZ &trans &trans &trans &trans &trans &trans
+#define NAVIGATION_RZ &trans &trans &trans &trans &trans &trans
 
 #define NAVIGATION_LT &trans  &kp PG_UP  &kp END  &kp UP_ARROW  &kp HOME  &msc SCRL_UP
 #define NAVIGATION_RT &msc SCRL_UP  &kp HOME  &kp UP_ARROW  &kp END  &kp PG_UP  &trans
@@ -460,9 +493,15 @@ arcane_nav_r: arcane_nav_r {
 #define NAVIGATION_LH &trans  &trans  &kp SPACE                                                          
 #define NAVIGATION_RH &kp SPACE  &trans  &trans
 
+#define NAVIGATION_LH_5 &trans &trans NAVIGATION_LH
+#define NAVIGATION_RH_5 &trans &trans NAVIGATION_RH
+
 
 
 // ******************************************  FUNCTION layer
+
+#define FUNCTION_LZ &trans &trans &trans &trans &trans &trans
+#define FUNCTION_RZ &trans &trans &trans &trans &trans &trans
 
 #define FUNCTION_LT &kp F1  &kp F2  &kp F3  &kp F4  &kp F5  &kp F6
 #define FUNCTION_RT &kp F7  &kp F8  &kp F9  &kp F10  &kp F11  &kp F12
@@ -476,8 +515,13 @@ arcane_nav_r: arcane_nav_r {
 #define FUNCTION_LH &trans &trans &build_time
 #define FUNCTION_RH &build_time  &trans  &trans
 
+#define FUNCTION_LH_5 &trans &trans FUNCTION_LH
+#define FUNCTION_RH_5 &trans &trans FUNCTION_RH
 
 // ******************************************  EXTRA layer
+
+#define EXTRA_LZ &trans &trans &trans &trans &trans &trans
+#define EXTRA_RZ &trans &trans &trans &trans &trans &trans
 
 #define EXTRA_LT &trans &trans &at_wgyl_org &trans &trans &trans
 #define EXTRA_RT &trans &trans &trans &trans &phone_alt &trans
@@ -491,9 +535,14 @@ arcane_nav_r: arcane_nav_r {
 #define EXTRA_LH                      &trans &oneshot_or_to_NAVIGATION &trans
 #define EXTRA_RH   		  &trans &oneshot_or_to_NAVIGATION &trans
 
+#define EXTRA_LH_5 &trans &trans EXTRA_LH
+#define EXTRA_RH_5 &trans &trans EXTRA_RH
 
 
 // ******************************************  RGB layer
+
+#define RGB_LZ &trans &trans &trans &trans &trans &trans
+#define RGB_RZ &trans &trans &trans &trans &trans &trans
 
 #define RGB_LT &trans  &trans  &trans  &trans  &trans  &trans
 #define RGB_RT &rgb_ug RGB_HUI  &rgb_ug RGB_SAI  &trans  &trans  &rgb_ug RGB_COLOR_HSB(0,100,100)    &rgb_ug RGB_COLOR_HSB(275,100,100)
@@ -507,10 +556,15 @@ arcane_nav_r: arcane_nav_r {
 #define RGB_LH &trans &trans &trans
 #define RGB_RH &trans &trans &trans 
 
+#define RGB_LH_5 &trans &trans RGB_LH
+#define RGB_RH_5 &trans &trans RGB_RH
 
 
 
 // ******************************************  SYSTEM layer
+
+#define SYSTEM_LZ &trans &trans &trans &trans &trans &trans
+#define SYSTEM_RZ &trans &trans &trans &trans &trans &trans
 
 #define SYSTEM_LT &bt BT_CLR &bt BT_CLR_ALL &trans &trans &trans &trans
 #define SYSTEM_RT &trans &trans &trans &trans &trans &trans
@@ -524,9 +578,15 @@ arcane_nav_r: arcane_nav_r {
 #define SYSTEM_LH &trans &trans &trans
 #define SYSTEM_RH &trans &trans &trans
 
+#define SYSTEM_LH_5 &trans &trans SYSTEM_LH
+#define SYSTEM_RH_5 &trans &trans SYSTEM_RH
+
 
 
 // ******************************************  LGUI+NAV layer
+
+#define LGN_LZ &trans &trans &trans &trans &trans &trans
+#define LGN_RZ &trans &trans &trans &trans &trans &trans
 
 #define LGN_LT &kp LG(TAB)    &kp LG(Q)  &kp LG(W)        &kp LG(E)        &kp LG(R)     &kp LG(T)
 #define LGN_RT &msc LG(SCRL_UP)    &kp LG(HOME)        &kp LG(UP_ARROW)    &kp LG(END)          &kp LG(PG_UP)  &kp LG(BSPC)
@@ -540,8 +600,14 @@ arcane_nav_r: arcane_nav_r {
 #define LGN_LH &kp LG(ESC)  &kp LG(TAB)  &to BASE
 #define LGN_RH &to BASE  &kp LG(BSPC)  &kp LG(RET)
 
+#define LGN_LH_5 &trans &trans LGN_LH
+#define LGN_RH_5 &trans &trans LGN_RH
+
 
 // ******************************************  RGUI+NAV layer
+
+#define RGN_LZ &trans &trans &trans &trans &trans &trans
+#define RGN_RZ &trans &trans &trans &trans &trans &trans
 
 #define RGN_LT &kp RG(ESC)   &kp RG(PG_UP)  &kp RG(DELETE)      &kp RG(UP_ARROW)    &kp RG(HOME)         &msc RG(SCRL_UP)
 #define RGN_RT &kp RG(Y)  &kp RG(U)     &kp RG(I)        &kp RG(O)        &kp RG(P)     &kp RG(BSPC)
@@ -555,10 +621,16 @@ arcane_nav_r: arcane_nav_r {
 #define RGN_LH &kp LG(ESC)         &kp LG(TAB)          &to BASE
 #define RGN_RH &to BASE   &kp LG(BSPC)  &kp LG(RET)
 
+#define RGN_LH_5 &trans &trans RGN_LH
+#define RGN_RH_5 &trans &trans RGN_RH
+
 
 /*
 
 // ******************************************  EMPTY layer
+
+#define _LZ &trans &trans &trans &trans &trans &trans
+#define _RZ &trans &trans &trans &trans &trans &trans
 
 #define _LT &trans &trans &trans &trans &trans &trans
 #define _RT &trans &trans &trans &trans &trans &trans
@@ -572,160 +644,8 @@ arcane_nav_r: arcane_nav_r {
 #define _LH &trans &trans &trans
 #define _RH &trans &trans &trans
 
+#define _LH_5 &trans &trans _LH
+#define _RH_5 &trans &trans _RH
+
 */
 
-    keymap {
-        compatible = "zmk,keymap";
-
-        base_layer {
-            display-name = "base";
-            bindings = <
-BASE_LT                       &kp UP              BASE_RT
-BASE_LM             &kp LEFT  &to RGB   &kp RIGHT BASE_RM
-BASE_LB &kp C_MUTE            &kp DOWN            BASE_RB
-BASE_LH BASE_RH
-				>;
-				
-            sensor-bindings = <&inc_dec_kp C_VOLUME_UP C_VOLUME_DOWN>;
-        };
-
-        gaming_layer {
-            display-name = "gaming";
-            bindings = <
-GAMING_LT                       &kp UP              GAMING_RT
-GAMING_LM             &kp LEFT  &to RGB   &kp RIGHT GAMING_RM
-GAMING_LB &kp C_MUTE            &kp DOWN            GAMING_RB
-GAMING_LH GAMING_RH
-             >;
-            sensor-bindings = <&inc_dec_kp C_VOLUME_UP C_VOLUME_DOWN>;
-        };
-
-	alt_alpha {
-				display-name = "hierophant";
-				bindings = <
-HIEROPHANT_LT                       &kp UP              HIEROPHANT_RT
-HIEROPHANT_LM             &kp LEFT  &to RGB   &kp RIGHT HIEROPHANT_RM
-HIEROPHANT_LB &kp C_MUTE            &kp DOWN            HIEROPHANT_RB
-HIEROPHANT_LH HIEROPHANT_RH
-				>;
-				
-	};
-
-	caps_layer {
-				display-name = "caps";
-				bindings = <
-CAPS_LT                &trans        CAPS_RT
-CAPS_LM         &trans &trans &trans CAPS_RM
-CAPS_LB &trans         &trans        CAPS_RB
-CAPS_LH CAPS_RH
-				>;
-				
-	};
-
-        numeric_layer {
-            display-name = "numeric";
-            bindings = <
-NUMERIC_LT                        &mmv MOVE_UP                NUMERIC_RT
-NUMERIC_LM         &mmv MOVE_LEFT &mkp LCLK  &mmv MOVE_RIGHT  NUMERIC_RM
-NUMERIC_LB &trans                 &mmv MOVE_DOWN              NUMERIC_RB
-NUMERIC_LH NUMERIC_RH
-            >;
-            sensor-bindings = <&scroll_encoder>;
-        };
-
-        navigation_layer {
-            display-name = "navigation";
-            bindings = <
-NAVIGATION_LT                        &mmv MOVE_UP                NAVIGATION_RT
-NAVIGATION_LM         &mmv MOVE_LEFT &mkp MB1   &mmv MOVE_RIGHT  NAVIGATION_RM
-NAVIGATION_LB &trans                 &mmv MOVE_DOWN              NAVIGATION_RB
-NAVIGATION_LH NAVIGATION_RH
-            >;
-            sensor-bindings = <&scroll_encoder>;
-        };
-
-        function_layer {
-            display-name = "function";
-            bindings = <
-FUNCTION_LT                        &mmv MOVE_UP                FUNCTION_RT
-FUNCTION_LM         &mmv MOVE_LEFT &mkp MB1   &mmv MOVE_RIGHT  FUNCTION_RM
-FUNCTION_LB &trans                 &mmv MOVE_DOWN              FUNCTION_RB
-FUNCTION_LH FUNCTION_RH
-            >;
-            sensor-bindings = <&scroll_encoder>;
-        };
-
-        extra_layer {
-            display-name = "extra";
-            bindings = <
-EXTRA_LT                &trans         EXTRA_RT
-EXTRA_LM         &trans &trans &trans  EXTRA_RM
-EXTRA_LB &trans         &trans         EXTRA_RB
-EXTRA_LH EXTRA_RH
-            >;
-            sensor-bindings = <&scroll_encoder>;
-        };
-
-        rgb_layer {
-            display-name = "rgb";
-            bindings = <
-RGB_LT                                    &rgb_ug RGB_SPI                    RGB_RT
-RGB_LM                   &rgb_ug RGB_EFR  &to BASE         &rgb_ug RGB_EFF   RGB_RM
-RGB_LB  &rgb_ug RGB_TOG                   &rgb_ug RGB_SPD                    RGB_RB
-RGB_LH RGB_RH
-            >;
-            sensor-bindings = <&rgb_encoder>;
-        };
-
-
-        system_layer {
-            display-name = "system";
-            bindings = <
-SYSTEM_LT                              &mmv MOVE_UP                     SYSTEM_RT
-SYSTEM_LM              &mmv MOVE_LEFT  &to BASE        &mmv MOVE_RIGHT  SYSTEM_RM
-SYSTEM_LB  &kp C_MUTE                  &mmv MOVE_DOWN                   SYSTEM_RB
-SYSTEM_LH SYSTEM_RH
-            >;
-            sensor-bindings = <&scroll_encoder>;
-        };
-
-
-
-        mod_l_nav_layer {
-            display-name = "L GUI+nav";
-            bindings = <
-LGN_LT                          &mmv MOVE_UP                      LGN_RT
-LGN_LM            &mmv MOVE_LEFT &kp HOME        &mmv MOVE_RIGHT  LGN_RM
-LGN_LB  &kp HOME                &mmv MOVE_DOWN                    LGN_RB
-LGN_LH LGN_RH
-            >;
-            sensor-bindings = <&scroll_encoder>;
-        };
-
-
-        mod_r_nav_layer {
-            display-name = "R GUI+nav";
-            bindings = <
-RGN_LT                          &mmv MOVE_UP                      RGN_RT
-RGN_LM            &mmv MOVE_LEFT &kp HOME        &mmv MOVE_RIGHT  RGN_RM
-RGN_LB  &kp HOME                &mmv MOVE_DOWN                    RGN_RB
-RGN_LH RGN_RH
-            >;
-            sensor-bindings = <&scroll_encoder>;
-        };
-
-/*
-        empty_layer {
-            display-name = "empty";
-            bindings = <
-EMPTY_LT                  &trans          EMPTY_RT
-EMPTY_LM          &trans  &trans  &trans  EMPTY_RM
-EMPTY_LB  &trans          &trans          EMPTY_RB
-EMPTY_LH EMPTY_RH
-            >;
-            sensor-bindings = <&scroll_encoder>;
-        };
-*/
-
-     }; /* keymap */
-};
