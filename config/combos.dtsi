@@ -112,7 +112,7 @@
 
 /* top row */
 ZMK_COMBO_FAST(esc, ESC, LT5, LT4)
-ZMK_COMBO_FAST(tilde, TILDE, LT5, LT3)
+ZMK_COMBO_FAST(tilde, TILDE, LT4, LT1) // double skip
 ZMK_COMBO_FAST(curlybracket_open, LEFT_BRACE, LT4, LT3)
 ZMK_COMBO_FAST(square_open, LEFT_BRACKET, LT3, LT2)
 ZMK_COMBO_FAST(paren_open, LEFT_PARENTHESIS, LT2, LT1)
@@ -138,6 +138,7 @@ ZMK_COMBO_PLUS(num_skip_8, &kp N8, RT5, RT3)  // skip!
 ZMK_COMBO_PLUS(num_skip_9, &kp N9, LT0, LT3)  // double skip! does not trigger, even with keys reversed
 ZMK_COMBO_PLUS(num_skip_0, &kp N0, RT3, RT0)  // double skip!
 
+
 /* middle row */
 ZMK_COMBO_PLUS_SLOW(tab_horiz, &kp TAB, LM4, LM5)
 ZMK_COMBO_PLUS(alt_l, &sk LALT, LM3, LM4)
@@ -151,7 +152,7 @@ ZMK_COMBO_PLUS(caps_word_r, &caps_word_lock_dance, RM2, RM3)
 ZMK_COMBO_PLUS(alt_r, &sk RALT, RM3, RM4)
 ZMK_COMBO_PLUS_SLOW(dash, &kp MINUS, RM4, RM5)
 
-ZMK_COMBO_3_PLUS_FAST(emdash_alt, &em_dash, RM3, RM4, RM5) // does not trigger if _SLOW
+ZMK_COMBO_3_PLUS_FAST(emdash_alt, &em_dash, RM3, RM4, RM5) // does not trigger, even with _slow and other variants
 
 // middle row skips
 
@@ -171,7 +172,7 @@ ZMK_COMBO_FAST(backslash, BSLH, LB5, LB4)
 //ZMK_COMBO_FAST(, , LB3, LB2)
 //ZMK_COMBO_FAST(, , LB2, LB1)
 ZMK_COMBO_FAST(minus, MINUS, LB1, LB0)
-ZMK_COMBO_3_PLUS(emdash, &em_dash, LB2, LB1, LB0)
+ZMK_COMBO_3_PLUS(emdash, &em_dash, LB2, LB1, LB0) // does not trigger
 
 
 ZMK_COMBO_FAST(plus, PLUS, RB0, RB1)
