@@ -59,8 +59,32 @@ def unmount_device(mount_point):
    _, stderr, returncode = run_command(cmd, check=False)
    return returncode == 0, stderr
 
+def extract_keyboard_info(mount_point):
+   """Extract keyboard information from INFO_UF2.TXT"""
+   info_path = Path(mount_point) / 'INFO_UF2.TXT'
+   keyboard_info = {}
+   
+   try:
+       with open(info_path, 'r') as f:
+           content = f.read()
+           
+       # Extract model information
+       for line in content.splitlines():
+           line = line.strip()
+           if line.startswith('Model:'):
+               keyboard_info['model'] = line.split(':', 1)[1].strip()
+           elif line.startswith('Board-ID:'):
+               keyboard_info['board_id'] = line.split(':', 1)[1].strip()
+           elif 'UF2 Bootloader' in line:
+               keyboard_info['bootloader'] = True
+               
+   except Exception:
+       pass
+   
+   return keyboard_info
+
 def check_zmk_criteria(mount_point, verbose=False):
-   """Check if mounted device meets ZMK bootloader criteria"""
+   """Check if mounted device meets ZMK bootloader criteria and return keyboard info"""
    mount_path = Path(mount_point)
    
    # Check for required files
@@ -69,9 +93,9 @@ def check_zmk_criteria(mount_point, verbose=False):
        if not file_path.exists():
            if verbose:
                print(f"Missing required file: {filename}")
-           return False
+           return False, {}
    
-   # Check INFO_UF2.TXT content
+   # Check INFO_UF2.TXT content and extract keyboard info
    info_path = mount_path / 'INFO_UF2.TXT'
    try:
        with open(info_path, 'r') as f:
@@ -81,17 +105,18 @@ def check_zmk_criteria(mount_point, verbose=False):
        if found_fields < len(INFO_FILE_FIELDS) - 1:  # Allow one missing field
            if verbose:
                print(f"INFO_UF2.TXT missing expected fields (found {found_fields}/{len(INFO_FILE_FIELDS)})")
-           return False
+           return False, {}
+           
+       keyboard_info = extract_keyboard_info(mount_point)
+       return True, keyboard_info
            
    except Exception as e:
        if verbose:
            print(f"Error reading INFO_UF2.TXT: {e}")
-       return False
-   
-   return True
+       return False, {}
 
 def check_device_zmk(device, size_mb, verbose=False):
-   """Check if a device is a ZMK bootloader device"""
+   """Check if a device is a ZMK bootloader device and return keyboard info"""
    if verbose:
        print(f"\nChecking device: {device} ({size_mb:.1f} MB)")
    
@@ -99,7 +124,7 @@ def check_device_zmk(device, size_mb, verbose=False):
    if is_mounted(device):
        if verbose:
            print(f"Device already mounted")
-       return False, None
+       return False, None, {}
    
    # Create temporary mount point
    temp_mount = tempfile.mkdtemp(prefix="zmk_", dir="/tmp")
@@ -111,20 +136,22 @@ def check_device_zmk(device, size_mb, verbose=False):
            if verbose:
                print(f"Failed to mount: {error}")
            os.rmdir(temp_mount)
-           return False, None
+           return False, None, {}
        
-       is_zmk = check_zmk_criteria(temp_mount, verbose)
+       is_zmk, keyboard_info = check_zmk_criteria(temp_mount, verbose)
        
        # Always unmount temp mount
        unmount_device(temp_mount)
        os.rmdir(temp_mount)
        
        if is_zmk and verbose:
-           print(f"ZMK bootloader device detected")
+           model = keyboard_info.get('model', 'Unknown')
+           board_id = keyboard_info.get('board_id', 'Unknown')
+           print(f"ZMK bootloader device detected: {model} (Board: {board_id})")
        elif verbose:
            print(f"Not a ZMK bootloader device")
            
-       return is_zmk, device
+       return is_zmk, device, keyboard_info
        
    except Exception as e:
        if verbose:
@@ -134,7 +161,7 @@ def check_device_zmk(device, size_mb, verbose=False):
            os.rmdir(temp_mount)
        except:
            pass
-       return False, None
+       return False, None, {}
 
 def mount_zmk_device(device, mount_location, verbose=False):
    """Mount a confirmed ZMK device to final location"""
@@ -151,8 +178,40 @@ def mount_zmk_device(device, mount_location, verbose=False):
            print(f"Failed to mount {device} at {final_mount}: {error}")
        return None
 
-def scan_and_mount(mount_location, no_mount, verbose, wait_seconds):
-   """Scan for devices and mount the first ZMK device found"""
+def match_keyboard_name(keyboard_info, target_name):
+   """Check if keyboard info matches target keyboard name"""
+   if not target_name:
+       return True  # No filter, match any
+       
+   target_lower = target_name.lower()
+   
+   # Check model name
+   model = keyboard_info.get('model', '').lower()
+   if target_lower in model:
+       return True
+       
+   # Check board ID  
+   board_id = keyboard_info.get('board_id', '').lower()
+   if target_lower in board_id:
+       return True
+       
+   # Check for common keyboard name patterns
+   keyboard_patterns = {
+       'sofle': ['sofle'],
+       'corne': ['corne', 'crkbd'],
+       'glove80': ['glove80', 'glove'],
+       'planck': ['planck'],
+       'zen': ['zen', 'corneish']
+   }
+   
+   for pattern_name, patterns in keyboard_patterns.items():
+       if target_lower in pattern_name or any(p in target_lower for p in patterns):
+           return any(p in model or p in board_id for p in patterns)
+           
+   return False
+
+def scan_and_mount(mount_location, no_mount, verbose, wait_seconds, keyboard_name=None):
+   """Scan for devices and mount ZMK device matching keyboard name"""
    start_time = time.time()
    checked_devices = set()
    
@@ -177,17 +236,18 @@ def scan_and_mount(mount_location, no_mount, verbose, wait_seconds):
                    checked_devices.add(device)
                    
                    try:
-                       is_zmk, found_device = future.result()
-                       if is_zmk:
+                       is_zmk, found_device, keyboard_info = future.result()
+                       if is_zmk and match_keyboard_name(keyboard_info, keyboard_name):
                            # Cancel remaining futures
                            for f in futures:
                                if f != future and not f.done():
                                    f.cancel()
                            
                            if no_mount:
-                               return found_device
+                               return found_device, keyboard_info
                            else:
-                               return mount_zmk_device(found_device, mount_location, verbose)
+                               mount_path = mount_zmk_device(found_device, mount_location, verbose)
+                               return mount_path, keyboard_info
                    except Exception as e:
                        if verbose:
                            print(f"Error checking {device}: {e}")
@@ -200,11 +260,12 @@ def scan_and_mount(mount_location, no_mount, verbose, wait_seconds):
        # Wait before next check
        time.sleep(DEVICE_CHECK_INTERVAL)
    
-   return None
+   return None, {}
 
 def main():
    parser = argparse.ArgumentParser(description='Find and mount ZMK bootloader devices')
    parser.add_argument('mount_location', help='Directory where the ZMK device should be mounted')
+   parser.add_argument('--keyboard', '-k', help='Keyboard name to match (sofle, corne, glove80, planck, zen)')
    parser.add_argument('--no-mount', action='store_true', help='Find devices but do not leave them mounted')
    parser.add_argument('--verbose', action='store_true', help='Verbose output')
    parser.add_argument('--wait', type=float, default=DEFAULT_WAIT_SECONDS, 
@@ -217,20 +278,25 @@ def main():
    wait_seconds = 0 if args.no_wait else args.wait
    
    if args.verbose:
+       keyboard_filter = f" matching '{args.keyboard}'" if args.keyboard else ""
        if wait_seconds > 0:
-           print(f"Waiting up to {wait_seconds} seconds for ZMK bootloader devices...")
+           print(f"Waiting up to {wait_seconds} seconds for ZMK bootloader devices{keyboard_filter}...")
        else:
-           print("Scanning for ZMK bootloader devices...")
+           print(f"Scanning for ZMK bootloader devices{keyboard_filter}...")
    
    # Scan and mount
-   result = scan_and_mount(args.mount_location, args.no_mount, args.verbose, wait_seconds)
+   result, keyboard_info = scan_and_mount(args.mount_location, args.no_mount, args.verbose, wait_seconds, args.keyboard)
    
    # Summary
    if result:
-       print(f"\nFound and {'identified' if args.no_mount else 'mounted'} 1 ZMK bootloader device")
+       model = keyboard_info.get('model', 'Unknown')
+       board_id = keyboard_info.get('board_id', 'Unknown')
+       action = 'identified' if args.no_mount else 'mounted'
+       print(f"\nFound and {action} ZMK device: {model} (Board: {board_id})")
        return 0
    else:
-       print("\nNo ZMK bootloader devices found")
+       keyboard_filter = f" matching '{args.keyboard}'" if args.keyboard else ""
+       print(f"\nNo ZMK bootloader devices found{keyboard_filter}")
        return 1
 
 if __name__ == "__main__":
