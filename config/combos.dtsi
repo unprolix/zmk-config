@@ -152,7 +152,7 @@ ZMK_COMBO_PLUS(caps_word_r, &caps_word_lock_dance, RM2, RM3)
 ZMK_COMBO_PLUS(alt_r, &sk RALT, RM3, RM4)
 ZMK_COMBO_PLUS_SLOW(dash, &kp MINUS, RM4, RM5)
 
-ZMK_COMBO_3_PLUS_FAST(emdash_alt, &em_dash, RM3, RM4, RM5) // does not trigger, even with _slow and other variants
+ZMK_COMBO_3_PLUS_FAST(emdash_alt, &em_dash, RM3, RM4, RM5)
 
 // middle row skips
 
@@ -172,7 +172,7 @@ ZMK_COMBO_FAST(backslash, BSLH, LB5, LB4)
 //ZMK_COMBO_FAST(, , LB3, LB2)
 //ZMK_COMBO_FAST(, , LB2, LB1)
 ZMK_COMBO_FAST(minus, MINUS, LB1, LB0)
-ZMK_COMBO_3_PLUS(emdash, &em_dash, LB2, LB1, LB0) // does not trigger
+ZMK_COMBO_3_PLUS(emdash, &em_dash, LB2, LB1, LB0)
 
 
 ZMK_COMBO_FAST(plus, PLUS, RB0, RB1)
