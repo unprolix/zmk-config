@@ -1,4 +1,4 @@
-// note: leader key sequences can currently have a maximum of five letters
+// note: leader key sequences can currently have a maximum of five letters, unless ZMK 0.3 changed that
 
 // the limit of sequences per leader key is CONFIG_ZMK_LEADER_MAX_SEQUENCES. defining more will result in runtime crashes.
 // the limit must be defined in the .conf file for whatever you're building.
@@ -78,15 +78,32 @@ ZMK_LEADER_SEQUENCE(caps_word,  &caps_word,     C W)
 
 // -----------------------------------------------------------------------------
 
+ZMK_LEADER_SEQUENCE(unicode_mode_linux, &uc UC_SET_LINUX, U L)
+ZMK_LEADER_SEQUENCE(unicode_mode_emacs, &uc UC_SET_EMACS, U E)
+
+ZMK_LEADER_SEQUENCE(circled_plus, &uc 0x2295 0,  C PLUS) // ⊕
+ZMK_LEADER_SEQUENCE(circled_0, &uc 0x245F 0x2775,  C N0) // ⑟⑟ // does this even exist?
+ZMK_LEADER_SEQUENCE(circled_1, &uc 0x2460 0x2776,  C N1) // ①❶
+ZMK_LEADER_SEQUENCE(circled_2, &uc 0x2461 0x2777,  C N2) // ②❷
+ZMK_LEADER_SEQUENCE(circled_3, &uc 0x2462 0x2778,  C N3) // ③❸
+ZMK_LEADER_SEQUENCE(circled_4, &uc 0x2463 0x2779,  C N4) // ④❹
+ZMK_LEADER_SEQUENCE(circled_5, &uc 0x2464 0x277A,  C N5) // ⑤❺
+ZMK_LEADER_SEQUENCE(circled_6, &uc 0x2465 0x277B,  C N6) // ⑥❻
+ZMK_LEADER_SEQUENCE(circled_7, &uc 0x2466 0x277C,  C N7) // ⑦❼
+ZMK_LEADER_SEQUENCE(circled_8, &uc 0x2467 0x277D,  C N8) // ⑧❽
+ZMK_LEADER_SEQUENCE(circled_9, &uc 0x2468 0x277E,  C N9) // ⑨❾
+ZMK_LEADER_SEQUENCE(circled_10, &uc 0x2469 0x277F,  C T N0) // ⑩❿
+ZMK_LEADER_SEQUENCE(circled_11, &uc 0x246A 0x2780,  C T N1) // 
+// there are more...
+
 
 /*
 ZMK_LEADER_UNICODE_4(heart, W H E A R, N2, N7, N6, N4)
 */
 
-ZMK_LEADER_UNICODE_5(smile, S M I L E, N1, F, N6, N0, A)
-ZMK_LEADER_UNICODE_5(thumb, T H U M B, N1, F, N4, N4, D)
-
-ZMK_LEADER_UNICODE_5(amour, A M O U R, N1, F, N6, N0, D)  // 😍
+ZMK_LEADER_SEQUENCE(smile, &uc 0x01F60A 0, S M I L E) // 😊
+ZMK_LEADER_SEQUENCE(thumb, &uc 0x01F44D 0, T H U M B)
+ZMK_LEADER_SEQUENCE(amour, &uc 0x01F60D 0, A M O U R)
 ZMK_LEADER_UNICODE_5(brain, B R A I N, N1, F, N9, E, N0) // 🧠
 ZMK_LEADER_UNICODE_5(cry, C R Y, N1, F, N6, N2, N2) // 😢
 ZMK_LEADER_UNICODE_5(kiss, K I S S, N1, F, N6, N1, N8) // 😘
