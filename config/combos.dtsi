@@ -161,9 +161,6 @@ ZMK_COMBO_PLUS(smart_num_r, &smart_num_lock_dance, RM1, RM3)  // skip!
 ZMK_COMBO_PLUS_FAST(gui_l, &sk LGUI, LM1, LM4)	// double skip!
 ZMK_COMBO_PLUS_FAST(gui_r, &sk RGUI, RM1, RM4)	// double skip!
 
-// middle and top, staggered
-ZMK_COMBO_PLUS(backspace_stagger_l, &kp BSPC, LT0, LM2)  // skip+stagger
-ZMK_COMBO_PLUS(return_stagger_r, &kp ENTER, RT0, RM2)  // skip+stagger
 
 
 /* bottom row */
@@ -193,8 +190,8 @@ ZMK_COMBO_FAST(printscreen, PRINTSCREEN, LH2, RH2) /* outer thumb keys; screensh
 
 /* top two rows */
 ZMK_COMBO_PLUS_SLOW(grave, &kp GRAVE, LT5, LM5)
-ZMK_COMBO_PLUS(excl, &kp EXCL, LT4, LM4)  // TODO: does not fire; fix.
-ZMK_COMBO_PLUS(at, &kp AT, LM3, LT3) // TODO: does not fire; fix.
+ZMK_COMBO_PLUS(excl, &kp EXCL, LT4, LM4)
+ZMK_COMBO_PLUS(at, &kp AT, LM3, LT3) 
 ZMK_COMBO_PLUS(hash, &kp HASH, LT2, LM2)
 ZMK_COMBO_PLUS(dollar, &kp DOLLAR, LT1, LM1)
 ZMK_COMBO_PLUS(tab_vert, &kp TAB, LT0, LM0)	/* top and middle innermost left */
@@ -205,6 +202,18 @@ ZMK_COMBO_SLOW(asterisk, ASTERISK, RT2, RM2)
 ZMK_COMBO_FAST(caret, CARET, RT3, RM3)	// TODO: fix. does not work with zmk_combo_slow or _fast in either key order
 ZMK_COMBO_SLOW(percent, PERCENT, RT4, RM4)
 ZMK_COMBO_SLOW(pipe, PIPE, RT5, RM5)
+
+/* top two rows stagger */
+ZMK_COMBO_SLOW(tab_stagger, TAB, LT0, LM2)
+ZMK_COMBO_SLOW(backspace_stagger_l, BSPC, LM0, LT1)
+// ⊕
+ZMK_COMBO_SLOW(backspace_stagger_r, BSPC, RM0, RT1)
+ZMK_COMBO_SLOW(enter_stagger, ENTER, RT0, RM2)
+
+
+
+
+
 
 
 /* bottom two rows */

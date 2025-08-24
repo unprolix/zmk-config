@@ -2,6 +2,7 @@
 #define HOST_OS 1 // linux. impacts unicode entry. anything else?
 
 #include <behaviors.dtsi>
+#include <behaviors/unicode.dtsi> // Requires zmk-unicode module.
 #include <behaviors/num_word.dtsi> // Requires auto-layer module.
 #include <dt-bindings/zmk/keys.h>
 
@@ -193,6 +194,11 @@ MAKE_HRM(hmr, &kp, &kp, KEYS_L THUMBS) // Right-hand HRMs.
     quick-tap-ms = <150>;
     flavor = "tap-preferred";
 };
+
+&uc {
+  default-mode = <UC_MODE_LINUX>;
+};
+
 
 / {
   macros {
