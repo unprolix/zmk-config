@@ -8,3 +8,10 @@ ht_mod_kp: ht_mod_kp {
     quick-tap-ms = <125>;
     bindings = <&kp>, <&kp>;
 };
+
+backspace_word_delete: backspace_word_delete {
+    compatible = "zmk,behavior-tap-dance";
+    #binding-cells = <0>;
+    tapping-term-ms = <TAP_DANCE_TAPPING>;
+    bindings = <&kp BSPC>, <&kp LC(BSPC)>;
+};

@@ -196,7 +196,7 @@ ZMK_COMBO_PLUS(hash, &kp HASH, LT2, LM2)
 ZMK_COMBO_PLUS(dollar, &kp DOLLAR, LT1, LM1)
 ZMK_COMBO_PLUS(tab_vert, &kp TAB, LT0, LM0)	/* top and middle innermost left */
 
-ZMK_COMBO_SLOW(backspace, BSPC, RT0, RM0)	/* top and middle innermost right */
+ZMK_COMBO_PLUS_SLOW(backspace, &backspace_word_delete, RT0, RM0)	/* top and middle innermost right */
 ZMK_COMBO_SLOW(amps, AMPS, RT1, RM1)
 ZMK_COMBO_SLOW(asterisk, ASTERISK, RT2, RM2)
 ZMK_COMBO_FAST(caret, CARET, RT3, RM3)	// TODO: fix. does not work with zmk_combo_slow or _fast in either key order
@@ -205,9 +205,9 @@ ZMK_COMBO_SLOW(pipe, PIPE, RT5, RM5)
 
 /* top two rows stagger */
 ZMK_COMBO_SLOW(tab_stagger, TAB, LT0, LM2)
-ZMK_COMBO_SLOW(backspace_stagger_l, BSPC, LM0, LT1)
+ZMK_COMBO_PLUS_SLOW(backspace_stagger_l, &backspace_word_delete, LM0, LT1)
 // ⊕
-ZMK_COMBO_SLOW(backspace_stagger_r, BSPC, RM0, RT1)
+ZMK_COMBO_PLUS_SLOW(backspace_stagger_r, &backspace_word_delete, RM0, RT1)
 ZMK_COMBO_SLOW(enter_stagger, ENTER, RT0, RM2)
 
 
