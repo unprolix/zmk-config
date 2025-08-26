@@ -16,6 +16,7 @@
 #include "zmk-helpers/key-labels/eyelash42.h"
 #include "jjb.keymap"
 
+/ {
     keymap {
         compatible = "zmk,keymap";
 
@@ -170,6 +171,6 @@ EMPTY_LH EMPTY_RH
 */
 
      }; /* keymap */
-};
+}; // root node
 
 
