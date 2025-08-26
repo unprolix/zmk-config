@@ -111,6 +111,7 @@ key numbers
 #define SYSTEM 9
 #define MODIFIER_LEFT_NAV 10
 #define MODIFIER_RIGHT_NAV 11
+#define SUPERSCRIPT 12
 
 
 // short versions for helping things line up
@@ -209,22 +210,33 @@ MAKE_HRM(hmr, &kp, &kp, KEYS_L THUMBS) // Right-hand HRMs.
 };
 
 
+#include "bt-modsel.dtsi"
 #include "leader.dtsi"
 
 ZMK_UNICODE_SINGLE(em_dash, N2, N0, N1, N4)
 
+//BT_MODSEL(0)
+//BT_MODSEL(1)
+//BT_MODSEL(2)
+//BT_MODSEL(3)
+//BT_MODSEL(4)
+//BT_MODSEL(5)
+
+		
+
+
 / {
 	behaviors {
 
+#include "alphanumerics.dtsi"
 #include "tap-hold-layer-behaviors.dtsi"
 #include "modifier-tap-doubletap-behaviors.dtsi"
 #include "arcane.dtsi"
-		
+
 ZMK_KEY_LAYER(SQT,NUM)
 ZMK_KEY_LAYER(DQT,NUM)
 ZMK_KEY_LAYER(ENTER, NAV)
 
-		
 // RGB control behaviors for delayed activation
 rgb_on_behavior: rgb_on_behavior {
     compatible = "zmk,behavior-macro";
@@ -526,22 +538,19 @@ arcane_nav_r: arcane_nav_r {
 
 // ******************************************  EXTRA layer
 
-#define EXTRA_LZ &trans &trans &trans &trans &trans &trans
-#define EXTRA_RZ &trans &trans &trans &trans &trans &trans
-
+#define EXTRA_LZ &smart_w &trans &trans &trans &trans &trans
 #define EXTRA_LT &trans &trans &at_wgyl_org &trans &trans &trans
-#define EXTRA_RT &trans &trans &trans &trans &phone_alt &trans
-
 #define EXTRA_LM &dash_emdash &one_urie &trans &trans &trans &kp DELETE
-#define EXTRA_RM &kp INSERT &trans &trans &trans &trans &trans
-
 #define EXTRA_LB &to_nav &trans &trans &trans &trans &trans
-#define EXTRA_RB &trans &trans &trans &trans &trans &key_repeat
-
 #define EXTRA_LH                      &trans &oneshot_or_to_NAVIGATION &trans
-#define EXTRA_RH   		  &trans &oneshot_or_to_NAVIGATION &trans
-
 #define EXTRA_LH_5 &trans &trans EXTRA_LH
+
+
+#define EXTRA_RZ &trans &trans &trans &trans &trans &trans
+#define EXTRA_RT &trans &trans &trans &trans &phone_alt &trans
+#define EXTRA_RM &kp INSERT &trans &trans &trans &trans &trans
+#define EXTRA_RB &trans &trans &trans &trans &trans &key_repeat
+#define EXTRA_RH   		  &trans &oneshot_or_to_NAVIGATION &trans
 #define EXTRA_RH_5 &trans &trans EXTRA_RH
 
 
@@ -570,23 +579,19 @@ arcane_nav_r: arcane_nav_r {
 // ******************************************  SYSTEM layer
 
 #define SYSTEM_LZ &trans &trans &trans &trans &trans &trans
-#define SYSTEM_RZ &trans &trans &trans &trans &trans &trans
 
-#define SYSTEM_LT &bt BT_CLR &bt BT_CLR_ALL &trans &trans &trans &trans
-#define SYSTEM_RT &trans &trans &trans &trans &trans &trans
-
-#define SYSTEM_LM &bt BT_SEL 0  &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4  &bt BT_SEL 5
-#define SYSTEM_RM &trans &trans &trans &trans &trans &trans
-
-#define SYSTEM_LB &trans &rgb_ug RGB_OFF &rgb_ug RGB_ON &trans &trans &rgb_ug RGB_EFF                    
-#define SYSTEM_RB &rgb_ug RGB_EFR  &rgb_ug RGB_SPI  &rgb_ug RGB_BRI  &rgb_ug RGB_BRD  &kp END   &kp PG_DN
-
+#define SYSTEM_LT &bt BT_CLR    &bt BT_CLR_ALL  &trans        &trans        &trans        &trans
+#define SYSTEM_LM &bt BT_SEL 0  &bt BT_SEL 1    &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4  &bt BT_SEL 5
+#define SYSTEM_LB &trans        &trans          &trans        &trans &trans &rgb_ug RGB_EFF
 #define SYSTEM_LH &trans &trans &trans
-#define SYSTEM_RH &trans &trans &trans
-
 #define SYSTEM_LH_5 &trans &trans SYSTEM_LH
-#define SYSTEM_RH_5 &trans &trans SYSTEM_RH
 
+#define SYSTEM_RZ &trans &trans &trans &trans &trans &trans
+#define SYSTEM_RT &trans &trans &trans &trans &trans &trans
+#define SYSTEM_RM &trans &trans &trans &trans &trans &trans
+#define SYSTEM_RB &rgb_ug RGB_EFR  &rgb_ug RGB_SPI  &rgb_ug RGB_BRI  &rgb_ug RGB_BRD  &kp END   &kp PG_DN
+#define SYSTEM_RH &trans &trans &trans
+#define SYSTEM_RH_5 &trans &trans SYSTEM_RH
 
 
 // ******************************************  LGUI+NAV layer
@@ -655,3 +660,22 @@ arcane_nav_r: arcane_nav_r {
 
 */
 
+// ****************************************** SUPERSCRIPT layer
+
+#define SUPERSCRIPT_LZ &trans &trans &trans &trans &trans &trans
+#define SUPERSCRIPT_RZ &trans &trans &trans &trans &trans &trans
+
+#define SUPERSCRIPT_LT &trans &trans &trans &trans &trans &trans
+#define SUPERSCRIPT_RT &trans &trans &trans &trans &trans &trans
+
+#define SUPERSCRIPT_LM &trans &trans &trans &trans &trans &trans
+#define SUPERSCRIPT_RM &trans &trans &trans &trans &trans &trans
+
+#define SUPERSCRIPT_LB &trans &trans &trans &trans &trans &trans
+#define SUPERSCRIPT_RB &trans &trans &trans &trans &trans &trans
+
+#define SUPERSCRIPT_LH &trans &trans &trans
+#define SUPERSCRIPT_RH &trans &trans &trans
+
+#define SUPERSCRIPT_LH_5 &trans &trans _LH
+#define SUPERSCRIPT_RH_5 &trans &trans _RH

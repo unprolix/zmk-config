@@ -1,0 +1,62 @@
+/* bt-modsel.dtsi
+ *
+ * Defines BT_MODSEL(idx) macro:
+ * - Shift+key → &bt BT_DISC idx
+ * - Alt+key   → &bt BT_CLR idx
+ * - Else      → &bt BT_SEL idx
+ *
+ * Usage:
+ *   BT_MODSEL(0)
+ *   BT_MODSEL(1)
+ *   ...
+ * Then bind keys with:
+ *   &bt_modsel_0
+ *   &bt_modsel_1
+ */
+
+#define BT_MODSEL(idx)                                                   \
+    / {                                                                  \
+        behaviors {                                                      \
+            bt_sel_##idx: bt_sel_##idx {                                 \
+                label = "BT_SEL" #idx;                                   \
+                compatible = "zmk,behavior-macro";                       \
+                #binding-cells = <0>;                                    \
+                bindings = <&bt BT_SEL idx>;                             \
+            };                                                           \
+                                                                         \
+            bt_disc_##idx: bt_disc_##idx {                               \
+                label = "BT_DISC" #idx;                                  \
+                compatible = "zmk,behavior-macro";                       \
+                #binding-cells = <0>;                                    \
+                bindings = <&bt BT_DISC idx>;                            \
+            };                                                           \
+                                                                         \
+            bt_clr_##idx: bt_clr_##idx {                                 \
+                label = "BT_CLR" #idx;                                   \
+                compatible = "zmk,behavior-macro";                       \
+                #binding-cells = <0>;                                    \
+                bindings = <&bt BT_CLR idx>;                             \
+            };                                                           \
+                                                                         \
+            bt_alt_##idx: bt_alt_##idx {                                 \
+                label = "BT_ALT" #idx;                                   \
+                compatible = "zmk,behavior-mod-morph";                   \
+                mods = <(MOD_LALT|MOD_RALT)>;                            \
+                bindings = <&bt_clr_##idx>, <&bt_sel_##idx>;             \
+            };                                                           \
+                                                                         \
+            bt_shift_##idx: bt_shift_##idx {                             \
+                label = "BT_SHIFT" #idx;                                 \
+                compatible = "zmk,behavior-mod-morph";                   \
+                mods = <(MOD_LSFT|MOD_RSFT)>;                            \
+                bindings = <&bt_disc_##idx>, <&bt_alt_##idx>;            \
+            };                                                           \
+                                                                         \
+            bt_modsel_##idx: bt_modsel_##idx {                           \
+                label = "BT_MODSEL" #idx;                                \
+                compatible = "zmk,behavior-macro";                       \
+                #binding-cells = <0>;                                    \
+                bindings = <&bt_shift_##idx>;                            \
+            };                                                           \
+        };                                                               \
+    }
