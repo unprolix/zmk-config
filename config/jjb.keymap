@@ -679,3 +679,5 @@ arcane_nav_r: arcane_nav_r {
 
 #define SUPERSCRIPT_LH_5 &trans &trans _LH
 #define SUPERSCRIPT_RH_5 &trans &trans _RH
+
+}; // root node
