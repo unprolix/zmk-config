@@ -104,45 +104,47 @@ ZMK_LEADER_UNICODE_4(heart, W H E A R, N2, N7, N6, N4)
 ZMK_LEADER_SEQUENCE(smile, &uc 0x01F60A 0, S M I L E) // 😊
 ZMK_LEADER_SEQUENCE(thumb, &uc 0x01F44D 0, T H U M B)
 ZMK_LEADER_SEQUENCE(amour, &uc 0x01F60D 0, A M O U R)
-ZMK_LEADER_UNICODE_5(brain, B R A I N, N1, F, N9, E, N0) // 🧠
-ZMK_LEADER_UNICODE_5(cry, C R Y, N1, F, N6, N2, N2) // 😢
-ZMK_LEADER_UNICODE_5(kiss, K I S S, N1, F, N6, N1, N8) // 😘
-ZMK_LEADER_UNICODE_5(pour, P O U R, N1, F, A, D, N7) // 🫗
+
+ZMK_LEADER_SEQUENCE(brain, &uc 0x1F9E0 0, B R A I N) // 🧠
+ZMK_LEADER_SEQUENCE(cry, &uc 0x1F622 0, C R Y) // 😢
+ZMK_LEADER_SEQUENCE(kiss, &uc 0x1F618 0, K I S S) // 😘
+
+ZMK_LEADER_SEQUENCE(pour, &uc 0x1FAD7 0, P O U R) // 🫗
+
+ZMK_LEADER_SEQUENCE(rictus, &uc 0x1F62C 0, R I C T U) // 😬
+ZMK_LEADER_SEQUENCE(halo, &uc 0x1F607 0, H A L O) // 😇
+ZMK_LEADER_SEQUENCE(fingers, &uc 0x1F91E 0, F I N) // 🤞
+ZMK_LEADER_SEQUENCE(roll, &uc 0x1F644 0, R O L L) // 🙄
+ZMK_LEADER_SEQUENCE(tldr, &uc 0x1F4DC 0, T L D R) // 📜
+ZMK_LEADER_SEQUENCE(wave, &uc 0x1F44B 0, W A V E) // 👋
+
+// these two do not seem to compile with &uc.
 ZMK_LEADER_UNICODE_5(eye, E Y E, N1, F, N4, N4, N1) // 👁
 ZMK_LEADER_UNICODE_5(ewe, E W E, N1, F, N4, N1, N1) // 🐑
-
-ZMK_LEADER_UNICODE_5(rictus, R I C T U, N1, F, N6, N2, C) // 😬
-ZMK_LEADER_UNICODE_5(halo, H A L O, N1, F, N6, N0, N7) // 😇
-ZMK_LEADER_UNICODE_5(fingers, F I N, N1, F, N9, N1, E) // 🤞
-ZMK_LEADER_UNICODE_5(roll, R O L L, N1, F, N6, N4, N4) // 🙄
-ZMK_LEADER_UNICODE_5(tldr, T L D R, N1, F, N4, D, C) // 📜
-ZMK_LEADER_UNICODE_5(wave, W A V E, N1, F, N4, N4, B) // 👋
 
 
 
 // Single emojis (5-byte sequences)
-ZMK_LEADER_UNICODE_5(koala, K O A L A, N1, F, N4, N2, N8) // 🐨
-ZMK_LEADER_UNICODE_5(kanga, K A N G A, N1, F, N9, N9, N8) // 🦘
-ZMK_LEADER_UNICODE_5(east, E A S T, N1, F, N5, F, F) // 🗿
-ZMK_LEADER_UNICODE_5(cro, C R O, N1, F, N9, N5, N0) // 🥐
-ZMK_LEADER_UNICODE_5(snak, S N A K, N1, F, N4, N0, D) // 🐍
-ZMK_LEADER_UNICODE_5(vin, V I N, N1, F, N3, N7, N7) // 🍷
-ZMK_LEADER_UNICODE_5(piz, P I Z, N1, F, N3, N5, N5) // 🍕
-ZMK_LEADER_UNICODE_5(steak, S T E A K, N1, F, N9, N6, N9) // 🥩
-ZMK_LEADER_UNICODE_5(zzz, Z Z Z, N1, F, N4, A, N4) // 💤
+ZMK_LEADER_SEQUENCE(koala, &uc 0x1F428 0, K O A L A) // 🐨
+ZMK_LEADER_SEQUENCE(kanga, &uc 0x1F998 0, K A N G A) // 🦘
+ZMK_LEADER_SEQUENCE(east, &uc 0x1F5FF 0, E A S T) // 🗿
+ZMK_LEADER_SEQUENCE(cro, &uc 0x1F950 0, C R O) // 🥐
+ZMK_LEADER_SEQUENCE(snak, &uc 0x1F40D 0, S N A K) // 🐍
+ZMK_LEADER_SEQUENCE(vin, &uc 0x1F377 0, V I N) // 🍷
+ZMK_LEADER_SEQUENCE(piz, &uc 0x1F355 0, P I Z) // 🍕
+ZMK_LEADER_SEQUENCE(steak, &uc 0x1F969 0, S T E A K) // 🥩
+ZMK_LEADER_SEQUENCE(zzz, &uc 0x1F4A4 0, Z Z Z) // 💤
 
 
-ZMK_LEADER_UNICODE_5(kiwi, K I W I, N1, F, N9, N5, D) // 🥝
-ZMK_LEADER_UNICODE_5(crepe, C R E P E, N1, F, N9, N5, E) // 🥞
-ZMK_LEADER_UNICODE_5(lapin, L A P I N, N1, F, N4, N0, N7) // 🐇
-ZMK_LEADER_UNICODE_5(chick, C H I C K, N1, F, N4, N2, N5) // 🐥
-ZMK_LEADER_UNICODE_5(duck, D U C K, N1, F, N9, N8, N6) // 🦆
-ZMK_LEADER_UNICODE_5(drums, D R U M S, N1, F, N3, N5, N7) // 🍗
+ZMK_LEADER_SEQUENCE(kiwi, &uc 0x1F95D 0, K I W I) // 🥝
+ZMK_LEADER_SEQUENCE(crepe, &uc 0x1F95E 0, C R E P E) // 🥞
+ZMK_LEADER_SEQUENCE(lapin, &uc 0x1F407 0, L A P I N) // 🐇
+ZMK_LEADER_SEQUENCE(chick, &uc 0x1F425 0, C H I C K) // 🐥
+ZMK_LEADER_SEQUENCE(duck, &uc 0x1F986 0, D U C K) // 🦆
+ZMK_LEADER_SEQUENCE(drums, &uc 0x1F357 0, D R U M S) // 🍗
 
-ZMK_LEADER_UNICODE_5(fete, F E T E, N1, F, N3, N8, N9) // 🎉
-ZMK_LEADER_UNICODE_5(shaka, S H A K A, N1, F, N9, N1, N9) // 🤙
-
-
+ZMK_LEADER_SEQUENCE(fete, &uc 0x1F389 0, F E T E) // 🎉
+ZMK_LEADER_SEQUENCE(shaka, &uc 0x1F919 0, S H A K A) // 🤙
 
 
 ZMK_LEADER_UNICODE_DUAL_4_4(red_heart, H E A R T, N2, N7, N6, N4, F, E, N0, F)

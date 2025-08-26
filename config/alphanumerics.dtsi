@@ -1,0 +1,14 @@
+#ifdef SUPERSCRIPT
+smart_w: smart_w {
+    compatible = "zmk,behavior-layer-morph-fixed";
+    #binding-cells = <0>;
+    layer = <SUPERSCRIPT>;
+    bindings = <&uc 0x02B7 0>, <&kp W>;
+};
+#else
+smart_w: smart_w {
+    compatible = "zmk,behavior-macro";
+    #binding-cells = <0>;
+    bindings = <&kp W>;
+};
+#endif
