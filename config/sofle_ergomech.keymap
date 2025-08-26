@@ -3,6 +3,7 @@
 #include "zmk-helpers/key-labels/sofle.h"
 #include "jjb.keymap"
 
+/ {
     keymap {
         compatible = "zmk,keymap";
 
@@ -147,6 +148,17 @@ RGN_LH_5 RGN_RH_5
             sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN &inc_dec_kp PG_UP PG_DN>;
         };
 
+        superscript_layer {
+            display-name = "superscript";
+            bindings = <
+SUPERSCRIPT_LT SUPERSCRIPT_RT
+SUPERSCRIPT_LM SUPERSCRIPT_RM
+SUPERSCRIPT_LB SUPERSCRIPT_RB
+SUPERSCRIPT_LH_5 SUPERSCRIPT_RH_5
+            >;
+            sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN &inc_dec_kp PG_UP PG_DN>;
+        };
+
 /*
         empty_layer {
             display-name = "empty";
@@ -161,6 +173,6 @@ EMPTY_LH_5 EMPTY_RH_5
 */
 
      }; /* keymap */
-};
+}; // root node
 
 
