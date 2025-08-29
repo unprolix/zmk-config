@@ -275,10 +275,10 @@ delayed_rgb_off: delayed_rgb_off {
 
 
 
-dash_emdash: dash_emdash {
+bt_fancy_0: bt_fancy_0 {
     compatible = "zmk,behavior-mod-morph";
     #binding-cells = <0>;
-    bindings = <&kp MINUS>, <&em_dash>;
+    bindings = <&bt BT_SEL 0>, <&bt BT_DISC 0>;
     mods = <(MOD_LSFT|MOD_RSFT)>;
 };
 
@@ -540,7 +540,7 @@ arcane_nav_r: arcane_nav_r {
 
 #define EXTRA_LZ &smart_w &trans &trans &trans &trans &trans
 #define EXTRA_LT &trans &trans &at_wgyl_org &trans &trans &trans
-#define EXTRA_LM &dash_emdash &one_urie &trans &trans &trans &kp DELETE
+#define EXTRA_LM &bt_fancy_0 &one_urie &trans &trans &trans &kp DELETE
 #define EXTRA_LB &to_nav &trans &trans &trans &trans &trans
 #define EXTRA_LH                      &trans &oneshot_or_to_NAVIGATION &trans
 #define EXTRA_LH_5 &trans &trans EXTRA_LH
