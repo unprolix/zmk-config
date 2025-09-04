@@ -53,6 +53,7 @@
 
 
 // for standardized address entry web forms
+ZMK_LEADER_SEQUENCE(one_urie, &one_urie, U R I E)
 ZMK_LEADER_SEQUENCE(home_address_web, &home_address_web, H O M E)
 ZMK_LEADER_SEQUENCE(phone, &phone, P H O N E)
 ZMK_LEADER_SEQUENCE(phone_alt, &phone_alt, T E L)
@@ -69,6 +70,8 @@ ZMK_LEADER_SEQUENCE(gr_phi, &el_phi, P H I)  // ϕ
 //ZMK_LEADER_SEQUENCE(red_heart, &red_heart,     H E A R T)
 
 ZMK_LEADER_SEQUENCE(gaming,      &to GAMING,     G A M E)
+ZMK_LEADER_SEQUENCE(bluetooth,      &to BLUETOOTH, B T)
+
 
 ZMK_LEADER_SEQUENCE(reset,      &sys_reset,     R E S E T)
 ZMK_LEADER_SEQUENCE(boot,       &bootloader,    B O O T)
@@ -159,3 +162,49 @@ ZMK_LEADER_UNICODE_MULTI_3(love, L O V E, eye, red_heart, ewe)
 ZMK_LEADER_UNICODE_DUAL_4_4(fr, F R,    N1, F, N1, E, N6, N1, F, N7) // 🇫🇷
 ZMK_LEADER_UNICODE_DUAL_4_4(aus, A U S, N1, F, N1, E, N6, N1, F, N1) // 🇦🇺
 ZMK_LEADER_UNICODE_DUAL_5(usa, U S A, N1, F, N1, F, A, N1, F, N1, F, N8) // 🇺🇸
+
+/*
+
+// Superscript digits
+ZMK_LEADER_SEQUENCE(super_0, &uc 0x2070 0, S U P N0) // ⁰
+ZMK_LEADER_SEQUENCE(super_1, &uc 0x00B9 0, S U P N1) // ¹
+ZMK_LEADER_SEQUENCE(super_2, &uc 0x00B2 0, S U P N2) // ²
+ZMK_LEADER_SEQUENCE(super_3, &uc 0x00B3 0, S U P N3) // ³
+ZMK_LEADER_SEQUENCE(super_4, &uc 0x2074 0, S U P N4) // ⁴
+ZMK_LEADER_SEQUENCE(super_5, &uc 0x2075 0, S U P N5) // ⁵
+ZMK_LEADER_SEQUENCE(super_6, &uc 0x2076 0, S U P N6) // ⁶
+ZMK_LEADER_SEQUENCE(super_7, &uc 0x2077 0, S U P N7) // ⁷
+ZMK_LEADER_SEQUENCE(super_8, &uc 0x2078 0, S U P N8) // ⁸
+ZMK_LEADER_SEQUENCE(super_9, &uc 0x2079 0, S U P N9) // ⁹
+
+// Superscript lowercase letters
+ZMK_LEADER_SEQUENCE(super_a, &uc 0x1D43 0, S U P A) // ᵃ
+ZMK_LEADER_SEQUENCE(super_b, &uc 0x1D47 0, S U P B) // ᵇ
+ZMK_LEADER_SEQUENCE(super_c, &uc 0x1D9C 0, S U P C) // ᶜ
+ZMK_LEADER_SEQUENCE(super_d, &uc 0x1D48 0, S U P D) // ᵈ
+ZMK_LEADER_SEQUENCE(super_e, &uc 0x1D49 0, S U P E) // ᵉ
+ZMK_LEADER_SEQUENCE(super_f, &uc 0x1DA0 0, S U P F) // ᶠ
+ZMK_LEADER_SEQUENCE(super_g, &uc 0x1D4D 0, S U P G) // ᵍ
+ZMK_LEADER_SEQUENCE(super_h, &uc 0x02B0 0, S U P H) // ʰ
+ZMK_LEADER_SEQUENCE(super_i, &uc 0x2071 0, S U P I) // ⁱ
+ZMK_LEADER_SEQUENCE(super_j, &uc 0x02B2 0, S U P J) // ʲ
+ZMK_LEADER_SEQUENCE(super_k, &uc 0x1D4F 0, S U P K) // ᵏ
+ZMK_LEADER_SEQUENCE(super_l, &uc 0x02E1 0, S U P L) // ˡ
+ZMK_LEADER_SEQUENCE(super_m, &uc 0x1D50 0, S U P M) // ᵐ
+ZMK_LEADER_SEQUENCE(super_n, &uc 0x207F 0, S U P N) // ⁿ
+ZMK_LEADER_SEQUENCE(super_o, &uc 0x1D52 0, S U P O) // ᵒ
+ZMK_LEADER_SEQUENCE(super_p, &uc 0x1D56 0, S U P P) // ᵖ
+ZMK_LEADER_SEQUENCE(super_r, &uc 0x02B3 0, S U P R) // ʳ
+ZMK_LEADER_SEQUENCE(super_s, &uc 0x02E2 0, S U P S) // ˢ
+ZMK_LEADER_SEQUENCE(super_t, &uc 0x1D57 0, S U P T) // ᵗ
+ZMK_LEADER_SEQUENCE(super_u, &uc 0x1D58 0, S U P U) // ᵘ
+ZMK_LEADER_SEQUENCE(super_v, &uc 0x1D5B 0, S U P V) // ᵛ
+ZMK_LEADER_SEQUENCE(super_w, &uc 0x02B7 0, S U P W) // ʷ
+ZMK_LEADER_SEQUENCE(super_x, &uc 0x02E3 0, S U P X) // ˣ
+ZMK_LEADER_SEQUENCE(super_y, &uc 0x02B8 0, S U P Y) // ʸ
+ZMK_LEADER_SEQUENCE(super_z, &uc 0x1DBB 0, S U P Z) // ᶻ
+*/
+
+
+// Superscript mode toggle
+//ZMK_LEADER_SEQUENCE(superscript_mode, &tog SUPERSCRIPT, S U P E R) // Toggle superscript mode

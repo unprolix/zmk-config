@@ -1,0 +1,479 @@
+#!/usr/bin/env python3
+"""
+ZMK Device Detection Tool
+Reads device configuration from ~/.config/zmk/devices.conf and shows
+access information for detected devices including /dev and /proc presence.
+"""
+
+import os
+import re
+import subprocess
+import sys
+from pathlib import Path
+
+
+def load_device_config():
+    """Load device configuration from ~/.config/zmk/devices.yaml or devices.conf"""
+    config_dir = Path.home() / ".config" / "zmk"
+    yaml_path = config_dir / "devices.yaml"
+    conf_path = config_dir / "devices.conf"
+    devices = {}
+    
+    # Try YAML format first
+    if yaml_path.exists():
+        try:
+            import yaml
+            with open(yaml_path, 'r') as f:
+                config = yaml.safe_load(f)
+                if config:
+                    for serial, device_info in config.items():
+                        # Preserve all existing keys, not just name/type/notes
+                        devices[serial] = dict(device_info)
+                        # Ensure standard keys exist with defaults
+                        devices[serial].setdefault('name', '')
+                        devices[serial].setdefault('type', 'unknown')
+                        devices[serial].setdefault('notes', '')
+            return devices
+        except ImportError:
+            print("PyYAML not found, falling back to conf format")
+        except Exception as e:
+            print(f"Error reading YAML config: {e}, falling back to conf format")
+    
+    # Fall back to conf format
+    if conf_path.exists():
+        with open(conf_path, 'r') as f:
+            for line_num, line in enumerate(f, 1):
+                line = line.strip()
+                if not line or line.startswith('#'):
+                    continue
+                
+                parts = line.split(':', 3)
+                if len(parts) < 2:
+                    print(f"Warning: Invalid format at line {line_num}: {line}")
+                    continue
+                
+                serial = parts[0]
+                friendly_name = parts[1]
+                device_type = parts[2] if len(parts) > 2 else "unknown"
+                notes = parts[3] if len(parts) > 3 else ""
+                
+                devices[serial] = {
+                    'name': friendly_name,
+                    'type': device_type,
+                    'notes': notes
+                }
+        return devices
+    
+    print("No config file found. Create ~/.config/zmk/devices.yaml or ~/.config/zmk/devices.conf")
+    return devices
+
+
+def get_usb_devices():
+    """Get USB device information using lsusb -v"""
+    try:
+        result = subprocess.run(['lsusb', '-v'], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True)
+        return result.stdout
+    except FileNotFoundError:
+        print("Error: lsusb command not found")
+        return ""
+
+
+def parse_usb_devices(lsusb_output):
+    """Parse lsusb output to extract device information"""
+    devices = []
+    current_device = {}
+    
+    for line in lsusb_output.split('\n'):
+        line = line.strip()
+        
+        if line.startswith('Bus ') and 'Device ' in line:
+            if current_device:
+                devices.append(current_device)
+            current_device = {}
+            # Extract bus and device numbers
+            match = re.search(r'Bus (\d+) Device (\d+)', line)
+            if match:
+                current_device['bus'] = match.group(1).zfill(3)
+                current_device['device'] = match.group(2).zfill(3)
+        
+        elif line.startswith('idVendor'):
+            match = re.search(r'idVendor\s+0x([0-9a-f]+)\s*(.*)', line)
+            if match:
+                current_device['vendor_id'] = match.group(1)
+                current_device['vendor_name'] = match.group(2).strip()
+        
+        elif line.startswith('idProduct'):
+            match = re.search(r'idProduct\s+0x([0-9a-f]+)\s*(.*)', line)
+            if match:
+                current_device['product_id'] = match.group(1)
+                current_device['product_name'] = match.group(2).strip()
+        
+        elif line.startswith('iSerial'):
+            match = re.search(r'iSerial\s+\d+\s+(.+)', line)
+            if match:
+                current_device['serial'] = match.group(1).strip()
+    
+    if current_device:
+        devices.append(current_device)
+    
+    return devices
+
+
+def find_dev_paths(bus, device, vendor_id, product_id):
+    """Find /dev paths for a USB device"""
+    dev_paths = []
+    
+    # Always add the USB device path
+    usb_path = f"/dev/bus/usb/{bus}/{device}"
+    if os.path.exists(usb_path):
+        dev_paths.append(usb_path)
+    
+    # Check for tty devices
+    import glob
+    tty_patterns = ["/dev/ttyACM*", "/dev/ttyUSB*"]
+    
+    for pattern in tty_patterns:
+        matches = glob.glob(pattern)
+        for match in matches:
+            try:
+                tty_name = os.path.basename(match)
+                
+                # Method 1: Check via sysfs device link
+                device_link = f"/sys/class/tty/{tty_name}/device"
+                if os.path.exists(device_link):
+                    real_path = os.path.realpath(device_link)
+                    # Look for USB bus and device numbers in the path
+                    if f"/{bus}-" in real_path:
+                        # Extract device number from path and compare
+                        import re
+                        dev_match = re.search(rf'/{bus}-\d+(?:\.\d+)*:[\d.]+/.*?(\d+)-\d+', real_path)
+                        if not dev_match:
+                            # Try simpler match
+                            if f".{device}/" in real_path or real_path.endswith(f".{device}"):
+                                dev_paths.append(match)
+                                continue
+                
+                # Method 2: Check via uevent file - go up to USB device level
+                usb_device_path = os.path.realpath(device_link)
+                while usb_device_path and '/sys/devices' in usb_device_path:
+                    uevent_path = os.path.join(usb_device_path, 'uevent')
+                    if os.path.exists(uevent_path):
+                        try:
+                            with open(uevent_path, 'r') as f:
+                                uevent_content = f.read()
+                                # Look for DEVNUM line that matches our device
+                                for line in uevent_content.split('\n'):
+                                    if line.startswith('DEVNUM='):
+                                        devnum = line.split('=')[1].strip()
+                                        if devnum == device:
+                                            dev_paths.append(match)
+                                            break
+                                if match in dev_paths:
+                                    break
+                        except Exception:
+                            pass
+                    usb_device_path = os.path.dirname(usb_device_path)
+                    if usb_device_path == '/sys/devices':
+                        break
+                
+            except Exception:
+                continue
+    
+    return dev_paths
+
+
+def add_detected_devices():
+    """Add newly detected devices to the config file"""
+    config_dir = Path.home() / ".config" / "zmk"
+    yaml_path = config_dir / "devices.yaml"
+    conf_path = config_dir / "devices.conf"
+    
+    # Load existing configuration
+    known_devices = load_device_config()
+    
+    # Get USB devices
+    lsusb_output = get_usb_devices()
+    if not lsusb_output:
+        print("Failed to get USB device information")
+        return
+    
+    usb_devices = parse_usb_devices(lsusb_output)
+    
+    # Find devices with serial numbers that aren't in config
+    new_devices = []
+    for device in usb_devices:
+        serial = device.get('serial')
+        if serial and serial not in known_devices:
+            # Skip Linux kernel devices and other common non-keyboard devices
+            vendor = device.get('vendor_name', '').lower()
+            product = device.get('product_name', '').lower()
+            
+            # Skip obviously non-keyboard devices
+            skip_keywords = ['hub', 'root hub', 'bluetooth', 'webcam', 'flash drive', 'mystic light']
+            if any(keyword in vendor.lower() or keyword in product.lower() for keyword in skip_keywords):
+                continue
+                
+            new_devices.append(device)
+    
+    if not new_devices:
+        print("No new devices detected")
+        return
+    
+    print(f"Found {len(new_devices)} new devices:")
+    for i, device in enumerate(new_devices, 1):
+        vendor = device.get('vendor_name', 'Unknown')
+        product = device.get('product_name', 'Unknown')
+        serial = device.get('serial')
+        print(f"  {i}. {vendor} {product} (Serial: {serial})")
+    
+    print()
+    
+    # Add devices to config
+    added_count = 0
+    for device in new_devices:
+        vendor = device.get('vendor_name', 'Unknown')
+        product = device.get('product_name', 'Unknown')
+        serial = device.get('serial')
+        
+        print(f"Adding device: {vendor} {product}")
+        
+        # Prompt for friendly name
+        default_name = f"{vendor} {product}".strip()
+        friendly_name = input(f"  Friendly name [{default_name}]: ").strip()
+        if not friendly_name:
+            friendly_name = default_name
+        
+        # Prompt for device type
+        device_type = input("  Device type (keyboard/bootloader/controller) [keyboard]: ").strip()
+        if not device_type:
+            device_type = "keyboard"
+        
+        # Prompt for notes
+        notes = input("  Notes (optional): ").strip()
+        
+        # Add to known_devices (preserve any existing structure)
+        known_devices[serial] = {
+            'name': friendly_name,
+            'type': device_type,
+            'notes': notes
+        }
+        
+        added_count += 1
+        print(f"  ✓ Added {friendly_name}")
+        print()
+    
+    # Append to config file (preserve existing formatting and comments)
+    if yaml_path.exists() or not conf_path.exists():
+        # Append to YAML (preferred format)
+        try:
+            import yaml
+            
+            # Just append the new devices
+            with open(yaml_path, 'a') as f:
+                for device in new_devices:
+                    serial = device.get('serial')
+                    if serial in known_devices:
+                        device_info = known_devices[serial]
+                        f.write(f"\n{serial}:\n")
+                        f.write(f"  name: {device_info['name']}\n")
+                        f.write(f"  type: {device_info['type']}\n")
+                        if device_info['notes']:
+                            f.write(f"  notes: {device_info['notes']}\n")
+                        else:
+                            f.write(f"  notes: ''\n")
+            
+            print(f"Appended {added_count} new devices to {yaml_path}")
+            
+        except ImportError:
+            print("PyYAML not found, appending to conf format instead")
+            # Fall back to conf format
+            append_to_conf_format(conf_path, new_devices, known_devices, added_count)
+    else:
+        # Append to conf format
+        append_to_conf_format(conf_path, new_devices, known_devices, added_count)
+
+
+def append_to_conf_format(conf_path, new_devices, known_devices, added_count):
+    """Append devices to conf format"""
+    with open(conf_path, 'a') as f:
+        for device in new_devices:
+            serial = device.get('serial')
+            if serial in known_devices:
+                device_info = known_devices[serial]
+                f.write(f"\n{serial}:{device_info['name']}:{device_info['type']}:{device_info['notes']}")
+    
+    print(f"Appended {added_count} new devices to {conf_path}")
+
+
+def save_to_conf_format(conf_path, known_devices, added_count):
+    """Save devices to conf format (only used for initial file creation)"""
+    with open(conf_path, 'w') as f:
+        f.write("# ZMK Device Configuration\n")
+        f.write("# Format: serial_number:friendly_name:device_type:notes\n")
+        f.write("#\n")
+        f.write("# device_type can be: keyboard, bootloader, controller\n")
+        f.write("# This helps identify what mode the device is in\n")
+        f.write("#\n")
+        for serial, device_info in known_devices.items():
+            f.write(f"{serial}:{device_info['name']}:{device_info['type']}:{device_info['notes']}\n")
+        f.write("# Add your devices above\n")
+    
+    print(f"Created {conf_path} with {added_count} new devices")
+
+
+def find_device_by_name(device_name, path_type='any'):
+    """Find device path by friendly name. Returns first matching path or None."""
+    known_devices = load_device_config()
+    if not known_devices:
+        return None
+    
+    # Find device with matching name
+    target_serial = None
+    for serial, config in known_devices.items():
+        if config['name'].lower() == device_name.lower():
+            target_serial = serial
+            break
+    
+    if not target_serial:
+        return None
+    
+    # Get USB devices and find the matching one
+    lsusb_output = get_usb_devices()
+    if not lsusb_output:
+        return None
+    
+    usb_devices = parse_usb_devices(lsusb_output)
+    
+    for usb_device in usb_devices:
+        if usb_device.get('serial') == target_serial:
+            bus = usb_device.get('bus')
+            dev_num = usb_device.get('device')
+            vendor_id = usb_device.get('vendor_id')
+            product_id = usb_device.get('product_id')
+            
+            if bus and dev_num:
+                dev_paths = find_dev_paths(bus, dev_num, vendor_id, product_id)
+                
+                if path_type == 'tty':
+                    tty_devices = [p for p in dev_paths if p.startswith('/dev/tty')]
+                    return tty_devices[0] if tty_devices else None
+                elif path_type == 'usb':
+                    usb_devices = [p for p in dev_paths if p.startswith('/dev/bus/usb/')]
+                    return usb_devices[0] if usb_devices else None
+                else:  # 'any'
+                    return dev_paths[0] if dev_paths else None
+    
+    return None
+
+
+def main():
+    import argparse
+    
+    parser = argparse.ArgumentParser(description='ZMK Device Detection Tool')
+    parser.add_argument('--path', '-p', metavar='DEVICE_NAME', 
+                        help='Get device path by friendly name')
+    parser.add_argument('--type', '-t', choices=['any', 'tty', 'usb'], default='any',
+                        help='Type of path to return (default: any)')
+    parser.add_argument('--list-names', '-l', action='store_true',
+                        help='List all configured device names')
+    parser.add_argument('--add-new', '-a', action='store_true',
+                        help='Interactively add newly detected devices to config')
+    
+    args = parser.parse_args()
+    
+    if args.path:
+        path = find_device_by_name(args.path, args.type)
+        if path:
+            print(path)
+            sys.exit(0)
+        else:
+            sys.exit(1)
+    
+    if args.list_names:
+        known_devices = load_device_config()
+        for config in known_devices.values():
+            print(config['name'])
+        return
+    
+    if args.add_new:
+        add_detected_devices()
+        return
+    
+    # Default behavior - show all devices
+    print("ZMK Device Detection Tool")
+    print("=" * 50)
+    
+    # Load device configuration
+    known_devices = load_device_config()
+    if not known_devices:
+        print("No devices configured. Add devices to ~/.config/zmk/devices.yaml")
+        return
+    
+    print(f"Loaded {len(known_devices)} configured devices")
+    print()
+    
+    # Get USB devices
+    lsusb_output = get_usb_devices()
+    if not lsusb_output:
+        print("Failed to get USB device information")
+        return
+    
+    usb_devices = parse_usb_devices(lsusb_output)
+    
+    # Match detected devices with configuration
+    found_devices = []
+    for usb_device in usb_devices:
+        serial = usb_device.get('serial')
+        if serial and serial in known_devices:
+            config = known_devices[serial]
+            usb_device['config'] = config
+            found_devices.append(usb_device)
+    
+    if not found_devices:
+        print("No configured devices detected")
+        print("\nCurrently connected USB devices with serial numbers:")
+        for device in usb_devices:
+            serial = device.get('serial')
+            if serial:
+                vendor = device.get('vendor_name', 'Unknown')
+                product = device.get('product_name', 'Unknown')
+                print(f"  Serial: {serial}")
+                print(f"    Device: {vendor} {product}")
+                print()
+        return
+    
+    # Display found devices
+    print(f"Found {len(found_devices)} configured devices:")
+    print()
+    
+    for device in found_devices:
+        config = device['config']
+        print(f"📱 {config['name']}")
+        print(f"   Type: {config['type']}")
+        if config['notes']:
+            print(f"   Notes: {config['notes']}")
+        print(f"   Serial: {device.get('serial', 'N/A')}")
+        print(f"   USB: {device.get('vendor_name', 'Unknown')} {device.get('product_name', 'Unknown')}")
+        
+        # Find device paths
+        bus = device.get('bus')
+        dev_num = device.get('device')
+        vendor_id = device.get('vendor_id')
+        product_id = device.get('product_id')
+        if bus and dev_num:
+            dev_paths = find_dev_paths(bus, dev_num, vendor_id, product_id)
+            if dev_paths:
+                # Separate USB device from tty devices
+                usb_devices = [p for p in dev_paths if p.startswith('/dev/bus/usb/')]
+                tty_devices = [p for p in dev_paths if p.startswith('/dev/tty')]
+                
+                if usb_devices:
+                    print(f"   USB device: {', '.join(usb_devices)}")
+                if tty_devices:
+                    print(f"   TTY device: {', '.join(tty_devices)}")
+        
+        print()
+
+
+if __name__ == "__main__":
+    main()
