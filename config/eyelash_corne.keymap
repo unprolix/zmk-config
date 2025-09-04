@@ -157,6 +157,31 @@ RGN_LH RGN_RH
             sensor-bindings = <&scroll_encoder>;
         };
 
+
+        bluetooth_layer {
+            display-name = "bluetooth";
+            bindings = <
+BLUETOOTH_LT                  &trans          BLUETOOTH_RT
+BLUETOOTH_LM          &trans  &trans  &trans  BLUETOOTH_RM
+BLUETOOTH_LB  &trans          &trans          BLUETOOTH_RB
+BLUETOOTH_LH BLUETOOTH_RH
+            >;
+            sensor-bindings = <&scroll_encoder>;
+        };
+
+        superscript_layer {
+            display-name = "superscript";
+            bindings = <
+SUPERSCRIPT_LT                  &trans          SUPERSCRIPT_RT
+SUPERSCRIPT_LM          &trans  &trans  &trans  SUPERSCRIPT_RM
+SUPERSCRIPT_LB  &trans          &trans          SUPERSCRIPT_RB
+SUPERSCRIPT_LH SUPERSCRIPT_RH
+            >;
+            sensor-bindings = <&scroll_encoder>;
+        };
+
+
+
 /*
         empty_layer {
             display-name = "empty";
