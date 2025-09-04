@@ -201,7 +201,7 @@ ZMK_COMBO_PLUS(tab_vert, &kp TAB, LT0, LM0)	/* top and middle innermost left */
 ZMK_COMBO_PLUS_SLOW(backspace, &backspace_word_delete, RT0, RM0)	/* top and middle innermost right */
 ZMK_COMBO_SLOW(amps, AMPS, RT1, RM1)
 ZMK_COMBO_SLOW(asterisk, ASTERISK, RT2, RM2)
-ZMK_COMBO_FAST(caret, CARET, RT3, RM3)	// TODO: fix. does not work with zmk_combo_slow or _fast in either key order
+ZMK_COMBO_FAST(caret, CARET, RT3, RM3)
 ZMK_COMBO_SLOW(percent, PERCENT, RT4, RM4)
 ZMK_COMBO_SLOW(question, QUESTION, RT5, RM5)
 
