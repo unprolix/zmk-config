@@ -1,0 +1,321 @@
+#!/usr/bin/env python3
+"""
+ZMK Auto Build Script
+Builds firmware for all configured devices that are currently attached to the system.
+Reads device configuration from ~/.config/zmk/devices.yaml and calls 'just' to build appropriate firmware.
+"""
+
+import os
+import re
+import subprocess
+import sys
+from pathlib import Path
+
+
+def load_device_config():
+    """Load device configuration from ~/.config/zmk/devices.yaml or devices.conf"""
+    config_dir = Path.home() / ".config" / "zmk"
+    yaml_path = config_dir / "devices.yaml"
+    conf_path = config_dir / "devices.conf"
+    devices = {}
+    
+    # Try YAML format first
+    if yaml_path.exists():
+        try:
+            import yaml
+            with open(yaml_path, 'r') as f:
+                config = yaml.safe_load(f)
+                if config:
+                    for serial, device_info in config.items():
+                        # Preserve all existing keys, not just name/type/notes
+                        devices[serial] = dict(device_info)
+                        # Ensure standard keys exist with defaults
+                        devices[serial].setdefault('name', '')
+                        devices[serial].setdefault('type', 'unknown')
+                        devices[serial].setdefault('notes', '')
+            return devices
+        except ImportError:
+            print("PyYAML not found, falling back to conf format")
+        except Exception as e:
+            print(f"Error reading YAML config: {e}, falling back to conf format")
+    
+    # Fall back to conf format
+    if conf_path.exists():
+        with open(conf_path, 'r') as f:
+            for line_num, line in enumerate(f, 1):
+                line = line.strip()
+                if not line or line.startswith('#'):
+                    continue
+                
+                parts = line.split(':', 3)
+                if len(parts) < 2:
+                    print(f"Warning: Invalid format at line {line_num}: {line}")
+                    continue
+                
+                serial = parts[0]
+                friendly_name = parts[1]
+                device_type = parts[2] if len(parts) > 2 else "unknown"
+                notes = parts[3] if len(parts) > 3 else ""
+                
+                devices[serial] = {
+                    'name': friendly_name,
+                    'type': device_type,
+                    'notes': notes
+                }
+        return devices
+    
+    print("No config file found. Create ~/.config/zmk/devices.yaml or ~/.config/zmk/devices.conf")
+    return devices
+
+
+def get_usb_devices():
+    """Get USB device information using lsusb -v"""
+    try:
+        result = subprocess.run(['lsusb', '-v'], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True)
+        return result.stdout
+    except FileNotFoundError:
+        print("Error: lsusb command not found")
+        return ""
+
+
+def parse_usb_devices(lsusb_output):
+    """Parse lsusb output to extract device information"""
+    devices = []
+    current_device = {}
+    
+    for line in lsusb_output.split('\n'):
+        line = line.strip()
+        
+        if line.startswith('Bus ') and 'Device ' in line:
+            if current_device:
+                devices.append(current_device)
+            current_device = {}
+            # Extract bus and device numbers
+            match = re.search(r'Bus (\d+) Device (\d+)', line)
+            if match:
+                current_device['bus'] = match.group(1).zfill(3)
+                current_device['device'] = match.group(2).zfill(3)
+        
+        elif line.startswith('idVendor'):
+            match = re.search(r'idVendor\s+0x([0-9a-f]+)\s*(.*)', line)
+            if match:
+                current_device['vendor_id'] = match.group(1)
+                current_device['vendor_name'] = match.group(2).strip()
+        
+        elif line.startswith('idProduct'):
+            match = re.search(r'idProduct\s+0x([0-9a-f]+)\s*(.*)', line)
+            if match:
+                current_device['product_id'] = match.group(1)
+                current_device['product_name'] = match.group(2).strip()
+        
+        elif line.startswith('iSerial'):
+            match = re.search(r'iSerial\s+\d+\s+(.+)', line)
+            if match:
+                current_device['serial'] = match.group(1).strip()
+    
+    if current_device:
+        devices.append(current_device)
+    
+    return devices
+
+
+def determine_firmware_variant(device_name, device_side):
+    """
+    Determine which firmware variant to build based on device name.
+    Maps device names to their corresponding config variants.
+    """
+    name_lower = device_name.lower()
+    
+    # Map device names to firmware variants
+    variant_map = {
+        'bureau': 'home',      # Bureau -> home variant
+        'salon': 'work',       # Salon -> work variant  
+        'lavendre': 'travel',  # Lavendre -> travel variant
+        'lavender': 'travel',  # Alternative spelling
+    }
+    
+    # Find matching variant
+    for key, variant in variant_map.items():
+        if key in name_lower:
+            return variant
+    
+    # Default to base variant (no suffix)
+    return None
+
+
+def get_build_targets_for_device(device_name, device_side):
+    """
+    Get the just build targets for a specific device.
+    Returns list of target expressions to pass to 'just build'.
+    """
+    targets = []
+    
+    variant = determine_firmware_variant(device_name, device_side)
+    
+    if variant:
+        # Build variant firmware (e.g., "home", "work", "travel")
+        if device_side == 'left':
+            targets.append(f"eyelash_corne_left_{variant}")
+        elif device_side == 'right':
+            targets.append(f"eyelash_corne_right_{variant}")
+        else:
+            # Unknown side, build both
+            targets.extend([f"eyelash_corne_left_{variant}", f"eyelash_corne_right_{variant}"])
+    else:
+        # Build base firmware
+        if device_side == 'left':
+            targets.append("eyelash_corne_left")
+        elif device_side == 'right':
+            targets.append("eyelash_corne_right")
+        else:
+            # Unknown side, build both
+            targets.extend(["eyelash_corne_left", "eyelash_corne_right"])
+    
+    return targets
+
+
+def find_attached_configured_devices():
+    """
+    Find devices that are both configured in devices.yaml and currently attached.
+    Returns list of (device_config, usb_device) tuples.
+    """
+    # Load device configuration
+    known_devices = load_device_config()
+    if not known_devices:
+        print("No devices configured in ~/.config/zmk/devices.yaml")
+        return []
+    
+    # Get USB devices
+    lsusb_output = get_usb_devices()
+    if not lsusb_output:
+        print("Failed to get USB device information")
+        return []
+    
+    usb_devices = parse_usb_devices(lsusb_output)
+    
+    # Match detected devices with configuration
+    attached_devices = []
+    for usb_device in usb_devices:
+        serial = usb_device.get('serial')
+        if serial and serial in known_devices:
+            config = known_devices[serial]
+            attached_devices.append((config, usb_device))
+    
+    return attached_devices
+
+
+def build_firmware_for_devices(attached_devices, dry_run=False, verbose=False):
+    """
+    Build firmware for all attached devices using 'just build'.
+    """
+    if not attached_devices:
+        print("No configured devices found attached to system")
+        return True
+    
+    print(f"Found {len(attached_devices)} configured devices attached:")
+    for config, usb_device in attached_devices:
+        print(f"  • {config['name']} ({config.get('side', 'unknown side')})")
+    print()
+    
+    # Group devices by required build targets to avoid duplicate builds
+    all_targets = set()
+    device_target_map = {}
+    
+    for config, usb_device in attached_devices:
+        device_name = config['name']
+        device_side = config.get('side', 'unknown')
+        targets = get_build_targets_for_device(device_name, device_side)
+        
+        device_target_map[device_name] = targets
+        all_targets.update(targets)
+    
+    if not all_targets:
+        print("No build targets determined for attached devices")
+        return False
+    
+    print(f"Build targets needed: {', '.join(sorted(all_targets))}")
+    
+    if dry_run:
+        print("\n[DRY RUN] Would execute the following builds:")
+        for target in sorted(all_targets):
+            print(f"  just build {target}")
+        return True
+    
+    # Execute builds
+    print(f"\nBuilding firmware for {len(all_targets)} targets...")
+    
+    success_count = 0
+    for target in sorted(all_targets):
+        print(f"\n🔨 Building {target}...")
+        
+        cmd = ['just', 'build', target]
+        if verbose:
+            print(f"Running: {' '.join(cmd)}")
+        
+        try:
+            script_dir = Path(__file__).parent
+            result = subprocess.run(cmd, cwd=script_dir.parent, text=True)
+            
+            if result.returncode == 0:
+                print(f"✅ {target} built successfully")
+                success_count += 1
+            else:
+                print(f"❌ {target} build failed")
+        
+        except FileNotFoundError:
+            print("❌ 'just' command not found. Please ensure 'just' is installed and in your PATH.")
+            return False
+    
+    print(f"\n🎉 Built firmware for {success_count}/{len(all_targets)} targets")
+    
+    # Show which devices each build covers
+    print("\nDevice firmware mapping:")
+    for config, usb_device in attached_devices:
+        device_name = config['name']
+        targets = device_target_map[device_name]
+        print(f"  {device_name}: {', '.join(targets)}")
+    
+    return success_count == len(all_targets)
+
+
+def main():
+    import argparse
+    
+    parser = argparse.ArgumentParser(description='Auto-build firmware for attached ZMK devices')
+    parser.add_argument('--dry-run', '-n', action='store_true',
+                        help='Show what would be built without actually building')
+    parser.add_argument('--verbose', '-v', action='store_true',
+                        help='Show verbose build output')
+    parser.add_argument('--list', '-l', action='store_true',
+                        help='List attached configured devices without building')
+    
+    args = parser.parse_args()
+    
+    print("ZMK Auto Build Tool")
+    print("=" * 50)
+    
+    # Find attached devices
+    attached_devices = find_attached_configured_devices()
+    
+    if args.list:
+        if attached_devices:
+            print(f"Found {len(attached_devices)} configured devices attached:")
+            for config, usb_device in attached_devices:
+                device_name = config['name']
+                device_side = config.get('side', 'unknown')
+                variant = determine_firmware_variant(device_name, device_side)
+                variant_info = f" (variant: {variant})" if variant else " (base firmware)"
+                print(f"  • {device_name} - {device_side} side{variant_info}")
+        else:
+            print("No configured devices found attached to system")
+        return
+    
+    # Build firmware
+    success = build_firmware_for_devices(attached_devices, args.dry_run, args.verbose)
+    
+    if not success:
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

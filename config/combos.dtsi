@@ -161,7 +161,9 @@ ZMK_COMBO_PLUS(smart_num_r, &smart_num_lock_dance, RM1, RM3)  // skip!
 ZMK_COMBO_PLUS_FAST(gui_l, &sk LGUI, LM1, LM4)	// double skip!
 ZMK_COMBO_PLUS_FAST(gui_r, &sk RGUI, RM1, RM4)	// double skip!
 
+// cross-side
 
+ZMK_COMBO_PLUS(tab_cross, &kp TAB, LM1, RM1)
 
 /* bottom row */
 ZMK_COMBO_FAST(backslash, BSLH, LB5, LB4)
@@ -201,14 +203,16 @@ ZMK_COMBO_SLOW(amps, AMPS, RT1, RM1)
 ZMK_COMBO_SLOW(asterisk, ASTERISK, RT2, RM2)
 ZMK_COMBO_FAST(caret, CARET, RT3, RM3)	// TODO: fix. does not work with zmk_combo_slow or _fast in either key order
 ZMK_COMBO_SLOW(percent, PERCENT, RT4, RM4)
-ZMK_COMBO_SLOW(pipe, PIPE, RT5, RM5)
+ZMK_COMBO_SLOW(question, QUESTION, RT5, RM5)
 
 /* top two rows stagger */
-ZMK_COMBO_SLOW(tab_stagger, TAB, LT0, LM2)
+ZMK_COMBO_SLOW(tab_stagger_alt, TAB, LT0, LM2)
+ZMK_COMBO_SLOW(tab_stagger, TAB, LT0, LM1)
 ZMK_COMBO_PLUS_SLOW(backspace_stagger_l, &backspace_word_delete, LM0, LT1)
 // ⊕
 ZMK_COMBO_PLUS_SLOW(backspace_stagger_r, &backspace_word_delete, RM0, RT1)
-ZMK_COMBO_SLOW(enter_stagger, ENTER, RT0, RM2)
+ZMK_COMBO_SLOW(enter_stagger, ENTER, RT0, RM1)
+ZMK_COMBO_SLOW(enter_stagger_alt, ENTER, RT0, RM2)
 
 
 
@@ -229,7 +233,11 @@ ZMK_COMBO_SLOW(menu, MENU, LM0, LB0)  /* middle and bottom inner rightmost keys 
 ZMK_COMBO_SLOW(semicolon, SEMICOLON, RM2, RB2)
 ZMK_COMBO_SLOW(colon, COLON, RB3, RM3) // for some reason, order of key positions is important here: reversing them means the combo does not fire.
 // RB4, RM4
-// RM5, RB5
+ZMK_COMBO_SLOW(pipe, PIPE, RM5, RB5)
+
+
+
+// bottom row
 
 ZMK_COMBO_PLUS_SLOW(alt_alpha, &to ALT_ALPHA, LB5, RB5)
 

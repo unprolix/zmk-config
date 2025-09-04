@@ -94,6 +94,7 @@ key numbers
 
 */
 
+
 #include <dt-bindings/zmk/mouse.h>
 #include <dt-bindings/zmk/rgb.h>
 
@@ -111,7 +112,8 @@ key numbers
 #define SYSTEM 9
 #define MODIFIER_LEFT_NAV 10
 #define MODIFIER_RIGHT_NAV 11
-#define SUPERSCRIPT 12
+#define BLUETOOTH 12
+#define SUPERSCRIPT 13
 
 
 // short versions for helping things line up
@@ -275,13 +277,77 @@ delayed_rgb_off: delayed_rgb_off {
 
 
 
-bt_fancy_0: bt_fancy_0 {
+dash_emdash: dash_emdash {
+    compatible = "zmk,behavior-mod-morph";
+    #binding-cells = <0>;
+    bindings = <&kp MINUS>, <&em_dash>;
+    mods = <(MOD_LSFT|MOD_RSFT)>;
+};
+
+
+fancy_bt_0: fancy_bt_0 {
     compatible = "zmk,behavior-mod-morph";
     #binding-cells = <0>;
     bindings = <&bt BT_SEL 0>, <&bt BT_DISC 0>;
     mods = <(MOD_LSFT|MOD_RSFT)>;
+};		
+
+fancy_bt_1: fancy_bt_1 {
+    compatible = "zmk,behavior-mod-morph";
+    #binding-cells = <0>;
+    bindings = <&bt BT_SEL 1>, <&bt BT_DISC 1>;
+    mods = <(MOD_LSFT|MOD_RSFT)>;
+};		
+
+fancy_bt_2: fancy_bt_2 {
+    compatible = "zmk,behavior-mod-morph";
+    #binding-cells = <0>;
+    bindings = <&bt BT_SEL 2>, <&bt BT_DISC 2>;
+    mods = <(MOD_LSFT|MOD_RSFT)>;
+};		
+
+fancy_bt_3: fancy_bt_3 {
+    compatible = "zmk,behavior-mod-morph";
+    #binding-cells = <0>;
+    bindings = <&bt BT_SEL 3>, <&bt BT_DISC 3>;
+    mods = <(MOD_LSFT|MOD_RSFT)>;
+};		
+
+fancy_bt_4: fancy_bt_4 {
+    compatible = "zmk,behavior-mod-morph";
+    #binding-cells = <0>;
+    bindings = <&bt BT_SEL 4>, <&bt BT_DISC 4>;
+    mods = <(MOD_LSFT|MOD_RSFT)>;
+};		
+
+fancy_bt_5: fancy_bt_5 {
+    compatible = "zmk,behavior-mod-morph";
+    #binding-cells = <0>;
+    bindings = <&bt BT_SEL 5>, <&bt BT_DISC 5>;
+    mods = <(MOD_LSFT|MOD_RSFT)>;
+};		
+
+fancy_bt_6: fancy_bt_6 {
+    compatible = "zmk,behavior-mod-morph";
+    #binding-cells = <0>;
+    bindings = <&bt BT_SEL 6>, <&bt BT_DISC 6>;
+    mods = <(MOD_LSFT|MOD_RSFT)>;
+};		
+
+// the morphed behavior seems to do nothing. have tried 20, 99, and 999 with MOVE_X and MOVE_Y
+msc_up_variable: msc_up_variable {
+    compatible = "zmk,behavior-mod-morph";
+    #binding-cells = <0>;
+    bindings = <&msc SCRL_UP>, <&msc MOVE_Y(20)>;
+    mods = <(MOD_LSFT|MOD_RSFT)>;
 };
 
+msc_down_variable: msc_down_variable {
+    compatible = "zmk,behavior-mod-morph";
+    #binding-cells = <0>;
+    bindings = <&msc SCRL_DOWN>, <&msc MOVE_Y(-20)>;
+    mods = <(MOD_LSFT|MOD_RSFT)>;
+};
 
 smart_nav_thumb: smart_nav_thumb {
     compatible = "zmk,behavior-hold-tap";
@@ -392,83 +458,84 @@ arcane_nav_r: arcane_nav_r {
 
 // ****************************************** BASE layer
 
-#define BASE_LZ &trans &trans &trans &trans &trans &trans
-#define BASE_RZ &trans &trans &trans &trans &trans &trans
-
 #define BASE_LT &kp TAB  &kp Q  &kp W  &kp E  &kp R  &kp T
-#define BASE_RT &kp Y    &kp U  &kp I  &kp O  &kp P  &kp BSPC
-
 #define BASE_LM &key_layer_SQT_NUM  &tap_hold_layer_lgui LGUI_NAV_L A  &hml L_M3 S  &hml L_M2 D  &hml L_M1 F  &kp G
-#define BASE_RM &kp H  &hmr R_M1 J  &hmr R_M2 K  &hmr R_M3 L  &tap_hold_layer_rgui RGUI_NAV_R SEMI  &key_layer_DQT_NUM
-
 #define BASE_LB &trans &kp Z  &kp X  &kp C  &kp V  &kp B
-#define BASE_RB &kp N  &kp M  &kp COMMA  &kp DOT  &kp FSLH  &kp RET
-
 #define BASE_LH &LTS EXTRA ESC  &smart_nav_thumb NAV TAB  &lgui_space_tab
-#define BASE_RH &rgui_space_ret  &smart_nav_thumb NAV BSPC  &LTS FN RETURN
-
 #define BASE_LH_5 &trans &trans BASE_LH
+#define BASE_LH_5 &trans &trans BASE_LH
+
+/*
+#define BASE_LZ &trans &trans &trans &trans &trans &trans
+#define BASE_LT &trans &trans &trans &trans &trans &trans
+#define BASE_LM &trans &trans &trans &trans &trans &trans
+#define BASE_LB &trans &trans &trans &trans &trans &trans
+#define BASE_LH &trans &trans &trans
+*/
+
+
+#define BASE_RZ &trans &trans &trans &trans &trans &trans
+#define BASE_RT &kp Y    &kp U  &kp I  &kp O  &kp P  &kp BSPC
+#define BASE_RM &kp H  &hmr R_M1 J  &hmr R_M2 K  &hmr R_M3 L  &tap_hold_layer_rgui RGUI_NAV_R SEMI  &key_layer_DQT_NUM
+#define BASE_RB &kp N  &kp M  &kp COMMA  &kp DOT  &kp FSLH  &kp RET
+#define BASE_RH &rgui_space_ret  &smart_nav_thumb NAV BSPC  &LTS FN RETURN
 #define BASE_RH_5 &trans &trans BASE_RH
+
+/*
+#define BASE_RT &trans &trans &trans &trans &trans &trans
+#define BASE_RM &trans &trans &trans &trans &trans &trans
+#define BASE_RB &trans &trans &trans &trans &trans &trans
+#define BASE_RH &trans &trans &trans
+#define BASE_RH_5 &trans &trans BASE_RH
+*/
 
 // ****************************************** GAMING layer
 
 #define GAMING_LZ &trans &trans &trans &trans &trans &trans
-#define GAMING_RZ &trans &trans &trans &trans &trans &trans
-
 #define GAMING_LT &kp ESC  &kp Q  &kp W  &kp E  &kp R  &kp T		         
-#define GAMING_RT &kp Y  &kp U  &kp I  &kp O  &kp P  &kp BSPC
-
 #define GAMING_LM &kp CAPS  &kp A  &kp S  &kp D  &kp F  &kp G
-#define GAMING_RM &kp H  &kp J  &kp K  &kp L  &kp SEMI  &kp SQT
-
 #define GAMING_LB &kp LSHIFT  &kp Z  &kp X  &kp C  &kp V  &kp B   
-#define GAMING_RB &kp N  &kp M  &kp COMMA  &kp DOT  &kp FSLH  &kp RSHIFT
-
 #define GAMING_LH &kp LCTRL  &kp TAB  &kp SPACE                
-#define GAMING_RH &kp SPACE  &kp BSPC  &kp RETURN
-
 #define GAMING_LH_5 &trans &trans GAMING_LH
+
+#define GAMING_RZ &trans &trans &trans &trans &trans &trans
+#define GAMING_RT &kp Y  &kp U  &kp I  &kp O  &kp P  &kp BSPC
+#define GAMING_RM &kp H  &kp J  &kp K  &kp L  &kp SEMI  &kp SQT
+#define GAMING_RB &kp N  &kp M  &kp COMMA  &kp DOT  &kp FSLH  &kp RSHIFT
+#define GAMING_RH &kp SPACE  &kp BSPC  &kp RETURN
 #define GAMING_RH_5 &trans &trans GAMING_RH
 
 // ******************************************  hierophant (alt_alpha) layer
 
 #define HIEROPHANT_LZ &trans &trans &trans &trans &trans &trans
-#define HIEROPHANT_RZ &trans &trans &trans &trans &trans &trans
-
 #define HIEROPHANT_LT &kp TAB  &kp F  &kp Z  &kp U  &kp Q  &kp BSPC
-#define HIEROPHANT_RT &kp RETURN  &kp W  &kp D  &kp L  &kp B  &kp SEMI
-
 #define HIEROPHANT_LM &key_layer_SQT_NUM  &tap_hold_layer_lgui LGUI_NAV_L H  &hml L_M3 I  &hml L_M2 E  &hml L_M1 A  &kp P
-#define HIEROPHANT_RM &kp G  &hmr R_M1 S  &hmr R_M2 T  &hmr R_M3 R  &tap_hold_layer_rgui RGUI_NAV_R N  &key_layer_DQT_NUM
-
 #define HIEROPHANT_LB &kp BSLH  &kp COMMA  &kp Y  &kp K  &kp O  &kp X
-#define HIEROPHANT_RB &kp V  &kp C  &kp M  &kp J  &kp DOT  &kp FSLH
-
 #define HIEROPHANT_LH &LTS EXTRA ESC  &arcane_nav_l NAV 0  &lgui_space_tab
-#define HIEROPHANT_RH &rgui_space_ret  &arcane_nav_r NAV 0  &LTS FN RETURN
-
 #define HIEROPHANT_LH_5 &trans &trans HIEROPHANT_LH
+
+#define HIEROPHANT_RZ &trans &trans &trans &trans &trans &trans
+#define HIEROPHANT_RT &kp RETURN  &kp W  &kp D  &kp L  &kp B  &kp SEMI
+#define HIEROPHANT_RM &kp G  &hmr R_M1 S  &hmr R_M2 T  &hmr R_M3 R  &tap_hold_layer_rgui RGUI_NAV_R N  &key_layer_DQT_NUM
+#define HIEROPHANT_RB &kp V  &kp C  &kp M  &kp J  &kp DOT  &kp FSLH
+#define HIEROPHANT_RH &rgui_space_ret  &arcane_nav_r NAV 0  &LTS FN RETURN
 #define HIEROPHANT_RH_5 &trans &trans HIEROPHANT_RH
 
 
 // ****************************************** CAPS layer
 
 #define CAPS_LZ &trans &trans &trans &trans &trans &trans
-#define CAPS_RZ &trans &trans &trans &trans &trans &trans
-
 #define CAPS_LT &caps_toggle &trans &trans &trans &trans &trans
-#define CAPS_RT &trans &trans &trans &trans &trans &trans
-
 #define CAPS_LM &trans &trans &trans &trans &trans &trans
-#define CAPS_RM &trans &trans &trans &trans &trans &trans
-
 #define CAPS_LB &trans &trans &trans &trans &trans &trans
-#define CAPS_RB &trans &trans &trans &trans &trans &trans
-
 #define CAPS_LH &trans &trans &trans
-#define CAPS_RH &trans &trans &trans
-
 #define CAPS_LH_5 &trans &trans CAPS_LH
+
+#define CAPS_RZ &trans &trans &trans &trans &trans &trans
+#define CAPS_RT &trans &trans &trans &trans &trans &trans
+#define CAPS_RM &trans &trans &trans &trans &trans &trans
+#define CAPS_RB &trans &trans &trans &trans &trans &trans
+#define CAPS_RH &trans &trans &trans
 #define CAPS_RH_5 &trans &trans CAPS_RH
 
 
@@ -497,21 +564,17 @@ arcane_nav_r: arcane_nav_r {
 // ******************************************  NAVIGATION layer
 
 #define NAVIGATION_LZ &trans &trans &trans &trans &trans &trans
-#define NAVIGATION_RZ &trans &trans &trans &trans &trans &trans
-
-#define NAVIGATION_LT &trans  &kp PG_UP  &kp END  &kp UP_ARROW  &kp HOME  &msc SCRL_UP
-#define NAVIGATION_RT &msc SCRL_UP  &kp HOME  &kp UP_ARROW  &kp END  &kp PG_UP  &trans
-
-#define NAVIGATION_LM &trans  &hml L_M4 PG_DN  &hml L_M3 LEFT_ARROW  &hml L_M2 DOWN_ARROW  &hml L_M1 RIGHT_ARROW  &msc SCRL_DOWN
-#define NAVIGATION_RM &msc SCRL_DOWN  &hmr R_M1 LEFT_ARROW  &hmr R_M2 DOWN_ARROW  &hmr R_M3 RIGHT_ARROW  &hmr R_M4 PG_DN  &trans
-
+#define NAVIGATION_LT &trans  &kp PG_UP  &kp END  &kp UP_ARROW  &kp HOME  &msc_up_variable
+#define NAVIGATION_LM &trans  &hml L_M4 PG_DN  &hml L_M3 LEFT_ARROW  &hml L_M2 DOWN_ARROW  &hml L_M1 RIGHT_ARROW  &msc_down_variable
 #define NAVIGATION_LB &trans  &trans  &trans  &trans  &trans  &trans
-#define NAVIGATION_RB &mkp MB2  &mkp MB3  &mkp MB4  &mkp MB5  &trans  &trans
-
 #define NAVIGATION_LH &trans  &trans  &kp SPACE                                                          
-#define NAVIGATION_RH &kp SPACE  &trans  &trans
-
 #define NAVIGATION_LH_5 &trans &trans NAVIGATION_LH
+
+#define NAVIGATION_RZ &trans &trans &trans &trans &trans &trans
+#define NAVIGATION_RT &msc_up_variable  &kp HOME  &kp UP_ARROW  &kp END  &kp PG_UP  &trans
+#define NAVIGATION_RM &msc_down_variable  &hmr R_M1 LEFT_ARROW  &hmr R_M2 DOWN_ARROW  &hmr R_M3 RIGHT_ARROW  &hmr R_M4 PG_DN  &trans
+#define NAVIGATION_RB &mkp MB2  &mkp MB3  &mkp MB4  &mkp MB5  &trans  &trans
+#define NAVIGATION_RH &kp SPACE  &trans  &trans
 #define NAVIGATION_RH_5 &trans &trans NAVIGATION_RH
 
 
@@ -538,10 +601,10 @@ arcane_nav_r: arcane_nav_r {
 
 // ******************************************  EXTRA layer
 
-#define EXTRA_LZ &smart_w &trans &trans &trans &trans &trans
-#define EXTRA_LT &trans &trans &at_wgyl_org &trans &trans &trans
-#define EXTRA_LM &bt_fancy_0 &one_urie &trans &trans &trans &kp DELETE
-#define EXTRA_LB &to_nav &trans &trans &trans &trans &trans
+#define EXTRA_LZ &trans &trans &trans &trans &trans &trans
+#define EXTRA_LT &smart_w &trans &at_wgyl_org &trans &trans &trans
+#define EXTRA_LM &trans &trans &trans &trans &trans &kp DELETE
+#define EXTRA_LB &dash_emdash &trans &trans &trans &trans &trans
 #define EXTRA_LH                      &trans &oneshot_or_to_NAVIGATION &trans
 #define EXTRA_LH_5 &trans &trans EXTRA_LH
 
@@ -581,13 +644,17 @@ arcane_nav_r: arcane_nav_r {
 #define SYSTEM_LZ &trans &trans &trans &trans &trans &trans
 
 #define SYSTEM_LT &bt BT_CLR    &bt BT_CLR_ALL  &trans        &trans        &trans        &trans
-#define SYSTEM_LM &bt BT_SEL 0  &bt BT_SEL 1    &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4  &bt BT_SEL 5
+
+#define SYSTEM_LM &trans &trans &trans &trans &trans &trans
+//#define SYSTEM_LM &bt BT_SEL 0  &hml L_M4 &bt BT_SEL 1  &hml L_M3 &bt BT_SEL 2  &hml L_M2 &bt BT_SEL 3  &hml L_M1 &bt BT_SEL 4 &bt BT_SEL 5
+
+
 #define SYSTEM_LB &trans        &trans          &trans        &trans &trans &rgb_ug RGB_EFF
 #define SYSTEM_LH &trans &trans &trans
 #define SYSTEM_LH_5 &trans &trans SYSTEM_LH
 
 #define SYSTEM_RZ &trans &trans &trans &trans &trans &trans
-#define SYSTEM_RT &trans &trans &trans &trans &trans &trans
+#define SYSTEM_RT &fancy_bt_0 &fancy_bt_1 &fancy_bt_2 &fancy_bt_3 &fancy_bt_4 &fancy_bt_5
 #define SYSTEM_RM &trans &trans &trans &trans &trans &trans
 #define SYSTEM_RB &rgb_ug RGB_EFR  &rgb_ug RGB_SPI  &rgb_ug RGB_BRI  &rgb_ug RGB_BRD  &kp END   &kp PG_DN
 #define SYSTEM_RH &trans &trans &trans
@@ -634,6 +701,27 @@ arcane_nav_r: arcane_nav_r {
 
 #define RGN_LH_5 &trans &trans RGN_LH
 #define RGN_RH_5 &trans &trans RGN_RH
+
+
+// ******************************************  BLUETOOTH layer
+
+#define BLUETOOTH_LZ &trans &trans &trans &trans &trans &trans
+
+#define BLUETOOTH_LT &bt BT_SEL 0  &bt BT_SEL 1   &bt BT_SEL 2   &bt BT_SEL 3   &bt BT_SEL 4   &bt BT_SEL 5
+#define BLUETOOTH_LM &bt BT_DISC 0 &bt BT_DISC 1  &bt BT_DISC 2  &bt BT_DISC 3  &bt BT_DISC 4  &bt BT_DISC 5
+#define BLUETOOTH_LB &bt BT_CLR &trans &trans &trans &trans &trans
+//#define BLUETOOTH_LB &bt BT_CLR 0  &bt BT_CLR 1   &bt BT_CLR 2   &bt BT_CLR 3   &bt BT_CLR 4   &bt BT_CLR 5
+
+#define BLUETOOTH_LH &trans &trans &trans
+#define BLUETOOTH_LH_5 &trans &trans BLUETOOTH_LH
+
+#define BLUETOOTH_RZ &trans &trans &trans &trans &trans &trans
+#define BLUETOOTH_RT &trans &trans &trans &trans &trans &trans
+#define BLUETOOTH_RM &trans &trans &trans &trans &trans &trans
+#define BLUETOOTH_RB &trans &trans &trans &trans &trans &trans
+#define BLUETOOTH_RH &trans &trans &trans
+#define BLUETOOTH_RH_5 &trans &trans BLUETOOTH_RH
+
 
 
 /*
