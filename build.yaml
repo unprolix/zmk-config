@@ -13,16 +13,56 @@
 #
 ---
 include:
+  # Original eyelash corne
   - board: eyelash_corne_left
-#    shield: nice_view raw_hid_adapter
     shield: nice_view
+    artifact-name: eyelash_corne_left-nice_view
   - board: eyelash_corne_right
     shield: nice_view
-#  - board: eyelash_gem_left
-#    shield: nice_view_gem
-#  - board: eyelash_gem_right
-#    shield: nice_view_gem
+    artifact-name: eyelash_corne_right-nice_view
+    
+  # Bureau variant (same keymap, different BT name)
+  - board: eyelash_corne_left
+    shield: nice_view
+    cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/eyelash_corne_bureau.conf"
+    artifact-name: eyelash_corne_left_bureau-nice_view
+  - board: eyelash_corne_right
+    shield: nice_view
+    cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/eyelash_corne_bureau.conf"
+    artifact-name: eyelash_corne_right_bureau-nice_view
+  
+  # Lavendre variant
+  - board: eyelash_corne_left
+    shield: nice_view
+    cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/eyelash_corne_lavendre.conf"
+    artifact-name: eyelash_corne_left_lavendre-nice_view
+  - board: eyelash_corne_right
+    shield: nice_view
+    cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/eyelash_corne_lavendre.conf"
+    artifact-name: eyelash_corne_right_lavendre-nice_view
+    
+  # Salon variant
+  - board: eyelash_corne_left
+    shield: nice_view
+    cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/eyelash_corne_salon.conf"
+    artifact-name: eyelash_corne_left_salon-nice_view
+  - board: eyelash_corne_right
+    shield: nice_view
+    cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/eyelash_corne_salon.conf"
+    artifact-name: eyelash_corne_right_salon-nice_view
+
+  # Other boards
   - board: nice_nano_v2
     shield: sofle_ergomech_left
+    artifact-name: sofle_ergomech_left-nice_nano_v2
   - board: nice_nano_v2
     shield: sofle_ergomech_right
+    artifact-name: sofle_ergomech_right-nice_nano_v2
+  
+  # Settings reset
+  - board: eyelash_corne_left
+    shield: settings_reset
+    artifact-name: eyelash_corne_left-settings_reset
+  - board: eyelash_corne_right
+    shield: settings_reset
+    artifact-name: eyelash_corne_right-settings_reset

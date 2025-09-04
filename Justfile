@@ -127,7 +127,7 @@ draw:
     set -euo pipefail
     keymap -c "{{ draw }}/config.yaml" parse -z "{{ config }}/eyelash_corne.keymap" --virtual-layers Combos >"{{ draw }}/base.yaml"
     yq -Yi '.combos.[].l = ["Combos"]' "{{ draw }}/base.yaml"
-    keymap -c "{{ draw }}/config.yaml" draw "{{ draw }}/base.yaml" -d "zmk-new_corne/boards/arm/eyelash_corne/eyelash_corne-layouts.dtsi" >"{{ draw }}/base.svg"
+    keymap -c "{{ draw }}/config.yaml" draw "{{ draw }}/base.yaml" -d "zmk-new_corne/boards/arm/eyelash_corne/eyelash_corne-layouts.dtsi" >"{{ draw }}/keymap.png"
 
 # initialize west
 init:
@@ -137,7 +137,7 @@ init:
 
 # list build targets
 list:
-    @just _parse_targets all | sed 's/,*$//' | sort | column
+    @just _parse_targets all | awk -F, '{if ($4) print $4; else if ($2) print $2"-"$1; else print $1}' | sort
 
 # update west
 update:
