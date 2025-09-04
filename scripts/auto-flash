@@ -130,10 +130,10 @@ def determine_firmware_variant(device_name, device_side):
     
     # Map device names to firmware variants
     variant_map = {
-        'bureau': 'home',      # Bureau -> home variant
-        'salon': 'work',       # Salon -> work variant  
-        'lavendre': 'travel',  # Lavendre -> travel variant
-        'lavender': 'travel',  # Alternative spelling
+        'bureau': 'bureau',    # Bureau -> bureau variant
+        'salon': 'salon',      # Salon -> salon variant  
+        'lavendre': 'lavendre', # Lavendre -> lavendre variant
+        'lavender': 'lavendre', # Alternative spelling -> lavendre variant
     }
     
     # Find matching variant
@@ -414,11 +414,39 @@ def unmount_device(mount_point):
         return False
 
 
-def find_flashable_devices(known_devices, firmware_dir, require_confirmation=False):
+def scan_for_bootloaders(known_devices, firmware_dir, require_confirmation=False, scan_duration=5):
     """
-    Find devices in bootloader mode that can be flashed.
+    Continuously scan for bootloader devices for the specified duration.
     Returns list of (mount_point, device_config, firmware_file) tuples.
     """
+    start_time = time.time()
+    scan_interval = 0.5  # Check every 500ms
+    found_devices = set()  # Track already-found devices to avoid duplicates
+    
+    print(f"Scanning for bootloader devices for {scan_duration} seconds...")
+    
+    while time.time() - start_time < scan_duration:
+        flashable = find_flashable_devices_once(known_devices, firmware_dir, require_confirmation, found_devices)
+        
+        if flashable:
+            # Found devices, return immediately
+            return flashable
+        
+        # Wait before next scan
+        time.sleep(scan_interval)
+    
+    print("Scan complete. No devices found.")
+    return []
+
+
+def find_flashable_devices_once(known_devices, firmware_dir, require_confirmation=False, found_devices=None):
+    """
+    Single scan for devices in bootloader mode that can be flashed.
+    Returns list of (mount_point, device_config, firmware_file) tuples.
+    """
+    if found_devices is None:
+        found_devices = set()
+        
     flashable = []
     
     # First check for already-mounted bootloader devices
@@ -426,8 +454,11 @@ def find_flashable_devices(known_devices, firmware_dir, require_confirmation=Fal
     mounted_devices = []
     
     if mount_points:
-        print(f"Found {len(mount_points)} already mounted bootloader device(s)")
-        mounted_devices = mount_points
+        new_mounted = [mp for mp in mount_points if mp not in found_devices]
+        if new_mounted:
+            print(f"Found {len(new_mounted)} new mounted bootloader device(s)")
+            mounted_devices = new_mounted
+            found_devices.update(new_mounted)
     
     # Also check for unmounted bootloader devices
     bootloader_devices = detect_bootloader_devices()
@@ -436,19 +467,29 @@ def find_flashable_devices(known_devices, firmware_dir, require_confirmation=Fal
     # Try to correlate USB bootloader devices with mass storage devices
     unmounted_devices = []
     for ms_device in mass_storage_devices:
-        # This is a simple correlation - in practice you might want more sophisticated matching
-        unmounted_devices.append(ms_device)
+        if ms_device['path'] not in found_devices:
+            # This is a simple correlation - in practice you might want more sophisticated matching
+            unmounted_devices.append(ms_device)
+            found_devices.add(ms_device['path'])
     
     if bootloader_devices:
-        print(f"Found {len(bootloader_devices)} USB bootloader device(s)")
+        new_bootloader_serials = []
         for device in bootloader_devices:
-            vendor = device.get('vendor_name', 'Unknown')
-            product = device.get('product_name', 'Unknown')
-            serial = device.get('serial', 'No serial')
-            print(f"  - {vendor} {product} (Serial: {serial})")
+            serial = device.get('serial', device.get('vendor_name', '') + device.get('product_name', ''))
+            if serial and serial not in found_devices:
+                new_bootloader_serials.append(device)
+                found_devices.add(serial)
+        
+        if new_bootloader_serials:
+            print(f"Found {len(new_bootloader_serials)} new USB bootloader device(s)")
+            for device in new_bootloader_serials:
+                vendor = device.get('vendor_name', 'Unknown')
+                product = device.get('product_name', 'Unknown')
+                serial = device.get('serial', 'No serial')
+                print(f"  - {vendor} {product} (Serial: {serial})")
     
     if unmounted_devices:
-        print(f"Found {len(unmounted_devices)} unmounted mass storage device(s)")
+        print(f"Found {len(unmounted_devices)} new unmounted mass storage device(s)")
         for device in unmounted_devices:
             print(f"  - {device['path']} (Label: {device['label'] or 'No label'})")
     
@@ -591,6 +632,13 @@ def find_flashable_devices(known_devices, firmware_dir, require_confirmation=Fal
     return flashable
 
 
+def find_flashable_devices(known_devices, firmware_dir, require_confirmation=False):
+    """
+    Legacy wrapper for backwards compatibility. Uses scanning approach.
+    """
+    return scan_for_bootloaders(known_devices, firmware_dir, require_confirmation, 5)
+
+
 def main():
     import argparse
     
@@ -602,6 +650,10 @@ def main():
                         help='Directory containing firmware files')
     parser.add_argument('--confirm', '-c', action='store_true',
                         help='Ask for confirmation before flashing each device')
+    parser.add_argument('--scan-duration', '-s', type=float, default=5.0,
+                        help='How long to scan for bootloader devices in seconds (default: 5.0)')
+    parser.add_argument('--no-scan', action='store_true',
+                        help='Do not scan continuously, just check once')
     
     args = parser.parse_args()
     
@@ -622,7 +674,8 @@ def main():
         return
     
     # Find devices that can be flashed
-    flashable_devices = find_flashable_devices(known_devices, firmware_dir, args.confirm)
+    scan_duration = 0 if args.no_scan else args.scan_duration
+    flashable_devices = scan_for_bootloaders(known_devices, firmware_dir, args.confirm, scan_duration)
     
     if not flashable_devices:
         print("\nNo flashable devices found.")
