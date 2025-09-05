@@ -1,0 +1,14 @@
+#!/bin/bash
+#
+# Simple wrapper for flashing settings reset firmware
+# Usage: flash-reset [--dry-run]
+#
+
+SCRIPT_DIR=$(dirname "$0")
+
+echo "🔄 ZMK Settings Reset Flash Tool"
+echo "Put your device in bootloader mode (double-tap reset) and connect it..."
+echo
+
+# Run the settings reset script with sensible defaults
+exec "$SCRIPT_DIR/reset-settings" "$@"
