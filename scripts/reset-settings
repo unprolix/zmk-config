@@ -1,0 +1,375 @@
+#!/usr/bin/env python3
+"""
+ZMK Settings Reset Tool
+Automatically flashes settings reset firmware to devices in bootloader mode.
+Uses device detection from auto-flash to identify connected bootloader devices.
+"""
+
+import os
+import sys
+import time
+from pathlib import Path
+
+# Import functions from auto-flash module
+sys.path.insert(0, str(Path(__file__).parent))
+from auto_flash_functions import (
+    load_device_config,
+    detect_bootloader_devices,
+    find_available_mass_storage_devices,
+    find_bootloader_mount_points,
+    get_bootloader_info,
+    flash_device,
+    mount_device,
+    unmount_device
+)
+
+def find_settings_reset_firmware(device_side, firmware_dir):
+    """
+    Find the appropriate settings reset firmware file based on device side.
+    """
+    firmware_dir = Path(firmware_dir)
+    
+    # Look for settings reset firmware files
+    if device_side == 'left':
+        pattern = "*left*settings*reset*.uf2"
+    elif device_side == 'right':
+        pattern = "*right*settings*reset*.uf2"
+    else:
+        # If side is unknown, try both
+        left_matches = list(firmware_dir.glob("*left*settings*reset*.uf2"))
+        right_matches = list(firmware_dir.glob("*right*settings*reset*.uf2"))
+        all_matches = left_matches + right_matches
+        if all_matches:
+            return str(all_matches[0])  # Return first match
+        return None
+    
+    matches = list(firmware_dir.glob(pattern))
+    if matches:
+        return str(matches[0])
+    
+    return None
+
+def find_flashable_devices_once(known_devices, firmware_dir, found_devices=None):
+    """
+    Single scan for devices in bootloader mode that can be flashed with settings reset.
+    Returns list of (mount_point, device_config, firmware_file, needs_unmount) tuples.
+    """
+    if found_devices is None:
+        found_devices = set()
+        
+    flashable = []
+    
+    # First check for already-mounted bootloader devices
+    mount_points = find_bootloader_mount_points()
+    mounted_devices = []
+    
+    if mount_points:
+        new_mounted = [mp for mp in mount_points if mp not in found_devices]
+        if new_mounted:
+            print(f"Found {len(new_mounted)} new mounted bootloader device(s)")
+            mounted_devices = new_mounted
+            found_devices.update(new_mounted)
+    
+    # Also check for unmounted bootloader devices
+    bootloader_devices = detect_bootloader_devices()
+    mass_storage_devices = find_available_mass_storage_devices()
+    
+    # Try to correlate USB bootloader devices with mass storage devices
+    unmounted_devices = []
+    for ms_device in mass_storage_devices:
+        if ms_device['path'] not in found_devices:
+            unmounted_devices.append(ms_device)
+            found_devices.add(ms_device['path'])
+    
+    if bootloader_devices and not mounted_devices and not unmounted_devices:
+        print(f"Found {len(bootloader_devices)} USB bootloader device(s) but no mass storage")
+        for device in bootloader_devices:
+            vendor = device.get('vendor_name', 'Unknown')
+            product = device.get('product_name', 'Unknown')
+            serial = device.get('serial', 'No serial')
+            print(f"  - {vendor} {product} (Serial: {serial})")
+    
+    all_devices = []
+    
+    # Handle already mounted devices
+    for mount_point in mounted_devices:
+        all_devices.append({
+            'type': 'mounted',
+            'mount_point': mount_point,
+            'device_path': None
+        })
+    
+    # Handle unmounted devices that need mounting
+    for device in unmounted_devices:
+        all_devices.append({
+            'type': 'unmounted', 
+            'mount_point': None,
+            'device_path': device['path'],
+            'label': device.get('label', '')
+        })
+    
+    if not all_devices:
+        return flashable
+    
+    # For each device, try to determine what to flash
+    for i, device_info in enumerate(all_devices, 1):
+        mount_point = device_info.get('mount_point')
+        device_path = device_info.get('device_path')
+        needs_unmount = False
+        
+        # If device is unmounted, we need to mount it temporarily
+        if device_info['type'] == 'unmounted':
+            temp_mount = f"/tmp/zmk-reset-{i}"
+            print(f"📱 Unmounted bootloader device: {device_path}")
+            print(f"Mounting to {temp_mount} to check device info...")
+            
+            if mount_device(device_path, temp_mount):
+                mount_point = temp_mount
+                needs_unmount = True
+            else:
+                print(f"❌ Failed to mount {device_path}, skipping")
+                continue
+        
+        # Get bootloader info
+        bootloader_info = get_bootloader_info(mount_point) if mount_point else {}
+        
+        # Try to match by serial number from USB device info
+        matched_config = None
+        usb_serial = None
+        
+        # Find the USB device with matching serial
+        for usb_device in bootloader_devices:
+            if usb_device.get('serial'):
+                usb_serial = usb_device.get('serial')
+                if usb_serial in known_devices:
+                    matched_config = known_devices[usb_serial]
+                    break
+        
+        print(f"📱 Bootloader device #{i}")
+        if device_info['type'] == 'mounted':
+            print(f"   Already mounted at: {mount_point}")
+        else:
+            print(f"   Device: {device_path}")
+            print(f"   Mounted at: {mount_point}")
+        
+        if usb_serial:
+            print(f"   USB Serial: {usb_serial}")
+            
+        if bootloader_info:
+            for key, value in bootloader_info.items():
+                print(f"   {key}: {value}")
+        
+        # If we found a match, check if we have settings reset firmware
+        if matched_config:
+            device_name = matched_config['name']
+            device_side = matched_config.get('side', 'unknown')
+            print(f"✨ Auto-detected: {device_name} ({device_side} side)")
+            
+            # Find appropriate settings reset firmware
+            firmware_file = find_settings_reset_firmware(device_side, firmware_dir)
+            if firmware_file:
+                flashable.append((mount_point, matched_config, firmware_file, needs_unmount))
+                print(f"✅ Will flash {os.path.basename(firmware_file)} to {device_name}")
+                continue
+            else:
+                print(f"❌ No settings reset firmware found for {device_side} side")
+        
+        # If no auto-detection, ask user to identify the device
+        print(f"\nConfigured devices:")
+        device_list = list(known_devices.items())
+        for j, (serial, config) in enumerate(device_list, 1):
+            side = config.get('side', 'unknown')
+            print(f"  {j}. {config['name']} ({side} side)")
+        
+        print("  0. Skip this device")
+        
+        try:
+            choice = input("Which device is this? (number): ").strip()
+            if choice == '0':
+                if needs_unmount:
+                    unmount_device(mount_point)
+                continue
+                
+            choice_idx = int(choice) - 1
+            if 0 <= choice_idx < len(device_list):
+                serial, config = device_list[choice_idx]
+                device_name = config['name']
+                device_side = config.get('side', 'unknown')
+                
+                # Find appropriate settings reset firmware
+                firmware_file = find_settings_reset_firmware(device_side, firmware_dir)
+                if firmware_file:
+                    flashable.append((mount_point, config, firmware_file, needs_unmount))
+                    print(f"✅ Will flash {os.path.basename(firmware_file)} to {device_name}")
+                else:
+                    print(f"❌ No settings reset firmware found for {device_side} side")
+                    if needs_unmount:
+                        unmount_device(mount_point)
+            else:
+                print("Invalid choice, skipping device")
+                if needs_unmount:
+                    unmount_device(mount_point)
+                
+        except (ValueError, KeyboardInterrupt):
+            print("Skipping device")
+            if needs_unmount:
+                unmount_device(mount_point)
+            continue
+    
+    return flashable
+
+def find_flashable_settings_reset_devices(known_devices, firmware_dir, scan_duration=5):
+    """
+    Find devices in bootloader mode that can have settings reset flashed.
+    Returns list of (mount_point, device_config, firmware_file, needs_unmount) tuples.
+    """
+    start_time = time.time()
+    scan_interval = 0.5
+    found_devices = set()
+    
+    print(f"Scanning for bootloader devices for {scan_duration} seconds...")
+    
+    while time.time() - start_time < scan_duration:
+        flashable = find_flashable_devices_once(known_devices, firmware_dir, found_devices)
+        
+        if flashable:
+            # Found devices, return immediately
+            return flashable
+        
+        # Wait before next scan
+        time.sleep(scan_interval)
+    
+    print("Scan complete. No devices found.")
+    return []
+
+def main():
+    import argparse
+    
+    parser = argparse.ArgumentParser(description='Flash settings reset firmware to bootloader devices')
+    parser.add_argument('--dry-run', '-n', action='store_true',
+                        help='Show what would be flashed without actually flashing')
+    parser.add_argument('--firmware-dir', '-f', 
+                        default=str(Path(__file__).parent.parent / 'firmware'),
+                        help='Directory containing firmware files')
+    parser.add_argument('--scan-duration', '-s', type=float, default=5.0,
+                        help='How long to scan for bootloader devices in seconds (default: 5.0)')
+    parser.add_argument('--no-scan', action='store_true',
+                        help='Do not scan continuously, just check once')
+    parser.add_argument('--yes', '-y', action='store_true',
+                        help='Skip confirmation prompt and flash immediately')
+    
+    args = parser.parse_args()
+    
+    print("ZMK Settings Reset Tool")
+    print("=" * 50)
+    print("This tool will flash settings reset firmware to devices in bootloader mode.")
+    print("Make sure your devices are in bootloader mode (double-tap reset button).")
+    print()
+    
+    # Load device configuration
+    known_devices = load_device_config()
+    if not known_devices:
+        print("No devices configured in ~/.config/zmk/devices.yaml")
+        print("Run 'scripts/zmk-devices --add-new' to configure devices first.")
+        return 1
+    
+    firmware_dir = Path(args.firmware_dir)
+    if not firmware_dir.exists():
+        print(f"Firmware directory not found: {firmware_dir}")
+        print("Make sure firmware has been built.")
+        return 1
+    
+    # Check if settings reset firmware exists
+    reset_firmware_files = list(firmware_dir.glob("*settings*reset*.uf2"))
+    if not reset_firmware_files:
+        print(f"No settings reset firmware found in {firmware_dir}")
+        print("Build settings reset firmware first with:")
+        print("  just build-reset")
+        return 1
+    
+    print(f"Found {len(reset_firmware_files)} settings reset firmware files:")
+    for fw in reset_firmware_files:
+        print(f"  - {fw.name}")
+    print()
+    
+    # Find devices that can be flashed with settings reset
+    scan_duration = 0 if args.no_scan else args.scan_duration
+    flashable_devices = find_flashable_settings_reset_devices(
+        known_devices, firmware_dir, scan_duration
+    )
+    
+    if not flashable_devices:
+        print("No flashable devices found in bootloader mode.")
+        print("Make sure devices are in bootloader mode (double-tap reset button).")
+        return 1
+    
+    print(f"Found {len(flashable_devices)} device(s) ready for settings reset")
+    
+    if args.dry_run:
+        print("\n[DRY RUN] Would flash the following:")
+        for item in flashable_devices:
+            mount_point, config, firmware_file = item[0], item[1], item[2]
+            needs_unmount = item[3] if len(item) > 3 else False
+            print(f"  {config['name']}: {os.path.basename(firmware_file)} -> {mount_point}")
+            
+            # Clean up any temporarily mounted devices
+            if needs_unmount:
+                print(f"  [DRY RUN] Would unmount {mount_point}")
+                unmount_device(mount_point)
+        return 0
+    
+    # Confirm with user before flashing (unless --yes flag is used)
+    if not args.yes:
+        print("\nThis will reset all settings on the following devices:")
+        for item in flashable_devices:
+            config = item[1]
+            firmware_file = item[2]
+            print(f"  - {config['name']}: {os.path.basename(firmware_file)}")
+        
+        confirm = input("\nProceed with settings reset? [y/N]: ").strip().lower()
+        if confirm not in ['y', 'yes']:
+            print("Cancelled.")
+            # Clean up any temporarily mounted devices before exiting
+            for item in flashable_devices:
+                needs_unmount = item[3] if len(item) > 3 else False
+                if needs_unmount:
+                    mount_point = item[0]
+                    print(f"Unmounting {mount_point}...")
+                    unmount_device(mount_point)
+            return 0
+    
+    # Flash devices
+    print(f"\nFlashing settings reset firmware to {len(flashable_devices)} device(s)...")
+    
+    success_count = 0
+    for item in flashable_devices:
+        mount_point, config, firmware_file = item[0], item[1], item[2]
+        needs_unmount = item[3] if len(item) > 3 else False
+        device_name = config['name']
+        
+        print(f"\n🔄 Resetting settings on {device_name}...")
+        if flash_device(mount_point, firmware_file, device_name):
+            success_count += 1
+            print(f"✅ Settings reset complete for {device_name}")
+            # Brief pause to allow device to reset
+            time.sleep(1)
+        else:
+            print(f"❌ Settings reset failed for {device_name}")
+        
+        # Unmount if we mounted it temporarily
+        if needs_unmount:
+            print(f"Unmounting {mount_point}...")
+            unmount_device(mount_point)
+    
+    print(f"\n🎉 Settings reset completed on {success_count}/{len(flashable_devices)} device(s)")
+    
+    if success_count > 0:
+        print("\nNOTE: After settings reset, you'll need to:")
+        print("1. Flash your regular keymap firmware")
+        print("2. Re-pair Bluetooth devices if using wireless")
+        print("3. Reconfigure any custom settings")
+    
+    return 0 if success_count == len(flashable_devices) else 1
+
+if __name__ == "__main__":
+    sys.exit(main())

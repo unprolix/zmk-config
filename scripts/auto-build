@@ -126,12 +126,11 @@ def determine_firmware_variant(device_name, device_side):
     """
     name_lower = device_name.lower()
     
-    # Map device names to firmware variants
+    # Map device names to firmware variants (using actual target names)
     variant_map = {
-        'bureau': 'home',      # Bureau -> home variant
-        'salon': 'work',       # Salon -> work variant  
-        'lavendre': 'travel',  # Lavendre -> travel variant
-        'lavender': 'travel',  # Alternative spelling
+        'bureau': 'bureau',      # Bureau -> bureau variant
+        'salon': 'salon',        # Salon -> salon variant  
+        'lavendre': 'lavendre',  # Lavendre -> lavendre variant
     }
     
     # Find matching variant
