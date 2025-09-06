@@ -133,7 +133,7 @@ def determine_firmware_variant(device_name, device_side):
         'bureau': 'bureau',    # Bureau -> bureau variant
         'salon': 'salon',      # Salon -> salon variant  
         'lavendre': 'lavendre', # Lavendre -> lavendre variant
-        'lavender': 'lavendre', # Alternative spelling -> lavendre variant
+        'lavendre': 'lavendre', # Lavendre -> lavendre variant
     }
     
     # Find matching variant
