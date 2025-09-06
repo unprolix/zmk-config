@@ -25,25 +25,21 @@ from auto_flash_functions import (
 
 def find_settings_reset_firmware(device_side, firmware_dir):
     """
-    Find the appropriate settings reset firmware file based on device side.
+    Find the universal settings reset firmware file (works for both sides).
     """
     firmware_dir = Path(firmware_dir)
     
-    # Look for settings reset firmware files
-    if device_side == 'left':
-        pattern = "*left*settings*reset*.uf2"
-    elif device_side == 'right':
-        pattern = "*right*settings*reset*.uf2"
-    else:
-        # If side is unknown, try both
-        left_matches = list(firmware_dir.glob("*left*settings*reset*.uf2"))
-        right_matches = list(firmware_dir.glob("*right*settings*reset*.uf2"))
-        all_matches = left_matches + right_matches
-        if all_matches:
-            return str(all_matches[0])  # Return first match
-        return None
-    
+    # Look for universal settings reset firmware (no side-specific naming)
+    pattern = "*settings*reset*.uf2"
     matches = list(firmware_dir.glob(pattern))
+    
+    # Filter out any old side-specific files if they exist
+    universal_matches = [m for m in matches if 'left' not in m.name.lower() and 'right' not in m.name.lower()]
+    
+    if universal_matches:
+        return str(universal_matches[0])
+    
+    # Fallback to any settings reset firmware if universal not found
     if matches:
         return str(matches[0])
     

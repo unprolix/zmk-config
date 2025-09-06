@@ -59,10 +59,7 @@ include:
     shield: sofle_ergomech_right
     artifact-name: sofle_ergomech_right-nice_nano_v2
   
-  # Settings reset
+  # Settings reset (universal for both sides)
   - board: eyelash_corne_left
     shield: settings_reset
-    artifact-name: eyelash_corne_left-settings_reset
-  - board: eyelash_corne_right
-    shield: settings_reset
-    artifact-name: eyelash_corne_right-settings_reset
+    artifact-name: eyelash_corne-settings_reset
