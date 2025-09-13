@@ -280,19 +280,6 @@ delayed_rgb_off: delayed_rgb_off {
 };
 
 
-comma_semicolon: comma_semicolon {
-    compatible = "zmk,behavior-mod-morph";
-    #binding-cells = <0>;
-    bindings = <&kp COMMA>, <&kp SEMI>;
-    mods = <(MOD_LSFT|MOD_RSFT)>;
-};
-
-dot_colon: dot_colon {
-    compatible = "zmk,behavior-mod-morph";
-    #binding-cells = <0>;
-    bindings = <&kp DOT>, <&kp COLON>;
-    mods = <(MOD_LSFT|MOD_RSFT)>;
-};
 
 dash_emdash: dash_emdash {
     compatible = "zmk,behavior-mod-morph";
@@ -509,20 +496,7 @@ arcane_nav_r: arcane_nav_r {
 
 // ******************************************  hierophant (alt_alpha) layer
 
-#define HIEROPHANT_LZ &trans &trans &trans &trans &trans &trans
-#define HIEROPHANT_LT &kp TAB  &kp F  &kp Z  &kp U  &tll NUMPAD Q  &backspace_word_delete
-#define HIEROPHANT_LM &key_layer_SQT_NUM  /*&numeric_sqt_ht*/  &tap_hold_layer_lgui_adaptive LGUI_NAV_L 0  &hml L_M3 I  &hml L_M2 E  &hml L_M1 A  &kp P
-#define HIEROPHANT_LB &kp BSLH  &comma_semicolon  &kp Y  &kp K  &kp O  &kp X
-#define HIEROPHANT_LH &LTS EXTRA ESC  &arcane_nav_l NAV 0  &lgui_space_tab
-#define HIEROPHANT_LH_5 &trans &trans HIEROPHANT_LH
-
-#define HIEROPHANT_RZ &trans &trans &trans &trans &trans &trans
-#define HIEROPHANT_RT &kp RETURN  &tlr NUMPAD W  &kp D  &kp L  &kp B  &kp SEMI
-#define HIEROPHANT_RM &kp G  &hmr R_M1 S  &hmr R_M2 T  &hmr R_M3 R  &tap_hold_layer_rgui RGUI_NAV_R N  &key_layer_DQT_NUM /*&numeric_dqt_ht*/
-#define HIEROPHANT_RB &kp V  &kp C  &kp M  &kp J  &dot_colon  &kp FSLH
-#define HIEROPHANT_RH &rgui_space_ret  &arcane_nav_r NAV 0  &LTS FN RETURN
-#define HIEROPHANT_RH_5 &trans &trans HIEROPHANT_RH
-
+// defined in hierophant.dtsi
 
 // ****************************************** CAPS layer
 
@@ -767,8 +741,8 @@ arcane_nav_r: arcane_nav_r {
 #define SUPERSCRIPT_LH &trans &trans &trans
 #define SUPERSCRIPT_RH &trans &trans &trans
 
-#define SUPERSCRIPT_LH_5 &trans &trans _LH
-#define SUPERSCRIPT_RH_5 &trans &trans _RH
+#define SUPERSCRIPT_LH_5 &trans &trans SUPERSCRIPT_LH
+#define SUPERSCRIPT_RH_5 &trans &trans SUPERSCRIPT_RH
 
 
 

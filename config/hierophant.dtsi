@@ -1,0 +1,85 @@
+/ {
+	macros {
+		cant_wont_tail: cant_wont_tail {
+			compatible = "zmk,behavior-macro";
+			#binding-cells = <0>;
+			bindings = <&kp SQT>, <&kp T>;
+		};
+	};
+
+	/*
+
+	won't, can't  (no NH in english)
+	i'd, i'll, i've (no IH)
+	they're (no YH)
+
+
+	*/
+
+
+	
+	behaviors {
+
+		sqt_dash: sqt_dash {
+			compatible = "zmk,behavior-mod-morph";
+			#binding-cells = <0>;
+			bindings = <&key_layer_SQT_NUM>, <&kp MINUS>;
+			mods = <(MOD_LSFT|MOD_RSFT)>;
+		};
+
+		dqt_underscore: dqt_underscore {
+			compatible = "zmk,behavior-mod-morph";
+			#binding-cells = <0>;
+			bindings = <&key_layer_DQT_NUM>, <&kp UNDERSCORE>;
+			mods = <(MOD_LSFT|MOD_RSFT)>;
+		};
+
+		dot_colon: dot_colon {
+			compatible = "zmk,behavior-mod-morph";
+			#binding-cells = <0>;
+			bindings = <&kp DOT>, <&kp COLON>;
+			mods = <(MOD_LSFT|MOD_RSFT)>;
+		};
+
+		comma_semicolon: comma_semicolon {
+			compatible = "zmk,behavior-mod-morph";
+			#binding-cells = <0>;
+			bindings = <&kp COMMA>, <&kp SEMI>;
+			mods = <(MOD_LSFT|MOD_RSFT)>;
+		};
+
+		adaptive_h_quote: adaptive_h_quote {
+			compatible = "zmk,behavior-antecedent-morph";
+			#binding-cells = <0>;
+			defaults = <&kp H>;
+			bindings = <&kp SQT>, <&cant_wont_tail>, <&kp SQT>, <&kp SQT>;
+			antecedents = <E N I>; // shE'll/shE'd, caN't/woN't, I'd/I'll
+			max-delay-ms = <LONG_PAUSE>;
+		};
+
+		tap_hold_layer_lgui_adaptive: tap_hold_layer_lgui_adaptive {
+			compatible = "zmk,behavior-hold-tap";
+			#binding-cells = <2>;
+			tapping-term-ms = <200>;
+			quick-tap-ms = <175>;
+			require-prior-idle-ms = <100>;
+			flavor = "balanced";
+			bindings = <&layer_lgui>, <&adaptive_h_quote>;
+		};
+	};
+};
+
+
+#define HIEROPHANT_LZ &trans &trans &trans &trans &trans &trans
+#define HIEROPHANT_LT &kp TAB  &kp F  &kp Z  &kp U  &tll NUMPAD Q  &backspace_word_delete
+#define HIEROPHANT_LM &sqt_dash &tap_hold_layer_lgui_adaptive LGUI_NAV_L 0  &hml L_M3 I  &hml L_M2 E  &hml L_M1 A  &kp P
+#define HIEROPHANT_LB &kp BSLH  &comma_semicolon  &kp Y  &kp K  &kp O  &kp X
+#define HIEROPHANT_LH &LTS EXTRA ESC  &arcane_nav_l NAV 0  &lgui_space_tab
+#define HIEROPHANT_LH_5 &trans &trans HIEROPHANT_LH
+
+#define HIEROPHANT_RZ &trans &trans &trans &trans &trans &trans
+#define HIEROPHANT_RT &kp RETURN  &tlr NUMPAD W  &kp D  &kp L  &kp B  &kp SEMI
+#define HIEROPHANT_RM &kp G  &hmr R_M1 S  &hmr R_M2 T  &hmr R_M3 R  &tap_hold_layer_rgui RGUI_NAV_R N  &dqt_underscore
+#define HIEROPHANT_RB &kp V  &kp C  &kp M  &kp J  &dot_colon  &kp FSLH
+#define HIEROPHANT_RH &rgui_space_ret  &arcane_nav_r NAV 0  &LTS FN RETURN
+#define HIEROPHANT_RH_5 &trans &trans HIEROPHANT_RH
