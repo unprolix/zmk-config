@@ -24,6 +24,15 @@
         require-prior-idle-ms = <COMBO_PREIDLE_SLOW>; \
     };
 
+#define ZMK_COMBO_LAYERS(name, keycode, pos1, pos2, layer_list) \
+    combo_##name { \
+        timeout-ms = <CHORD_TIMEOUT>; \
+        key-positions = <pos1 pos2>; \
+        bindings = <&kp keycode>; \
+        layers = <layer_list>; \
+        require-prior-idle-ms = <COMBO_PREIDLE_SLOW>; \
+    };
+
 
 #define ZMK_COMBO_FAST(name, keycode, pos1, pos2) \
     combo_##name { \
@@ -39,7 +48,7 @@
         key-positions = <pos1 pos2>; \
         bindings = <&kp keycode>; \
         require-prior-idle-ms = <COMBO_PREIDLE_SLOW>; \
-    };
+};
 
 #define ZMK_COMBO_LESSSLOW(name, keycode, pos1, pos2) \
     combo_##name { \
@@ -47,15 +56,6 @@
         key-positions = <pos1 pos2>; \
         bindings = <&kp keycode>; \
         require-prior-idle-ms = <COMBO_PREIDLE_LESSSLOW>; \
-    };
-
-#define ZMK_COMBO_ADVANCED(name, keycode, pos1, pos2, layers, timeout, idle) \
-    combo_##name { \
-        timeout-ms = <timeout>; \
-        key-positions = <pos1 pos2>; \
-        bindings = <&kp keycode>; \
-        layers = <layers>; \
-        require-prior-idle-ms = <idle>; \
     };
 
 #define ZMK_COMBO_PLUS(name, behavior, pos1, pos2) \
@@ -206,17 +206,13 @@ ZMK_COMBO_SLOW(percent, PERCENT, RT4, RM4)
 ZMK_COMBO_SLOW(question, QUESTION, RT5, RM5)
 
 /* top two rows stagger */
-ZMK_COMBO_SLOW(tab_stagger_alt, TAB, LT0, LM2)
+ZMK_COMBO_SLOW(del_stagger_alt, DELETE, LT0, LM2)
 ZMK_COMBO_SLOW(tab_stagger, TAB, LT0, LM1)
 ZMK_COMBO_PLUS_SLOW(backspace_stagger_l, &backspace_word_delete, LM0, LT1)
 // ⊕
 ZMK_COMBO_PLUS_SLOW(backspace_stagger_r, &backspace_word_delete, RM0, RT1)
 ZMK_COMBO_SLOW(enter_stagger, ENTER, RT0, RM1)
 ZMK_COMBO_SLOW(enter_stagger_alt, ENTER, RT0, RM2)
-
-
-
-
 
 
 
@@ -240,6 +236,12 @@ ZMK_COMBO_SLOW(pipe, PIPE, RM5, RB5)
 // bottom row
 
 ZMK_COMBO_PLUS_SLOW(alt_alpha, &to ALT_ALPHA, LB5, RB5)
+
+
+// for specific layers
+
+ZMK_COMBO_LAYERS(game_lalt, LALT, LB5, LB4, GAMING)
+
 
 // system layer. would have been with all six thumb keys but that is at least too many for the default config
 // so this just uses the outer four

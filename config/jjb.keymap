@@ -114,7 +114,7 @@ key numbers
 #define MODIFIER_RIGHT_NAV 11
 #define BLUETOOTH 12
 #define SUPERSCRIPT 13
-
+#define NUMPAD 14
 
 // short versions for helping things line up
 #define NUM NUMERIC
@@ -187,7 +187,9 @@ ZMK_TAP_DANCE(smart_num_lock_dance, bindings = <&sl NUM>, <&num_word NUM>, <&rgb
 MAKE_HRM(hml, &kp, &kp, KEYS_R THUMBS) // Left-hand HRMs.
 MAKE_HRM(hmr, &kp, &kp, KEYS_L THUMBS) // Right-hand HRMs.
 
-
+// Top Layer Left/Right
+MAKE_HRM(tll, &mo, &kp, KEYS_L THUMBS)
+MAKE_HRM(tlr, &mo, &kp, KEYS_R THUMBS)
 
 #include "build_info.dtsi"
 //#include "tap-hold-layer.dtsi"
@@ -224,7 +226,7 @@ ZMK_UNICODE_SINGLE(em_dash, N2, N0, N1, N4)
 //BT_MODSEL(4)
 //BT_MODSEL(5)
 
-		
+#include "hierophant.dtsi"		
 
 
 / {
@@ -235,10 +237,12 @@ ZMK_UNICODE_SINGLE(em_dash, N2, N0, N1, N4)
 #include "modifier-tap-doubletap-behaviors.dtsi"
 #include "arcane.dtsi"
 
+// todo: remake these to be more like hml and hmr
 ZMK_KEY_LAYER(SQT,NUM)
 ZMK_KEY_LAYER(DQT,NUM)
 ZMK_KEY_LAYER(ENTER, NAV)
 
+		
 // RGB control behaviors for delayed activation
 rgb_on_behavior: rgb_on_behavior {
     compatible = "zmk,behavior-macro";
@@ -337,13 +341,6 @@ fancy_bt_5: fancy_bt_5 {
     compatible = "zmk,behavior-mod-morph";
     #binding-cells = <0>;
     bindings = <&bt BT_SEL 5>, <&bt BT_DISC 5>;
-    mods = <(MOD_LSFT|MOD_RSFT)>;
-};		
-
-fancy_bt_6: fancy_bt_6 {
-    compatible = "zmk,behavior-mod-morph";
-    #binding-cells = <0>;
-    bindings = <&bt BT_SEL 6>, <&bt BT_DISC 6>;
     mods = <(MOD_LSFT|MOD_RSFT)>;
 };		
 
@@ -471,24 +468,16 @@ arcane_nav_r: arcane_nav_r {
 
 // ****************************************** BASE layer
 
+#define BASE_LZ &trans &trans &trans &trans &trans &trans
 #define BASE_LT &kp TAB  &kp Q  &kp W  &kp E  &kp R  &kp T
 #define BASE_LM &key_layer_SQT_NUM  &tap_hold_layer_lgui LGUI_NAV_L A  &hml L_M3 S  &hml L_M2 D  &hml L_M1 F  &kp G
 #define BASE_LB &trans &kp Z  &kp X  &kp C  &kp V  &kp B
 #define BASE_LH &LTS EXTRA ESC  &smart_nav_thumb NAV TAB  &lgui_space_tab
 #define BASE_LH_5 &trans &trans BASE_LH
-#define BASE_LH_5 &trans &trans BASE_LH
-
-/*
-#define BASE_LZ &trans &trans &trans &trans &trans &trans
-#define BASE_LT &trans &trans &trans &trans &trans &trans
-#define BASE_LM &trans &trans &trans &trans &trans &trans
-#define BASE_LB &trans &trans &trans &trans &trans &trans
-#define BASE_LH &trans &trans &trans
-*/
 
 
 #define BASE_RZ &trans &trans &trans &trans &trans &trans
-#define BASE_RT &kp Y    &kp U  &kp I  &kp O  &kp P  &kp BSPC
+#define BASE_RT &kp Y    &kp U  &kp I  &kp O  &kp P  &backspace_word_delete
 #define BASE_RM &kp H  &hmr R_M1 J  &hmr R_M2 K  &hmr R_M3 L  &tap_hold_layer_rgui RGUI_NAV_R SEMI  &key_layer_DQT_NUM
 #define BASE_RB &kp N  &kp M  &kp COMMA  &kp DOT  &kp FSLH  &kp RET
 #define BASE_RH &rgui_space_ret  &smart_nav_thumb NAV BSPC  &LTS FN RETURN
@@ -508,28 +497,28 @@ arcane_nav_r: arcane_nav_r {
 #define GAMING_LT &kp ESC  &kp Q  &kp W  &kp E  &kp R  &kp T		         
 #define GAMING_LM &kp CAPS  &kp A  &kp S  &kp D  &kp F  &kp G
 #define GAMING_LB &kp LSHIFT  &kp Z  &kp X  &kp C  &kp V  &kp B   
-#define GAMING_LH &kp LCTRL  &kp TAB  &kp SPACE                
+#define GAMING_LH &kp LCTRL  &smart_nav_thumb NAV TAB  &kp SPACE                
 #define GAMING_LH_5 &trans &trans GAMING_LH
 
 #define GAMING_RZ &trans &trans &trans &trans &trans &trans
 #define GAMING_RT &kp Y  &kp U  &kp I  &kp O  &kp P  &kp BSPC
 #define GAMING_RM &kp H  &kp J  &kp K  &kp L  &kp SEMI  &kp SQT
 #define GAMING_RB &kp N  &kp M  &kp COMMA  &kp DOT  &kp FSLH  &kp RSHIFT
-#define GAMING_RH &kp SPACE  &kp BSPC  &kp RETURN
+#define GAMING_RH &kp SPACE  &smart_nav_thumb NAV BSPC  &kp RETURN
 #define GAMING_RH_5 &trans &trans GAMING_RH
 
 // ******************************************  hierophant (alt_alpha) layer
 
 #define HIEROPHANT_LZ &trans &trans &trans &trans &trans &trans
-#define HIEROPHANT_LT &kp TAB  &kp F  &kp Z  &kp U  &kp Q  &kp BSPC
-#define HIEROPHANT_LM &key_layer_SQT_NUM  &tap_hold_layer_lgui LGUI_NAV_L H  &hml L_M3 I  &hml L_M2 E  &hml L_M1 A  &kp P
+#define HIEROPHANT_LT &kp TAB  &kp F  &kp Z  &kp U  &tll NUMPAD Q  &backspace_word_delete
+#define HIEROPHANT_LM &key_layer_SQT_NUM  /*&numeric_sqt_ht*/  &tap_hold_layer_lgui_adaptive LGUI_NAV_L 0  &hml L_M3 I  &hml L_M2 E  &hml L_M1 A  &kp P
 #define HIEROPHANT_LB &kp BSLH  &comma_semicolon  &kp Y  &kp K  &kp O  &kp X
 #define HIEROPHANT_LH &LTS EXTRA ESC  &arcane_nav_l NAV 0  &lgui_space_tab
 #define HIEROPHANT_LH_5 &trans &trans HIEROPHANT_LH
 
 #define HIEROPHANT_RZ &trans &trans &trans &trans &trans &trans
-#define HIEROPHANT_RT &kp RETURN  &kp W  &kp D  &kp L  &kp B  &kp SEMI
-#define HIEROPHANT_RM &kp G  &hmr R_M1 S  &hmr R_M2 T  &hmr R_M3 R  &tap_hold_layer_rgui RGUI_NAV_R N  &key_layer_DQT_NUM
+#define HIEROPHANT_RT &kp RETURN  &tlr NUMPAD W  &kp D  &kp L  &kp B  &kp SEMI
+#define HIEROPHANT_RM &kp G  &hmr R_M1 S  &hmr R_M2 T  &hmr R_M3 R  &tap_hold_layer_rgui RGUI_NAV_R N  &key_layer_DQT_NUM /*&numeric_dqt_ht*/
 #define HIEROPHANT_RB &kp V  &kp C  &kp M  &kp J  &dot_colon  &kp FSLH
 #define HIEROPHANT_RH &rgui_space_ret  &arcane_nav_r NAV 0  &LTS FN RETURN
 #define HIEROPHANT_RH_5 &trans &trans HIEROPHANT_RH
@@ -780,5 +769,25 @@ arcane_nav_r: arcane_nav_r {
 
 #define SUPERSCRIPT_LH_5 &trans &trans _LH
 #define SUPERSCRIPT_RH_5 &trans &trans _RH
+
+
+
+
+// ******************************************  EMPTY layer
+
+#define NUMPAD_LZ &trans &trans &trans &trans &trans &trans
+#define NUMPAD_LT &trans &kp N0 &kp N1 &kp N2 &kp N3 &trans
+#define NUMPAD_LM &trans &trans &kp N4 &kp N5 &kp N6 &trans
+#define NUMPAD_LB &trans &trans &kp N7 &kp N8 &kp N9 &trans
+#define NUMPAD_LH &kp N0 &trans &trans
+#define NUMPAD_LH_5 &trans &trans NUMPAD_LH
+
+
+#define NUMPAD_RZ &trans &trans &trans &trans &trans &trans
+#define NUMPAD_RT &kp N0 &kp N1 &kp N2 &kp N3 &trans &trans
+#define NUMPAD_RM &trans &kp N4 &kp N5 &kp N6 &trans &trans
+#define NUMPAD_RB &trans &kp N7 &kp N8 &kp N9 &trans &trans
+#define NUMPAD_RH &trans &trans &kp N0
+#define NUMPAD_RH_5 &trans &trans NUMPAD_RH
 
 }; // root node
