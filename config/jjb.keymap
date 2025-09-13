@@ -182,6 +182,16 @@ ZMK_TAP_DANCE(smart_num_lock_dance, bindings = <&sl NUM>, <&num_word NUM>, <&rgb
                require-prior-idle-ms = <HRM_PRIOR_IDLE>; hold-trigger-on-release; \
                hold-trigger-key-positions = <TRIGGER_POS>;)
 
+#define MAKE_ADAPTIVE_REPEAT(NAME, HOLD_TAP_BEHAVIOR, LAYER, KEY) \
+		NAME: NAME { \
+			compatible = "zmk,behavior-antecedent-morph"; \
+			#binding-cells = <0>; \
+			defaults = <&HOLD_TAP_BEHAVIOR LAYER KEY>; \
+			bindings = <&key_repeat>; \
+			antecedents = <KEY>; \
+			max-delay-ms = <500>; \
+		};
+
 
 
 MAKE_HRM(hml, &kp, &kp, KEYS_R THUMBS) // Left-hand HRMs.
