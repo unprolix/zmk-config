@@ -180,6 +180,17 @@ SUPERSCRIPT_LH SUPERSCRIPT_RH
             sensor-bindings = <&scroll_encoder>;
         };
 
+        numpad_layer {
+            display-name = "numpad";
+            bindings = <
+NUMPAD_LT                  &trans          NUMPAD_RT
+NUMPAD_LM          &trans  &trans  &trans  NUMPAD_RM
+NUMPAD_LB  &trans          &trans          NUMPAD_RB
+NUMPAD_LH NUMPAD_RH
+            >;
+            sensor-bindings = <&scroll_encoder>;
+        };
+
 
 
 /*
