@@ -1,4 +1,7 @@
 / {
+	
+	ZMK_TEXT_MACRO(comma_space, <&kp COMMA>, <&kp SPACE>);
+
 	macros {
 		cant_wont_tail: cant_wont_tail {
 			compatible = "zmk,behavior-macro";
@@ -55,7 +58,7 @@
 		comma_semicolon: comma_semicolon {
 			compatible = "zmk,behavior-mod-morph";
 			#binding-cells = <0>;
-			bindings = <&kp COMMA>, <&kp SEMI>;
+			bindings = <&comma_space>, <&kp SEMI>;
 			mods = <(MOD_LSFT|MOD_RSFT)>;
 		};
 

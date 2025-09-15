@@ -19,6 +19,18 @@
         }; \
     };
 
+#define ZMK_TEXT_MACRO(name, ...) \
+    name: name { \
+        compatible = "zmk,behavior-macro"; \
+        wait-ms = <10>; \
+        tap-ms = <10>; \
+        #binding-cells = <0>; \
+        bindings = __VA_ARGS__; \
+    }
+
+
+ZMK_TEXT_MACRO(dotcom, <&kp DOT>, <&kp C>, <&kp O>, <&kp M>);
+
 
 cancel: cancel {
         compatible = "zmk,behavior-macro";
@@ -38,7 +50,6 @@ at_wgyl_org: at_wgyl_org {
 	bindings = <&kp AT>, <&kp W>, <&kp G>, <&kp Y>, <&kp L>, <&kp DOT>, <&kp O>, <&kp R>, <&kp G>, <&kp TAB>;
 };
 
-#include "personal.dtsi"
 
 
 azrael: azrael {
