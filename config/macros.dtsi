@@ -19,7 +19,7 @@
         }; \
     };
 
-#define ZMK_TEXT_MACRO(name, ...) \
+#define ZMK_TEXT_MACRO_ORIG(name, ...) \
     name: name { \
         compatible = "zmk,behavior-macro"; \
         wait-ms = <10>; \
@@ -29,7 +29,22 @@
     }
 
 
-ZMK_TEXT_MACRO(dotcom, <&kp DOT>, <&kp C>, <&kp O>, <&kp M>);
+// for use OUTSIDE the global brackets
+#define ZMK_TEXT_MACRO(name, ...) \
+/ { \
+  macros { \
+    name: name { \
+        compatible = "zmk,behavior-macro"; \
+        wait-ms = <10>; \
+        tap-ms = <10>; \
+        #binding-cells = <0>; \
+        bindings = __VA_ARGS__; \
+    }; \
+  }; \
+};		
+
+
+ZMK_TEXT_MACRO_ORIG(dotcom, <&kp DOT>, <&kp C>, <&kp O>, <&kp M>);
 
 
 cancel: cancel {

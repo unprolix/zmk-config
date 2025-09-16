@@ -1,6 +1,6 @@
 / {
 	
-	ZMK_TEXT_MACRO(comma_space, <&kp COMMA>, <&kp SPACE>);
+	ZMK_TEXT_MACRO_ORIG(comma_space, <&kp COMMA>, <&kp SPACE>);
 
 	macros {
 		cant_wont_tail: cant_wont_tail {
