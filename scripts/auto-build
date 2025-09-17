@@ -129,8 +129,10 @@ def determine_firmware_variant(device_name, device_side):
     # Map device names to firmware variants (using actual target names)
     variant_map = {
         'bureau': 'bureau',      # Bureau -> bureau variant
-        'salon': 'salon',        # Salon -> salon variant  
+        'salon': 'salon',        # Salon -> salon variant
         'lavendre': 'lavendre',  # Lavendre -> lavendre variant
+        'fuligin': 'fuligin',    # Fuligin -> fuligin variant
+        'xan': 'xan',            # Xan -> xan variant
     }
     
     # Find matching variant
@@ -173,9 +175,52 @@ def get_build_targets_for_device(device_name, device_side):
     return targets
 
 
+def detect_bootloader_devices():
+    """
+    Detect devices currently in bootloader mode.
+    Bootloader devices typically show up as USB mass storage devices.
+    """
+    bootloader_devices = []
+
+    # Get USB devices
+    lsusb_output = get_usb_devices()
+    if not lsusb_output:
+        return bootloader_devices
+
+    usb_devices = parse_usb_devices(lsusb_output)
+
+    # Look for devices that might be in bootloader mode
+    # Common bootloader characteristics:
+    # - Vendor names like "Adafruit", "Raspberry Pi", or specific controller vendors
+    # - Product names containing "CircuitPython", "RPI-RP2", "UF2 Bootloader", etc.
+    bootloader_keywords = [
+        'circuitpython', 'uf2', 'bootloader', 'rpi-rp2', 'pico',
+        'adafruit', 'raspberry pi', 'seeed', 'nice!nano'
+    ]
+
+    for device in usb_devices:
+        vendor_name = device.get('vendor_name', '').lower()
+        product_name = device.get('product_name', '').lower()
+
+        # Check if device matches bootloader patterns
+        is_bootloader = any(keyword in vendor_name or keyword in product_name
+                          for keyword in bootloader_keywords)
+
+        if is_bootloader:
+            # Add device path information for mounting
+            bus = device.get('bus')
+            dev_num = device.get('device')
+            if bus and dev_num:
+                device['usb_path'] = f"/dev/bus/usb/{bus}/{dev_num}"
+            bootloader_devices.append(device)
+
+    return bootloader_devices
+
+
 def find_attached_configured_devices():
     """
     Find devices that are both configured in devices.yaml and currently attached.
+    When bootloader devices are detected, only build for those in bootloader mode.
     Returns list of (device_config, usb_device) tuples.
     """
     # Load device configuration
@@ -183,23 +228,46 @@ def find_attached_configured_devices():
     if not known_devices:
         print("No devices configured in ~/.config/zmk/devices.yaml")
         return []
-    
+
     # Get USB devices
     lsusb_output = get_usb_devices()
     if not lsusb_output:
         print("Failed to get USB device information")
         return []
-    
+
     usb_devices = parse_usb_devices(lsusb_output)
-    
+
+    # Check if any devices are in bootloader mode
+    bootloader_devices = detect_bootloader_devices()
+    bootloader_serials = set()
+
+    if bootloader_devices:
+        print(f"Detected {len(bootloader_devices)} device(s) in bootloader mode:")
+        for device in bootloader_devices:
+            vendor = device.get('vendor_name', 'Unknown')
+            product = device.get('product_name', 'Unknown')
+            serial = device.get('serial', 'No serial')
+            print(f"  - {vendor} {product} (Serial: {serial})")
+            if serial and serial != 'No serial':
+                bootloader_serials.add(serial)
+
     # Match detected devices with configuration
     attached_devices = []
     for usb_device in usb_devices:
         serial = usb_device.get('serial')
         if serial and serial in known_devices:
             config = known_devices[serial]
-            attached_devices.append((config, usb_device))
-    
+
+            # If there are bootloader devices, only include those in bootloader mode
+            if bootloader_devices:
+                if serial in bootloader_serials:
+                    attached_devices.append((config, usb_device))
+                else:
+                    print(f"Skipping {config['name']} - not in bootloader mode")
+            else:
+                # No bootloader devices detected, include all attached configured devices
+                attached_devices.append((config, usb_device))
+
     return attached_devices
 
 

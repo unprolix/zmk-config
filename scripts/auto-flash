@@ -131,9 +131,10 @@ def determine_firmware_variant(device_name, device_side):
     # Map device names to firmware variants
     variant_map = {
         'bureau': 'bureau',    # Bureau -> bureau variant
-        'salon': 'salon',      # Salon -> salon variant  
+        'salon': 'salon',      # Salon -> salon variant
         'lavendre': 'lavendre', # Lavendre -> lavendre variant
-        'lavendre': 'lavendre', # Lavendre -> lavendre variant
+        'fuligin': 'fuligin',  # Fuligin -> fuligin variant
+        'xan': 'xan',          # Xan -> xan variant
     }
     
     # Find matching variant
