@@ -29,28 +29,19 @@
     }
 
 
-// for use OUTSIDE the global brackets
-#define ZMK_TEXT_MACRO(name, ...) \
-/ { \
-  macros { \
-    name: name { \
-        compatible = "zmk,behavior-macro"; \
-        wait-ms = <10>; \
-        tap-ms = <10>; \
-        #binding-cells = <0>; \
-        bindings = __VA_ARGS__; \
-    }; \
-  }; \
-};		
 
 
 ZMK_TEXT_MACRO_ORIG(dotcom, <&kp DOT>, <&kp C>, <&kp O>, <&kp M>);
-
+ZMK_TEXT_MACRO_ORIG(i_am, <&kp I>, <&kp SQT>, <&kp M>);
+ZMK_TEXT_MACRO_ORIG(i_will, <&kp I>, <&kp SQT>, <&kp L>, <&kp L>);
+ZMK_TEXT_MACRO_ORIG(i_would, <&kp I>, <&kp SQT>, <&kp D>);
+ZMK_TEXT_MACRO_ORIG(i_have, <&kp I>, <&kp SQT>, <&kp V>, <&kp E>);
+ 
 
 cancel: cancel {
         compatible = "zmk,behavior-macro";
         #binding-cells = <0>;
-        bindings = <&none>, <&to BASE>;
+        bindings = <&none>, <&to QWERTY>;
 };
 
 caps_toggle: caps_toggle {
