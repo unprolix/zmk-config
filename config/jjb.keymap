@@ -100,9 +100,9 @@ key numbers
 
 #include <input/processors.dtsi>
 
-#define BASE 0
-#define GAMING 1
-#define ALT_ALPHA 2
+#define HIEROPHANT 0
+#define QWERTY 1
+#define GAMING 2
 #define CAPS_LAYER 3
 #define NUMERIC 4
 #define NAVIGATION 5
@@ -161,6 +161,12 @@ key numbers
 #define ZMK_MOUSE_DEFAULT_SCRL_VAL 20    // 10
 
 #define QUICK_TAP_MS 175
+
+
+
+#include "macros_2.dtsi"
+
+
 
 #define SMART_NUM &smart_num NUM 0
 ZMK_HOLD_TAP(smart_num, bindings = <&mo>, <&num_dance>; flavor = "balanced";
@@ -423,6 +429,16 @@ arcane_nav_r: arcane_nav_r {
             bindings = <&mo>, <&kp>;
         };
 
+        layer_and_oneshot_key: layer_and_oneshot_key {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            tapping-term-ms = <200>;
+            quick-tap-ms = <175>;
+            require-prior-idle-ms = <100>;
+            flavor = "balanced";
+            bindings = <&mo>, <&sk>;
+        };
+
     };
 
 
@@ -465,29 +481,29 @@ arcane_nav_r: arcane_nav_r {
     };
 
 
-// ****************************************** BASE layer
+// ****************************************** QWERTY layer
 
-#define BASE_LZ &trans &trans &trans &trans &trans &trans
-#define BASE_LT &kp TAB  &kp Q  &kp W  &kp E  &kp R  &kp T
-#define BASE_LM &key_layer_SQT_NUM  &tap_hold_layer_lgui LGUI_NAV_L A  &hml L_M3 S  &hml L_M2 D  &hml L_M1 F  &kp G
-#define BASE_LB &trans &kp Z  &kp X  &kp C  &kp V  &kp B
-#define BASE_LH &LTS EXTRA ESC  &smart_nav_thumb NAV TAB  &lgui_space_tab
-#define BASE_LH_5 &trans &trans BASE_LH
+#define QWERTY_LZ &trans &trans &trans &trans &trans &trans
+#define QWERTY_LT &kp TAB  &kp Q  &kp W  &kp E  &kp R  &kp T
+#define QWERTY_LM &key_layer_SQT_NUM  &tap_hold_layer_lgui LGUI_NAV_L A  &hml L_M3 S  &hml L_M2 D  &hml L_M1 F  &kp G
+#define QWERTY_LB &trans &kp Z  &kp X  &kp C  &kp V  &kp B
+#define QWERTY_LH &LTS EXTRA ESC  &smart_nav_thumb NAV TAB  &lgui_space_tab
+#define QWERTY_LH_5 &trans &trans QWERTY_LH
 
 
-#define BASE_RZ &trans &trans &trans &trans &trans &trans
-#define BASE_RT &kp Y    &kp U  &kp I  &kp O  &kp P  &backspace_word_delete
-#define BASE_RM &kp H  &hmr R_M1 J  &hmr R_M2 K  &hmr R_M3 L  &tap_hold_layer_rgui RGUI_NAV_R SEMI  &key_layer_DQT_NUM
-#define BASE_RB &kp N  &kp M  &kp COMMA  &kp DOT  &kp FSLH  &kp RET
-#define BASE_RH &rgui_space_ret  &smart_nav_thumb NAV BSPC  &LTS FN RETURN
-#define BASE_RH_5 &trans &trans BASE_RH
+#define QWERTY_RZ &trans &trans &trans &trans &trans &trans
+#define QWERTY_RT &kp Y    &kp U  &kp I  &kp O  &kp P  &backspace_word_delete
+#define QWERTY_RM &kp H  &hmr R_M1 J  &hmr R_M2 K  &hmr R_M3 L  &tap_hold_layer_rgui RGUI_NAV_R SEMI  &key_layer_DQT_NUM
+#define QWERTY_RB &kp N  &kp M  &kp COMMA  &kp DOT  &kp FSLH  &kp RET
+#define QWERTY_RH &rgui_space_ret  &smart_nav_thumb NAV BSPC  &LTS FN RETURN
+#define QWERTY_RH_5 &trans &trans QWERTY_RH
 
 /*
-#define BASE_RT &trans &trans &trans &trans &trans &trans
-#define BASE_RM &trans &trans &trans &trans &trans &trans
-#define BASE_RB &trans &trans &trans &trans &trans &trans
-#define BASE_RH &trans &trans &trans
-#define BASE_RH_5 &trans &trans BASE_RH
+#define QWERTY_RT &trans &trans &trans &trans &trans &trans
+#define QWERTY_RM &trans &trans &trans &trans &trans &trans
+#define QWERTY_RB &trans &trans &trans &trans &trans &trans
+#define QWERTY_RH &trans &trans &trans
+#define QWERTY_RH_5 &trans &trans QWERTY_RH
 */
 
 // ****************************************** GAMING layer
@@ -663,8 +679,8 @@ arcane_nav_r: arcane_nav_r {
 #define LGN_LB &kp LG(LCTRL)  &kp LG(Z)  &kp LG(X)        &kp LG(C)        &kp LG(V)     &kp LG(B)
 #define LGN_RB &kp LG(N)           &kp LG(M)           &kp LG(COMMA)       &kp LG(DOT)          &kp LG(FSLH)   &kp LG(RET)
 
-#define LGN_LH &kp LG(ESC)  &kp LG(TAB)  &to BASE
-#define LGN_RH &to BASE  &kp LG(BSPC)  &kp LG(RET)
+#define LGN_LH &kp LG(ESC)  &kp LG(TAB)  &to HIEROPHANT
+#define LGN_RH &to HIEROPHANT &kp LG(BSPC)  &kp LG(RET)
 
 #define LGN_LH_5 &trans &trans LGN_LH
 #define LGN_RH_5 &trans &trans LGN_RH
@@ -684,8 +700,8 @@ arcane_nav_r: arcane_nav_r {
 #define RGN_LB &kp RG(LCTRL) &kp RG(Z)      &kp RG(X)           &kp RG(C)	     &kp RG(V)  	  &kp RG(B)
 #define RGN_RB &kp RG(N)  &kp RG(M)     &kp RG(COMMA)    &kp RG(DOT)      &kp RG(FSLH)  &kp RG(RET)
 
-#define RGN_LH &kp LG(ESC)         &kp LG(TAB)          &to BASE
-#define RGN_RH &to BASE   &kp LG(BSPC)  &kp LG(RET)
+#define RGN_LH &kp LG(ESC)      &kp LG(TAB)   &to HIEROPHANT
+#define RGN_RH &to HIEROPHANT   &kp LG(BSPC)  &kp LG(RET)
 
 #define RGN_LH_5 &trans &trans RGN_LH
 #define RGN_RH_5 &trans &trans RGN_RH

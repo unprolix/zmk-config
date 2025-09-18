@@ -20,16 +20,27 @@
     keymap {
         compatible = "zmk,keymap";
 
-        base_layer {
-            display-name = "base";
-            bindings = <
-BASE_LT                       &kp UP              BASE_RT
-BASE_LM             &kp LEFT  &to RGB   &kp RIGHT BASE_RM
-BASE_LB &kp C_MUTE            &kp DOWN            BASE_RB
-BASE_LH BASE_RH
+	hierophant_layer {
+				display-name = "hierophant";
+				bindings = <
+HIEROPHANT_LT                       &kp UP              HIEROPHANT_RT
+HIEROPHANT_LM             &kp LEFT  &to RGB   &kp RIGHT HIEROPHANT_RM
+HIEROPHANT_LB &kp C_MUTE            &kp DOWN            HIEROPHANT_RB
+HIEROPHANT_LH HIEROPHANT_RH
 				>;
 				
             sensor-bindings = <&inc_dec_kp C_VOLUME_UP C_VOLUME_DOWN>;
+	};
+
+        qwerty_layer {
+            display-name = "qwerty";
+            bindings = <
+QWERTY_LT                       &kp UP              QWERTY_RT
+QWERTY_LM             &kp LEFT  &to RGB   &kp RIGHT QWERTY_RM
+QWERTY_LB &kp C_MUTE            &kp DOWN            QWERTY_RB
+QWERTY_LH QWERTY_RH
+				>;
+				
         };
 
         gaming_layer {
@@ -42,17 +53,6 @@ GAMING_LH GAMING_RH
              >;
             sensor-bindings = <&inc_dec_kp C_VOLUME_UP C_VOLUME_DOWN>;
         };
-
-	alt_alpha {
-				display-name = "hierophant";
-				bindings = <
-HIEROPHANT_LT                       &kp UP              HIEROPHANT_RT
-HIEROPHANT_LM             &kp LEFT  &to RGB   &kp RIGHT HIEROPHANT_RM
-HIEROPHANT_LB &kp C_MUTE            &kp DOWN            HIEROPHANT_RB
-HIEROPHANT_LH HIEROPHANT_RH
-				>;
-				
-	};
 
 	caps_layer {
 				display-name = "caps";
@@ -113,7 +113,7 @@ EXTRA_LH EXTRA_RH
             display-name = "rgb";
             bindings = <
 RGB_LT                                    &rgb_ug RGB_SPI                    RGB_RT
-RGB_LM                   &rgb_ug RGB_EFR  &to BASE         &rgb_ug RGB_EFF   RGB_RM
+RGB_LM                   &rgb_ug RGB_EFR  &to QWERTY         &rgb_ug RGB_EFF   RGB_RM
 RGB_LB  &rgb_ug RGB_TOG                   &rgb_ug RGB_SPD                    RGB_RB
 RGB_LH RGB_RH
             >;
@@ -125,13 +125,11 @@ RGB_LH RGB_RH
             display-name = "system";
             bindings = <
 SYSTEM_LT                              &mmv MOVE_UP                     SYSTEM_RT
-SYSTEM_LM              &mmv MOVE_LEFT  &to BASE        &mmv MOVE_RIGHT  SYSTEM_RM
+SYSTEM_LM              &mmv MOVE_LEFT  &to QWERTY        &mmv MOVE_RIGHT  SYSTEM_RM
 SYSTEM_LB  &kp C_MUTE                  &mmv MOVE_DOWN                   SYSTEM_RB
 SYSTEM_LH SYSTEM_RH
             >;
-            sensor-bindings = <&scroll_encoder>;
         };
-
 
 
         mod_l_nav_layer {
@@ -142,7 +140,6 @@ LGN_LM            &mmv MOVE_LEFT &kp HOME        &mmv MOVE_RIGHT  LGN_RM
 LGN_LB  &kp HOME                &mmv MOVE_DOWN                    LGN_RB
 LGN_LH LGN_RH
             >;
-            sensor-bindings = <&scroll_encoder>;
         };
 
 
@@ -154,7 +151,6 @@ RGN_LM            &mmv MOVE_LEFT &kp HOME        &mmv MOVE_RIGHT  RGN_RM
 RGN_LB  &kp HOME                &mmv MOVE_DOWN                    RGN_RB
 RGN_LH RGN_RH
             >;
-            sensor-bindings = <&scroll_encoder>;
         };
 
 
@@ -166,7 +162,6 @@ BLUETOOTH_LM          &trans  &trans  &trans  BLUETOOTH_RM
 BLUETOOTH_LB  &trans          &trans          BLUETOOTH_RB
 BLUETOOTH_LH BLUETOOTH_RH
             >;
-            sensor-bindings = <&scroll_encoder>;
         };
 
         superscript_layer {
@@ -177,7 +172,6 @@ SUPERSCRIPT_LM          &trans  &trans  &trans  SUPERSCRIPT_RM
 SUPERSCRIPT_LB  &trans          &trans          SUPERSCRIPT_RB
 SUPERSCRIPT_LH SUPERSCRIPT_RH
             >;
-            sensor-bindings = <&scroll_encoder>;
         };
 
         numpad_layer {
@@ -188,7 +182,6 @@ NUMPAD_LM          &trans  &trans  &trans  NUMPAD_RM
 NUMPAD_LB  &trans          &trans          NUMPAD_RB
 NUMPAD_LH NUMPAD_RH
             >;
-            sensor-bindings = <&scroll_encoder>;
         };
 
 

@@ -184,7 +184,7 @@ ZMK_COMBO_FAST(slash, FSLH, RB4, RB5)
 ZMK_COMBO_PLUS(dotcom, &dotcom, RB1, RB4) // dot and C on hierophant
 
 /* thumbs */
-ZMK_COMBO_PLUS(base, &to BASE, LH0, RH0) /* inner thumb keys */
+ZMK_COMBO_PLUS(to_hierophant, &to HIEROPHANT, LH0, RH0) /* inner thumb keys */
 ZMK_COMBO_PLUS(navigation, &to NAVIGATION, LH1, RH1) /* middle thumb keys */
 ZMK_COMBO_FAST(printscreen, PRINTSCREEN, LH2, RH2) /* outer thumb keys; screenshot */
 
@@ -236,8 +236,16 @@ ZMK_COMBO_SLOW(pipe, PIPE, RM5, RB5)
 
 // bottom row
 
-ZMK_COMBO_PLUS_SLOW(alt_alpha, &to ALT_ALPHA, LB5, RB5)
+ZMK_COMBO_PLUS_SLOW(qwerty, &to QWERTY, LB5, RB5)
 
+
+// wild ones
+
+/* contractions */
+ZMK_COMBO_PLUS_SLOW(i_am, &i_am, LM3, RB2)
+ZMK_COMBO_PLUS_SLOW(i_will, &i_will, LM3, RT3)
+ZMK_COMBO_PLUS_SLOW(i_would, &i_would, LM3, RT2)
+ZMK_COMBO_PLUS_SLOW(i_have, &i_have, LM3, RB0)
 
 // for specific layers
 

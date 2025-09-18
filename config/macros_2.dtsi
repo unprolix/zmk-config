@@ -1,0 +1,17 @@
+// for use OUTSIDE the global brackets
+#define ZMK_TEXT_MACRO(name, ...) \
+/ { \
+  macros { \
+    name: name { \
+        compatible = "zmk,behavior-macro"; \
+        wait-ms = <10>; \
+        tap-ms = <10>; \
+        #binding-cells = <0>; \
+        bindings = __VA_ARGS__; \
+    }; \
+  }; \
+};
+
+
+
+
