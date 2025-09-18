@@ -164,7 +164,7 @@ key numbers
 
 
 
-#include "macros_2.dtsi"
+#include "macros.dtsi"
 
 
 
@@ -225,7 +225,6 @@ MAKE_HRM(tlr, &mo, &kp, KEYS_R THUMBS)
 
 / {
   macros {
- #include "macros.dtsi"
       #include "layer-mod-macros.dtsi"
       #include "emoji.dtsi"
   };

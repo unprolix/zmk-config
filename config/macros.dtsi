@@ -1,104 +1,33 @@
-#define ZMK_TAP_HOLD_DOUBLE(name, tap_binding, hold_binding, double_tap_binding) \
-    / { \
-        behaviors { \
-            name##_ht: name##_ht { \
-                compatible = "zmk,behavior-hold-tap"; \
-                #binding-cells = <2>; \
-                flavor = "tap-preferred"; \
-                tapping-term-ms = <200>; \
-                quick-tap-ms = <150>; \
-                bindings = <hold_binding>, <tap_binding>; \
-            }; \
-            \
-            name: name { \
-                compatible = "zmk,behavior-tap-dance"; \
-                #binding-cells = <0>; \
-                tapping-term-ms = <200>; \
-                bindings = <&name##_ht 0 0>, <double_tap_binding>; \
-            }; \
-        }; \
-    };
-
-#define ZMK_TEXT_MACRO_ORIG(name, ...) \
+// for use OUTSIDE the global brackets
+#define ZMK_SIMPLE_MACRO(name, ...) \
+/ { \
+  macros { \
     name: name { \
         compatible = "zmk,behavior-macro"; \
         wait-ms = <10>; \
         tap-ms = <10>; \
         #binding-cells = <0>; \
         bindings = __VA_ARGS__; \
-    }
-
-
-
-
-ZMK_TEXT_MACRO_ORIG(dotcom, <&kp DOT>, <&kp C>, <&kp O>, <&kp M>);
-ZMK_TEXT_MACRO_ORIG(i_am, <&kp I>, <&kp SQT>, <&kp M>);
-ZMK_TEXT_MACRO_ORIG(i_will, <&kp I>, <&kp SQT>, <&kp L>, <&kp L>);
-ZMK_TEXT_MACRO_ORIG(i_would, <&kp I>, <&kp SQT>, <&kp D>);
-ZMK_TEXT_MACRO_ORIG(i_have, <&kp I>, <&kp SQT>, <&kp V>, <&kp E>);
- 
-
-cancel: cancel {
-        compatible = "zmk,behavior-macro";
-        #binding-cells = <0>;
-        bindings = <&none>, <&to QWERTY>;
-};
-
-caps_toggle: caps_toggle {
-        compatible = "zmk,behavior-macro";
-        #binding-cells = <0>;
-        bindings = <&kp CAPS>, <&tog CAPS_LAYER>;
-};
-
-at_wgyl_org: at_wgyl_org {
-	compatible = "zmk,behavior-macro";
-	#binding-cells = <0>;
-	bindings = <&kp AT>, <&kp W>, <&kp G>, <&kp Y>, <&kp L>, <&kp DOT>, <&kp O>, <&kp R>, <&kp G>, <&kp TAB>;
+    }; \
+  }; \
 };
 
 
+ZMK_SIMPLE_MACRO(dotcom, <&kp DOT>, <&kp C>, <&kp O>, <&kp M>)
+ZMK_SIMPLE_MACRO(i_am, <&kp I>, <&kp SQT>, <&kp M>)
+ZMK_SIMPLE_MACRO(i_will, <&kp I>, <&kp SQT>, <&kp L>, <&kp L>)
+ZMK_SIMPLE_MACRO(i_would, <&kp I>, <&kp SQT>, <&kp D>)
+ZMK_SIMPLE_MACRO(i_have, <&kp I>, <&kp SQT>, <&kp V>, <&kp E>)
 
-azrael: azrael {
-	compatible = "zmk,behavior-macro";
-	#binding-cells = <0>;
-	bindings = <&kp A>, <&kp Z>, <&kp R>, <&kp A>, <&kp MENU>, <&kp DQT>, <&kp E>, <&kp L>;
-};
+ZMK_SIMPLE_MACRO(cancel, <&none>, <&to QWERTY>)
+ZMK_SIMPLE_MACRO(caps_toggle, <&kp CAPS>, <&tog CAPS_LAYER>)
 
-anais: anais {
-	compatible = "zmk,behavior-macro";
-	#binding-cells = <0>;
-	bindings = <&kp A>, <&kp N>, <&kp A>, <&kp MENU>, <&kp DQT>, <&kp I>, <&kp S>;
-};
-
-
-rgb_tog_num: rgb_tog_num {
-    compatible = "zmk,behavior-macro";
-    wait-ms = <10>;
-    tap-ms = <10>;
-    #binding-cells = <0>;
-    bindings
-        = <&macro_tap &rgb_ug RGB_ON>
-          , <&macro_tap &rgb_ug RGB_COLOR_HSB(43,100,100)>
-        ;
-};
+ZMK_SIMPLE_MACRO(at_wgyl_org, <&kp AT>, <&kp W>, <&kp G>, <&kp Y>, <&kp L>, <&kp DOT>, <&kp O>, <&kp R>, <&kp G>, <&kp TAB>)
+ZMK_SIMPLE_MACRO(azrael, <&kp A>, <&kp Z>, <&kp R>, <&kp A>, <&kp MENU>, <&kp DQT>, <&kp E>, <&kp L>)
+ZMK_SIMPLE_MACRO(anais, <&kp A>, <&kp N>, <&kp A>, <&kp MENU>, <&kp DQT>, <&kp I>, <&kp S>)
 
 
+ZMK_SIMPLE_MACRO(rgb_tog_num, <&macro_tap &rgb_ug RGB_ON>, <&macro_tap &rgb_ug RGB_COLOR_HSB(43,100,100)>)
 
 
-underglow_on: underglow_on {
-    compatible = "zmk,behavior-macro-one-param";
-    wait-ms = <10>;
-    tap-ms = <10>;
-    #binding-cells = <1>;
-    bindings
-        = <&macro_tap &rgb_ug RGB_ON>
-// adding these causes compile error:
-//        , <&macro_param_1to1>
-//        , <&macro_tap &rgb_ug MACRO_PLACEHOLDER>
-        ;
-};
-//	    = <&rgb_ug RGB_ON>,
-//              <&macro_param_1to1>,
-//              <&rgb_ug MACRO_PLACEHOLDER>,
-// 	      <&rgb_ug RGB_OFF>;
 
