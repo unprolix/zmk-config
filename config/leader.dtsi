@@ -93,12 +93,13 @@ ZMK_LEADER_SEQUENCE(circled_4, &uc 0x2463 0x2779,  C N4) // ④❹
 ZMK_LEADER_SEQUENCE(circled_5, &uc 0x2464 0x277A,  C N5) // ⑤❺
 ZMK_LEADER_SEQUENCE(circled_6, &uc 0x2465 0x277B,  C N6) // ⑥❻
 ZMK_LEADER_SEQUENCE(circled_7, &uc 0x2466 0x277C,  C N7) // ⑦❼
+/*
 ZMK_LEADER_SEQUENCE(circled_8, &uc 0x2467 0x277D,  C N8) // ⑧❽
 ZMK_LEADER_SEQUENCE(circled_9, &uc 0x2468 0x277E,  C N9) // ⑨❾
 ZMK_LEADER_SEQUENCE(circled_10, &uc 0x2469 0x277F,  C T N0) // ⑩❿
 ZMK_LEADER_SEQUENCE(circled_11, &uc 0x246A 0x2780,  C T N1) // 
 // there are more...
-
+*/
 
 /*
 ZMK_LEADER_UNICODE_4(heart, W H E A R, N2, N7, N6, N4)
@@ -120,6 +121,12 @@ ZMK_LEADER_SEQUENCE(fingers, &uc 0x1F91E 0, F I N) // 🤞
 ZMK_LEADER_SEQUENCE(roll, &uc 0x1F644 0, R O L L) // 🙄
 ZMK_LEADER_SEQUENCE(tldr, &uc 0x1F4DC 0, T L D R) // 📜
 ZMK_LEADER_SEQUENCE(wave, &uc 0x1F44B 0, W A V E) // 👋
+
+ZMK_LEADER_SEQUENCE(manicule_up, &uc 0x1F446 0, H A N D UP) // 👆
+ZMK_LEADER_SEQUENCE(manicule_down, &uc 0x1F447 0, H A N D DOWN) // 👇
+ZMK_LEADER_SEQUENCE(manicule_left, &uc 0x1F448 0, H A N D LEFT) // 👈
+ZMK_LEADER_SEQUENCE(manicule_right, &uc 0x1F449 0, H A N D RIGHT) // 👉 
+
 
 // these two do not seem to compile with &uc.
 ZMK_LEADER_UNICODE_5(eye, E Y E, N1, F, N4, N4, N1) // 👁

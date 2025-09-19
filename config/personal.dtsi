@@ -1,8 +1,8 @@
-ZMK_SIMPLE_MACRO(phone, <&none>)
+ZMK_SIMPLE_MACRO(phone, <&kp N0>, <&kp N4>, <&kp N3>, <&kp N7>, <&kp N3>, <&kp N2>, <&kp N3>, <&kp N9>, <&kp N8>, <&kp N7>, <&kp TAB>)
 
-ZMK_SIMPLE_MACRO(phone_alt, <&none>)
+ZMK_SIMPLE_MACRO(phone_alt, <&kp N0>, <&kp N4>, <&kp N3>, <&kp N2>, <&kp N3>, <&kp N0>, <&kp N8>, <&kp N0>, <&kp N2>, <&kp N0>, <&kp TAB>)
 
-ZMK_SIMPLE_MACRO(one_urie, <&none>)
+ZMK_SIMPLE_MACRO(one_urie, <&kp N1>, <&kp SPACE>, <&kp LS(U)>, <&kp R>, <&kp I>, <&kp E>, <&kp SPACE>, <&kp L>, <&kp A>, <&kp N>, <&kp E>, <&kp TAB>)
 
-ZMK_SIMPLE_MACRO(home_address_web, <&none>)
+ZMK_SIMPLE_MACRO(home_address_web, <&kp N1>, <&kp SPACE>, <&kp LS(U)>, <&kp R>, <&kp I>, <&kp E>, <&kp SPACE>, <&kp L>, <&kp A>, <&kp N>, <&kp E>, <&kp TAB>, <&kp TAB>, <&kp F>, <&kp L>, <&kp E>, <&kp M>, <&kp I>, <&kp N>, <&kp G>, <&kp T>, <&kp O>, <&kp N>, <&kp TAB>, <&kp TAB>, <&kp N3>, <&kp N0>, <&kp N3>, <&kp N1>, <&kp TAB>, <&kp N0>, <&kp N4>, <&kp N3>, <&kp N7>, <&kp N3>, <&kp N2>, <&kp N3>, <&kp N9>, <&kp N8>, <&kp N7>, <&kp TAB>)
 
