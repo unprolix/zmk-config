@@ -7,5 +7,46 @@ on:
   #     - build.yaml
 
 jobs:
+  # Auto-adjust config and build
+  auto-adjust-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Auto-adjust leader sequence config
+        run: |
+          echo "🔧 Auto-adjusting CONFIG_ZMK_LEADER_MAX_SEQUENCES based on leader.dtsi content"
+          chmod +x scripts/adjust_leader_config.sh
+          scripts/adjust_leader_config.sh
+
+      - name: Generate build info
+        run: |
+          echo "📝 Generating build info with commit hash"
+          chmod +x scripts/generate_build_info.sh
+          scripts/generate_build_info.sh --commit
+
+      - name: Commit config changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+          if ! git diff --quiet config/*.conf; then
+            echo "📝 Config files were updated, committing changes"
+            git add config/*.conf
+            git commit -m "Auto-adjust CONFIG_ZMK_LEADER_MAX_SEQUENCES for build
+
+            Automatically adjusted leader sequence limits based on sequences defined in leader.dtsi.
+            This prevents buffer overflow crashes when too many sequences are defined."
+            git push
+            echo "✅ Config changes committed and pushed"
+          else
+            echo "ℹ️ No config changes needed"
+          fi
+
   build:
+    needs: auto-adjust-and-build
     uses: zmkfirmware/zmk/.github/workflows/build-user-config.yml@main

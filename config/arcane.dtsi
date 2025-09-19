@@ -36,7 +36,14 @@ arcane_left_default: arcane_left_default {
         bindings = <&sk LSHIFT>, <&caps_word>;
         mods = <(MOD_LSFT|MOD_RSFT)>;
 };
-
+ 
+arcane_right_default: arcane_right_default {
+        compatible = "zmk,behavior-mod-morph";
+        #binding-cells = <0>;
+        bindings = <&sk RSHIFT>, <&caps_word>;
+        mods = <(MOD_LSFT|MOD_RSFT)>;
+};
+ 
 arcane_left: arcane_left {
         compatible = "zmk,behavior-antecedent-morph";
         #binding-cells = <0>;
@@ -49,7 +56,7 @@ arcane_left: arcane_left {
 arcane_right: arcane_right {
         compatible = "zmk,behavior-antecedent-morph";
         #binding-cells = <0>;
-        defaults = <&sk LCTRL>;
+        defaults = <&arcane_right_default>;
 	bindings = <&arcane_a>, <&key_repeat>, <&key_repeat>, <&key_repeat>, <&key_repeat>, <&key_repeat>, <&key_repeat>, <&key_repeat>, <&arcane_i>, <&key_repeat>, <&key_repeat>, <&key_repeat>, <&key_repeat>, <&key_repeat>, <&key_repeat>, <&arcane_p>, <&arcane_q>, <&key_repeat>, <&key_repeat>, <&key_repeat>, <&key_repeat>, <&key_repeat>, <&key_repeat>, <&key_repeat>, <&arcane_y>, <&key_repeat>;
         antecedents = <A B C D E F G H I J K L M N O P Q R S T U V W X Y Z>;
         max-delay-ms = <ARCANE_DELAY>;

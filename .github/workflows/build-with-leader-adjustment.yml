@@ -1,0 +1,125 @@
+name: Build ZMK firmware with auto leader config adjustment
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - config/**
+      - build.yaml
+      - scripts/adjust_leader_config.sh
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: zmkfirmware/zmk-build-arm:stable
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Auto-adjust leader sequence config
+        run: |
+          echo "🔧 Auto-adjusting CONFIG_ZMK_LEADER_MAX_SEQUENCES based on leader.dtsi content"
+          chmod +x scripts/adjust_leader_config.sh
+          scripts/adjust_leader_config.sh
+
+      - name: Generate build info
+        run: |
+          echo "📝 Generating build info with commit hash"
+          chmod +x scripts/generate_build_info.sh
+          scripts/generate_build_info.sh --commit
+
+      - name: Cache west modules
+        uses: actions/cache@v4
+        env:
+          cache-name: cache-zephyr-modules
+        with:
+          path: |
+            modules/
+            tools/
+            zephyr/
+            bootloader/
+            zmk/
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/west.yml', '**/build.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+
+      - name: West Init
+        run: west init -l config
+
+      - name: West Update
+        run: west update
+
+      - name: West Zephyr export
+        run: west zephyr-export
+
+      - name: Fetch build targets
+        id: build-targets
+        run: |
+          echo "build-targets=$(yq -r '[.[]? | select(.board and .shield) | .board + "/" + .shield + "/" + (.cmake-args // "")? + "/" + (."artifact-name" // "")]' build.yaml | jq -r '.[]' | tr '\n' ' ')" >> $GITHUB_OUTPUT
+
+      - name: Build firmware
+        run: |
+          # Parse build.yaml and build each target
+          yq eval -o=json '.[]' build.yaml | while read target; do
+            board=$(echo "$target" | jq -r '.board')
+            shield=$(echo "$target" | jq -r '.shield // empty')
+            cmake_args=$(echo "$target" | jq -r '.["cmake-args"] // empty')
+            artifact_name=$(echo "$target" | jq -r '.["artifact-name"] // empty')
+
+            if [[ -z "$artifact_name" ]]; then
+              if [[ -n "$shield" ]]; then
+                artifact_name="${shield}-${board}"
+              else
+                artifact_name="$board"
+              fi
+            fi
+
+            echo "🔨 Building $artifact_name (board: $board, shield: $shield)"
+
+            # Prepare build command
+            build_cmd="west build -s zmk/app -d build/$artifact_name -b $board"
+
+            # Add cmake args if present
+            if [[ -n "$cmake_args" ]]; then
+              # Replace placeholder with actual path
+              cmake_args="${cmake_args//\$\{GITHUB_WORKSPACE\}/$(pwd)}"
+              build_cmd="$build_cmd -- $cmake_args"
+            else
+              build_cmd="$build_cmd -- -DZMK_CONFIG=$(pwd)/config"
+            fi
+
+            # Add shield if present
+            if [[ -n "$shield" ]]; then
+              if [[ "$build_cmd" == *"-- "* ]]; then
+                build_cmd="$build_cmd -DSHIELD=$shield"
+              else
+                build_cmd="$build_cmd -- -DZMK_CONFIG=$(pwd)/config -DSHIELD=$shield"
+              fi
+            fi
+
+            echo "Running: $build_cmd"
+            eval "$build_cmd"
+
+            # Copy firmware file
+            mkdir -p firmware
+            if [[ -f "build/$artifact_name/zephyr/zmk.uf2" ]]; then
+              cp "build/$artifact_name/zephyr/zmk.uf2" "firmware/$artifact_name.uf2"
+              echo "✅ Built firmware/$artifact_name.uf2"
+            elif [[ -f "build/$artifact_name/zephyr/zmk.hex" ]]; then
+              cp "build/$artifact_name/zephyr/zmk.hex" "firmware/$artifact_name.hex"
+              echo "✅ Built firmware/$artifact_name.hex"
+            elif [[ -f "build/$artifact_name/zephyr/zmk.bin" ]]; then
+              cp "build/$artifact_name/zephyr/zmk.bin" "firmware/$artifact_name.bin"
+              echo "✅ Built firmware/$artifact_name.bin"
+            else
+              echo "❌ No firmware file found for $artifact_name"
+            fi
+          done
+
+      - name: Archive firmware
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware
+          path: firmware/

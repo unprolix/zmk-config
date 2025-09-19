@@ -9,6 +9,9 @@ draw := absolute_path('draw')
 _generate_build_info:
     scripts/generate_build_info.sh
 
+_adjust_leader_config:
+    scripts/adjust_leader_config.sh
+
 # parse build.yaml and filter targets by expression
 _parse_targets $expr:
     #!/usr/bin/env bash
@@ -109,7 +112,7 @@ _check_upstream:
     fi
 
 # build firmware for matching targets
-build expr *west_args: _check_upstream _check_west_update _generate_build_info
+build expr *west_args: _check_upstream _check_west_update _adjust_leader_config _generate_build_info
     #!/usr/bin/env bash
     set -euo pipefail
     targets=$(just _parse_targets {{ expr }})
@@ -118,6 +121,14 @@ build expr *west_args: _check_upstream _check_west_update _generate_build_info
     echo "$targets" | while IFS=, read -r board shield snippet artifact cmake_args; do
         just _build_single "$board" "$shield" "$snippet" "$artifact" "$cmake_args" {{ west_args }}
     done
+
+# manually adjust leader sequence limits for all configs
+adjust-leader-config:
+    scripts/adjust_leader_config.sh
+
+# manually adjust leader sequence limits for specific config
+adjust-leader-config-for config_name:
+    scripts/adjust_leader_config.sh {{ config_name }}
 
 # clear build cache and artifacts
 clean:
