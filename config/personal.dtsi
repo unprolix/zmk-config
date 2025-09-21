@@ -1,0 +1,11 @@
+ZMK_SIMPLE_MACRO(personal_email, <&none>)
+
+ZMK_SIMPLE_MACRO(phone, <&none>)
+
+ZMK_SIMPLE_MACRO(phone_alt, <&none>)
+
+ZMK_SIMPLE_MACRO(one_urie, <&none>)
+
+ZMK_SIMPLE_MACRO(home_address_web, <&none>)
+
+
