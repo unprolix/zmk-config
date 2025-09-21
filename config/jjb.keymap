@@ -545,21 +545,18 @@ arcane_nav_r: arcane_nav_r {
 // ******************************************  NUMERIC layer
 
 #define NUMERIC_LZ &trans &trans &trans &trans &trans &trans
-#define NUMERIC_RZ &trans &trans &trans &trans &trans &trans
-
 #define NUMERIC_LT &kp GRAVE  &kp EXCL  &kp AT        &kp HASH  &kp DOLLAR  &kp PERCENT
-#define NUMERIC_RT &kp CARET  &kp AMPS  &kp ASTERISK  &kp LPAR  &kp RPAR    &kp EQUAL
-
 #define NUMERIC_LM &kp N0  &hml L_M4 N1  &hml L_M3 N2  &hml L_M2 N3  &hml L_M1 N4  &kp N5
-#define NUMERIC_RM &kp N6  &hmr R_M1 N7  &hmr R_M2 N8  &hmr R_M3 N9  &hmr R_M4 N0  &kp MINUS
-
-#define NUMERIC_LB &cancel  &trans  &trans  &trans  &trans  &trans
-#define NUMERIC_RB &trans  &trans  &trans  &trans  &trans  &cancel
-
-#define NUMERIC_LH &trans  &trans  &trans                                                             
-#define NUMERIC_RH &kp SPACE  &kp BACKSPACE  &kp PERIOD
-
+#define NUMERIC_LB &cancel  &kp BSLH  &kp MINUS  &kp LT  &kp COMMA  &kp PIPE
+#define NUMERIC_LH &trans  &trans  &trans
 #define NUMERIC_LH_5 &trans &trans NUMERIC_LH
+
+
+#define NUMERIC_RZ &trans &trans &trans &trans &trans &trans
+#define NUMERIC_RT &kp CARET  &kp AMPS  &kp ASTERISK  &kp LPAR  &kp RPAR    &kp EQUAL
+#define NUMERIC_RM &kp N6  &hmr R_M1 N7  &hmr R_M2 N8  &hmr R_M3 N9  &hmr R_M4 N0  &kp MINUS
+#define NUMERIC_RB &kp EQUAL  &kp PERIOD  &kp GT  &kp PLUS  &kp FSLH  &cancel
+#define NUMERIC_RH &trans  &kp BACKSPACE  &kp PERIOD
 #define NUMERIC_RH_5 &trans &trans NUMERIC_RH
 
 
@@ -612,10 +609,10 @@ arcane_nav_r: arcane_nav_r {
 #define EXTRA_LH_5 &trans &trans EXTRA_LH
 
 
-#define EXTRA_RZ &trans &trans &trans &trans &trans &trans
+#define EXTRA_RZ &at_wgyl_org &trans &trans &trans &trans &trans
 #define EXTRA_RT &trans &trans &trans &trans &phone_alt &trans
 #define EXTRA_RM &kp INSERT &trans &trans &trans &trans &trans
-#define EXTRA_RB &trans &trans &trans &trans &trans &key_repeat
+#define EXTRA_RB &trans &trans &trans &personal_email &trans &key_repeat
 #define EXTRA_RH   		  &trans &oneshot_or_to_NAVIGATION &trans
 #define EXTRA_RH_5 &trans &trans EXTRA_RH
 

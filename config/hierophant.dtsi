@@ -87,6 +87,13 @@ ZMK_SIMPLE_MACRO(cant_wont_tail, <&kp SQT>, <&kp T>)
 			mods = <(MOD_LSFT|MOD_RSFT)>;
 		};
 
+		dqt_underscore_thumb: dqt_underscore_thumb {
+			compatible = "zmk,behavior-mod-morph";
+			#binding-cells = <0>;
+			bindings = <&kp DQT>, <&kp UNDERSCORE>;
+			mods = <(MOD_LSFT|MOD_RSFT)>;
+		};
+
 		lts_extra_sqt_minus: lts_extra_sqt_minus {
 			compatible = "zmk,behavior-hold-tap";
 			#binding-cells = <2>;
@@ -106,7 +113,18 @@ ZMK_SIMPLE_MACRO(cant_wont_tail, <&kp SQT>, <&kp T>)
 			flavor = "balanced";
 			bindings = <&mo>, <&dqt_plus_thumb>;
 		};
+
+		lts_fn_dqt_underscore: lts_fn_dqt_underscore {
+			compatible = "zmk,behavior-hold-tap";
+			#binding-cells = <2>;
+			tapping-term-ms = <200>;
+			quick-tap-ms = <175>;
+			require-prior-idle-ms = <100>;
+			flavor = "balanced";
+			bindings = <&mo>, <&dqt_underscore_thumb>;
+		};
 	};
+	
 };
 
 
@@ -121,5 +139,5 @@ ZMK_SIMPLE_MACRO(cant_wont_tail, <&kp SQT>, <&kp T>)
 #define HIEROPHANT_RT &kp RETURN  &adaptive_w_repeat  &kp D  &kp L  &kp B  &kp SEMI
 #define HIEROPHANT_RM &kp G  &adaptive_s_repeat  &adaptive_t_repeat  &adaptive_r_repeat  &tap_hold_layer_rgui RGUI_NAV_R N  &dqt_underscore
 #define HIEROPHANT_RB &kp V  &kp C  &kp M  &kp J  &dot_colon  &kp FSLH
-#define HIEROPHANT_RH &rgui_space_ret  &arcane_nav_r NAV 0  &lts_fn_dqt_plus FN 0
+#define HIEROPHANT_RH &rgui_space_ret  &arcane_nav_r NAV 0  &lts_fn_dqt_underscore FN 0
 #define HIEROPHANT_RH_5 &trans &trans HIEROPHANT_RH
