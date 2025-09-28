@@ -129,7 +129,7 @@ ZMK_SIMPLE_MACRO(cant_wont_tail, <&kp SQT>, <&kp T>)
 
 
 #define HIEROPHANT_LZ &trans &trans &trans &trans &trans &trans
-#define HIEROPHANT_LT &kp TAB  &kp F  &kp Z  &kp U  &adaptive_q_repeat  &backspace_word_delete
+#define HIEROPHANT_LT &kp TILDE  &kp F  &kp Z  &kp U  &adaptive_q_repeat  &backspace_word_delete
 #define HIEROPHANT_LM &sqt_dash &tap_hold_layer_lgui_adaptive LGUI_NAV_L 0  &adaptive_i_repeat  &adaptive_e_repeat  &adaptive_a_repeat  &kp P
 #define HIEROPHANT_LB &kp BSLH  &comma_semicolon  &kp Y  &kp K  &kp O  &kp X
 #define HIEROPHANT_LH &lts_extra_sqt_minus EXTRA 0  &arcane_nav_l NAV 0  &lgui_space_tab

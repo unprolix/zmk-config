@@ -14,10 +14,10 @@
 
 
 ZMK_SIMPLE_MACRO(dotcom, <&kp DOT>, <&kp C>, <&kp O>, <&kp M>)
-ZMK_SIMPLE_MACRO(i_am, <&kp I>, <&kp SQT>, <&kp M>)
-ZMK_SIMPLE_MACRO(i_will, <&kp I>, <&kp SQT>, <&kp L>, <&kp L>)
-ZMK_SIMPLE_MACRO(i_would, <&kp I>, <&kp SQT>, <&kp D>)
-ZMK_SIMPLE_MACRO(i_have, <&kp I>, <&kp SQT>, <&kp V>, <&kp E>)
+ZMK_SIMPLE_MACRO(i_am, <&kp I>, <&kp SQT>, <&kp M>, <&kp SPACE>)
+ZMK_SIMPLE_MACRO(i_will, <&kp I>, <&kp SQT>, <&kp L>, <&kp L>, <&kp SPACE>)
+ZMK_SIMPLE_MACRO(i_would, <&kp I>, <&kp SQT>, <&kp D>, <&kp SPACE>)
+ZMK_SIMPLE_MACRO(i_have, <&kp I>, <&kp SQT>, <&kp V>, <&kp E>, <&kp SPACE>)
 
 ZMK_SIMPLE_MACRO(cancel, <&none>, <&to QWERTY>)
 ZMK_SIMPLE_MACRO(caps_toggle, <&kp CAPS>, <&tog CAPS_LAYER>)

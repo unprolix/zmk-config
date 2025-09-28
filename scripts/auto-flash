@@ -258,8 +258,8 @@ def find_available_mass_storage_devices():
                 
                 if (device_type == 'disk' and is_unmounted):
                     # Skip obvious system disks and swap
-                    if (name.startswith('nvme') or 
-                        name in ['sda', 'zram0'] or
+                    if (name.startswith('nvme') or
+                        name in ['zram0'] or
                         'SWAP' in str(label) or
                         'luks-' in name):
                         continue

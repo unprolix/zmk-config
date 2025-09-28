@@ -1,6 +1,6 @@
 // todo: some preprocess scripting to make this nicer to read and maintain
 
-#define ARCANE_DELAY 450
+#define ARCANE_DELAY 650
 
 
 #define ARCANE_EXPANSION(name, ...) \

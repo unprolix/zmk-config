@@ -15,3 +15,10 @@ backspace_word_delete: backspace_word_delete {
     tapping-term-ms = <TAP_DANCE_TAPPING>;
     bindings = <&kp BSPC>, <&kp LC(BSPC)>;
 };
+
+delete_delete_word: delete_delete_word {
+    compatible = "zmk,behavior-tap-dance";
+    #binding-cells = <0>;
+    tapping-term-ms = <TAP_DANCE_TAPPING>;
+    bindings = <&kp DELETE>, <&kp LC(DELETE)>;
+};
