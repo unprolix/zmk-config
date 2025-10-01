@@ -247,7 +247,6 @@ ZMK_UNICODE_SINGLE(em_dash, N2, N0, N1, N4)
 
 #include "hierophant.dtsi"		
 
-
 / {
 	behaviors {
 
@@ -740,26 +739,46 @@ arcane_nav_r: arcane_nav_r {
 
 
 
-// ******************************************  EMPTY layer
+// ******************************************  NUMPAD layer
 
 #define NUMPAD_LZ &trans &trans &trans &trans &trans &trans
-#define NUMPAD_LT &trans &kp N0 &kp N1 &kp N2 &kp N3 &trans
-#define NUMPAD_LM &trans &trans &kp N4 &kp N5 &kp N6 &trans
-#define NUMPAD_LB &trans &trans &kp N7 &kp N8 &kp N9 &trans
+#define NUMPAD_LT &kp BSLH &kp N0 &kp N1 &kp N2 &kp N3 &kp QUESTION
+#define NUMPAD_LM &trans   &trans &kp N4 &kp N5 &kp N6 &kp SQT
+#define NUMPAD_LB &trans   &trans &kp N7 &kp N8 &kp N9 &trans
 #define NUMPAD_LH &kp N0 &trans &trans
 #define NUMPAD_LH_5 &trans &trans NUMPAD_LH
 
 
-#define NUMPAD_RZ &trans &trans &trans &trans &trans &trans
-#define NUMPAD_RT &kp N0 &kp N1 &kp N2 &kp N3 &trans &trans
-#define NUMPAD_RM &trans &kp N4 &kp N5 &kp N6 &trans &trans
-#define NUMPAD_RB &trans &kp N7 &kp N8 &kp N9 &trans &trans
+#define NUMPAD_RZ &trans  &trans &trans &trans &trans &trans
+#define NUMPAD_RT &kp N0  &kp N1 &kp N2 &kp N3 &kp EXCL &kp FSLH
+#define NUMPAD_RM &kp DQT &kp N4 &kp N5 &kp N6 &trans   &trans
+#define NUMPAD_RB &trans  &kp N7 &kp N8 &kp N9 &trans   &trans
 #define NUMPAD_RH &trans &trans &kp N0
 #define NUMPAD_RH_5 &trans &trans NUMPAD_RH
 
 
 
 
+// ****************************************** SYMBOL layer
+
+// maybe: ; : . , « » “ ” ‘ ’ ? ! 
+//         arrow(s)
+
+
+#define SYMBOL_LZ &trans         &trans  &trans   &trans         &trans                &trans
+#define SYMBOL_LT &kp LEFT_BRACE &trans  &trans   &kp TAB        &kp PIPE              &trans
+#define SYMBOL_LM &trans         &kp SQT &kp BSLH &kp UNDERSCORE &kp LEFT_PARENTHESIS  &kp LEFT_BRACKET
+#define SYMBOL_LB &trans         &trans  &trans   &trans         &trans                &kp LESS_THAN
+#define SYMBOL_LH &trans &trans &kp TAB
+#define SYMBOL_LH_5 &trans &trans _LH
+
+
+#define SYMBOL_RZ &trans             &trans                &trans     &trans   &trans  &trans
+#define SYMBOL_RT &trans             &kp PLUS              &kp TAB    &trans   &trans  &kp RIGHT_BRACE
+#define SYMBOL_RM &kp RIGHT_BRACKET  &kp RIGHT_PARENTHESIS &kp MINUS  &kp FSLH &kp DQT &trans
+#define SYMBOL_RB &kp GREATER_THAN   &trans                &trans     &trans   &trans  &trans
+#define SYMBOL_RH &kp TAB &trans &trans
+#define SYMBOL_RH_5 &trans &trans _RH
 
 
 /*

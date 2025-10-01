@@ -164,7 +164,7 @@
 
 // top row
 ZMK_COMBO_FAST(esc_2, ESC, LT5, LT4)
-ZMK_COMBO_FAST(tilde_old, TILDE, LT4, LT1) // double skip (obsolete)
+//ZMK_COMBO_FAST(tilde_old, TILDE, LT4, LT1) // double skip (obsolete)
 ZMK_COMBO_FAST(curlybracket_open, LEFT_BRACE, LT4, LT3)
 ZMK_COMBO_FAST(square_open, LEFT_BRACKET, LT3, LT2)
 ZMK_COMBO_FAST(paren_open, LEFT_PARENTHESIS, LT2, LT1)

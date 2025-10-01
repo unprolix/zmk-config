@@ -184,6 +184,15 @@ NUMPAD_LH NUMPAD_RH
             >;
         };
 
+        symbol_layer {
+            display-name = "symbol";
+            bindings = <
+SYMBOL_LT                  &trans          SYMBOL_RT
+SYMBOL_LM          &trans  &trans  &trans  SYMBOL_RM
+SYMBOL_LB  &trans          &trans          SYMBOL_RB
+SYMBOL_LH SYMBOL_RH
+            >;
+        };
 
 
 /*

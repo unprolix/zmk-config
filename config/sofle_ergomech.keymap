@@ -10,6 +10,7 @@
 	hierophant_layer {
 				display-name = "hierophant";
 				bindings = <
+HIEROPHANT_LZ HIEROPHANT_RZ
 HIEROPHANT_LT HIEROPHANT_RT
 HIEROPHANT_LM HIEROPHANT_RM
 HIEROPHANT_LB HIEROPHANT_RB
@@ -47,6 +48,7 @@ GAMING_LH_5 GAMING_RH_5
 	caps_layer {
 				display-name = "caps";
 				bindings = <
+CAPS_LZ CAPS_RZ
 CAPS_LT CAPS_RT
 CAPS_LM CAPS_RM
 CAPS_LB CAPS_RB
@@ -59,6 +61,7 @@ CAPS_LH_5 CAPS_RH_5
         numeric_layer {
             display-name = "numeric";
             bindings = <
+NUMERIC_LZ NUMERIC_RZ
 NUMERIC_LT NUMERIC_RT
 NUMERIC_LM NUMERIC_RM
 NUMERIC_LB NUMERIC_RB
@@ -70,6 +73,7 @@ NUMERIC_LH_5 NUMERIC_RH_5
         navigation_layer {
             display-name = "navigation";
             bindings = <
+NAVIGATION_LZ NAVIGATION_RZ
 NAVIGATION_LT NAVIGATION_RT
 NAVIGATION_LM NAVIGATION_RM
 NAVIGATION_LB NAVIGATION_RB
@@ -81,6 +85,7 @@ NAVIGATION_LH_5 NAVIGATION_RH_5
         function_layer {
             display-name = "function";
             bindings = <
+FUNCTION_LZ FUNCTION_RZ
 FUNCTION_LT FUNCTION_RT
 FUNCTION_LM FUNCTION_RM
 FUNCTION_LB FUNCTION_RB
@@ -92,6 +97,7 @@ FUNCTION_LH_5 FUNCTION_RH_5
         extra_layer {
             display-name = "extra";
             bindings = <
+EXTRA_LZ EXTRA_RZ
 EXTRA_LT EXTRA_RT
 EXTRA_LM EXTRA_RM
 EXTRA_LB EXTRA_RB
@@ -103,6 +109,7 @@ EXTRA_LH_5 EXTRA_RH_5
         rgb_layer {
             display-name = "rgb";
             bindings = <
+RGB_LZ RGB_RZ
 RGB_LT RGB_RT
 RGB_LM RGB_RM
 RGB_LB RGB_RB
@@ -115,6 +122,7 @@ RGB_LH_5 RGB_RH_5
         system_layer {
             display-name = "system";
             bindings = <
+SYSTEM_LZ SYSTEM_RZ
 SYSTEM_LT SYSTEM_RT
 SYSTEM_LM SYSTEM_RM
 SYSTEM_LB SYSTEM_RB
@@ -128,6 +136,7 @@ SYSTEM_LH_5 SYSTEM_RH_5
         mod_l_nav_layer {
             display-name = "L GUI+nav";
             bindings = <
+LGN_LZ LGN_RZ
 LGN_LT LGN_RT
 LGN_LM LGN_RM
 LGN_LB LGN_RB
@@ -140,6 +149,7 @@ LGN_LH_5 LGN_RH_5
         mod_r_nav_layer {
             display-name = "R GUI+nav";
             bindings = <
+RGN_LZ RGN_RZ
 RGN_LT RGN_RT
 RGN_LM RGN_RM
 RGN_LB RGN_RB
@@ -151,6 +161,7 @@ RGN_LH_5 RGN_RH_5
         superscript_layer {
             display-name = "superscript";
             bindings = <
+SUPERSCRIPT_LZ SUPERSCRIPT_RZ
 SUPERSCRIPT_LT SUPERSCRIPT_RT
 SUPERSCRIPT_LM SUPERSCRIPT_RM
 SUPERSCRIPT_LB SUPERSCRIPT_RB
@@ -159,10 +170,34 @@ SUPERSCRIPT_LH_5 SUPERSCRIPT_RH_5
             sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN &inc_dec_kp PG_UP PG_DN>;
         };
 
+
+        numpad_layer {
+            display-name = "numpad";
+            bindings = <
+NUMPAD_LZ NUMPAD_RZ
+NUMPAD_LT NUMPAD_RT
+NUMPAD_LM NUMPAD_RM
+NUMPAD_LB NUMPAD_RB
+NUMPAD_LH NUMPAD_RH
+            >;
+        };
+
+        symbol_layer {
+            display-name = "symbol";
+            bindings = <
+SYMBOL_LZ SYMBOL_RZ
+SYMBOL_LT SYMBOL_RT
+SYMBOL_LM SYMBOL_RM
+SYMBOL_LB SYMBOL_RB
+SYMBOL_LH SYMBOL_RH
+            >;
+        };
+
 /*
         empty_layer {
             display-name = "empty";
             bindings = <
+EMPTY_LZ EMPTY_RZ
 EMPTY_LT EMPTY_RT
 EMPTY_LM EMPTY_RM
 EMPTY_LB EMPTY_RB
