@@ -15,7 +15,28 @@ ZMK_SIMPLE_MACRO(cant_wont_tail, <&kp SQT>, <&kp T>)
 	
 	behaviors {
 
-		MAKE_ADAPTIVE_REPEAT(adaptive_q_repeat, tll, NUMPAD, Q)
+		// Q with U->K antecedent
+		adaptive_q_base: adaptive_q_base {
+			compatible = "zmk,behavior-antecedent-morph";
+			#binding-cells = <0>;
+			defaults = <&kp Q>;
+			bindings = <&key_repeat>, <&kp K>;
+			antecedents = <Q U>;
+			max-delay-ms = <500>;
+		};
+
+		adaptive_q_repeat: adaptive_q_repeat {
+			compatible = "zmk,behavior-hold-tap";
+			#binding-cells = <2>;
+			tapping-term-ms = <200>;
+			quick-tap-ms = <QUICK_TAP_MS>;
+			require-prior-idle-ms = <HRM_PRIOR_IDLE>;
+			flavor = "balanced";
+			hold-trigger-on-release;
+			hold-trigger-key-positions = <KEYS_L THUMBS>;
+			bindings = <&mo>, <&adaptive_q_base>;
+		};
+
 		MAKE_ADAPTIVE_REPEAT(adaptive_w_repeat, tlr, NUMPAD, W)
 
 		MAKE_ADAPTIVE_REPEAT(adaptive_u_repeat, tll, SYMBOL, U)
@@ -141,7 +162,7 @@ ZMK_SIMPLE_MACRO(cant_wont_tail, <&kp SQT>, <&kp T>)
 
 
 #define HIEROPHANT_LZ &trans &trans &trans &trans &trans &trans
-#define HIEROPHANT_LT &kp TILDE  &kp F                                       &kp Z               &adaptive_u_repeat  &adaptive_q_repeat  &backspace_word_delete
+#define HIEROPHANT_LT &kp TILDE  &kp F                                       &kp Z               &adaptive_u_repeat  &adaptive_q_repeat NUMPAD 0  &backspace_word_delete
 #define HIEROPHANT_LM &sqt_dash  &tap_hold_layer_lgui_adaptive LGUI_NAV_L 0  &adaptive_i_repeat  &adaptive_e_repeat  &adaptive_a_repeat  &kp P
 #define HIEROPHANT_LB &kp BSLH   &comma_semicolon                            &kp Y               &kp K               &kp O               &kp X
 #define HIEROPHANT_LH &lts_extra_sqt_minus EXTRA 0  &arcane_nav_l NAV 0  &lgui_space_tab

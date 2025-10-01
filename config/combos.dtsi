@@ -230,7 +230,9 @@ ZMK_COMBO_FAST(plus, PLUS, RB0, RB1)
 ZMK_COMBO_FAST(equal, EQUAL, RB1, RB2)
 ZMK_COMBO_FAST(comma, COMMA, RB2, RB3)
 ZMK_COMBO_FAST(dot, DOT, RB3, RB4)
-ZMK_COMBO_FAST(slash, FSLH, RB4, RB5)
+
+ZMK_SIMPLE_MACRO(dot_dot_slash, <&kp DOT>, <&kp DOT>, <&kp FSLH>)
+ZMK_COMBO_PLUS(dot_dot_slash_combo, &dot_dot_slash, RB4, RB5)
 
 // skips
 //ZMK_SIMPLE_MACRO(dotcom_new, <&kp DOT>, <&kp C>, <&kp O>, <&kp M>)

@@ -765,18 +765,18 @@ arcane_nav_r: arcane_nav_r {
 //         arrow(s)
 
 
-#define SYMBOL_LZ &trans         &trans  &trans   &trans         &trans                &trans
-#define SYMBOL_LT &kp LEFT_BRACE &trans  &trans   &kp TAB        &kp PIPE              &trans
-#define SYMBOL_LM &trans         &kp SQT &kp BSLH &kp UNDERSCORE &kp LEFT_PARENTHESIS  &kp LEFT_BRACKET
-#define SYMBOL_LB &trans         &trans  &trans   &trans         &trans                &kp LESS_THAN
+#define SYMBOL_LZ &trans         &trans          &trans   &trans         &trans                &trans
+#define SYMBOL_LT &kp ESC        &kp LEFT_BRACE  &trans   &kp TAB        &kp PIPE              &trans
+#define SYMBOL_LM &trans         &kp SQT         &kp BSLH &kp UNDERSCORE &kp LEFT_PARENTHESIS  &kp LEFT_BRACKET
+#define SYMBOL_LB &trans         &sk LGUI        &sk LALT &sk LSHIFT     &sk LCTRL             &kp LESS_THAN
 #define SYMBOL_LH &trans &trans &kp TAB
 #define SYMBOL_LH_5 &trans &trans _LH
 
 
-#define SYMBOL_RZ &trans             &trans                &trans     &trans   &trans  &trans
-#define SYMBOL_RT &trans             &kp PLUS              &kp TAB    &trans   &trans  &kp RIGHT_BRACE
-#define SYMBOL_RM &kp RIGHT_BRACKET  &kp RIGHT_PARENTHESIS &kp MINUS  &kp FSLH &kp DQT &trans
-#define SYMBOL_RB &kp GREATER_THAN   &trans                &trans     &trans   &trans  &trans
+#define SYMBOL_RZ &trans             &trans                &trans     &trans   &trans          &trans
+#define SYMBOL_RT &trans             &kp PLUS              &kp TAB    &trans   &kp RIGHT_BRACE &trans
+#define SYMBOL_RM &kp RIGHT_BRACKET  &kp RIGHT_PARENTHESIS &kp MINUS  &kp FSLH &kp DQT         &trans
+#define SYMBOL_RB &kp GREATER_THAN   &sk RCTRL             &sk RSHIFT &sk RALT &sk RSHIFT      &trans
 #define SYMBOL_RH &kp TAB &trans &trans
 #define SYMBOL_RH_5 &trans &trans _RH
 
