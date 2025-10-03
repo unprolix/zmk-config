@@ -764,19 +764,29 @@ arcane_nav_r: arcane_nav_r {
 // maybe: ; : . , « » “ ” ‘ ’ ? ! 
 //         arrow(s)
 
+MAKE_ADAPTIVE_REPEAT(adaptive_sqt_repeat, hml, LGUI, SQT)
+MAKE_ADAPTIVE_REPEAT(adaptive_bslh_repeat, hml, LALT, BSLH)
+MAKE_ADAPTIVE_REPEAT(adaptive_und_repeat, hml, LSHIFT, UNDERSCORE)
+MAKE_ADAPTIVE_REPEAT(adaptive_lpar_repeat, hml, LCTRL, LEFT_PARENTHESIS)
 
-#define SYMBOL_LZ &trans         &trans          &trans   &trans         &trans                &trans
-#define SYMBOL_LT &kp ESC        &kp LEFT_BRACE  &trans   &kp TAB        &kp PIPE              &trans
-#define SYMBOL_LM &trans         &kp SQT         &kp BSLH &kp UNDERSCORE &kp LEFT_PARENTHESIS  &kp LEFT_BRACKET
-#define SYMBOL_LB &trans         &sk LGUI        &sk LALT &sk LSHIFT     &sk LCTRL             &kp LESS_THAN
+MAKE_ADAPTIVE_REPEAT(adaptive_rpar_repeat, hmr, RCTRL, RIGHT_PARENTHESIS)
+MAKE_ADAPTIVE_REPEAT(adaptive_minus_repeat, hmr, RSHIFT, MINUS)
+MAKE_ADAPTIVE_REPEAT(adaptive_fslh_repeat, hmr, RALT, FSLH)
+MAKE_ADAPTIVE_REPEAT(adaptive_dqt_repeat, hmr, RGUI, DQT)
+
+
+#define SYMBOL_LZ &trans   &trans                &trans                 &trans                &trans                 &trans
+#define SYMBOL_LT &kp ESC  &kp ESC               &kp PIPE               &kp TAB               &kp EQUAL               &kp LEFT_BRACE
+#define SYMBOL_LM &trans   &adaptive_sqt_repeat  &adaptive_bslh_repeat  &adaptive_und_repeat  &adaptive_lpar_repeat  &kp LEFT_BRACKET
+#define SYMBOL_LB &trans   &sk LGUI              &sk LALT               &sk LSHIFT            &sk LCTRL              &kp LESS_THAN
 #define SYMBOL_LH &trans &trans &kp TAB
 #define SYMBOL_LH_5 &trans &trans _LH
 
 
-#define SYMBOL_RZ &trans             &trans                &trans     &trans   &trans          &trans
-#define SYMBOL_RT &trans             &kp PLUS              &kp TAB    &trans   &kp RIGHT_BRACE &trans
-#define SYMBOL_RM &kp RIGHT_BRACKET  &kp RIGHT_PARENTHESIS &kp MINUS  &kp FSLH &kp DQT         &trans
-#define SYMBOL_RB &kp GREATER_THAN   &sk RCTRL             &sk RSHIFT &sk RALT &sk RSHIFT      &trans
+#define SYMBOL_RZ &trans             &trans                 &trans                  &trans                 &trans                &trans
+#define SYMBOL_RT &kp RIGHT_BRACE    &kp PLUS               &kp TAB                 &kp QUESTION           &kp ESC               &kp ESC
+#define SYMBOL_RM &kp RIGHT_BRACKET  &adaptive_rpar_repeat  &adaptive_minus_repeat  &adaptive_fslh_repeat  &adaptive_dqt_repeat  &trans
+#define SYMBOL_RB &kp GREATER_THAN   &sk RCTRL              &sk RSHIFT              &sk RALT               &sk RSHIFT            &trans
 #define SYMBOL_RH &kp TAB &trans &trans
 #define SYMBOL_RH_5 &trans &trans _RH
 
