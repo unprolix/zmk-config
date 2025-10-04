@@ -13,19 +13,10 @@
 };
 
 
-ZMK_SIMPLE_MACRO(dotcom, <&kp DOT>, <&kp C>, <&kp O>, <&kp M>)
-ZMK_SIMPLE_MACRO(i_am, <&kp I>, <&kp SQT>, <&kp M>, <&kp SPACE>)
-ZMK_SIMPLE_MACRO(i_will, <&kp I>, <&kp SQT>, <&kp L>, <&kp L>, <&kp SPACE>)
-ZMK_SIMPLE_MACRO(i_would, <&kp I>, <&kp SQT>, <&kp D>, <&kp SPACE>)
-ZMK_SIMPLE_MACRO(i_have, <&kp I>, <&kp SQT>, <&kp V>, <&kp E>, <&kp SPACE>)
-
-ZMK_SIMPLE_MACRO(cancel, <&none>, <&to QWERTY>)
+ZMK_SIMPLE_MACRO(cancel, <&none>, <&to HIEROPHANT>)
 ZMK_SIMPLE_MACRO(caps_toggle, <&kp CAPS>, <&tog CAPS_LAYER>)
 
 ZMK_SIMPLE_MACRO(at_wgyl_org, <&kp AT>, <&kp W>, <&kp G>, <&kp Y>, <&kp L>, <&kp DOT>, <&kp O>, <&kp R>, <&kp G>, <&kp TAB>)
-ZMK_SIMPLE_MACRO(azrael, <&kp A>, <&kp Z>, <&kp R>, <&kp A>, <&kp MENU>, <&kp DQT>, <&kp E>, <&kp L>)
-ZMK_SIMPLE_MACRO(anais, <&kp A>, <&kp N>, <&kp A>, <&kp MENU>, <&kp DQT>, <&kp I>, <&kp S>)
-
 
 ZMK_SIMPLE_MACRO(rgb_tog_num, <&macro_tap &rgb_ug RGB_ON>, <&macro_tap &rgb_ug RGB_COLOR_HSB(43,100,100)>)
 

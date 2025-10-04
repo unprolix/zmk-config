@@ -539,18 +539,18 @@ arcane_nav_r: arcane_nav_r {
 
 // ******************************************  NUMERIC layer
 
-#define NUMERIC_LZ &trans &trans &trans &trans &trans &trans
-#define NUMERIC_LT &kp GRAVE  &kp EXCL  &kp AT        &kp HASH  &kp DOLLAR  &kp PERCENT
-#define NUMERIC_LM &kp N0  &hml L_M4 N1  &hml L_M3 N2  &hml L_M2 N3  &hml L_M1 N4  &kp N5
-#define NUMERIC_LB &cancel  &kp BSLH  &kp MINUS  &kp LT  &kp COMMA  &kp PIPE
+#define NUMERIC_LZ &trans     &trans        &trans        &trans        &trans        &trans
+#define NUMERIC_LT &kp GRAVE  &kp EXCL      &kp AT        &kp HASH      &kp DOLLAR    &kp PERCENT
+#define NUMERIC_LM &kp N0     &hml L_M4 N1  &hml L_M3 N2  &hml L_M2 N3  &hml L_M1 N4  &kp N5
+#define NUMERIC_LB &trans     &trans        &trans        &trans        &trans        &cancel
 #define NUMERIC_LH &trans  &trans  &trans
 #define NUMERIC_LH_5 &trans &trans NUMERIC_LH
 
 
-#define NUMERIC_RZ &trans &trans &trans &trans &trans &trans
-#define NUMERIC_RT &kp CARET  &kp AMPS  &kp ASTERISK  &kp LPAR  &kp RPAR    &kp EQUAL
-#define NUMERIC_RM &kp N6  &hmr R_M1 N7  &hmr R_M2 N8  &hmr R_M3 N9  &hmr R_M4 N0  &kp MINUS
-#define NUMERIC_RB &kp EQUAL  &kp PERIOD  &kp GT  &kp PLUS  &kp FSLH  &cancel
+#define NUMERIC_RZ &trans     &trans        &trans        &trans        &trans        &trans
+#define NUMERIC_RT &kp CARET  &kp AMPS      &kp ASTERISK  &kp LPAR      &kp RPAR      &kp EQUAL
+#define NUMERIC_RM &kp N6     &hmr R_M1 N7  &hmr R_M2 N8  &hmr R_M3 N9  &hmr R_M4 N0  &kp MINUS
+#define NUMERIC_RB &cancel    &trans        &trans        &trans        &trans        &trans
 #define NUMERIC_RH &trans  &kp BACKSPACE  &kp PERIOD
 #define NUMERIC_RH_5 &trans &trans NUMERIC_RH
 
@@ -576,38 +576,46 @@ arcane_nav_r: arcane_nav_r {
 
 // ******************************************  FUNCTION layer
 
-#define FUNCTION_LZ &trans &trans &trans &trans &trans &trans
-#define FUNCTION_RZ &trans &trans &trans &trans &trans &trans
+MAKE_ADAPTIVE_REPEAT(f_hrk_f14, hml, L_M4, F14)
+MAKE_ADAPTIVE_REPEAT(f_hrk_f15, hml, L_M3, F15)
+MAKE_ADAPTIVE_REPEAT(f_hrk_f16, hml, L_M2, F16)
+MAKE_ADAPTIVE_REPEAT(f_hrk_f17, hml, L_M1, F17)
 
-#define FUNCTION_LT &kp F1  &kp F2  &kp F3  &kp F4  &kp F5  &kp F6
-#define FUNCTION_RT &kp F7  &kp F8  &kp F9  &kp F10  &kp F11  &kp F12
+MAKE_ADAPTIVE_REPEAT(f_hrk_f20, hmr, R_M1, F20)
+MAKE_ADAPTIVE_REPEAT(f_hrk_f21, hmr, R_M2, F21)
+MAKE_ADAPTIVE_REPEAT(f_hrk_f22, hmr, R_M3, F22)
+MAKE_ADAPTIVE_REPEAT(f_hrk_f23, hmr, R_M4, F23)
 
-#define FUNCTION_LM &kp F13  &hml L_M4 F14  &hml L_M3 F15  &hml L_M2 F16  &hml L_M1 F17  &kp F18
-#define FUNCTION_RM &kp F19  &hmr R_M1 F20  &hmr R_M2 F21  &hmr R_M3 F22  &hmr R_M4 F23  &kp F24
 
-#define FUNCTION_LB &trans  &sys_reset  &trans  &bootloader  &trans  &mkp MB5 
-#define FUNCTION_RB &trans  &trans  &bootloader  &sys_reset  &kp SCROLLLOCK  &kp PAUSE_BREAK
-
+#define FUNCTION_LZ &trans   &trans      &trans      &trans       &trans      &trans
+#define FUNCTION_LT &kp F1   &kp F2      &kp F3      &kp F4       &kp F5      &kp F6
+#define FUNCTION_LM &kp F13  &f_hrk_f14  &f_hrk_f15  &f_hrk_f16   &f_hrk_f17  &kp F18
+#define FUNCTION_LB &trans   &sys_reset  &trans      &bootloader  &trans      &mkp MB5
 #define FUNCTION_LH &trans &trans &build_time
-#define FUNCTION_RH &build_time  &trans  &trans
-
 #define FUNCTION_LH_5 &trans &trans FUNCTION_LH
+
+
+#define FUNCTION_RZ &trans &trans &trans &trans &trans &trans
+#define FUNCTION_RT &kp F7   &kp F8      &kp F9       &kp F10     &kp F11         &kp F12
+#define FUNCTION_RM &kp F19  &f_hrk_f20  &f_hrk_f21   &f_hrk_f22  &f_hrk_f23      &kp F24
+#define FUNCTION_RB &trans   &trans      &bootloader  &sys_reset  &kp SCROLLLOCK  &kp PAUSE_BREAK
+#define FUNCTION_RH &build_time  &trans  &trans
 #define FUNCTION_RH_5 &trans &trans FUNCTION_RH
 
 // ******************************************  EXTRA layer
 
-#define EXTRA_LZ &trans &trans &trans &trans &trans &trans
-#define EXTRA_LT &smart_w &trans &at_wgyl_org &trans &trans &trans
-#define EXTRA_LM &trans &trans &trans &trans &trans &kp DELETE
-#define EXTRA_LB &dash_emdash &trans &trans &trans &trans &trans
+#define EXTRA_LZ &trans        &trans    &trans    &trans    &trans    &trans
+#define EXTRA_LT &smart_w      &trans    &kp MENU  &trans    &trans    &kp DELETE
+#define EXTRA_LM &trans        &sk L_M4  &sk L_M3  &sk L_M2  &sk L_M1  &trans
+#define EXTRA_LB &dash_emdash  &trans    &trans    &trans    &trans    &trans
 #define EXTRA_LH                      &trans &oneshot_or_to_NAVIGATION &trans
 #define EXTRA_LH_5 &trans &trans EXTRA_LH
 
 
-#define EXTRA_RZ &at_wgyl_org &trans &trans &trans &trans &trans
-#define EXTRA_RT &trans &trans &trans &trans &phone_alt &trans
-#define EXTRA_RM &kp INSERT &trans &trans &trans &trans &trans
-#define EXTRA_RB &trans &trans &trans &personal_email &trans &key_repeat
+#define EXTRA_RZ &trans      &trans        &trans    &trans           &trans      &trans
+#define EXTRA_RT &kp INSERT  &at_wgyl_org  &trans    &leader          &phone_alt  &trans
+#define EXTRA_RM &trans      &sk R_M1      &sk R_M2  &sk R_M3         &sk R_M4    &trans
+#define EXTRA_RB &trans      &trans        &trans    &personal_email  &trans      &key_repeat
 #define EXTRA_RH   		  &trans &oneshot_or_to_NAVIGATION &trans
 #define EXTRA_RH_5 &trans &trans EXTRA_RH
 
@@ -742,17 +750,17 @@ arcane_nav_r: arcane_nav_r {
 // ******************************************  NUMPAD layer
 
 #define NUMPAD_LZ &trans &trans &trans &trans &trans &trans
-#define NUMPAD_LT &kp BSLH &kp N0 &kp N1 &kp N2 &kp N3 &kp QUESTION
-#define NUMPAD_LM &trans   &trans &kp N4 &kp N5 &kp N6 &kp SQT
-#define NUMPAD_LB &trans   &trans &kp N7 &kp N8 &kp N9 &trans
+#define NUMPAD_LT &kp BSLH  &kp N0    &kp N1 &kp N2 &kp N3  &kp QUESTION
+#define NUMPAD_LM &trans    &kp PLUS  &kp N4 &kp N5 &kp N6  &kp SQT
+#define NUMPAD_LB &trans    &kp DOT   &kp N7 &kp N8 &kp N9  &trans
 #define NUMPAD_LH &kp N0 &trans &trans
 #define NUMPAD_LH_5 &trans &trans NUMPAD_LH
 
 
-#define NUMPAD_RZ &trans  &trans &trans &trans &trans &trans
-#define NUMPAD_RT &kp N0  &kp N1 &kp N2 &kp N3 &kp EXCL &kp FSLH
-#define NUMPAD_RM &kp DQT &kp N4 &kp N5 &kp N6 &trans   &trans
-#define NUMPAD_RB &trans  &kp N7 &kp N8 &kp N9 &trans   &trans
+#define NUMPAD_RZ &trans   &trans &trans &trans  &trans     &trans
+#define NUMPAD_RT &kp N0   &kp N1 &kp N2 &kp N3  &kp MINUS  &kp FSLH
+#define NUMPAD_RM &kp DQT  &kp N4 &kp N5 &kp N6  &kp PLUS   &trans
+#define NUMPAD_RB &trans   &kp N7 &kp N8 &kp N9  &kp DOT    &trans
 #define NUMPAD_RH &trans &trans &kp N0
 #define NUMPAD_RH_5 &trans &trans NUMPAD_RH
 
@@ -776,9 +784,9 @@ MAKE_ADAPTIVE_REPEAT(adaptive_dqt_repeat, hmr, RGUI, DQT)
 
 
 #define SYMBOL_LZ &trans   &trans                &trans                 &trans                &trans                 &trans
-#define SYMBOL_LT &kp ESC  &kp ESC               &kp PIPE               &kp TAB               &kp EQUAL               &kp LEFT_BRACE
+#define SYMBOL_LT &kp ESC  &kp ESC               &kp PIPE               &kp TAB               &kp EQUAL              &kp LEFT_BRACE
 #define SYMBOL_LM &trans   &adaptive_sqt_repeat  &adaptive_bslh_repeat  &adaptive_und_repeat  &adaptive_lpar_repeat  &kp LEFT_BRACKET
-#define SYMBOL_LB &trans   &sk LGUI              &sk LALT               &sk LSHIFT            &sk LCTRL              &kp LESS_THAN
+#define SYMBOL_LB &trans   &kp TILDE             &kp GRAVE              &trans                &trans                 &kp LESS_THAN
 #define SYMBOL_LH &trans &trans &kp TAB
 #define SYMBOL_LH_5 &trans &trans _LH
 
@@ -786,7 +794,7 @@ MAKE_ADAPTIVE_REPEAT(adaptive_dqt_repeat, hmr, RGUI, DQT)
 #define SYMBOL_RZ &trans             &trans                 &trans                  &trans                 &trans                &trans
 #define SYMBOL_RT &kp RIGHT_BRACE    &kp PLUS               &kp TAB                 &kp QUESTION           &kp ESC               &kp ESC
 #define SYMBOL_RM &kp RIGHT_BRACKET  &adaptive_rpar_repeat  &adaptive_minus_repeat  &adaptive_fslh_repeat  &adaptive_dqt_repeat  &trans
-#define SYMBOL_RB &kp GREATER_THAN   &sk RCTRL              &sk RSHIFT              &sk RALT               &sk RSHIFT            &trans
+#define SYMBOL_RB &kp GREATER_THAN   &trans                 &trans                  &trans                 &trans                &trans
 #define SYMBOL_RH &kp TAB &trans &trans
 #define SYMBOL_RH_5 &trans &trans _RH
 

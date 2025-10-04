@@ -60,7 +60,9 @@ ZMK_LEADER_SEQUENCE(phone_alt, &phone_alt, T E L)
 
 
 
+ZMK_SIMPLE_MACRO(azrael, <&kp A>, <&kp Z>, <&kp R>, <&kp A>, <&kp MENU>, <&kp DQT>, <&kp E>, <&kp L>)
 ZMK_LEADER_SEQUENCE(azrael, &azrael, A Z)  // azraël
+ZMK_SIMPLE_MACRO(anais, <&kp A>, <&kp N>, <&kp A>, <&kp MENU>, <&kp DQT>, <&kp I>, <&kp S>)
 ZMK_LEADER_SEQUENCE(anais, &anais, A N)  // anaïs
 
 ZMK_LEADER_SEQUENCE(gr_phi, &el_phi, P H I)  // ϕ

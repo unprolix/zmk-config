@@ -235,7 +235,7 @@ ZMK_SIMPLE_MACRO(dot_dot_slash, <&kp DOT>, <&kp DOT>, <&kp FSLH>)
 ZMK_COMBO_PLUS(dot_dot_slash_combo, &dot_dot_slash, RB4, RB5)
 
 // skips
-//ZMK_SIMPLE_MACRO(dotcom_new, <&kp DOT>, <&kp C>, <&kp O>, <&kp M>)
+ZMK_SIMPLE_MACRO(dotcom, <&kp DOT>, <&kp C>, <&kp O>, <&kp M>)
 ZMK_COMBO_PLUS(dotcom, &dotcom, RB1, RB4) // dot and C on hierophant
 
 // thumbs
@@ -298,9 +298,16 @@ ZMK_COMBO_PLUS_SLOW(qwerty, &to QWERTY, LB5, RB5)
 // wild ones
 
 // contractions
+ZMK_SIMPLE_MACRO(i_am, <&kp I>, <&kp SQT>, <&kp M>, <&kp SPACE>)
 ZMK_COMBO_PLUS_SLOW(i_am, &i_am, LM3, RB2)
+
+ZMK_SIMPLE_MACRO(i_will, <&kp I>, <&kp SQT>, <&kp L>, <&kp L>, <&kp SPACE>)
 ZMK_COMBO_PLUS_SLOW(i_will, &i_will, LM3, RT3)
+
+ZMK_SIMPLE_MACRO(i_would, <&kp I>, <&kp SQT>, <&kp D>, <&kp SPACE>)
 ZMK_COMBO_PLUS_SLOW(i_would, &i_would, LM3, RT2)
+
+ZMK_SIMPLE_MACRO(i_have, <&kp I>, <&kp SQT>, <&kp V>, <&kp E>, <&kp SPACE>)
 ZMK_COMBO_PLUS_SLOW(i_have, &i_have, LM3, RB0)
 
 // for specific layers
