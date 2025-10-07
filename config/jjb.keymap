@@ -104,18 +104,25 @@ key numbers
 #define QWERTY 1
 #define GAMING 2
 #define CAPS_LAYER 3
-#define NUMERIC 4
-#define NAVIGATION 5
-#define FN 6
-#define EXTRA 7
-#define RGB 8
-#define SYSTEM 9
+#define SUPERSCRIPT 4
+
+#define NUMERIC 5
+#define NUMPAD 6
+#define NUMBERLINE 7
+#define SYMBOL 8
+
+
+#define NAVIGATION 9
 #define MODIFIER_LEFT_NAV 10
 #define MODIFIER_RIGHT_NAV 11
-#define BLUETOOTH 12
-#define SUPERSCRIPT 13
-#define NUMPAD 14
-#define SYMBOL 15
+
+#define EXTRA 12
+#define FN 13
+
+#define RGB 14
+#define BLUETOOTH 15
+#define SYSTEM 16
+
 
 // short versions for helping things line up
 #define NUM NUMERIC
@@ -169,7 +176,6 @@ key numbers
 
 
 
-#define SMART_NUM &smart_num NUM 0
 ZMK_HOLD_TAP(smart_num, bindings = <&mo>, <&num_dance>; flavor = "balanced";
              tapping-term-ms = <200>; quick-tap-ms = <QUICK_TAP_MS>;)
 ZMK_TAP_DANCE(num_dance, bindings = <&num_word NUM>, <&sl NUM>;
@@ -205,8 +211,8 @@ MAKE_HRM(hml, &kp, &kp, KEYS_R THUMBS) // Left-hand HRMs.
 MAKE_HRM(hmr, &kp, &kp, KEYS_L THUMBS) // Right-hand HRMs.
 
 // Top Layer Left/Right
-MAKE_HRM(tll, &mo, &kp, KEYS_L THUMBS)
-MAKE_HRM(tlr, &mo, &kp, KEYS_R THUMBS)
+MAKE_HRM(tll, &mo, &kp, KEYS_R THUMBS)
+MAKE_HRM(tlr, &mo, &kp, KEYS_L THUMBS)
 
 #include "build_info.dtsi"
 //#include "tap-hold-layer.dtsi"
@@ -274,12 +280,6 @@ rgb_off_behavior: rgb_off_behavior {
     bindings = <&rgb_ug RGB_OFF>;
 };
         
-to_nav: to_nav {
-    compatible = "zmk,behavior-macro";
-    #binding-cells = <0>;
-    wait-ms = <1000>;
-    bindings = <&to NAV>, <&rgb_ug RGB_ON>, <&rgb_ug RGB_OFF>;
-};
 
 
 // for testing behavior-delayed, which does not currently work
@@ -392,15 +392,6 @@ arcane_nav_r: arcane_nav_r {
 };
 
 
-		
-
-	menu_smart_num: menu_smart_num {
-	    compatible = "zmk,behavior-tap-dance";
-	    #binding-cells = <0>;
-	    tapping-term-ms = <300>; /* is this the time limit to invoke smart_num here? i swear i'm doing it faster than 250 but it seems not to activate often at that point */
-	    bindings = <&kp MENU>, <&smart_num NUM 0>;
-	};
-
 	// hold LGUI, tap for space, double tap for tab
 	// BUT using this may make spaces slooow so we'll switch to something else soon
         lgui_space_tab: lgui_space_tab {
@@ -424,7 +415,7 @@ arcane_nav_r: arcane_nav_r {
             #binding-cells = <2>;
             tapping-term-ms = <200>;
             quick-tap-ms = <175>;
-            require-prior-idle-ms = <100>;
+            require-prior-idle-ms = <HRM_PRIOR_IDLE>;
             flavor = "balanced";
             bindings = <&mo>, <&kp>;
         };
@@ -434,7 +425,7 @@ arcane_nav_r: arcane_nav_r {
             #binding-cells = <2>;
             tapping-term-ms = <200>;
             quick-tap-ms = <175>;
-            require-prior-idle-ms = <100>;
+            require-prior-idle-ms = <HRM_PRIOR_IDLE>;
             flavor = "balanced";
             bindings = <&mo>, <&sk>;
         };
@@ -492,13 +483,6 @@ arcane_nav_r: arcane_nav_r {
 #define QWERTY_RH &rgui_space_ret  &smart_nav_thumb NAV BSPC  &LTS FN RETURN
 #define QWERTY_RH_5 &trans &trans QWERTY_RH
 
-/*
-#define QWERTY_RT &trans &trans &trans &trans &trans &trans
-#define QWERTY_RM &trans &trans &trans &trans &trans &trans
-#define QWERTY_RB &trans &trans &trans &trans &trans &trans
-#define QWERTY_RH &trans &trans &trans
-#define QWERTY_RH_5 &trans &trans QWERTY_RH
-*/
 
 // ****************************************** GAMING layer
 
@@ -769,34 +753,11 @@ MAKE_ADAPTIVE_REPEAT(f_hrk_f23, hmr, R_M4, F23)
 
 // ****************************************** SYMBOL layer
 
-// maybe: ; : . , « » “ ” ‘ ’ ? ! 
-//         arrow(s)
+#include "symbol.dtsi"
 
-MAKE_ADAPTIVE_REPEAT(adaptive_sqt_repeat, hml, LGUI, SQT)
-MAKE_ADAPTIVE_REPEAT(adaptive_bslh_repeat, hml, LALT, BSLH)
-MAKE_ADAPTIVE_REPEAT(adaptive_und_repeat, hml, LSHIFT, UNDERSCORE)
-MAKE_ADAPTIVE_REPEAT(adaptive_lpar_repeat, hml, LCTRL, LEFT_PARENTHESIS)
+// ****************************************** SYMBOL layer
 
-MAKE_ADAPTIVE_REPEAT(adaptive_rpar_repeat, hmr, RCTRL, RIGHT_PARENTHESIS)
-MAKE_ADAPTIVE_REPEAT(adaptive_minus_repeat, hmr, RSHIFT, MINUS)
-MAKE_ADAPTIVE_REPEAT(adaptive_fslh_repeat, hmr, RALT, FSLH)
-MAKE_ADAPTIVE_REPEAT(adaptive_dqt_repeat, hmr, RGUI, DQT)
-
-
-#define SYMBOL_LZ &trans   &trans                &trans                 &trans                &trans                 &trans
-#define SYMBOL_LT &kp ESC  &kp ESC               &kp PIPE               &kp TAB               &kp EQUAL              &kp LEFT_BRACE
-#define SYMBOL_LM &trans   &adaptive_sqt_repeat  &adaptive_bslh_repeat  &adaptive_und_repeat  &adaptive_lpar_repeat  &kp LEFT_BRACKET
-#define SYMBOL_LB &trans   &kp TILDE             &kp GRAVE              &trans                &trans                 &kp LESS_THAN
-#define SYMBOL_LH &trans &trans &kp TAB
-#define SYMBOL_LH_5 &trans &trans _LH
-
-
-#define SYMBOL_RZ &trans             &trans                 &trans                  &trans                 &trans                &trans
-#define SYMBOL_RT &kp RIGHT_BRACE    &kp PLUS               &kp TAB                 &kp QUESTION           &kp ESC               &kp ESC
-#define SYMBOL_RM &kp RIGHT_BRACKET  &adaptive_rpar_repeat  &adaptive_minus_repeat  &adaptive_fslh_repeat  &adaptive_dqt_repeat  &trans
-#define SYMBOL_RB &kp GREATER_THAN   &trans                 &trans                  &trans                 &trans                &trans
-#define SYMBOL_RH &kp TAB &trans &trans
-#define SYMBOL_RH_5 &trans &trans _RH
+#include "numberline.dtsi"
 
 
 /*

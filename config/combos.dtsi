@@ -208,8 +208,10 @@ ZMK_COMBO_3_PLUS_FAST(emdash_alt, &em_dash, RM3, RM4, RM5)
 
 // middle row skips
 
-ZMK_COMBO_PLUS(smart_num_l, &smart_num_lock_dance, LM1, LM3)  // skip!
-ZMK_COMBO_PLUS(smart_num_r, &smart_num_lock_dance, RM1, RM3)  // skip!
+ZMK_COMBO_PLUS(smart_num_l, &num_word NUMBERLINE HIEROPHANT, LM1, LM3)  // skip!
+ZMK_COMBO_PLUS(smart_num_r, &num_word NUMBERLINE HIEROPHANT, RM1, RM3)  // skip!
+ZMK_COMBO_PLUS(sl_numsym_l, &sl NUM, LM2, LM4)  // skip!
+ZMK_COMBO_PLUS(sl_numsym_r, &sl NUM, RM2, RM4)  // skip!
 ZMK_COMBO_PLUS_FAST(gui_l, &sk LGUI, LM1, LM4)	// double skip!
 ZMK_COMBO_PLUS_FAST(gui_r, &sk RGUI, RM1, RM4)	// double skip!
 
@@ -220,6 +222,7 @@ ZMK_COMBO_PLUS(tab_cross, &kp TAB, LM1, RM1)
 // bottom row
 ZMK_COMBO_FAST(backslash, BSLH, LB5, LB4)
 //ZMK_COMBO_FAST(, , LB4, LB3)
+
 //ZMK_COMBO_FAST(, , LB3, LB2)
 //ZMK_COMBO_FAST(, , LB2, LB1)
 ZMK_COMBO_FAST(minus, MINUS, LB1, LB0)

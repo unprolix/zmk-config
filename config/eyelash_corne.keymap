@@ -19,7 +19,6 @@
 / {
     keymap {
         compatible = "zmk,keymap";
-
 	hierophant_layer {
 				display-name = "hierophant";
 				bindings = <
@@ -27,10 +26,10 @@ HIEROPHANT_LT                       &kp UP              HIEROPHANT_RT
 HIEROPHANT_LM             &kp LEFT  &to RGB   &kp RIGHT HIEROPHANT_RM
 HIEROPHANT_LB &kp C_MUTE            &kp DOWN            HIEROPHANT_RB
 HIEROPHANT_LH HIEROPHANT_RH
-				>;
-				
+				>;				
             sensor-bindings = <&inc_dec_kp C_VOLUME_UP C_VOLUME_DOWN>;
 	};
+
 
         qwerty_layer {
             display-name = "qwerty";
@@ -39,9 +38,9 @@ QWERTY_LT                       &kp UP              QWERTY_RT
 QWERTY_LM             &kp LEFT  &to RGB   &kp RIGHT QWERTY_RM
 QWERTY_LB &kp C_MUTE            &kp DOWN            QWERTY_RB
 QWERTY_LH QWERTY_RH
-				>;
-				
+				>;				
         };
+
 
         gaming_layer {
             display-name = "gaming";
@@ -54,6 +53,7 @@ GAMING_LH GAMING_RH
             sensor-bindings = <&inc_dec_kp C_VOLUME_UP C_VOLUME_DOWN>;
         };
 
+
 	caps_layer {
 				display-name = "caps";
 				bindings = <
@@ -61,9 +61,20 @@ CAPS_LT                &trans        CAPS_RT
 CAPS_LM         &trans &trans &trans CAPS_RM
 CAPS_LB &trans         &trans        CAPS_RB
 CAPS_LH CAPS_RH
-				>;
-				
+				>;				
 	};
+
+
+        superscript_layer {
+            display-name = "superscript";
+            bindings = <
+SUPERSCRIPT_LT                  &trans          SUPERSCRIPT_RT
+SUPERSCRIPT_LM          &trans  &trans  &trans  SUPERSCRIPT_RM
+SUPERSCRIPT_LB  &trans          &trans          SUPERSCRIPT_RB
+SUPERSCRIPT_LH SUPERSCRIPT_RH
+            >;
+        };
+
 
         numeric_layer {
             display-name = "numeric";
@@ -76,6 +87,40 @@ NUMERIC_LH NUMERIC_RH
             sensor-bindings = <&scroll_encoder>;
         };
 
+
+        numpad_layer {
+            display-name = "numpad";
+            bindings = <
+NUMPAD_LT                  &trans          NUMPAD_RT
+NUMPAD_LM          &trans  &trans  &trans  NUMPAD_RM
+NUMPAD_LB  &trans          &trans          NUMPAD_RB
+NUMPAD_LH NUMPAD_RH
+            >;
+        };
+
+
+        numberline_layer {
+            display-name = "#line";
+            bindings = <
+NUMBERLINE_LT                  &trans          NUMBERLINE_RT
+NUMBERLINE_LM          &trans  &trans  &trans  NUMBERLINE_RM
+NUMBERLINE_LB  &trans          &trans          NUMBERLINE_RB
+NUMBERLINE_LH NUMBERLINE_RH
+            >;
+        };
+ 
+
+        symbol_layer {
+            display-name = "symbol";
+            bindings = <
+SYMBOL_LT                  &trans          SYMBOL_RT
+SYMBOL_LM          &trans  &trans  &trans  SYMBOL_RM
+SYMBOL_LB  &trans          &trans          SYMBOL_RB
+SYMBOL_LH SYMBOL_RH
+            >;
+        };
+
+
         navigation_layer {
             display-name = "navigation";
             bindings = <
@@ -87,16 +132,28 @@ NAVIGATION_LH NAVIGATION_RH
             sensor-bindings = <&scroll_encoder>;
         };
 
-        function_layer {
-            display-name = "function";
+
+        mod_l_nav_layer {
+            display-name = "LGUI+nav";
             bindings = <
-FUNCTION_LT                        &mmv MOVE_UP                FUNCTION_RT
-FUNCTION_LM         &mmv MOVE_LEFT &mkp MB1   &mmv MOVE_RIGHT  FUNCTION_RM
-FUNCTION_LB &trans                 &mmv MOVE_DOWN              FUNCTION_RB
-FUNCTION_LH FUNCTION_RH
+LGN_LT                          &mmv MOVE_UP                      LGN_RT
+LGN_LM            &mmv MOVE_LEFT &kp HOME        &mmv MOVE_RIGHT  LGN_RM
+LGN_LB  &kp HOME                &mmv MOVE_DOWN                    LGN_RB
+LGN_LH LGN_RH
             >;
-            sensor-bindings = <&scroll_encoder>;
         };
+
+
+        mod_r_nav_layer {
+            display-name = "RGUI+nav";
+            bindings = <
+RGN_LT                          &mmv MOVE_UP                      RGN_RT
+RGN_LM            &mmv MOVE_LEFT &kp HOME        &mmv MOVE_RIGHT  RGN_RM
+RGN_LB  &kp HOME                &mmv MOVE_DOWN                    RGN_RB
+RGN_LH RGN_RH
+            >;
+        };
+
 
         extra_layer {
             display-name = "extra";
@@ -105,6 +162,18 @@ EXTRA_LT                &trans         EXTRA_RT
 EXTRA_LM         &trans &trans &trans  EXTRA_RM
 EXTRA_LB &trans         &trans         EXTRA_RB
 EXTRA_LH EXTRA_RH
+            >;
+            sensor-bindings = <&scroll_encoder>;
+        };
+
+
+        function_layer {
+            display-name = "function";
+            bindings = <
+FUNCTION_LT                        &mmv MOVE_UP                FUNCTION_RT
+FUNCTION_LM         &mmv MOVE_LEFT &mkp MB1   &mmv MOVE_RIGHT  FUNCTION_RM
+FUNCTION_LB &trans                 &mmv MOVE_DOWN              FUNCTION_RB
+FUNCTION_LH FUNCTION_RH
             >;
             sensor-bindings = <&scroll_encoder>;
         };
@@ -121,39 +190,6 @@ RGB_LH RGB_RH
         };
 
 
-        system_layer {
-            display-name = "system";
-            bindings = <
-SYSTEM_LT                              &mmv MOVE_UP                     SYSTEM_RT
-SYSTEM_LM              &mmv MOVE_LEFT  &to QWERTY        &mmv MOVE_RIGHT  SYSTEM_RM
-SYSTEM_LB  &kp C_MUTE                  &mmv MOVE_DOWN                   SYSTEM_RB
-SYSTEM_LH SYSTEM_RH
-            >;
-        };
-
-
-        mod_l_nav_layer {
-            display-name = "L GUI+nav";
-            bindings = <
-LGN_LT                          &mmv MOVE_UP                      LGN_RT
-LGN_LM            &mmv MOVE_LEFT &kp HOME        &mmv MOVE_RIGHT  LGN_RM
-LGN_LB  &kp HOME                &mmv MOVE_DOWN                    LGN_RB
-LGN_LH LGN_RH
-            >;
-        };
-
-
-        mod_r_nav_layer {
-            display-name = "R GUI+nav";
-            bindings = <
-RGN_LT                          &mmv MOVE_UP                      RGN_RT
-RGN_LM            &mmv MOVE_LEFT &kp HOME        &mmv MOVE_RIGHT  RGN_RM
-RGN_LB  &kp HOME                &mmv MOVE_DOWN                    RGN_RB
-RGN_LH RGN_RH
-            >;
-        };
-
-
         bluetooth_layer {
             display-name = "bluetooth";
             bindings = <
@@ -164,35 +200,17 @@ BLUETOOTH_LH BLUETOOTH_RH
             >;
         };
 
-        superscript_layer {
-            display-name = "superscript";
+
+        system_layer {
+            display-name = "system";
             bindings = <
-SUPERSCRIPT_LT                  &trans          SUPERSCRIPT_RT
-SUPERSCRIPT_LM          &trans  &trans  &trans  SUPERSCRIPT_RM
-SUPERSCRIPT_LB  &trans          &trans          SUPERSCRIPT_RB
-SUPERSCRIPT_LH SUPERSCRIPT_RH
+SYSTEM_LT                              &mmv MOVE_UP                     SYSTEM_RT
+SYSTEM_LM              &mmv MOVE_LEFT  &to QWERTY        &mmv MOVE_RIGHT  SYSTEM_RM
+SYSTEM_LB  &kp C_MUTE                  &mmv MOVE_DOWN                   SYSTEM_RB
+SYSTEM_LH SYSTEM_RH
             >;
         };
 
-        numpad_layer {
-            display-name = "numpad";
-            bindings = <
-NUMPAD_LT                  &trans          NUMPAD_RT
-NUMPAD_LM          &trans  &trans  &trans  NUMPAD_RM
-NUMPAD_LB  &trans          &trans          NUMPAD_RB
-NUMPAD_LH NUMPAD_RH
-            >;
-        };
-
-        symbol_layer {
-            display-name = "symbol";
-            bindings = <
-SYMBOL_LT                  &trans          SYMBOL_RT
-SYMBOL_LM          &trans  &trans  &trans  SYMBOL_RM
-SYMBOL_LB  &trans          &trans          SYMBOL_RB
-SYMBOL_LH SYMBOL_RH
-            >;
-        };
 
 
 /*

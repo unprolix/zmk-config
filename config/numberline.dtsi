@@ -1,0 +1,16 @@
+
+#define NUMBERLINE_LZ &cancel  &trans  &trans  &trans  &trans  &trans
+#define NUMBERLINE_LT &cancel  &trans  &trans  &trans  &trans  &trans
+#define NUMBERLINE_LM &kp N0   &kp N1  &kp N2  &kp N3  &kp N4  &kp N5
+#define NUMBERLINE_LB &cancel  &trans  &trans  &trans  &trans  &trans
+#define NUMBERLINE_LH                        &cancel  &cancel  &trans
+#define NUMBERLINE_LH_5 &cancel &cancel NUMBERLINE_LH
+
+
+#define NUMBERLINE_RZ &trans  &trans  &trans  &trans  &trans  &cancel
+#define NUMBERLINE_RT &trans  &trans  &trans  &trans  &trans  &cancel
+#define NUMBERLINE_RM &kp N6  &kp N7  &kp N8  &kp N9  &kp N0  &cancel
+#define NUMBERLINE_RB &trans  &trans  &trans  &trans  &trans  &cancel
+#define NUMBERLINE_RH &cancel  &cancel  &cancel
+#define NUMBERLINE_RH_5 &cancel &cancel NUMBERLINE_RH
+
