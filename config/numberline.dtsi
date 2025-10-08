@@ -1,15 +1,26 @@
+MAKE_ADAPTIVE_REPEAT(nl_n1, hml, L_M4, N1)
+MAKE_ADAPTIVE_REPEAT(nl_n2, hml, L_M3, N2)
+MAKE_ADAPTIVE_REPEAT(nl_n3, hml, L_M2, N3)
+MAKE_ADAPTIVE_REPEAT(nl_n4, hml, L_M1, N4)
+
+MAKE_ADAPTIVE_REPEAT(nl_n7, hmr, R_M1, N7)
+MAKE_ADAPTIVE_REPEAT(nl_n8, hmr, R_M2, N8)
+MAKE_ADAPTIVE_REPEAT(nl_n9, hmr, R_M3, N9)
+MAKE_ADAPTIVE_REPEAT(nl_n0, hmr, R_M4, N0)
+
+
 #define NUMBERLINE_LZ &cancel  &trans  &trans  &trans  &trans  &trans
 #define NUMBERLINE_LT &cancel  &trans  &trans  &trans  &trans  &trans
-#define NUMBERLINE_LM &kp N0   &kp N1  &kp N2  &kp N3  &kp N4  &kp N5
+#define NUMBERLINE_LM &kp N0   &nl_n1  &nl_n2  &nl_n3  &nl_n4  &kp N5
 #define NUMBERLINE_LB &cancel  &trans  &trans  &trans  &trans  &trans
-#define NUMBERLINE_LH                        &cancel  &cancel  &trans
+#define NUMBERLINE_LH                        &cancel  &trans  &trans
 #define NUMBERLINE_LH_5 &cancel &cancel NUMBERLINE_LH
 
 
 #define NUMBERLINE_RZ &trans  &trans  &trans  &trans  &trans  &cancel
 #define NUMBERLINE_RT &trans  &trans  &trans  &trans  &trans  &cancel
-#define NUMBERLINE_RM &kp N6  &kp N7  &kp N8  &kp N9  &kp N0  &cancel
+#define NUMBERLINE_RM &kp N6  &nl_n7  &nl_n8  &nl_n9  &nl_n0  &cancel
 #define NUMBERLINE_RB &trans  &trans  &trans  &trans  &trans  &cancel
-#define NUMBERLINE_RH &cancel  &cancel  &cancel
+#define NUMBERLINE_RH &trans  &trans  &cancel
 #define NUMBERLINE_RH_5 &cancel &cancel NUMBERLINE_RH
 

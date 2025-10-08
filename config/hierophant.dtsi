@@ -1,5 +1,6 @@
 ZMK_SIMPLE_MACRO(comma_space, <&kp COMMA>, <&kp SPACE>)
 ZMK_SIMPLE_MACRO(cant_wont_tail, <&kp SQT>, <&kp T>)
+ZMK_SIMPLE_MACRO(dot_slash, <&kp DOT>, <&kp FSLH>)
 / {
 	
 	/*
@@ -93,7 +94,7 @@ ZMK_SIMPLE_MACRO(cant_wont_tail, <&kp SQT>, <&kp T>)
 			max-delay-ms = <LONG_PAUSE>;
 		};
 
-		MAKE_ANTECEDENT_MORPH(adaptive_j_dot, J, DOT, DOT)
+		MAKE_ANTECEDENT_MORPH_ADV(adaptive_j_dot, &kp J, &dot_slash, DOT)
 
 		tap_hold_layer_lgui_adaptive: tap_hold_layer_lgui_adaptive {
 			compatible = "zmk,behavior-hold-tap";
