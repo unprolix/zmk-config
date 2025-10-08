@@ -93,14 +93,7 @@ ZMK_SIMPLE_MACRO(cant_wont_tail, <&kp SQT>, <&kp T>)
 			max-delay-ms = <LONG_PAUSE>;
 		};
 
-		adaptive_j_dot: adaptive_j_dot {
-			compatible = "zmk,behavior-antecedent-morph";
-			#binding-cells = <0>;
-			defaults = <&kp J>;
-			bindings = <&kp DOT>;
-			antecedents = <DOT>;
-			max-delay-ms = <LONG_PAUSE>;
-		};
+		MAKE_ANTECEDENT_MORPH(adaptive_j_dot, J, DOT, DOT)
 
 		tap_hold_layer_lgui_adaptive: tap_hold_layer_lgui_adaptive {
 			compatible = "zmk,behavior-hold-tap";

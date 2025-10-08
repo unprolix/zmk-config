@@ -205,6 +205,16 @@ ZMK_TAP_DANCE(smart_num_lock_dance, bindings = <&sl NUM>, <&num_word NUM>, <&rgb
 			max-delay-ms = <500>; \
 		};
 
+#define MAKE_ANTECEDENT_MORPH(NAME, DEFAULT_KEY, MORPH_KEY, ANTECEDENT_KEY) \
+		NAME: NAME { \
+			compatible = "zmk,behavior-antecedent-morph"; \
+			#binding-cells = <0>; \
+			defaults = <&kp DEFAULT_KEY>; \
+			bindings = <&kp MORPH_KEY>; \
+			antecedents = <ANTECEDENT_KEY>; \
+			max-delay-ms = <500>; \
+		};
+
 
 
 MAKE_HRM(hml, &kp, &kp, KEYS_R THUMBS) // Left-hand HRMs.
