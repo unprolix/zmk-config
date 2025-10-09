@@ -38,6 +38,10 @@ ZMK_SIMPLE_MACRO(dot_slash, <&kp DOT>, <&kp FSLH>)
 			bindings = <&mo>, <&adaptive_q_base>;
 		};
 
+
+		// todo: use this to remake adaptive_q_repeat
+		MAKE_ANTECEDENT_MORPH(adaptive_q_k, Q, K, U)
+
 		MAKE_ADAPTIVE_REPEAT(adaptive_w_repeat, tlr, NUMPAD, W)
 
 		MAKE_ADAPTIVE_REPEAT(adaptive_u_repeat, tll, SYMBOL, U)
@@ -49,10 +53,12 @@ ZMK_SIMPLE_MACRO(dot_slash, <&kp DOT>, <&kp FSLH>)
 		MAKE_ADAPTIVE_REPEAT(adaptive_f_repeat, tll, FN, F)
 		MAKE_ADAPTIVE_REPEAT(adaptive_b_repeat, tlr, FN, B)
 		
-		// adaptive homerow mods for hierophant layer
 		MAKE_ADAPTIVE_REPEAT(adaptive_i_repeat, hml, LALT, I)
 		MAKE_ADAPTIVE_REPEAT(adaptive_e_repeat, hml, LSHIFT, E)
 		MAKE_ADAPTIVE_REPEAT(adaptive_a_repeat, hml, LCTRL, A)
+		MAKE_ADAPTIVE_REPEAT(adaptive_p_repeat, tll, NUM, P)
+
+		MAKE_ADAPTIVE_REPEAT(adaptive_g_repeat, tlr, NUM, G)
 		MAKE_ADAPTIVE_REPEAT(adaptive_s_repeat, hmr, RCTRL, S)
 		MAKE_ADAPTIVE_REPEAT(adaptive_t_repeat, hmr, RSHIFT, T)
 		MAKE_ADAPTIVE_REPEAT(adaptive_r_repeat, hmr, RALT, R)
@@ -163,14 +169,14 @@ ZMK_SIMPLE_MACRO(dot_slash, <&kp DOT>, <&kp FSLH>)
 
 #define HIEROPHANT_LZ &trans &trans &trans &trans &trans &trans
 #define HIEROPHANT_LT &kp TILDE  &adaptive_f_repeat                          &adaptive_z_repeat  &adaptive_u_repeat  &adaptive_q_repeat NUMPAD 0  &backspace_word_delete
-#define HIEROPHANT_LM &sqt_dash  &tap_hold_layer_lgui_adaptive LGUI_NAV_L 0  &adaptive_i_repeat  &adaptive_e_repeat  &adaptive_a_repeat  &kp P
-#define HIEROPHANT_LB &kp BSLH   &comma_semicolon                            &kp Y               &kp K               &kp O               &kp X
+#define HIEROPHANT_LM &sqt_dash  &tap_hold_layer_lgui_adaptive LGUI_NAV_L 0  &adaptive_i_repeat  &adaptive_e_repeat  &adaptive_a_repeat           &adaptive_p_repeat
+#define HIEROPHANT_LB &kp BSLH   &comma_semicolon                            &kp Y               &kp K               &kp O                        &kp X
 #define HIEROPHANT_LH &lts_extra_sqt_minus EXTRA 0  &arcane_nav_l NAV 0  &lgui_space_tab
 #define HIEROPHANT_LH_5 &trans &trans HIEROPHANT_LH
 
 #define HIEROPHANT_RZ &trans &trans &trans &trans &trans &trans
-#define HIEROPHANT_RT &kp RETURN  &adaptive_w_repeat  &adaptive_d_repeat  &adaptive_l_repeat  &adaptive_b_repeat                 &kp SEMI
-#define HIEROPHANT_RM &kp G       &adaptive_s_repeat  &adaptive_t_repeat  &adaptive_r_repeat  &tap_hold_layer_rgui RGUI_NAV_R N  &dqt_underscore
-#define HIEROPHANT_RB &kp V       &kp C               &kp M               &adaptive_j_dot     &dot_colon                         &kp FSLH
-#define HIEROPHANT_RH &rgui_space_ret  &arcane_nav_r NAV 0  &lts_fn_dqt_underscore FN 0
+#define HIEROPHANT_RT &kp RETURN          &adaptive_w_repeat  &adaptive_d_repeat  &adaptive_l_repeat  &adaptive_b_repeat                 &kp SEMI
+#define HIEROPHANT_RM &adaptive_g_repeat  &adaptive_s_repeat  &adaptive_t_repeat  &adaptive_r_repeat  &tap_hold_layer_rgui RGUI_NAV_R N  &dqt_underscore
+#define HIEROPHANT_RB &kp V               &kp C               &kp M               &adaptive_j_dot     &dot_colon                         &kp FSLH
+#define HIEROPHANT_RH &rgui_space_ret   &arcane_nav_r NAV 0  &lts_fn_dqt_underscore FN 0
 #define HIEROPHANT_RH_5 &trans &trans HIEROPHANT_RH
