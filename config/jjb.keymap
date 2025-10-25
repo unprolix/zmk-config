@@ -264,7 +264,7 @@ MAKE_HRM(tlr, &mo, &kp, KEYS_L THUMBS)
 
 ZMK_UNICODE_SINGLE(em_dash, N2, N0, N1, N4)
 
-//BT_MODSEL(0)
+BT_MODSEL(0)
 //BT_MODSEL(1)
 //BT_MODSEL(2)
 //BT_MODSEL(3)
@@ -712,6 +712,8 @@ MAKE_ADAPTIVE_REPEAT(f_hrk_f23, hmr, R_M4, F23)
 
 // ******************************************  BLUETOOTH layer
 
+
+		
 #define BLUETOOTH_LZ &trans &trans &trans &trans &trans &trans
 #define BLUETOOTH_LT &bt BT_SEL 0  &bt BT_SEL 1   &bt BT_SEL 2   &bt BT_SEL 3   &bt BT_SEL 4   &bt BT_SEL 5
 #define BLUETOOTH_LM &bt BT_DISC 0 &bt BT_DISC 1  &bt BT_DISC 2  &bt BT_DISC 3  &bt BT_DISC 4  &bt BT_DISC 5

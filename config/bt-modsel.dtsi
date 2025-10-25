@@ -18,45 +18,41 @@
     / {                                                                  \
         behaviors {                                                      \
             bt_sel_##idx: bt_sel_##idx {                                 \
-                label = "BT_SEL" #idx;                                   \
                 compatible = "zmk,behavior-macro";                       \
                 #binding-cells = <0>;                                    \
-                bindings = <&bt BT_SEL idx>;                             \
+                bindings = <&bt BT_SEL_CMD idx>;                         \
             };                                                           \
                                                                          \
             bt_disc_##idx: bt_disc_##idx {                               \
-                label = "BT_DISC" #idx;                                  \
                 compatible = "zmk,behavior-macro";                       \
                 #binding-cells = <0>;                                    \
-                bindings = <&bt BT_DISC idx>;                            \
+                bindings = <&bt BT_DISC_CMD idx>;                        \
             };                                                           \
                                                                          \
             bt_clr_##idx: bt_clr_##idx {                                 \
-                label = "BT_CLR" #idx;                                   \
                 compatible = "zmk,behavior-macro";                       \
                 #binding-cells = <0>;                                    \
-                bindings = <&bt BT_CLR idx>;                             \
+                bindings = <&bt BT_CLR_CMD idx>;                         \
             };                                                           \
                                                                          \
             bt_alt_##idx: bt_alt_##idx {                                 \
-                label = "BT_ALT" #idx;                                   \
                 compatible = "zmk,behavior-mod-morph";                   \
+                #binding-cells = <0>;                                    \
+                bindings = <&bt_sel_##idx>, <&bt_clr_##idx>;             \
                 mods = <(MOD_LALT|MOD_RALT)>;                            \
-                bindings = <&bt_clr_##idx>, <&bt_sel_##idx>;             \
             };                                                           \
                                                                          \
             bt_shift_##idx: bt_shift_##idx {                             \
-                label = "BT_SHIFT" #idx;                                 \
                 compatible = "zmk,behavior-mod-morph";                   \
+                #binding-cells = <0>;                                    \
+                bindings = <&bt_alt_##idx>, <&bt_disc_##idx>;            \
                 mods = <(MOD_LSFT|MOD_RSFT)>;                            \
-                bindings = <&bt_disc_##idx>, <&bt_alt_##idx>;            \
             };                                                           \
                                                                          \
             bt_modsel_##idx: bt_modsel_##idx {                           \
-                label = "BT_MODSEL" #idx;                                \
                 compatible = "zmk,behavior-macro";                       \
                 #binding-cells = <0>;                                    \
                 bindings = <&bt_shift_##idx>;                            \
             };                                                           \
         };                                                               \
-    }
+    };

@@ -17,7 +17,7 @@ MAKE_ANTECEDENT_MORPH(grave_slash, GRAVE, FSLH, TILDE)
 
 
 #define SYMBOL_LZ &trans   &trans                &trans                 &trans                &trans                 &trans
-#define SYMBOL_LT &kp ESC  &kp ESC               &kp PIPE               &kp TAB               &kp EQUAL              &kp LEFT_BRACE
+#define SYMBOL_LT &kp ESC  &kp ESC               &kp PIPE               &kp RS(TAB)           &kp EQUAL              &kp LEFT_BRACE
 #define SYMBOL_LM &trans   &adaptive_sqt_repeat  &adaptive_bslh_repeat  &adaptive_und_repeat  &adaptive_lpar_repeat  &kp LEFT_BRACKET
 #define SYMBOL_LB &trans   &kp TILDE             &grave_slash           &trans                &trans                 &kp LESS_THAN
 #define SYMBOL_LH &trans &trans &kp TAB
