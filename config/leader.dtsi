@@ -1,4 +1,5 @@
 // note: leader key sequences can currently have a maximum of five letters, unless ZMK 0.3 changed that
+// violating this will likely produce seemingly unrelated errors
 
 // the limit of sequences per leader key is CONFIG_ZMK_LEADER_MAX_SEQUENCES. defining more will result in runtime crashes.
 // the limit must be defined in the .conf file for whatever you're building.
@@ -58,6 +59,10 @@ ZMK_LEADER_SEQUENCE(home_address_web, &home_address_web, H O M E)
 ZMK_LEADER_SEQUENCE(phone, &phone, P H O N E)
 ZMK_LEADER_SEQUENCE(phone_alt, &phone_alt, T E L)
 
+ZMK_LEADER_SEQUENCE(address_colorado, &address_colorado, M O M)
+ZMK_LEADER_SEQUENCE(address_california, &address_california, D A N)
+ZMK_LEADER_SEQUENCE(phone_usa, &phone_usa, U S P H O)
+ZMK_LEADER_SEQUENCE(phone_usa_alt, &phone_usa_alt, U S T E L)
 
 
 ZMK_SIMPLE_MACRO(azrael, <&kp A>, <&kp Z>, <&kp R>, <&kp A>, <&kp MENU>, <&kp DQT>, <&kp E>, <&kp L>)
