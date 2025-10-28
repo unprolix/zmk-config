@@ -35,6 +35,9 @@ manifest:
     - name: ergomechstore
       url-base: https://github.com/ergomechstore
 
+    # for rolio2
+    - name: rolio2
+      url-base: git@github.com:MickiusMousius
 
     # for usb raw hid (not yet used)
     - name: zzeneg
@@ -63,6 +66,11 @@ manifest:
       remote: ergomechstore
       path: modules/vendors/ergomech-sofle
       revision: master
+
+    - name: Rolio2Firmware
+      remote: rolio2
+      path: modules/vendors/rolio2
+      revision: main
 
     # for default layer
     - name: zmk-userspace
