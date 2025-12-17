@@ -147,11 +147,11 @@ key numbers
 
 
 
-#define HRM_TIMEOUT 400
 #define TAP_TIMEOUT 50
 #define TAP_DANCE_TAPPING 250  	/* 200 seemed difficult to achieve */
 #define FAST_TAP 230		// at 200, the double tap actions do not reliably trigger
 #define INTERRUPT_TAP 50        // very short window, for interrupting tap dance
+#define HRM_PAUSE 250           // required delay before a hrm will trigger (too big: 350)
 #define LONG_PAUSE 500		// e.g. before certain combos. 800 is too long. so is 600
 /*
 
@@ -202,7 +202,7 @@ ZMK_TAP_DANCE(smart_num_lock_dance, bindings = <&sl NUM>, <&num_word NUM>, <&rgb
 			defaults = <&HOLD_TAP_BEHAVIOR LAYER KEY>; \
 			bindings = <&key_repeat>; \
 			antecedents = <KEY>; \
-			max-delay-ms = <500>; \
+			max-delay-ms = <HRM_PAUSE>; \
 		};
 
 #define MAKE_ANTECEDENT_MORPH(NAME, DEFAULT_KEY, MORPH_KEY, ANTECEDENT_KEY) \
@@ -212,7 +212,7 @@ ZMK_TAP_DANCE(smart_num_lock_dance, bindings = <&sl NUM>, <&num_word NUM>, <&rgb
 			defaults = <&kp DEFAULT_KEY>; \
 			bindings = <&kp MORPH_KEY>; \
 			antecedents = <ANTECEDENT_KEY>; \
-			max-delay-ms = <500>; \
+			max-delay-ms = <HRM_PAUSE>; \
 		};
 
 #define MAKE_ANTECEDENT_MORPH_ADV(NAME, DEFAULT_BEHAVIOR, MORPH_BEHAVIOR, ANTECEDENT_KEY) \
@@ -222,7 +222,7 @@ ZMK_TAP_DANCE(smart_num_lock_dance, bindings = <&sl NUM>, <&num_word NUM>, <&rgb
 			defaults = <DEFAULT_BEHAVIOR>; \
 			bindings = <MORPH_BEHAVIOR>; \
 			antecedents = <ANTECEDENT_KEY>; \
-			max-delay-ms = <500>; \
+			max-delay-ms = <HRM_PAUSE>; \
 		};
 
 
@@ -264,11 +264,12 @@ MAKE_HRM(tlr, &mo, &kp, KEYS_L THUMBS)
 
 ZMK_UNICODE_SINGLE(em_dash, N2, N0, N1, N4)
 
+
 BT_MODSEL(0)
-//BT_MODSEL(1)
-//BT_MODSEL(2)
-//BT_MODSEL(3)
-//BT_MODSEL(4)
+BT_MODSEL(1)
+BT_MODSEL(2)
+BT_MODSEL(3)
+BT_MODSEL(4)
 //BT_MODSEL(5)
 
 #include "hierophant.dtsi"		
@@ -510,14 +511,14 @@ arcane_nav_r: arcane_nav_r {
 #define GAMING_LT &kp ESC  &kp Q  &kp W  &kp E  &kp R  &kp T		         
 #define GAMING_LM &kp CAPS  &kp A  &kp S  &kp D  &kp F  &kp G
 #define GAMING_LB &kp LSHIFT  &kp Z  &kp X  &kp C  &kp V  &kp B   
-#define GAMING_LH &kp LCTRL  &smart_nav_thumb NAV TAB  &kp SPACE                
+#define GAMING_LH &kp LCTRL  &smart_nav_thumb NAV TAB  &hml LALT SPACE                
 #define GAMING_LH_5 &trans &trans GAMING_LH
 
 #define GAMING_RZ &trans &trans &trans &trans &trans &trans
 #define GAMING_RT &kp Y  &kp U  &kp I  &kp O  &kp P  &kp BSPC
 #define GAMING_RM &kp H  &kp J  &kp K  &kp L  &kp SEMI  &kp SQT
 #define GAMING_RB &kp N  &kp M  &kp COMMA  &kp DOT  &kp FSLH  &kp RSHIFT
-#define GAMING_RH &kp SPACE  &smart_nav_thumb NAV BSPC  &kp RETURN
+#define GAMING_RH &hmr RALT SPACE  &smart_nav_thumb NAV BSPC  &kp RETURN
 #define GAMING_RH_5 &trans &trans GAMING_RH
 
 // ******************************************  hierophant (alt_alpha) layer
