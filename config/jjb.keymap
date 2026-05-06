@@ -108,20 +108,19 @@ key numbers
 
 #define NUMERIC 5
 #define NUMPAD 6
-#define NUMBERLINE 7
-#define SYMBOL 8
+#define SYMBOL 7
 
 
-#define NAVIGATION 9
-#define MODIFIER_LEFT_NAV 10
-#define MODIFIER_RIGHT_NAV 11
+#define NAVIGATION 8
+#define MODIFIER_LEFT_NAV 9
+#define MODIFIER_RIGHT_NAV 10
 
-#define EXTRA 12
-#define FN 13
+#define EXTRA 11
+#define FN 12
 
-#define RGB 14
-#define BLUETOOTH 15
-#define SYSTEM 16
+#define RGB 13
+#define BLUETOOTH 14
+#define SYSTEM 15
 
 
 // short versions for helping things line up
@@ -815,9 +814,6 @@ MAKE_ADAPTIVE_REPEAT(f_hrk_f23, hmr, R_M4, F23)
 
 #include "symbol.dtsi"
 
-// ****************************************** SYMBOL layer
-
-#include "numberline.dtsi"
 
 
 /*

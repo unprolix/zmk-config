@@ -99,17 +99,6 @@ NUMPAD_LH NUMPAD_RH
         };
 
 
-        numberline_layer {
-            display-name = "#line";
-            bindings = <
-NUMBERLINE_LT                  &trans          NUMBERLINE_RT
-NUMBERLINE_LM          &trans  &trans  &trans  NUMBERLINE_RM
-NUMBERLINE_LB  &trans          &trans          NUMBERLINE_RB
-NUMBERLINE_LH NUMBERLINE_RH
-            >;
-        };
- 
-
         symbol_layer {
             display-name = "symbol";
             bindings = <

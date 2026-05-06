@@ -25,13 +25,13 @@
 #define ZMK_LEADER_UNICODE_DUAL_4_4(name, sequence, u0, u1, u2, u3, u4, u5, u6, u7) \
     UC_MACRO(name ## _uc1, &kp u0 &kp u1 &kp u2 &kp u3) \
     UC_MACRO(name ## _uc2, &kp u4 &kp u5 &kp u6 &kp u7) \
-    ZMK_MACRO(name ## _uc, bindings = <&name ## _uc1 &name ## _uc2>;) \
+    ZMK_MACRO(name ## _uc, bindings = <&name ## _uc1>, <&name ## _uc2>;) \
     ZMK_LEADER_SEQUENCE(name, &name ## _uc, sequence)
 
 #define ZMK_LEADER_UNICODE_DUAL_5(name, sequence, u0, u1, u2, u3, u4, u5, u6, u7, u8, u9) \
     UC_MACRO(name ## _uc1, &kp u0 &kp u1 &kp u2 &kp u3 &kp u4) \
     UC_MACRO(name ## _uc2, &kp u5 &kp u6 &kp u7 &kp u8 &kp u9) \
-    ZMK_MACRO(name ## _uc, bindings = <&name ## _uc1 &name ## _uc2>;) \
+    ZMK_MACRO(name ## _uc, bindings = <&name ## _uc1>, <&name ## _uc2>;) \
     ZMK_LEADER_SEQUENCE(name, &name ## _uc, sequence)
 
 #define ZMK_LEADER_UNICODE_4(name, sequence, u0, u1, u2, u3) \
@@ -48,7 +48,7 @@
     ZMK_LEADER_SEQUENCE(name, &name ## _uc, sequence)
 
 #define ZMK_LEADER_UNICODE_MULTI_3(name, sequence, name1, name2, name3) \
-    UC_MACRO(name ## _uc, &name1 ## _uc &name2 ## _uc &name3 ## _uc) \
+    ZMK_MACRO(name ## _uc, bindings = <&name1 ## _uc>, <&name2 ## _uc>, <&name3 ## _uc>;) \
     ZMK_LEADER_SEQUENCE(name, &name ## _uc, sequence)
 
 
@@ -164,18 +164,18 @@ ZMK_LEADER_SEQUENCE(fete, &uc 0x1F389 0, F E T E) // 🎉
 ZMK_LEADER_SEQUENCE(shaka, &uc 0x1F919 0, S H A K A) // 🤙
 
 
-// ZMK_LEADER_UNICODE_DUAL_4_4(red_heart, H E A R T, N2, N7, N6, N4, F, E, N0, F)  // FIXME: parse error at column 853 — see leader.dtsi:50 ZMK_LEADER_UNICODE_MULTI_3 referencing this
+ZMK_LEADER_UNICODE_DUAL_4_4(red_heart, H E A R T, N2, N7, N6, N4, F, E, N0, F)
 
 
 
 
-// ZMK_LEADER_UNICODE_MULTI_3(love, L O V E, eye, red_heart, ewe)  // depends on red_heart above
+ZMK_LEADER_UNICODE_MULTI_3(love, L O V E, eye, red_heart, ewe)
 
 
 // Flag emojis (dual 4-byte sequences)
-// ZMK_LEADER_UNICODE_DUAL_4_4(fr, F R,    N1, F, N1, E, N6, N1, F, N7) // 🇫🇷  // FIXME: same parse error as red_heart
-// ZMK_LEADER_UNICODE_DUAL_4_4(aus, A U S, N1, F, N1, E, N6, N1, F, N1) // 🇦🇺  // FIXME: same parse error
-// ZMK_LEADER_UNICODE_DUAL_5(usa, U S A, N1, F, N1, F, A, N1, F, N1, F, N8) // 🇺🇸  // FIXME: same parse error
+ZMK_LEADER_UNICODE_DUAL_4_4(fr, F R,    N1, F, N1, E, N6, N1, F, N7) // 🇫🇷
+ZMK_LEADER_UNICODE_DUAL_4_4(aus, A U S, N1, F, N1, E, N6, N1, F, N1) // 🇦🇺
+ZMK_LEADER_UNICODE_DUAL_5(usa, U S A, N1, F, N1, F, A, N1, F, N1, F, N8) // 🇺🇸
 
 /*
 
