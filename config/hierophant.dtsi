@@ -178,5 +178,5 @@ ZMK_SIMPLE_MACRO(dot_slash, <&kp DOT>, <&kp FSLH>)
 #define HIEROPHANT_RT &kp RETURN          &adaptive_w_repeat  &adaptive_d_repeat  &adaptive_l_repeat  &adaptive_b_repeat                 &kp SEMI
 #define HIEROPHANT_RM &adaptive_g_repeat  &adaptive_s_repeat  &adaptive_t_repeat  &adaptive_r_repeat  &tap_hold_layer_rgui RGUI_NAV_R N  &dqt_underscore
 #define HIEROPHANT_RB &kp V               &kp C               &kp M               &adaptive_j_dot     &dot_colon                         &kp FSLH
-#define HIEROPHANT_RH &rgui_space_ret   &arcane_nav_r NAV 0  &sl NUMERIC
+#define HIEROPHANT_RH &rgui_space_ret   &arcane_nav_r NAV 0  &sl_num_or_word
 #define HIEROPHANT_RH_5 &trans &trans HIEROPHANT_RH
