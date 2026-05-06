@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>jjb keymap cheat sheet</title>
+<style>
+  @page { size: letter; margin: 0.4in; }
+  * { box-sizing: border-box; }
+  body {
+    font: 9pt/1.25 ui-monospace, "JetBrains Mono", "SF Mono", Consolas, monospace;
+    margin: 0; padding: 0; color: #111;
+  }
+  .page {
+    width: 7.7in; min-height: 10.2in;
+    page-break-after: always; padding: 0;
+  }
+  .page:last-child { page-break-after: auto; }
+  h1 { font-size: 13pt; margin: 0 0 4pt; }
+  h2 { font-size: 10pt; margin: 8pt 0 2pt; padding: 1pt 4pt;
+       background: #222; color: #fff; }
+  h3 { font-size: 9pt; margin: 5pt 0 2pt; color: #444; border-bottom: 1px solid #aaa; }
+  table { border-collapse: collapse; width: 100%; font-size: 8pt; }
+  td, th { border: 1px solid #888; padding: 1pt 3pt; text-align: center; }
+  th { background: #eee; }
+  .kbd {
+    display: grid; grid-template-columns: repeat(13, 1fr);
+    gap: 1pt; font-size: 7.2pt;
+  }
+  .kbd > div { border: 1px solid #888; padding: 1pt; min-height: 26pt;
+               display: flex; flex-direction: column; justify-content: center;
+               text-align: center; word-break: break-word; }
+  .kbd > div.gap { border: none; }
+  .mod { background: #ffe7c2; }
+  .layer { background: #d4eaff; }
+  .smart { background: #d8f5d4; }
+  .combo { background: #fce4ec; }
+  .note { font-size: 7.5pt; color: #555; }
+  .small { font-size: 7.5pt; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6pt; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6pt; }
+  ul { margin: 1pt 0 4pt 12pt; padding: 0; }
+  li { margin: 0; }
+  .legend { font-size: 7pt; color: #333; margin-top: 1pt; }
+  .legend span { display: inline-block; padding: 0 4pt; margin-right: 4pt; border: 1px solid #888; }
+  .layout-row { display: flex; gap: 2pt; margin-bottom: 1pt; }
+  .layout-row > .k { flex: 1; min-height: 22pt; border: 1px solid #888;
+                     padding: 1pt; text-align: center; font-size: 6.8pt;
+                     display: flex; flex-direction: column; justify-content: center; }
+  .gapbox { flex: 0.4; visibility: hidden; }
+  .thumbs { display: flex; justify-content: center; gap: 2pt; margin-top: 2pt; }
+  .thumbs > .k { flex: 0 0 70pt; min-height: 22pt; border: 1px solid #888; padding: 1pt;
+                 text-align: center; font-size: 6.8pt;
+                 display: flex; flex-direction: column; justify-content: center; }
+</style>
+</head>
+<body>
+
+<!-- ============================================================ PAGE 1 -->
+<div class="page">
+
+<h1>jjb keymap cheat sheet — page 1: layers</h1>
+<div class="legend">
+  <span class="mod">home-row mod</span>
+  <span class="layer">layer key</span>
+  <span class="smart">smart-layer</span>
+  <span class="combo">combo target</span>
+  <span>shift-morph in italics</span>
+</div>
+
+<h2>HIEROPHANT (base alpha layer)</h2>
+<div class="layout-row">
+  <div class="k">~ <i>tilde</i></div>
+  <div class="k layer">F<br><span class="small">hold→FN</span></div>
+  <div class="k layer">Z<br><span class="small">hold→EXTRA</span></div>
+  <div class="k layer">U<br><span class="small">hold→SYMBOL</span></div>
+  <div class="k layer">Q→K<br><span class="small">hold→NUMPAD<br>(after qu)</span></div>
+  <div class="k">⌫ word</div>
+  <div class="gapbox"></div>
+  <div class="k">⏎</div>
+  <div class="k layer">W<br><span class="small">hold→NUMPAD</span></div>
+  <div class="k layer">D<br><span class="small">hold→SYMBOL</span></div>
+  <div class="k layer">L<br><span class="small">hold→EXTRA</span></div>
+  <div class="k layer">B<br><span class="small">hold→FN</span></div>
+  <div class="k">;</div>
+</div>
+<div class="layout-row">
+  <div class="k">' / <i>−</i><br><span class="small">tap NUM</span></div>
+  <div class="k mod">A+H<br><span class="small">LGUI / lgui-nav</span></div>
+  <div class="k mod">I<br>LALT</div>
+  <div class="k mod">E<br>LSHIFT</div>
+  <div class="k mod">A<br>LCTRL</div>
+  <div class="k">P</div>
+  <div class="gapbox"></div>
+  <div class="k">G</div>
+  <div class="k mod">S<br>RCTRL</div>
+  <div class="k mod">T<br>RSHIFT</div>
+  <div class="k mod">R<br>RALT</div>
+  <div class="k mod">N<br>RGUI / rgui-nav</div>
+  <div class="k">" / <i>_</i></div>
+</div>
+<div class="layout-row">
+  <div class="k">\</div>
+  <div class="k">, / <i>;</i></div>
+  <div class="k">Y</div>
+  <div class="k">K</div>
+  <div class="k">O</div>
+  <div class="k">X</div>
+  <div class="gapbox"></div>
+  <div class="k">V</div>
+  <div class="k">C</div>
+  <div class="k">M</div>
+  <div class="k">J / <i>./</i></div>
+  <div class="k">. / <i>:</i></div>
+  <div class="k">/</div>
+</div>
+<div class="thumbs">
+  <div class="k smart">sl SYMBOL<br><span class="small">(LH2 instant)</span></div>
+  <div class="k layer">NAV / arcane<br><span class="small">tap arcane</span></div>
+  <div class="k mod">LGUI / SPACE / TAB</div>
+  <div class="gapbox"></div>
+  <div class="k mod">RGUI / SPACE / RET</div>
+  <div class="k layer">NAV / arcane</div>
+  <div class="k smart">sl NUMERIC<br><span class="small">(RH2 instant)</span></div>
+</div>
+
+<h2>NUMERIC (digits + shifted-symbols)</h2>
+<div class="layout-row">
+  <div class="k">`</div><div class="k">!</div><div class="k">@</div><div class="k">#</div><div class="k">$</div><div class="k">%</div>
+  <div class="gapbox"></div>
+  <div class="k">^</div><div class="k">&amp;</div><div class="k">*</div><div class="k">(</div><div class="k">)</div><div class="k">=</div>
+</div>
+<div class="layout-row">
+  <div class="k">0</div>
+  <div class="k mod">1<br>LGUI</div>
+  <div class="k mod">2<br>LALT</div>
+  <div class="k mod">3<br>LSHIFT</div>
+  <div class="k mod">4<br>LCTRL</div>
+  <div class="k">5</div>
+  <div class="gapbox"></div>
+  <div class="k">6</div>
+  <div class="k mod">7<br>RCTRL</div>
+  <div class="k mod">8<br>RSHIFT</div>
+  <div class="k mod">9<br>RALT</div>
+  <div class="k mod">0<br>RGUI</div>
+  <div class="k">−</div>
+</div>
+<p class="note">Enter: hold P (LM5) or G (RM0) on hierophant; or tap-dance on '/" outer column; combo LM2+LM4 (sl NUM); ' / " outer-column tap-dance.</p>
+
+<h2>SYMBOL (CTRL+ALT only on home row; longer 380/250 timing)</h2>
+<div class="layout-row">
+  <div class="k">esc</div><div class="k">esc</div><div class="k">|</div><div class="k">⇧tab</div><div class="k">=</div><div class="k">{</div>
+  <div class="gapbox"></div>
+  <div class="k">}</div><div class="k">+</div><div class="k">tab</div><div class="k">?</div><div class="k">!</div><div class="k">esc</div>
+</div>
+<div class="layout-row">
+  <div class="k">trans</div>
+  <div class="k">'</div>
+  <div class="k mod">\<br>LALT</div>
+  <div class="k">_</div>
+  <div class="k mod">(<br>LCTRL</div>
+  <div class="k">[</div>
+  <div class="gapbox"></div>
+  <div class="k">]</div>
+  <div class="k mod">)<br>RCTRL</div>
+  <div class="k">−</div>
+  <div class="k mod">/<br>RALT</div>
+  <div class="k">"</div>
+  <div class="k">trans</div>
+</div>
+<div class="layout-row">
+  <div class="k">trans</div><div class="k">~</div><div class="k">`/~</div><div class="k">trans</div><div class="k">trans</div><div class="k">&lt;</div>
+  <div class="gapbox"></div>
+  <div class="k">&gt;</div><div class="k">trans</div><div class="k">trans</div><div class="k">trans</div><div class="k">trans</div><div class="k">trans</div>
+</div>
+<p class="note">CTRL-= → hold RM1 (RCTRL) + tap LT4 (=). CTRL-− → hold LM4 (LCTRL) + tap RM2 (−). ALT-/ → hold LM2 (LALT) + tap RM3 (/). Modifiers slow on purpose: 380ms term, 250ms prior-idle.</p>
+
+<h2>NAVIGATION</h2>
+<div class="layout-row">
+  <div class="k">trans</div><div class="k">PgUp</div><div class="k">End</div><div class="k">↑</div><div class="k">Home</div><div class="k">scroll↑</div>
+  <div class="gapbox"></div>
+  <div class="k">scroll↑</div><div class="k">Home</div><div class="k">↑</div><div class="k">End</div><div class="k">PgUp</div><div class="k">trans</div>
+</div>
+<div class="layout-row">
+  <div class="k">trans</div>
+  <div class="k mod">PgDn<br>LGUI</div>
+  <div class="k mod">←<br>LALT</div>
+  <div class="k mod">↓<br>LSHIFT</div>
+  <div class="k mod">→<br>LCTRL</div>
+  <div class="k">scroll↓</div>
+  <div class="gapbox"></div>
+  <div class="k">scroll↓</div>
+  <div class="k mod">←<br>RCTRL</div>
+  <div class="k mod">↓<br>RSHIFT</div>
+  <div class="k mod">→<br>RALT</div>
+  <div class="k mod">PgDn<br>RGUI</div>
+  <div class="k">trans</div>
+</div>
+<p class="note">Enter: hold middle thumb (arcane_nav) or combo LH1+RH1, or tap once for sticky NAV (arcane).</p>
+
+<h2>NUMPAD (smart mode via LGN-RH1; calculator layout, two mirrors)</h2>
+<div class="layout-row">
+  <div class="k">\</div><div class="k">0</div><div class="k">1</div><div class="k">2</div><div class="k">3</div><div class="k">?</div>
+  <div class="gapbox"></div>
+  <div class="k">0</div><div class="k">1</div><div class="k">2</div><div class="k">3</div><div class="k">−</div><div class="k">/</div>
+</div>
+<div class="layout-row">
+  <div class="k">trans</div><div class="k">+</div><div class="k">4</div><div class="k">5</div><div class="k">6</div><div class="k">'</div>
+  <div class="gapbox"></div>
+  <div class="k">"</div><div class="k">4</div><div class="k">5</div><div class="k">6</div><div class="k">+</div><div class="k">trans</div>
+</div>
+<div class="layout-row">
+  <div class="k">trans</div><div class="k">.</div><div class="k">7</div><div class="k">8</div><div class="k">9</div><div class="k">&lt;</div>
+  <div class="gapbox"></div>
+  <div class="k">&gt;</div><div class="k">7</div><div class="k">8</div><div class="k">9</div><div class="k">.</div><div class="k">trans</div>
+</div>
+
+<h2>Layer entry summary</h2>
+<table>
+<tr><th>layer</th><th>fast path (one-shot)</th><th>persistent path</th></tr>
+<tr><td>NUMERIC</td><td>RH2 thumb (sl NUM); '/&quot; outer column tap-dance</td><td>combo LM2+LM4 / RM2+RM4 (sl); P or G hold; smart_num combo LM1+LM3 / RM1+RM3 → ctrl_shift, see note</td></tr>
+<tr><td>SYMBOL</td><td>LH2 thumb (sl SYMBOL)</td><td>U or D hold (top row); RGN-LH1 = symbol_word</td></tr>
+<tr><td>NUMPAD</td><td>—</td><td>Q or W hold; LGN-RH1 = numpad_word</td></tr>
+<tr><td>NAVIGATION</td><td>middle thumb LH1/RH1 (arcane_nav)</td><td>combo LH1+RH1 (to NAV)</td></tr>
+<tr><td>EXTRA</td><td>—</td><td>Z or L hold (top row)</td></tr>
+<tr><td>FN</td><td>—</td><td>F or B hold (top row)</td></tr>
+<tr><td>LGUI+NAV</td><td>—</td><td>A hold (left pinky)</td></tr>
+<tr><td>RGUI+NAV</td><td>—</td><td>N hold (right pinky)</td></tr>
+<tr><td>SYSTEM</td><td>—</td><td>4-thumb combo LH2+LH1+RH1+RH2</td></tr>
+</table>
+<p class="note"><b>NOTE:</b> The smart_num combos at LM1+LM3 / RM1+RM3 were repurposed to <b>ctrl_shift</b> — see page 2.</p>
+
+</div>
+
+<!-- ============================================================ PAGE 2 -->
+<div class="page">
+
+<h1>jjb keymap cheat sheet — page 2: combos, adaptive keys, leader, special</h1>
+
+<div class="grid2">
+<div>
+
+<h2>Combos</h2>
+<h3>Top row (always pairs of brackets/parens)</h3>
+<table>
+<tr><th>positions</th><th>output</th></tr>
+<tr><td>LT5+LT4</td><td>esc</td></tr>
+<tr><td>LT4+LT3</td><td>{</td></tr>
+<tr><td>LT3+LT2</td><td>[</td></tr>
+<tr><td>LT2+LT1</td><td>(</td></tr>
+<tr><td>LT1+LT0</td><td>&lt;</td></tr>
+<tr><td>RT0+RT1</td><td>&gt;</td></tr>
+<tr><td>RT1+RT2</td><td>)</td></tr>
+<tr><td>RT2+RT3</td><td>]</td></tr>
+<tr><td>RT3+RT4</td><td>}</td></tr>
+<tr><td>RT4+RT5</td><td>_</td></tr>
+<tr><td>LT5+LT4+LT3</td><td>&amp;none (block)</td></tr>
+</table>
+
+<h3>Top-row skips → digits</h3>
+<table>
+<tr><td>LT3+LT1</td><td>1</td></tr>
+<tr><td>RT3+RT1</td><td>2</td></tr>
+<tr><td>LT4+LT2</td><td>3</td></tr>
+<tr><td>RT4+RT2</td><td>4</td></tr>
+<tr><td>LT2+LT0</td><td>5</td></tr>
+<tr><td>RT2+RT0</td><td>6</td></tr>
+<tr><td>LT5+LT3</td><td>7</td></tr>
+<tr><td>RT5+RT3</td><td>8</td></tr>
+<tr><td>LT0+LT3</td><td>9 (broken)</td></tr>
+<tr><td>RT3+RT0</td><td>0</td></tr>
+</table>
+
+<h3>Mid row (sticky modifiers + layer)</h3>
+<table>
+<tr><td>LM4+LM5</td><td>tab (slow)</td></tr>
+<tr><td>LM3+LM4</td><td><b>sk LALT</b></td></tr>
+<tr><td>LM2+LM3</td><td>caps_word_lock_dance</td></tr>
+<tr><td>LM1+LM2</td><td><b>sk LCTRL</b></td></tr>
+<tr><td>LM0+LM1</td><td>key_layer_ENTER_NAV</td></tr>
+<tr><td>RM0+RM1</td><td>key_layer_ENTER_NAV</td></tr>
+<tr><td>RM1+RM2</td><td><b>sk RCTRL</b></td></tr>
+<tr><td>RM2+RM3</td><td>caps_word_lock_dance</td></tr>
+<tr><td>RM3+RM4</td><td><b>sk RALT</b></td></tr>
+<tr><td>RM4+RM5</td><td>−</td></tr>
+<tr><td>RM3+RM4+RM5</td><td>em-dash</td></tr>
+</table>
+
+<h3>Mid-row skips</h3>
+<table>
+<tr><td class="combo">LM1+LM3</td><td class="combo"><b>sk LCTRL+LSHIFT</b> (NEW)</td></tr>
+<tr><td class="combo">RM1+RM3</td><td class="combo"><b>sk LCTRL+LSHIFT</b> (NEW)</td></tr>
+<tr><td>LM2+LM4</td><td>sl NUM</td></tr>
+<tr><td>RM2+RM4</td><td>sl NUM</td></tr>
+<tr><td>LM1+LM4</td><td>sk LGUI (double-skip)</td></tr>
+<tr><td>RM1+RM4</td><td>sk RGUI</td></tr>
+<tr><td>LM1+RM1</td><td>tab (cross-side)</td></tr>
+</table>
+
+</div>
+<div>
+
+<h3>Bottom row + diagonals</h3>
+<table>
+<tr><td>LB5+LB4</td><td>\</td></tr>
+<tr><td>LB1+LB0</td><td>−</td></tr>
+<tr><td>LB2+LB1+LB0</td><td>em-dash</td></tr>
+<tr><td>RB0+RB1</td><td>+</td></tr>
+<tr><td>RB1+RB2</td><td>=</td></tr>
+<tr><td>RB2+RB3</td><td>,</td></tr>
+<tr><td>RB3+RB4</td><td>.</td></tr>
+<tr><td>RB4+RB5</td><td>../</td></tr>
+<tr><td>RB1+RB4</td><td>.com</td></tr>
+<tr><td>LB5+RB5</td><td>to QWERTY</td></tr>
+</table>
+
+<h3>Vertical (top+mid)</h3>
+<table>
+<tr><td>LT5+LM5</td><td>` (slow)</td></tr>
+<tr><td>LT4+LM4</td><td>!</td></tr>
+<tr><td>LT3+LM3</td><td>@</td></tr>
+<tr><td>LT2+LM2</td><td>#</td></tr>
+<tr><td>LT1+LM1</td><td>$</td></tr>
+<tr><td>LT0+LM0</td><td>tab</td></tr>
+<tr><td>RT0+RM0</td><td>backspace word</td></tr>
+<tr><td>RT1+RM1</td><td>&amp;</td></tr>
+<tr><td>RT2+RM2</td><td>*</td></tr>
+<tr><td>RT3+RM3</td><td>^</td></tr>
+<tr><td>RT4+RM4</td><td>%</td></tr>
+<tr><td>RT5+RM5</td><td>?</td></tr>
+</table>
+
+<h3>Vertical (mid+bot)</h3>
+<table>
+<tr><td>LM5+LB5</td><td>leader</td></tr>
+<tr><td>LM0+LB0</td><td>menu</td></tr>
+<tr><td>RM2+RB2</td><td>;</td></tr>
+<tr><td>RB3+RM3</td><td>: <span class="note">(order matters)</span></td></tr>
+<tr><td>RM5+RB5</td><td>|</td></tr>
+</table>
+
+<h3>Top-mid stagger</h3>
+<table>
+<tr><td>LT0+LM2</td><td>delete</td></tr>
+<tr><td>LT0+LM1</td><td>tab</td></tr>
+<tr><td>LT1+LM0</td><td>backspace word</td></tr>
+<tr><td>LT4+LM1</td><td>~</td></tr>
+<tr><td>RM0+RT1</td><td>delete word</td></tr>
+<tr><td>RT0+RM1</td><td>enter</td></tr>
+<tr><td>RT0+RM2</td><td>enter</td></tr>
+</table>
+
+<h3>Thumbs</h3>
+<table>
+<tr><td>LH0+RH0</td><td>to HIEROPHANT</td></tr>
+<tr><td>LH1+RH1</td><td>to NAVIGATION</td></tr>
+<tr><td>LH2+RH2</td><td>printscreen</td></tr>
+<tr><td>LH2+LH1+RH1+RH2</td><td>to SYSTEM</td></tr>
+</table>
+
+<h3>Contractions (LM3 = E + …)</h3>
+<table>
+<tr><td>LM3+RB2</td><td>"i'm "</td></tr>
+<tr><td>LM3+RT3</td><td>"i'll "</td></tr>
+<tr><td>LM3+RT2</td><td>"i'd "</td></tr>
+<tr><td>LM3+RB0</td><td>"i've "</td></tr>
+</table>
+
+</div>
+</div>
+
+<h2>Adaptive keys (antecedent-morph)</h2>
+<table>
+<tr><th>antecedent</th><th>key</th><th>morph</th></tr>
+<tr><td>(any same key)</td><td>most home-row keys</td><td>→ key_repeat (within 250ms)</td></tr>
+<tr><td>q</td><td>u</td><td>→ K (the qu→qk shortcut)</td></tr>
+<tr><td>I</td><td>h</td><td>→ ' then T (i'd / i'll / can't / won't tail)</td></tr>
+<tr><td>E</td><td>h</td><td>→ ' (she'll / she'd)</td></tr>
+<tr><td>N</td><td>h</td><td>→ ' (can't, won't tail)</td></tr>
+<tr><td>.</td><td>j</td><td>→ ./ (./)</td></tr>
+</table>
+
+<h2>Arcane keys (NAV-thumb tap, antecedent → expansion)</h2>
+<p class="note">Tap LH1 (arcane_nav_l) or RH1 (arcane_nav_r). Default = sticky shift / caps_word. With recent letter antecedent, expands:</p>
+<table>
+<tr><td>after A</td><td>+ND → "and"</td><td>after I</td><td>+NG → "ing"</td><td>after Q</td><td>+UE → "que"</td></tr>
+<tr><td>after B</td><td>+ECAUSE</td><td>after J</td><td>+UST</td><td>after T</td><td>+ION</td></tr>
+<tr><td>after C</td><td>+AN</td><td>after K</td><td>+E (avoid SFB)</td><td>after V</td><td>+ERSION</td></tr>
+<tr><td>after G</td><td>+ENERAL</td><td>after K</td><td>+U (avoid SFB)</td><td>after W</td><td>+HICH</td></tr>
+<tr><td>after M</td><td>+ENT</td><td>after N</td><td>+ION</td><td>after Y</td><td>+EAH</td></tr>
+<tr><td>after P</td><td>+AS</td><td colspan="4">window: 650ms</td></tr>
+</table>
+
+<h2>Mod-morphs (shift to alt char)</h2>
+<table>
+<tr><th>tap</th><th>shifted</th><th>tap</th><th>shifted</th></tr>
+<tr><td>'</td><td>−</td><td>"</td><td>_</td></tr>
+<tr><td>.</td><td>:</td><td>,</td><td>; (after space)</td></tr>
+<tr><td>−</td><td>em-dash</td><td>'</td><td>(via key_layer)</td></tr>
+</table>
+
+<h2>Leader sequences (tap LM5+LB5 leader, then…)</h2>
+<table>
+<tr><th>seq</th><th>action</th><th>seq</th><th>action</th></tr>
+<tr><td>U R I E</td><td>address line</td><td>P H O N E</td><td>main phone</td></tr>
+<tr><td>H O M E</td><td>full home web form</td><td>T E L</td><td>commercial phone</td></tr>
+<tr><td>M O M</td><td>CO address</td><td>D A N</td><td>CA address</td></tr>
+<tr><td>U S P H O</td><td>US phone</td><td>U S T E L</td><td>US commercial</td></tr>
+<tr><td>A Z</td><td>azraël</td><td>A N</td><td>anaïs</td></tr>
+<tr><td>P H I</td><td>ϕ</td><td>U L / U E</td><td>set unicode mode (linux/emacs)</td></tr>
+<tr><td>G A M E</td><td>to GAMING</td><td>B T</td><td>to BLUETOOTH</td></tr>
+<tr><td>R E S E T</td><td>sys_reset</td><td>B O O T</td><td>bootloader</td></tr>
+<tr><td>C W</td><td>caps_word</td><td>C P L U S</td><td>⊕</td></tr>
+<tr><td>S M I L E</td><td>😊</td><td>T H U M B</td><td>👍</td></tr>
+<tr><td>K I S S</td><td>😘</td><td>C R Y</td><td>😢</td></tr>
+<tr><td>B R A I N</td><td>🧠</td><td>F I N</td><td>🤞</td></tr>
+<tr><td>P O U R</td><td>🫗</td><td>R O L L</td><td>🙄</td></tr>
+<tr><td>H A L O</td><td>😇</td><td>T L D R</td><td>📜</td></tr>
+<tr><td>W A V E</td><td>👋</td><td>R I C T U</td><td>😬</td></tr>
+<tr><td>H A N D ↑/↓/←/→</td><td>👆👇👈👉</td><td>F E T E</td><td>🎉</td></tr>
+<tr><td>K O A L A</td><td>🐨</td><td>K A N G A</td><td>🦘</td></tr>
+<tr><td>S N A K</td><td>🐍</td><td>L A P I N</td><td>🐇</td></tr>
+<tr><td>D U C K</td><td>🦆</td><td>C H I C K</td><td>🐥</td></tr>
+<tr><td>D R U M S</td><td>🍗</td><td>S T E A K</td><td>🥩</td></tr>
+<tr><td>P I Z</td><td>🍕</td><td>C R O</td><td>🥐</td></tr>
+<tr><td>V I N</td><td>🍷</td><td>K I W I</td><td>🥝</td></tr>
+<tr><td>C R E P E</td><td>🥞</td><td>S H A K A</td><td>🤙</td></tr>
+<tr><td>Z Z Z</td><td>💤</td><td>E A S T</td><td>🗿</td></tr>
+<tr><td>E Y E</td><td>👁</td><td>E W E</td><td>🐑</td></tr>
+<tr><td>C N0…N7</td><td>circled digits ①…⑦</td><td>A M O U R</td><td>😍</td></tr>
+</table>
+<p class="note">Currently disabled (build error): red_heart (HEART), love (LOVE), fr/aus/usa flags.</p>
+
+<h2>Tap-dances</h2>
+<ul>
+<li><b>caps_word_lock_dance</b> — 1: sk LSHIFT, 2: caps_word, 3: CAPS_LOCK</li>
+<li><b>num_dance / smart_num_lock_dance</b> — 1: num_word NUM, 2: sl NUM, 3: rgb-color marker</li>
+<li><b>menu_layer / sqt_layer</b> — quote/menu key tap fires char, second tap activates num_word NUM</li>
+<li><b>thumb space-tab / space-ret</b> — hold = LGUI/RGUI; tap = SPACE; double-tap = TAB / RETURN</li>
+</ul>
+
+<h2>Quick lookup: emacs / terminal pain points</h2>
+<ul>
+<li><b>ALT-/</b> — entering SYMBOL: hold LM2 (LALT), tap RM3 (/).</li>
+<li><b>CTRL-=</b> — entering SYMBOL: hold RM1 (RCTRL), tap LT4 (=).</li>
+<li><b>CTRL-−</b> — entering SYMBOL: hold LM4 (LCTRL), tap RM2 (−).</li>
+<li><b>CTRL-+</b> — entering SYMBOL: hold RM1 + a sticky shift (combo LM2+LM3 or RM2+RM3) + tap LT4.</li>
+<li><b>CTRL-SHIFT-C / V</b> — combo LM1+LM3 (or RM1+RM3) → next key gets Ctrl+Shift. Then C or V.</li>
+</ul>
+
+</div>
+
+</body>
+</html>

@@ -164,18 +164,18 @@ ZMK_LEADER_SEQUENCE(fete, &uc 0x1F389 0, F E T E) // 🎉
 ZMK_LEADER_SEQUENCE(shaka, &uc 0x1F919 0, S H A K A) // 🤙
 
 
-ZMK_LEADER_UNICODE_DUAL_4_4(red_heart, H E A R T, N2, N7, N6, N4, F, E, N0, F)
+// ZMK_LEADER_UNICODE_DUAL_4_4(red_heart, H E A R T, N2, N7, N6, N4, F, E, N0, F)  // FIXME: parse error at column 853 — see leader.dtsi:50 ZMK_LEADER_UNICODE_MULTI_3 referencing this
 
 
 
 
-ZMK_LEADER_UNICODE_MULTI_3(love, L O V E, eye, red_heart, ewe)
+// ZMK_LEADER_UNICODE_MULTI_3(love, L O V E, eye, red_heart, ewe)  // depends on red_heart above
 
 
 // Flag emojis (dual 4-byte sequences)
-ZMK_LEADER_UNICODE_DUAL_4_4(fr, F R,    N1, F, N1, E, N6, N1, F, N7) // 🇫🇷
-ZMK_LEADER_UNICODE_DUAL_4_4(aus, A U S, N1, F, N1, E, N6, N1, F, N1) // 🇦🇺
-ZMK_LEADER_UNICODE_DUAL_5(usa, U S A, N1, F, N1, F, A, N1, F, N1, F, N8) // 🇺🇸
+// ZMK_LEADER_UNICODE_DUAL_4_4(fr, F R,    N1, F, N1, E, N6, N1, F, N7) // 🇫🇷  // FIXME: same parse error as red_heart
+// ZMK_LEADER_UNICODE_DUAL_4_4(aus, A U S, N1, F, N1, E, N6, N1, F, N1) // 🇦🇺  // FIXME: same parse error
+// ZMK_LEADER_UNICODE_DUAL_5(usa, U S A, N1, F, N1, F, A, N1, F, N1, F, N8) // 🇺🇸  // FIXME: same parse error
 
 /*
 

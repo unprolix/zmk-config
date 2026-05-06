@@ -14,39 +14,39 @@
 ---
 include:
   # Original eyelash corne
-  - board: eyelash_corne_left
+  - board: eyelash_corne_left/nrf52840/zmk
     shield: nice_view
     artifact-name: eyelash_corne_left-nice_view
-  - board: eyelash_corne_right
+  - board: eyelash_corne_right/nrf52840/zmk
     shield: nice_view
     artifact-name: eyelash_corne_right-nice_view
     
   # Bureau variant (same keymap, different BT name)
-  - board: eyelash_corne_left
+  - board: eyelash_corne_left/nrf52840/zmk
     shield: nice_view
     cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/eyelash_corne_bureau.conf"
     artifact-name: eyelash_corne_left_bureau-nice_view
-  - board: eyelash_corne_right
+  - board: eyelash_corne_right/nrf52840/zmk
     shield: nice_view
     cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/eyelash_corne_bureau.conf"
     artifact-name: eyelash_corne_right_bureau-nice_view
   
   # Lavendre variant
-  - board: eyelash_corne_left
+  - board: eyelash_corne_left/nrf52840/zmk
     shield: nice_view
     cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/eyelash_corne_lavendre.conf"
     artifact-name: eyelash_corne_left_lavendre-nice_view
-  - board: eyelash_corne_right
+  - board: eyelash_corne_right/nrf52840/zmk
     shield: nice_view
     cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/eyelash_corne_lavendre.conf"
     artifact-name: eyelash_corne_right_lavendre-nice_view
     
   # Salon variant
-  - board: eyelash_corne_left
+  - board: eyelash_corne_left/nrf52840/zmk
     shield: nice_view
     cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/eyelash_corne_salon.conf"
     artifact-name: eyelash_corne_left_salon-nice_view
-  - board: eyelash_corne_right
+  - board: eyelash_corne_right/nrf52840/zmk
     shield: nice_view
     cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/eyelash_corne_salon.conf"
     artifact-name: eyelash_corne_right_salon-nice_view
@@ -60,26 +60,26 @@ include:
     artifact-name: sofle_ergomech_right-nice_nano_v2
   
   # Fuligin variant
-  - board: eyelash_corne_left
+  - board: eyelash_corne_left/nrf52840/zmk
     shield: nice_view
     cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/eyelash_corne_fuligin.conf"
     artifact-name: eyelash_corne_left_fuligin-nice_view
-  - board: eyelash_corne_right
+  - board: eyelash_corne_right/nrf52840/zmk
     shield: nice_view
     cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/eyelash_corne_fuligin.conf"
     artifact-name: eyelash_corne_right_fuligin-nice_view
 
   # Xan variant (same hardware as fuligin)
-  - board: eyelash_corne_left
+  - board: eyelash_corne_left/nrf52840/zmk
     shield: nice_view
     cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/eyelash_corne_xan.conf"
     artifact-name: eyelash_corne_left_xan-nice_view
-  - board: eyelash_corne_right
+  - board: eyelash_corne_right/nrf52840/zmk
     shield: nice_view
     cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/eyelash_corne_xan.conf"
     artifact-name: eyelash_corne_right_xan-nice_view
 
   # Settings reset (universal for both sides)
-  - board: eyelash_corne_left
+  - board: eyelash_corne_left/nrf52840/zmk
     shield: settings_reset
     artifact-name: eyelash_corne-settings_reset

@@ -19,7 +19,7 @@
 manifest:
   defaults:
     remote: urob
-    revision: v0.3 # Pin everything to v0.3
+    revision: main # Upgraded from v0.3.0
 
   remotes:
     - name: urob
@@ -98,14 +98,14 @@ manifest:
 
     - name: zmk-antecedent-morph
       remote: ssbb
-      revision: v1
+      revision: v1.0.1
       path: modules/zmk/zmk-antecedent-morph
 
     # Only source necessary Zephyr modules. Remove this entire section to restore
     # the default (needed for less common hardware).
     - name: zephyr
       remote: zmkfirmware
-      revision: v3.5.0+zmk-fixes
+      revision: v4.1.0+zmk-fixes
       clone-depth: 1
       import:
         name-allowlist:
@@ -114,6 +114,7 @@ manifest:
           - hal_rpi_pico
           - hal_stm32
           - lvgl
+          - mbedtls   # required by BT_CRYPTO in Zephyr 4.1.0
           - tinycrypt
 
   self:

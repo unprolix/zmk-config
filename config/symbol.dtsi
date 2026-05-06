@@ -2,15 +2,11 @@
 // maybe: ; : . , « » “ ” ‘ ’ ? ! 
 //         arrow(s)
 
-MAKE_ADAPTIVE_REPEAT(adaptive_sqt_repeat, hml, LGUI, SQT)
-MAKE_ADAPTIVE_REPEAT(adaptive_bslh_repeat, hml, LALT, BSLH)
-MAKE_ADAPTIVE_REPEAT(adaptive_und_repeat, hml, LSHIFT, UNDERSCORE)
-MAKE_ADAPTIVE_REPEAT(adaptive_lpar_repeat, hml, LCTRL, LEFT_PARENTHESIS)
+MAKE_ADAPTIVE_REPEAT(adaptive_bslh_repeat, hml_sym, LALT, BSLH)
+MAKE_ADAPTIVE_REPEAT(adaptive_lpar_repeat, hml_sym, LCTRL, LEFT_PARENTHESIS)
 
-MAKE_ADAPTIVE_REPEAT(adaptive_rpar_repeat, hmr, RCTRL, RIGHT_PARENTHESIS)
-MAKE_ADAPTIVE_REPEAT(adaptive_minus_repeat, hmr, RSHIFT, MINUS)
-MAKE_ADAPTIVE_REPEAT(adaptive_fslh_repeat, hmr, RALT, FSLH)
-MAKE_ADAPTIVE_REPEAT(adaptive_dqt_repeat, hmr, RGUI, DQT)
+MAKE_ADAPTIVE_REPEAT(adaptive_rpar_repeat, hmr_sym, RCTRL, RIGHT_PARENTHESIS)
+MAKE_ADAPTIVE_REPEAT(adaptive_fslh_repeat, hmr_sym, RALT, FSLH)
 
 MAKE_ANTECEDENT_MORPH(grave_slash, GRAVE, FSLH, TILDE)
 
@@ -18,7 +14,7 @@ MAKE_ANTECEDENT_MORPH(grave_slash, GRAVE, FSLH, TILDE)
 
 #define SYMBOL_LZ &trans   &trans                &trans                 &trans                &trans                 &trans
 #define SYMBOL_LT &kp ESC  &kp ESC               &kp PIPE               &kp RS(TAB)           &kp EQUAL              &kp LEFT_BRACE
-#define SYMBOL_LM &trans   &adaptive_sqt_repeat  &adaptive_bslh_repeat  &adaptive_und_repeat  &adaptive_lpar_repeat  &kp LEFT_BRACKET
+#define SYMBOL_LM &trans   &kp SQT               &adaptive_bslh_repeat  &kp UNDERSCORE        &adaptive_lpar_repeat  &kp LEFT_BRACKET
 #define SYMBOL_LB &trans   &kp TILDE             &grave_slash           &trans                &trans                 &kp LESS_THAN
 #define SYMBOL_LH &trans &trans &kp TAB
 #define SYMBOL_LH_5 &trans &trans _LH
@@ -26,7 +22,7 @@ MAKE_ANTECEDENT_MORPH(grave_slash, GRAVE, FSLH, TILDE)
 
 #define SYMBOL_RZ &trans             &trans                 &trans                  &trans                 &trans                &trans
 #define SYMBOL_RT &kp RIGHT_BRACE    &kp PLUS               &kp TAB                 &kp QUESTION           &kp EXCL              &kp ESC
-#define SYMBOL_RM &kp RIGHT_BRACKET  &adaptive_rpar_repeat  &adaptive_minus_repeat  &adaptive_fslh_repeat  &adaptive_dqt_repeat  &trans
+#define SYMBOL_RM &kp RIGHT_BRACKET  &adaptive_rpar_repeat  &kp MINUS               &adaptive_fslh_repeat  &kp DQT               &trans
 #define SYMBOL_RB &kp GREATER_THAN   &trans                 &trans                  &trans                 &trans                &trans
 #define SYMBOL_RH &kp TAB &trans &trans
 #define SYMBOL_RH_5 &trans &trans _RH

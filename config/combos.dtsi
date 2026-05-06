@@ -208,8 +208,9 @@ ZMK_COMBO_3_PLUS_FAST(emdash_alt, &em_dash, RM3, RM4, RM5)
 
 // middle row skips
 
-ZMK_COMBO_PLUS(smart_num_l, &num_word NUMBERLINE HIEROPHANT, LM1, LM3)  // skip!
-ZMK_COMBO_PLUS(smart_num_r, &num_word NUMBERLINE HIEROPHANT, RM1, RM3)  // skip!
+ZMK_SIMPLE_MACRO(sk_ctrl_shift, <&macro_tap &sk LCTRL>, <&macro_tap &sk LSHIFT>)
+ZMK_COMBO_PLUS(ctrl_shift_l, &sk_ctrl_shift, LM1, LM3)  // skip! repurposed from smart_num_l
+ZMK_COMBO_PLUS(ctrl_shift_r, &sk_ctrl_shift, RM1, RM3)  // skip! repurposed from smart_num_r
 ZMK_COMBO_PLUS(sl_numsym_l, &sl NUM, LM2, LM4)  // skip!
 ZMK_COMBO_PLUS(sl_numsym_r, &sl NUM, RM2, RM4)  // skip!
 ZMK_COMBO_PLUS_FAST(gui_l, &sk LGUI, LM1, LM4)	// double skip!
@@ -252,7 +253,7 @@ ZMK_COMBO_FAST(printscreen, PRINTSCREEN, LH2, RH2) // outer thumb keys; screensh
 // top two rows
 ZMK_COMBO_PLUS_SLOW(grave, &kp GRAVE, LT5, LM5)
 ZMK_COMBO_PLUS(excl, &kp EXCL, LT4, LM4)
-ZMK_COMBO_PLUS(at, &kp AT, LM3, LT3) 
+ZMK_COMBO_PLUS(at, &kp AT, LM3, LT3)
 ZMK_COMBO_PLUS(hash, &kp HASH, LT2, LM2)
 ZMK_COMBO_PLUS(dollar, &kp DOLLAR, LT1, LM1)
 ZMK_COMBO_PLUS(tab_vert, &kp TAB, LT0, LM0)	// top and middle innermost left

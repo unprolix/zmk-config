@@ -181,18 +181,44 @@ ZMK_HOLD_TAP(smart_num, bindings = <&mo>, <&num_dance>; flavor = "balanced";
 ZMK_TAP_DANCE(num_dance, bindings = <&num_word NUM>, <&sl NUM>;
               tapping-term-ms = <200>;)
 
+// dedicated auto-layer behaviors so smart NUMPAD/SYMBOL stay active across their layer keys
+/ {
+    behaviors {
+        numpad_word: numpad_word {
+            compatible = "zmk,behavior-auto-layer";
+            #binding-cells = <1>;
+            continue-list = <BACKSPACE DELETE DOT COMMA PLUS MINUS STAR FSLH EQUAL BSLH SQT DQT QUESTION LESS_THAN GREATER_THAN>;
+            ignore-numbers;
+        };
+        symbol_word: symbol_word {
+            compatible = "zmk,behavior-auto-layer";
+            #binding-cells = <1>;
+            continue-list = <BACKSPACE DELETE SPACE TAB ESC GRAVE TILDE EXCL AT HASH DOLLAR PERCENT CARET AMPS ASTERISK LPAR RPAR MINUS UNDERSCORE EQUAL PLUS LBKT RBKT LBRC RBRC BSLH PIPE SEMI COLON SQT DQT COMMA DOT LT GT FSLH QMARK>;
+        };
+    };
+};
+
 ZMK_TAP_DANCE(caps_word_lock_dance, bindings = <&sk LSHIFT>, <&caps_word>, <&kp CAPS>;
               tapping-term-ms = <300>;)
 ZMK_TAP_DANCE(smart_num_lock_dance, bindings = <&sl NUM>, <&num_word NUM>, <&rgb_tog_num>;
               tapping-term-ms = <300>;)
 
 
-#define HRM_PRIOR_IDLE 80	// 100 caused false taps over holds, particularly with LCTRL. maybe this will be better. but note i seem to roll AR while normal typing which causes problems for accidental LGUI activation
+#define HRM_PRIOR_IDLE 150	// increased from 80 to fix inconsistent hold activation (particularly A->LCTRL). 80 was too low, causing holds to fail when typing quickly
 
 #define MAKE_HRM(NAME, HOLD, TAP, TRIGGER_POS)                                    \
   ZMK_HOLD_TAP(NAME, bindings = <HOLD>, <TAP>; flavor = "balanced";               \
-               tapping-term-ms = <200>; quick-tap-ms = <QUICK_TAP_MS>;            \
-               require-prior-idle-ms = <HRM_PRIOR_IDLE>; hold-trigger-on-release; \
+               tapping-term-ms = <280>; quick-tap-ms = <QUICK_TAP_MS>;            \
+               require-prior-idle-ms = <HRM_PRIOR_IDLE>;                          \
+               hold-trigger-key-positions = <TRIGGER_POS>;)
+
+#define HRM_SYM_TAPPING_TERM 380
+#define HRM_SYM_PRIOR_IDLE 250
+
+#define MAKE_HRM_SYM(NAME, HOLD, TAP, TRIGGER_POS)                                    \
+  ZMK_HOLD_TAP(NAME, bindings = <HOLD>, <TAP>; flavor = "balanced";                   \
+               tapping-term-ms = <HRM_SYM_TAPPING_TERM>; quick-tap-ms = <QUICK_TAP_MS>; \
+               require-prior-idle-ms = <HRM_SYM_PRIOR_IDLE>;                          \
                hold-trigger-key-positions = <TRIGGER_POS>;)
 
 #define MAKE_ADAPTIVE_REPEAT(NAME, HOLD_TAP_BEHAVIOR, LAYER, KEY) \
@@ -229,6 +255,9 @@ ZMK_TAP_DANCE(smart_num_lock_dance, bindings = <&sl NUM>, <&num_word NUM>, <&rgb
 
 MAKE_HRM(hml, &kp, &kp, KEYS_R THUMBS) // Left-hand HRMs.
 MAKE_HRM(hmr, &kp, &kp, KEYS_L THUMBS) // Right-hand HRMs.
+
+MAKE_HRM_SYM(hml_sym, &kp, &kp, KEYS_R THUMBS) // SYMBOL-layer left HRMs (longer term, more prior-idle).
+MAKE_HRM_SYM(hmr_sym, &kp, &kp, KEYS_L THUMBS) // SYMBOL-layer right HRMs.
 
 // Top Layer Left/Right
 MAKE_HRM(tll, &mo, &kp, KEYS_R THUMBS)
@@ -686,7 +715,7 @@ MAKE_ADAPTIVE_REPEAT(f_hrk_f23, hmr, R_M4, F23)
 #define LGN_RT &msc LG(SCRL_UP)    &kp LG(HOME)        &kp LG(UP_ARROW)    &kp LG(END)          &kp LG(PG_UP)  &kp LG(BSPC)
 #define LGN_RM &msc LG(SCRL_DOWN)  &kp LG(LEFT_ARROW)  &kp LG(DOWN_ARROW)  &kp LG(RIGHT_ARROW)  &kp LG(PG_DN)  &kp LG(SQT)
 #define LGN_RB &kp LG(V)           &kp LG(C)           &kp LG(M)       &kp LG(J)          &kp LG(DOT)   &kp LG(FSLH)
-#define LGN_RH &to HIEROPHANT &kp LG(BSPC)  &kp LG(RET)
+#define LGN_RH &to HIEROPHANT &numpad_word NUMPAD  &kp LG(RET)
 #define LGN_RH_5 &trans &trans LGN_RH
 
 
@@ -699,7 +728,7 @@ MAKE_ADAPTIVE_REPEAT(f_hrk_f23, hmr, R_M4, F23)
 #define RGN_LT &kp RG(TAB)   &kp RG(PG_UP)  &kp RG(DELETE)      &kp RG(UP_ARROW)    &kp RG(HOME)         &msc RG(SCRL_UP)
 #define RGN_LM &trans        &kp RG(PG_DN)  &kp RG(LEFT_ARROW)  &kp RG(DOWN_ARROW)  &kp RG(RIGHT_ARROW)  &msc RG(SCRL_DOWN)
 #define RGN_LB &kp RG(BSLH)  &kp RG(COMMA)  &kp RG(Y)        &kp RG(K)        &kp RG(O)     &kp RG(X)
-#define RGN_LH &kp RG(ESC)   &kp RG(TAB)   &to HIEROPHANT
+#define RGN_LH &kp RG(ESC)   &symbol_word SYMBOL   &to HIEROPHANT
 #define RGN_LH_5 &trans &trans RGN_LH
 
 
@@ -759,7 +788,7 @@ MAKE_ADAPTIVE_REPEAT(f_hrk_f23, hmr, R_M4, F23)
 #define NUMPAD_LZ &trans &trans &trans &trans &trans &trans
 #define NUMPAD_LT &kp BSLH  &kp N0    &kp N1 &kp N2 &kp N3  &kp QUESTION
 #define NUMPAD_LM &trans    &kp PLUS  &kp N4 &kp N5 &kp N6  &kp SQT
-#define NUMPAD_LB &trans    &kp DOT   &kp N7 &kp N8 &kp N9  &trans
+#define NUMPAD_LB &trans    &kp DOT   &kp N7 &kp N8 &kp N9  &kp LESS_THAN
 #define NUMPAD_LH &kp N0 &trans &trans
 #define NUMPAD_LH_5 &trans &trans NUMPAD_LH
 
@@ -767,7 +796,7 @@ MAKE_ADAPTIVE_REPEAT(f_hrk_f23, hmr, R_M4, F23)
 #define NUMPAD_RZ &trans   &trans &trans &trans  &trans     &trans
 #define NUMPAD_RT &kp N0   &kp N1 &kp N2 &kp N3  &kp MINUS  &kp FSLH
 #define NUMPAD_RM &kp DQT  &kp N4 &kp N5 &kp N6  &kp PLUS   &trans
-#define NUMPAD_RB &trans   &kp N7 &kp N8 &kp N9  &kp DOT    &trans
+#define NUMPAD_RB &kp GREATER_THAN   &kp N7 &kp N8 &kp N9  &kp DOT    &trans
 #define NUMPAD_RH &trans &trans &kp N0
 #define NUMPAD_RH_5 &trans &trans NUMPAD_RH
 
