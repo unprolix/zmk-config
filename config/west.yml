@@ -51,21 +51,26 @@ manifest:
     - name: ssbb
       url-base: https://github.com/ssbb
 
+    # user fork: holds HWMv2 migration of eyelash_corne and Zephyr 4.1.0 fixes
+    - name: unprolix
+      url-base: https://github.com/unprolix
+
   projects:
     - name: zmk
       remote: zmkfirmware
       import: app/west.yml
 
-    # for eyelash_corne
-    - name: zmk-new_corne
-      remote: a741725193
-      revision: main
-      
-    # for sofle hybrid (no idea if this will work)
+    # for eyelash_corne (user fork: HWMv2 migration for Zephyr 4.1.0)
+    - name: corne-j-keyboard-zmk
+      remote: unprolix
+      path: zmk-new_corne
+      revision: eyelash-corne-hwmv2
+
+    # for sofle hybrid (user fork: WS2812_STRIP fix for Zephyr 4.1.0)
     - name: sofle-hybrid-ergomech-zmk
-      remote: ergomechstore
+      remote: unprolix
       path: modules/vendors/ergomech-sofle
-      revision: master
+      revision: zephyr-4.1-ws2812-fix
 
     - name: Rolio2Firmware
       remote: rolio2
