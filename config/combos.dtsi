@@ -251,6 +251,10 @@ ZMK_COMBO_FAST(printscreen, PRINTSCREEN, LH2, RH2) // outer thumb keys; screensh
 ZMK_COMBO_PLUS(sk_lctrl_thumb, &sk LCTRL, LH0, LH1)
 ZMK_COMBO_PLUS(sk_rctrl_thumb, &sk RCTRL, RH0, RH1)
 
+// same-side thumb combos: one-shot GUI (middle+outer thumbs) — pure-GUI access without hold-tap latency
+ZMK_COMBO_PLUS(sk_lgui_thumb, &sk LGUI, LH1, LH2)
+ZMK_COMBO_PLUS(sk_rgui_thumb, &sk RGUI, RH1, RH2)
+
 
 // vertical shapes
 
