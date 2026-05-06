@@ -247,6 +247,10 @@ ZMK_COMBO_PLUS(to_hierophant, &to HIEROPHANT, LH0, RH0) // inner thumb keys
 ZMK_COMBO_PLUS(navigation, &to NAVIGATION, LH1, RH1) // middle thumb keys
 ZMK_COMBO_FAST(printscreen, PRINTSCREEN, LH2, RH2) // outer thumb keys; screenshot
 
+// same-side thumb combos: one-shot CTRL (inner+middle thumbs)
+ZMK_COMBO_PLUS(sk_lctrl_thumb, &sk LCTRL, LH0, LH1)
+ZMK_COMBO_PLUS(sk_rctrl_thumb, &sk RCTRL, RH0, RH1)
+
 
 // vertical shapes
 
