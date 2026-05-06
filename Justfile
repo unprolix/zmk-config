@@ -66,7 +66,7 @@ _check_upstream:
     
     if [[ -z "$latest_tag" ]]; then
         echo "⚠️  No upstream-sync tags found. Run 'just upstream-status' to see all upstream commits."
-        return
+        exit 0
     fi
     
     echo "🔍 Checking for upstream updates since $latest_tag..."
