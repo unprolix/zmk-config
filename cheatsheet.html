@@ -76,25 +76,24 @@ Same for GUI: <span class="k">LH1+LH2</span>.</div>
 <code>R</code> = RALT, <code>N</code> = RGUI; combos exist on right home row too.)</p>
 
 <h2>2 — Word builders (arcane key)</h2>
-<p class="small">Type a letter, immediately tap the <b>middle thumb</b> (the NAV-arcane key on
-LH1 or RH1). The arcane fires the rest of a common word. Use the <em>opposite</em> thumb
-from the source letter.</p>
+<p class="small">Tap a letter, then a <b>middle thumb</b> (the arcane / NAV key on LH1 or RH1).
+The dispatch table differs per thumb. Cross-hand is more ergonomic but either works.</p>
 
 <div class="grid grid-2">
 <div>
-<h3>Type letter (left side) + RIGHT thumb</h3>
+<h3>Then RIGHT thumb (arcane_right)</h3>
 <table>
-<tr><td><code>A</code></td><td><span class="out">+nd</span></td><td>"and", "expand"</td></tr>
+<tr><td><code>A</code></td><td><span class="out">+nd</span></td><td>"and"</td></tr>
 <tr><td><code>I</code></td><td><span class="out">+ng</span></td><td>"-ing" suffix</td></tr>
-<tr><td><code>P</code></td><td><span class="out">+eople</span></td><td>"people" (NEW — was "as")</td></tr>
-<tr><td><code>K</code></td><td><span class="out">+now</span></td><td>"know" (NEW — was "u")</td></tr>
+<tr><td><code>K</code></td><td><span class="out">+now</span></td><td>"know" (NEW)</td></tr>
+<tr><td><code>P</code></td><td><span class="out">+eople</span></td><td>"people" (NEW)</td></tr>
 <tr><td><code>Q</code></td><td><span class="out">+ue</span></td><td>"que"</td></tr>
 <tr><td><code>Y</code></td><td><span class="out">+eah</span></td><td>"yeah"</td></tr>
 </table>
 </div>
 
 <div>
-<h3>Type letter (right side) + LEFT thumb</h3>
+<h3>Then LEFT thumb (arcane_left)</h3>
 <table>
 <tr><td><code>B</code></td><td><span class="out">+ecause</span></td><td>"because"</td></tr>
 <tr><td><code>C</code></td><td><span class="out">+an</span></td><td>"can"</td></tr>
@@ -102,13 +101,17 @@ from the source letter.</p>
 <tr><td><code>J</code></td><td><span class="out">+ust</span></td><td>"just"</td></tr>
 <tr><td><code>K</code></td><td><span class="out">+e</span></td><td>SFB-fix: "make", "like", "take"</td></tr>
 <tr><td><code>M</code></td><td><span class="out">+ent</span></td><td>"-ment" suffix</td></tr>
-<tr><td><code>N</code></td><td><span class="out">+ion</span></td><td>"-ion" suffix</td></tr>
+<tr><td><code>N</code></td><td><span class="out">+ion</span></td><td>"-nion": "union", "opinion"</td></tr>
 <tr><td><code>T</code></td><td><span class="out">+ion</span></td><td>"-tion" suffix</td></tr>
 <tr><td><code>V</code></td><td><span class="out">+ersion</span></td><td>"version"</td></tr>
 <tr><td><code>W</code></td><td><span class="out">+hich</span></td><td>"which"</td></tr>
 </table>
 </div>
 </div>
+
+<p class="small">No expansion in the table for that letter? Arcane falls back to <code>&amp;sk LSHIFT</code>
+(or <code>caps_word</code> on a 2nd consecutive press). So tap-a-letter-then-thumb is also how you
+get a sticky shift — useful right after typing.</p>
 
 <div class="box">If you find yourself spelling out a word in the table, you forgot. Drill the
 ones that match your most-typed words. The user said "I'm not using these as much as I should" —
@@ -118,13 +121,14 @@ this is the page that fixes that.</div>
 <p class="small">Two adjacent top-row keys at the same time, on the same hand. The bracket
 matches what's between them visually.</p>
 
+<p class="small">Left top row outer→inner: <code>~ F Z U Q ⌫</code>. Right top row inner→outer: <code>⏎ W D L B ;</code>. Pair adjacent positions, same hand:</p>
 <table>
-<tr><th>Roll left top-row…</th><th>Get</th><th>Roll right top-row…</th><th>Get</th></tr>
-<tr><td><code>F+Z</code></td><td><span class="out">{</span></td><td><code>W+D</code></td><td><span class="out">)</span></td></tr>
+<tr><th>Roll left top-row (outer→inner)…</th><th>Get</th><th>Roll right top-row (inner→outer)…</th><th>Get</th></tr>
+<tr><td><code>~+F</code></td><td><span class="out">&lt;</span></td><td><code>⏎+W</code></td><td><span class="out">&gt;</span></td></tr>
+<tr><td><code>F+Z</code></td><td><span class="out">(</span></td><td><code>W+D</code></td><td><span class="out">)</span></td></tr>
 <tr><td><code>Z+U</code></td><td><span class="out">[</span></td><td><code>D+L</code></td><td><span class="out">]</span></td></tr>
-<tr><td><code>U+Q</code></td><td><span class="out">(</span></td><td><code>L+B</code></td><td><span class="out">}</span></td></tr>
-<tr><td><code>Q+⌫</code></td><td><span class="out">&lt;</span></td><td><code>B+;</code></td><td><span class="out">_</span></td></tr>
-<tr><td><code>~+F</code></td><td><span class="out">esc</span></td><td><code>⏎+W</code></td><td><span class="out">&gt;</span></td></tr>
+<tr><td><code>U+Q</code></td><td><span class="out">{</span></td><td><code>L+B</code></td><td><span class="out">}</span></td></tr>
+<tr><td><code>Q+⌫</code></td><td><span class="out">esc</span></td><td><code>B+;</code></td><td><span class="out">_</span></td></tr>
 </table>
 
 <div class="box">You forgot these. Try saying the open/close bracket as a single roll — the
@@ -142,7 +146,7 @@ muscle memory comes back fast.</div>
 <tr><td>Hold <code>P</code> or <code>G</code></td><td>Momentary NUMERIC</td></tr>
 <tr><td>Hold <code>F</code>/<code>B</code></td><td>FN layer (F1-F24)</td></tr>
 <tr><td>Hold <code>Z</code>/<code>L</code></td><td>EXTRA layer (sticky mods, delete, menu)</td></tr>
-<tr><td>Hold <code>A</code>/<code>N</code></td><td>L/R-GUI+NAV (window manager / macOS-style)</td></tr>
+<tr><td>Hold <code>H</code>/<code>N</code> (left/right pinky letter)</td><td>L/R-GUI+NAV (window manager / macOS-style)</td></tr>
 <tr><td>Combo <span class="k">LH1+RH1</span></td><td>Switch to NAVIGATION (cross-thumb)</td></tr>
 <tr><td>Combo <span class="k">LH2+LH1+RH1+RH2</span> (4 thumbs)</td><td>Switch to SYSTEM (BT, RGB)</td></tr>
 </table>
@@ -151,10 +155,9 @@ muscle memory comes back fast.</div>
 
 <h3>Adaptive shortcuts (no extra key — the keymap inserts the rest)</h3>
 <ul>
-<li><code>q</code> after <code>u</code>: <code>q</code> auto-becomes <code>k</code> ("queek" doesn't happen — it's "queue")</li>
-<li><code>i</code>+<code>h</code> → <code>i'</code> (then <code>d</code>/<code>l</code>/<code>v</code>/<code>m</code> for "i'd", "i'll", "i've", "i'm")</li>
-<li><code>e</code>+<code>h</code> or <code>n</code>+<code>h</code> → <code>'</code> (for "she'll", "won't", "can't")</li>
-<li><code>.</code>+<code>j</code> → <code>./</code> (start a relative path)</li>
+<li>After <code>U</code>, the <code>Q</code> key produces <code>K</code> (so the rare K-after-U bigram doesn't reuse the middle finger)</li>
+<li>After <code>.</code>, the <code>J</code> key produces <code>../</code> (parent dir shorthand)</li>
+<li>After <code>I</code>, the <code>H</code> key produces <code>'t</code> (currently behaves as a "can't"-tail; the I'd / I'll / I've contractions go via the dedicated combos below — see "Single-fire macro combos")</li>
 </ul>
 
 <h3>Single-fire macro combos</h3>
@@ -165,12 +168,14 @@ muscle memory comes back fast.</div>
 <li><span class="k">LM3+RB2</span> = "I'm "; <span class="k">LM3+RT3</span> = "I'll "; <span class="k">LM3+RT2</span> = "I'd "; <span class="k">LM3+RB0</span> = "I've "</li>
 </ul>
 
-<h3>Shifted morphs (just press shift)</h3>
+<h3>Mod-morphs (shift the punctuation)</h3>
 <ul>
-<li>shift + <code>'</code> → <code>-</code>; shift + <code>"</code> → <code>_</code></li>
-<li>shift + <code>.</code> → <code>:</code>; shift + <code>,</code> → <code>;</code></li>
-<li>shift + <code>-</code> → em-dash; combo <span class="k">LB2+LB1+LB0</span> also = em-dash</li>
+<li>shift + <code>'</code> → <code>-</code> &nbsp;·&nbsp; shift + <code>"</code> → <code>_</code></li>
+<li>shift + <code>.</code> → <code>:</code> &nbsp;·&nbsp; shift + <code>,</code> → <code>;</code></li>
+<li>em-dash via 3-key combo <span class="k">LB2+LB1+LB0</span> (left bottom-outer) or <span class="k">RM3+RM4+RM5</span> (right home-row outer)</li>
 </ul>
+
+<div class="box"><b>Subtle:</b> tapping the comma key alone produces <code>", "</code> — comma <em>and</em> a space. (Behavior <code>comma_semicolon</code> in <code>hierophant.dtsi</code>.)</div>
 
 <h2>6 — Leader key (combo <span class="k">LM5+LB5</span> = P+X)</h2>
 <p class="small">Tap the leader combo, then type the sequence.</p>
@@ -188,14 +193,18 @@ muscle memory comes back fast.</div>
 <h2>7 — When typing feels wrong, try this</h2>
 
 <div class="box">
-<p><b>"thisi s" instead of "this is"</b> — you're rolling SPACE-thumb into 'i' too fast.
-The hold-tap on the inner thumb defers SPACE to release. Workarounds: type slightly more
-deliberate space-then-letter, or (eventually) we'll switch the inner thumbs to bare SPACE
-and rely on <span class="k">LH1+LH2</span> for GUI.</p>
-<p><b>"re" produces "("</b> — that's the cross-hand bigram triggering a combo. Recheck
-prior-idle settings if it persists.</p>
-<p><b>HRM modifier didn't fire</b> — you typed too fast; <code>HRM_PRIOR_IDLE</code> (80ms)
-disabled it. Pause briefly before the modifier-letter, or use the sticky-combo path.</p>
+<p><b>"thisi s" instead of "this is"</b> — you rolled the SPACE-thumb into 'i'. The hold-tap
+on the inner thumb defers SPACE emit to release. Workarounds: deliberately separate space
+from the next letter, or transition to the new thumb-pair GUI combos
+(<span class="k">LH1+LH2</span> / <span class="k">RH1+RH2</span>) so the inner thumb can be
+demoted to bare SPACE.</p>
+<p><b>shift+' didn't produce "</b> — you used the same-hand shift HRM (E on LM3) for the
+left-hand SQT (LM0). Same-hand HRMs don't fire. Use the opposite-hand shift (T on right) or
+the I+E sticky-shift combo first, then tap '.</p>
+<p><b>HRM modifier didn't fire</b> — your previous keypress was within
+<code>HRM_PRIOR_IDLE</code> (150ms), which disables the HRM and forces tap. Pause briefly
+before the modifier-letter, or fall through to the sticky-combo path
+(<span class="k">LH0+LH1</span> for CTRL, <span class="k">LH1+LH2</span> for GUI, etc.).</p>
 </div>
 
 </body>
