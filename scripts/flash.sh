@@ -27,47 +27,50 @@ find_firmware_file() {
     local keyboard_name="$1"
     local side="$2"
     local firmware_file=""
-    
-    # If no keyboard name specified, try to find any .uf2 file
+
+    # No keyboard name: just take any .uf2 (sorted for stable order).
     if [ -z "$keyboard_name" ]; then
-        firmware_file=$(find "$FIRMWARE_DIR" -name "*.uf2" | head -1)
-        if [ -n "$firmware_file" ]; then
-            echo "$firmware_file"
-            return 0
-        fi
-    else
-        # Look for firmware files matching keyboard name
-        keyboard_lower=$(echo "$keyboard_name" | tr '[:upper:]' '[:lower:]')
-        
-        # If side is specified, prioritize that side
-        if [ -n "$side" ]; then
-            for pattern in "${keyboard_lower}_${side}" "${keyboard_lower}-${side}"; do
-                firmware_file=$(find "$FIRMWARE_DIR" -name "*${pattern}*.uf2" | head -1)
-                if [ -n "$firmware_file" ]; then
-                    echo "$firmware_file"
-                    return 0
-                fi
-            done
-        fi
-        
-        # Try exact matches first
-        for pattern in "${keyboard_lower}" "${keyboard_lower}_left" "${keyboard_lower}_right" "${keyboard_lower}-left" "${keyboard_lower}-right"; do
-            firmware_file=$(find "$FIRMWARE_DIR" -name "*${pattern}*.uf2" | head -1)
-            if [ -n "$firmware_file" ]; then
-                echo "$firmware_file"
-                return 0
-            fi
-        done
-        
-        # Try partial matches
-        firmware_file=$(find "$FIRMWARE_DIR" -name "*${keyboard_lower}*.uf2" | head -1)
-        if [ -n "$firmware_file" ]; then
-            echo "$firmware_file"
-            return 0
-        fi
+        firmware_file=$(find "$FIRMWARE_DIR" -name "*.uf2" | sort | head -1)
+        [ -n "$firmware_file" ] && echo "$firmware_file" && return 0
+        return 1
     fi
-    
-    return 1
+
+    local keyboard_lower
+    keyboard_lower=$(echo "$keyboard_name" | tr '[:upper:]' '[:lower:]')
+
+    # Substring match keyword against filenames (works whether the keyword is
+    # a family like "corne" or a variant suffix like "salon").
+    local candidates
+    candidates=$(find "$FIRMWARE_DIR" -name "*${keyboard_lower}*.uf2" | sort)
+
+    [ -z "$candidates" ] && return 1
+
+    # If side is requested, filter to firmwares with _left_ / _right_ / -left- / -right- as a token.
+    # This handles both <family>_<side>_<variant> and <variant>-<side>-* naming.
+    if [ -n "$side" ]; then
+        firmware_file=$(echo "$candidates" | grep -E "[_-]${side}[_.-]" | head -1)
+        [ -n "$firmware_file" ] && echo "$firmware_file" && return 0
+        return 1
+    fi
+
+    echo "$candidates" | head -1
+    return 0
+}
+
+# Derive a recognizable bootloader family from the firmware filename.
+# mount-device.py only knows hardcoded family patterns (corne/sofle/glove80/
+# planck/zen); user-provided variants like "salon" don't match.
+derive_bootloader_family() {
+    local fname
+    fname=$(basename "$1")
+    case "$fname" in
+        *corne*)   echo "corne" ;;
+        *sofle*)   echo "sofle" ;;
+        *glove80*) echo "glove80" ;;
+        *planck*)  echo "planck" ;;
+        *zen*)     echo "zen" ;;
+        *)         echo "" ;;
+    esac
 }
 
 # Parse arguments
@@ -130,10 +133,18 @@ fi
 
 echo "Using firmware: $(basename "$FIRMWARE_FILE")"
 
-# Mount the keyboard device
+# Mount the keyboard device. mount-device.py filters by hardcoded family
+# patterns (corne/sofle/glove80/planck/zen). The user might pass a variant
+# name like "salon" that isn't a family — derive the family from the firmware
+# filename so the bootloader filter still matches.
+BOOTLOADER_FAMILY=$(derive_bootloader_family "$FIRMWARE_FILE")
+if [ -z "$BOOTLOADER_FAMILY" ] && [ -n "$KEYBOARD_NAME" ]; then
+    BOOTLOADER_FAMILY="$KEYBOARD_NAME"
+fi
+
 KEYBOARD_ARG=""
-if [ -n "$KEYBOARD_NAME" ]; then
-    KEYBOARD_ARG="--keyboard $KEYBOARD_NAME"
+if [ -n "$BOOTLOADER_FAMILY" ]; then
+    KEYBOARD_ARG="--keyboard $BOOTLOADER_FAMILY"
 fi
 
 echo "Mounting keyboard device..."
