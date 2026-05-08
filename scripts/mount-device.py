@@ -195,19 +195,23 @@ def match_keyboard_name(keyboard_info, target_name):
    if target_lower in board_id:
        return True
        
-   # Check for common keyboard name patterns
+   # Check for common keyboard name patterns. Some keyboards use generic
+   # bootloaders (e.g. eyelash_corne and other nrf52840-based splits ship the
+   # Adafruit nice!nano UF2 bootloader, which advertises Model: nice!nano /
+   # Board-ID: nRF52840-nicenano), so we include the bootloader strings as
+   # acceptable matches for the keyboards that use them.
    keyboard_patterns = {
-       'sofle': ['sofle'],
-       'corne': ['corne', 'crkbd'],
+       'sofle':   ['sofle',   'nice!nano', 'nicenano'],
+       'corne':   ['corne',   'crkbd', 'nice!nano', 'nicenano'],
        'glove80': ['glove80', 'glove'],
-       'planck': ['planck'],
-       'zen': ['zen', 'corneish']
+       'planck':  ['planck'],
+       'zen':     ['zen',     'corneish']
    }
-   
+
    for pattern_name, patterns in keyboard_patterns.items():
        if target_lower in pattern_name or any(p in target_lower for p in patterns):
            return any(p in model or p in board_id for p in patterns)
-           
+
    return False
 
 def scan_and_mount(mount_location, no_mount, verbose, wait_seconds, keyboard_name=None):
