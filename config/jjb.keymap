@@ -467,6 +467,14 @@ arcane_nav_r: arcane_nav_r {
             bindings = <&sl NUMERIC>, <&numpad_word NUMPAD>;
         };
 
+	// outer left thumb: tap = sticky SYMBOL, double tap = smart NUMPAD
+        sl_sym_or_numpad: sl_sym_or_numpad {
+            compatible = "zmk,behavior-tap-dance";
+            #binding-cells = <0>;
+            tapping-term-ms = <FAST_TAP>;
+            bindings = <&sl SYMBOL>, <&numpad_word NUMPAD>;
+        };
+
         LTS: LTS {
             compatible = "zmk,behavior-hold-tap";
             #binding-cells = <2>;

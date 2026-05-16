@@ -171,7 +171,7 @@ ZMK_SIMPLE_MACRO(dot_slash, <&kp DOT>, <&kp FSLH>)
 #define HIEROPHANT_LT &kp TILDE  &adaptive_f_repeat                          &adaptive_z_repeat  &adaptive_u_repeat  &adaptive_q_repeat NUMPAD 0  &backspace_word_delete
 #define HIEROPHANT_LM &sqt_dash  &tap_hold_layer_lgui_adaptive LGUI_NAV_L 0  &adaptive_i_repeat  &adaptive_e_repeat  &adaptive_a_repeat           &adaptive_p_repeat
 #define HIEROPHANT_LB &kp LCTRL   &comma_semicolon                            &kp Y               &kp K               &kp O                        &kp X
-#define HIEROPHANT_LH &sl SYMBOL  &arcane_nav_l NAV 0  &lgui_space_tab
+#define HIEROPHANT_LH &sl_sym_or_numpad  &arcane_nav_l NAV 0  &lgui_space_tab
 #define HIEROPHANT_LH_5 &trans &trans HIEROPHANT_LH
 
 #define HIEROPHANT_RZ &trans &trans &trans &trans &trans &trans
