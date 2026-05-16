@@ -459,12 +459,12 @@ arcane_nav_r: arcane_nav_r {
             bindings = <&ht_mod_kp RGUI SPACE>, <&kp RET>;
         };
 
-	// outer right thumb: tap = sticky NUMERIC, double tap = smart number-word
+	// outer right thumb: tap = sticky NUMERIC, double tap = smart NUMPAD
         sl_num_or_word: sl_num_or_word {
             compatible = "zmk,behavior-tap-dance";
             #binding-cells = <0>;
             tapping-term-ms = <FAST_TAP>;
-            bindings = <&sl NUMERIC>, <&num_word NUM>;
+            bindings = <&sl NUMERIC>, <&numpad_word NUMPAD>;
         };
 
         LTS: LTS {
