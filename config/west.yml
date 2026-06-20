@@ -60,11 +60,12 @@ manifest:
       remote: zmkfirmware
       import: app/west.yml
 
-    # for eyelash_corne (user fork: HWMv2 migration for Zephyr 4.1.0)
+    # for eyelash_corne (user fork tracking upstream shield-based architecture;
+    # the HWMv2 board form lives on branch eyelash-corne-hwmv2 if rollback is needed)
     - name: corne-j-keyboard-zmk
       remote: unprolix
       path: zmk-new_corne
-      revision: eyelash-corne-hwmv2
+      revision: eyelash-corne-shield
 
     # for sofle hybrid (user fork: WS2812_STRIP fix for Zephyr 4.1.0)
     - name: sofle-hybrid-ergomech-zmk
