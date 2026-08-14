@@ -171,7 +171,7 @@ FUNCTION_LH FUNCTION_RH
             display-name = "rgb";
             bindings = <
 RGB_LT                                    &rgb_ug RGB_SPI                    RGB_RT
-RGB_LM                   &rgb_ug RGB_EFR  &to QWERTY         &rgb_ug RGB_EFF   RGB_RM
+RGB_LM                   &rgb_ug RGB_EFR  &to HIEROPHANT     &rgb_ug RGB_EFF   RGB_RM
 RGB_LB  &rgb_ug RGB_TOG                   &rgb_ug RGB_SPD                    RGB_RB
 RGB_LH RGB_RH
             >;
@@ -194,7 +194,7 @@ BLUETOOTH_LH BLUETOOTH_RH
             display-name = "system";
             bindings = <
 SYSTEM_LT                              &mmv MOVE_UP                     SYSTEM_RT
-SYSTEM_LM              &mmv MOVE_LEFT  &to QWERTY        &mmv MOVE_RIGHT  SYSTEM_RM
+SYSTEM_LM              &mmv MOVE_LEFT  &to HIEROPHANT    &mmv MOVE_RIGHT  SYSTEM_RM
 SYSTEM_LB  &kp C_MUTE                  &mmv MOVE_DOWN                   SYSTEM_RB
 SYSTEM_LH SYSTEM_RH
             >;
