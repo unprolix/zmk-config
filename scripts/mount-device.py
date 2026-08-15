@@ -205,7 +205,11 @@ def match_keyboard_name(keyboard_info, target_name):
        'corne':   ['corne',   'crkbd', 'nice!nano', 'nicenano'],
        'glove80': ['glove80', 'glove'],
        'planck':  ['planck'],
-       'zen':     ['zen',     'corneish']
+       'zen':     ['zen',     'corneish'],
+       # Toucan (xiao_ble) ships the Seeed XIAO UF2 bootloader, which
+       # advertises Seeed/XIAO strings — distinct from nice!nano, so a
+       # toucan flash can't grab an eyelash-corne bootloader or vice versa.
+       'toucan':  ['toucan',  'xiao', 'seeed'],
    }
 
    for pattern_name, patterns in keyboard_patterns.items():
@@ -228,33 +232,42 @@ def scan_and_mount(mount_location, no_mount, verbose, wait_seconds, keyboard_nam
            if verbose and len(new_devices) > 0:
                print(f"\nScanning {len(new_devices)} new device(s)...")
            
-           # Check devices in parallel
+           # Check devices in parallel. Collect ALL matches before acting so
+           # that two same-family bootloaders (e.g. both toucan halves in
+           # flash mode at once) fail loudly instead of flashing an
+           # arbitrary one.
+           matches = []
            with ThreadPoolExecutor(max_workers=min(len(new_devices), MAX_PARALLEL_MOUNTS)) as executor:
                futures = {
                    executor.submit(check_device_zmk, device, size_mb, verbose): (device, size_mb)
                    for device, size_mb in new_devices
                }
-               
+
                for future in as_completed(futures):
                    device, size_mb = futures[future]
                    checked_devices.add(device)
-                   
+
                    try:
                        is_zmk, found_device, keyboard_info = future.result()
                        if is_zmk and match_keyboard_name(keyboard_info, keyboard_name):
-                           # Cancel remaining futures
-                           for f in futures:
-                               if f != future and not f.done():
-                                   f.cancel()
-                           
-                           if no_mount:
-                               return found_device, keyboard_info
-                           else:
-                               mount_path = mount_zmk_device(found_device, mount_location, verbose)
-                               return mount_path, keyboard_info
+                           matches.append((found_device, keyboard_info))
                    except Exception as e:
                        if verbose:
                            print(f"Error checking {device}: {e}")
+
+           if len(matches) > 1:
+               print("Error: multiple matching bootloader devices found:")
+               for dev, info in matches:
+                   print(f"  {dev}: {info.get('model', '?')} (Board: {info.get('board_id', '?')})")
+               print("Put only ONE half in bootloader mode at a time, then retry.")
+               return None, {}
+           if matches:
+               found_device, keyboard_info = matches[0]
+               if no_mount:
+                   return found_device, keyboard_info
+               else:
+                   mount_path = mount_zmk_device(found_device, mount_location, verbose)
+                   return mount_path, keyboard_info
        
        # Check if we should continue waiting
        elapsed = time.time() - start_time

@@ -8,7 +8,7 @@ MOUNT_POINT=~/mnt/keeb
 
 usage() {
     echo "Usage: $0 [keyboard_name] [OPTIONS]"
-    echo "  keyboard_name: sofle, corne, glove80, planck, zen, etc."
+    echo "  keyboard_name: sofle, corne, toucan, glove80, planck, zen, etc."
     echo ""
     echo "Options:"
     echo "  -l, --left     Flash left side of split keyboard"
@@ -64,6 +64,7 @@ derive_bootloader_family() {
     local fname
     fname=$(basename "$1")
     case "$fname" in
+        *toucan*)  echo "toucan" ;;
         *corne*)   echo "corne" ;;
         *sofle*)   echo "sofle" ;;
         *glove80*) echo "glove80" ;;
@@ -147,8 +148,11 @@ if [ -n "$BOOTLOADER_FAMILY" ]; then
     KEYBOARD_ARG="--keyboard $BOOTLOADER_FAMILY"
 fi
 
-echo "Mounting keyboard device..."
-if ! "$SCRIPT_DIR/mount-device.py" $KEYBOARD_ARG $VERBOSE "$MOUNT_POINT"; then
+# Wait up to 60s so this works as a single invocation: run it first, then
+# double-tap reset on the half being flashed.
+BOOTLOADER_WAIT_SECONDS=60
+echo "Mounting keyboard device (waiting up to ${BOOTLOADER_WAIT_SECONDS}s — double-tap reset now)..."
+if ! "$SCRIPT_DIR/mount-device.py" $KEYBOARD_ARG $VERBOSE --wait "$BOOTLOADER_WAIT_SECONDS" "$MOUNT_POINT"; then
     echo "Error: Failed to mount keyboard device"
     exit 1
 fi
