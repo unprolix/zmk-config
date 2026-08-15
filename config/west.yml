@@ -55,6 +55,10 @@ manifest:
     - name: unprolix
       url-base: https://github.com/unprolix
 
+    # for toucan2 trackpad (azoteq tps43 driver + zoom input processor)
+    - name: beekeeb
+      url-base: https://github.com/beekeeb
+
   projects:
     - name: zmk
       remote: zmkfirmware
@@ -106,6 +110,16 @@ manifest:
       remote: ssbb
       revision: v1.0.1
       path: modules/zmk/zmk-antecedent-morph
+
+    # for beekeeb toucan2 trackpad (shield is vendored in config/boards/shields/toucan)
+    - name: zmk_driver_azoteq
+      remote: beekeeb
+      revision: c329f309b7481e5723603550b15f48e24d0c8a6a  # main as of 2026-08-15
+      path: modules/drivers/azoteq
+    - name: zmk-input-zoom
+      remote: beekeeb
+      revision: 91bbe0c0e02145da50c9df798489479d28be1804  # main as of 2026-08-15
+      path: modules/zmk/input-zoom
 
     # Only source necessary Zephyr modules. Remove this entire section to restore
     # the default (needed for less common hardware).

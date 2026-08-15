@@ -534,17 +534,23 @@ arcane_nav_r: arcane_nav_r {
 // ****************************************** QWERTY layer
 
 #define QWERTY_LZ &trans &trans &trans &trans &trans &trans
-#define QWERTY_LT &kp TAB  &kp Q  &kp W  &kp E  &kp R  &kp T
-#define QWERTY_LM &key_layer_SQT_NUM  &tap_hold_layer_lgui LGUI_NAV_L A  &hml L_M3 S  &hml L_M2 D  &hml L_M1 F  &kp G
-#define QWERTY_LB &trans &kp Z  &kp X  &kp C  &kp V  &kp B
+#define QWERTY_LT_IN &kp Q  &kp W  &kp E  &kp R  &kp T
+#define QWERTY_LT &kp TAB  QWERTY_LT_IN
+#define QWERTY_LM_IN &tap_hold_layer_lgui LGUI_NAV_L A  &hml L_M3 S  &hml L_M2 D  &hml L_M1 F  &kp G
+#define QWERTY_LM &key_layer_SQT_NUM  QWERTY_LM_IN
+#define QWERTY_LB_IN &kp Z  &kp X  &kp C  &kp V  &kp B
+#define QWERTY_LB &trans  QWERTY_LB_IN
 #define QWERTY_LH &LTS EXTRA ESC  &smart_nav_thumb NAV TAB  &lgui_space_tab
 #define QWERTY_LH_5 &trans &trans QWERTY_LH
 
 
 #define QWERTY_RZ &trans &trans &trans &trans &trans &trans
-#define QWERTY_RT &kp Y    &kp U  &kp I  &kp O  &kp P  &backspace_word_delete
-#define QWERTY_RM &kp H  &hmr R_M1 J  &hmr R_M2 K  &hmr R_M3 L  &tap_hold_layer_rgui RGUI_NAV_R SEMI  &key_layer_DQT_NUM
-#define QWERTY_RB &kp N  &kp M  &kp COMMA  &kp DOT  &kp FSLH  &kp RET
+#define QWERTY_RT_IN &kp Y  &kp U  &kp I  &kp O  &kp P
+#define QWERTY_RT QWERTY_RT_IN  &backspace_word_delete
+#define QWERTY_RM_IN &kp H  &hmr R_M1 J  &hmr R_M2 K  &hmr R_M3 L  &tap_hold_layer_rgui RGUI_NAV_R SEMI
+#define QWERTY_RM QWERTY_RM_IN  &key_layer_DQT_NUM
+#define QWERTY_RB_IN &kp N  &kp M  &kp COMMA  &kp DOT  &kp FSLH
+#define QWERTY_RB QWERTY_RB_IN  &kp RET
 #define QWERTY_RH &rgui_space_ret  &smart_nav_thumb NAV BSPC  &LTS FN RETURN
 #define QWERTY_RH_5 &trans &trans QWERTY_RH
 
@@ -552,16 +558,22 @@ arcane_nav_r: arcane_nav_r {
 // ****************************************** GAMING layer
 
 #define GAMING_LZ &trans &trans &trans &trans &trans &trans
-#define GAMING_LT &kp ESC  &kp Q  &kp W  &kp E  &kp R  &kp T		         
-#define GAMING_LM &kp CAPS  &kp A  &kp S  &kp D  &kp F  &kp G
-#define GAMING_LB &kp LSHIFT  &kp Z  &kp X  &kp C  &kp V  &kp B   
+#define GAMING_LT_IN &kp Q  &kp W  &kp E  &kp R  &kp T
+#define GAMING_LT &kp ESC  GAMING_LT_IN
+#define GAMING_LM_IN &kp A  &kp S  &kp D  &kp F  &kp G
+#define GAMING_LM &kp CAPS  GAMING_LM_IN
+#define GAMING_LB_IN &kp Z  &kp X  &kp C  &kp V  &kp B
+#define GAMING_LB &kp LSHIFT  GAMING_LB_IN
 #define GAMING_LH &kp LCTRL  &smart_nav_thumb NAV TAB  &hml LALT SPACE                
 #define GAMING_LH_5 &trans &trans GAMING_LH
 
 #define GAMING_RZ &trans &trans &trans &trans &trans &trans
-#define GAMING_RT &kp Y  &kp U  &kp I  &kp O  &kp P  &kp BSPC
-#define GAMING_RM &kp H  &kp J  &kp K  &kp L  &kp SEMI  &kp SQT
-#define GAMING_RB &kp N  &kp M  &kp COMMA  &kp DOT  &kp FSLH  &kp RSHIFT
+#define GAMING_RT_IN &kp Y  &kp U  &kp I  &kp O  &kp P
+#define GAMING_RT GAMING_RT_IN  &kp BSPC
+#define GAMING_RM_IN &kp H  &kp J  &kp K  &kp L  &kp SEMI
+#define GAMING_RM GAMING_RM_IN  &kp SQT
+#define GAMING_RB_IN &kp N  &kp M  &kp COMMA  &kp DOT  &kp FSLH
+#define GAMING_RB GAMING_RB_IN  &kp RSHIFT
 #define GAMING_RH &hmr RALT SPACE  &smart_nav_thumb NAV BSPC  &kp RETURN
 #define GAMING_RH_5 &trans &trans GAMING_RH
 
@@ -572,16 +584,22 @@ arcane_nav_r: arcane_nav_r {
 // ****************************************** CAPS layer
 
 #define CAPS_LZ &trans &trans &trans &trans &trans &trans
-#define CAPS_LT &caps_toggle &trans &trans &trans &trans &trans
-#define CAPS_LM &trans &trans &trans &trans &trans &trans
-#define CAPS_LB &trans &trans &trans &trans &trans &trans
+#define CAPS_LT_IN &trans  &trans  &trans  &trans  &trans
+#define CAPS_LT &caps_toggle  CAPS_LT_IN
+#define CAPS_LM_IN &trans  &trans  &trans  &trans  &trans
+#define CAPS_LM &trans  CAPS_LM_IN
+#define CAPS_LB_IN &trans  &trans  &trans  &trans  &trans
+#define CAPS_LB &trans  CAPS_LB_IN
 #define CAPS_LH &trans &trans &trans
 #define CAPS_LH_5 &trans &trans CAPS_LH
 
 #define CAPS_RZ &trans &trans &trans &trans &trans &trans
-#define CAPS_RT &trans &trans &trans &trans &trans &trans
-#define CAPS_RM &trans &trans &trans &trans &trans &trans
-#define CAPS_RB &trans &trans &trans &trans &trans &trans
+#define CAPS_RT_IN &trans  &trans  &trans  &trans  &trans
+#define CAPS_RT CAPS_RT_IN  &trans
+#define CAPS_RM_IN &trans  &trans  &trans  &trans  &trans
+#define CAPS_RM CAPS_RM_IN  &trans
+#define CAPS_RB_IN &trans  &trans  &trans  &trans  &trans
+#define CAPS_RB CAPS_RB_IN  &trans
 #define CAPS_RH &trans &trans &trans
 #define CAPS_RH_5 &trans &trans CAPS_RH
 
@@ -589,17 +607,23 @@ arcane_nav_r: arcane_nav_r {
 // ******************************************  NUMERIC layer
 
 #define NUMERIC_LZ &trans     &trans        &trans        &trans        &trans        &trans
-#define NUMERIC_LT &kp GRAVE  &kp EXCL      &kp AT        &kp HASH      &kp DOLLAR    &kp PERCENT
-#define NUMERIC_LM &kp N0     &hml L_M4 N1  &hml L_M3 N2  &hml L_M2 N3  &hml L_M1 N4  &kp N5
-#define NUMERIC_LB &trans     &trans        &trans        &trans        &trans        &cancel
+#define NUMERIC_LT_IN &kp EXCL  &kp AT  &kp HASH  &kp DOLLAR  &kp PERCENT
+#define NUMERIC_LT &kp GRAVE  NUMERIC_LT_IN
+#define NUMERIC_LM_IN &hml L_M4 N1  &hml L_M3 N2  &hml L_M2 N3  &hml L_M1 N4  &kp N5
+#define NUMERIC_LM &kp N0  NUMERIC_LM_IN
+#define NUMERIC_LB_IN &trans  &trans  &trans  &trans  &cancel
+#define NUMERIC_LB &trans  NUMERIC_LB_IN
 #define NUMERIC_LH &trans  &trans  &trans
 #define NUMERIC_LH_5 &trans &trans NUMERIC_LH
 
 
 #define NUMERIC_RZ &trans     &trans        &trans        &trans        &trans        &trans
-#define NUMERIC_RT &kp CARET  &kp AMPS      &kp ASTERISK  &kp LPAR      &kp RPAR      &kp EQUAL
-#define NUMERIC_RM &kp N6     &hmr R_M1 N7  &hmr R_M2 N8  &hmr R_M3 N9  &hmr R_M4 N0  &kp MINUS
-#define NUMERIC_RB &cancel    &trans        &trans        &trans        &trans        &trans
+#define NUMERIC_RT_IN &kp CARET  &kp AMPS  &kp ASTERISK  &kp LPAR  &kp RPAR
+#define NUMERIC_RT NUMERIC_RT_IN  &kp EQUAL
+#define NUMERIC_RM_IN &kp N6  &hmr R_M1 N7  &hmr R_M2 N8  &hmr R_M3 N9  &hmr R_M4 N0
+#define NUMERIC_RM NUMERIC_RM_IN  &kp MINUS
+#define NUMERIC_RB_IN &cancel  &trans  &trans  &trans  &trans
+#define NUMERIC_RB NUMERIC_RB_IN  &trans
 #define NUMERIC_RH &trans  &kp BACKSPACE  &kp PERIOD
 #define NUMERIC_RH_5 &trans &trans NUMERIC_RH
 
@@ -608,16 +632,22 @@ arcane_nav_r: arcane_nav_r {
 // ******************************************  NAVIGATION layer
 
 #define NAVIGATION_LZ &trans &trans &trans &trans &trans &trans
-#define NAVIGATION_LT &trans  &kp PG_UP  &kp END  &kp UP_ARROW  &kp HOME  &msc_up_variable
-#define NAVIGATION_LM &trans  &hml L_M4 PG_DN  &hml L_M3 LEFT_ARROW  &hml L_M2 DOWN_ARROW  &hml L_M1 RIGHT_ARROW  &msc_down_variable
-#define NAVIGATION_LB &trans  &trans  &trans  &trans  &trans  &trans
+#define NAVIGATION_LT_IN &kp PG_UP  &kp END  &kp UP_ARROW  &kp HOME  &msc_up_variable
+#define NAVIGATION_LT &trans  NAVIGATION_LT_IN
+#define NAVIGATION_LM_IN &hml L_M4 PG_DN  &hml L_M3 LEFT_ARROW  &hml L_M2 DOWN_ARROW  &hml L_M1 RIGHT_ARROW  &msc_down_variable
+#define NAVIGATION_LM &trans  NAVIGATION_LM_IN
+#define NAVIGATION_LB_IN &trans  &trans  &trans  &trans  &trans
+#define NAVIGATION_LB &trans  NAVIGATION_LB_IN
 #define NAVIGATION_LH &trans  &trans  &kp SPACE                                                          
 #define NAVIGATION_LH_5 &trans &trans NAVIGATION_LH
 
 #define NAVIGATION_RZ &trans &trans &trans &trans &trans &trans
-#define NAVIGATION_RT &msc_up_variable  &kp HOME  &kp UP_ARROW  &kp END  &kp PG_UP  &trans
-#define NAVIGATION_RM &msc_down_variable  &hmr R_M1 LEFT_ARROW  &hmr R_M2 DOWN_ARROW  &hmr R_M3 RIGHT_ARROW  &hmr R_M4 PG_DN  &trans
-#define NAVIGATION_RB &mkp MB2  &mkp MB3  &mkp MB4  &mkp MB5  &trans  &trans
+#define NAVIGATION_RT_IN &msc_up_variable  &kp HOME  &kp UP_ARROW  &kp END  &kp PG_UP
+#define NAVIGATION_RT NAVIGATION_RT_IN  &trans
+#define NAVIGATION_RM_IN &msc_down_variable  &hmr R_M1 LEFT_ARROW  &hmr R_M2 DOWN_ARROW  &hmr R_M3 RIGHT_ARROW  &hmr R_M4 PG_DN
+#define NAVIGATION_RM NAVIGATION_RM_IN  &trans
+#define NAVIGATION_RB_IN &mkp MB2  &mkp MB3  &mkp MB4  &mkp MB5  &trans
+#define NAVIGATION_RB NAVIGATION_RB_IN  &trans
 #define NAVIGATION_RH &kp SPACE  &trans  &trans
 #define NAVIGATION_RH_5 &trans &trans NAVIGATION_RH
 
@@ -637,34 +667,46 @@ MAKE_ADAPTIVE_REPEAT(f_hrk_f23, hmr, R_M4, F23)
 
 
 #define FUNCTION_LZ &trans   &trans      &trans      &trans       &trans      &trans
-#define FUNCTION_LT &kp F1   &kp F2      &kp F3      &kp F4       &kp F5      &kp F6
-#define FUNCTION_LM &kp F13  &f_hrk_f14  &f_hrk_f15  &f_hrk_f16   &f_hrk_f17  &kp F18
-#define FUNCTION_LB &trans   &sys_reset  &trans      &bootloader  &trans      &mkp MB5
+#define FUNCTION_LT_IN &kp F2  &kp F3  &kp F4  &kp F5  &kp F6
+#define FUNCTION_LT &kp F1  FUNCTION_LT_IN
+#define FUNCTION_LM_IN &f_hrk_f14  &f_hrk_f15  &f_hrk_f16  &f_hrk_f17  &kp F18
+#define FUNCTION_LM &kp F13  FUNCTION_LM_IN
+#define FUNCTION_LB_IN &sys_reset  &trans  &bootloader  &trans  &mkp MB5
+#define FUNCTION_LB &trans  FUNCTION_LB_IN
 #define FUNCTION_LH &trans &trans &build_time
 #define FUNCTION_LH_5 &trans &trans FUNCTION_LH
 
 
 #define FUNCTION_RZ &trans &trans &trans &trans &trans &trans
-#define FUNCTION_RT &kp F7   &kp F8      &kp F9       &kp F10     &kp F11         &kp F12
-#define FUNCTION_RM &kp F19  &f_hrk_f20  &f_hrk_f21   &f_hrk_f22  &f_hrk_f23      &kp F24
-#define FUNCTION_RB &trans   &trans      &bootloader  &sys_reset  &kp SCROLLLOCK  &kp PAUSE_BREAK
+#define FUNCTION_RT_IN &kp F7  &kp F8  &kp F9  &kp F10  &kp F11
+#define FUNCTION_RT FUNCTION_RT_IN  &kp F12
+#define FUNCTION_RM_IN &kp F19  &f_hrk_f20  &f_hrk_f21  &f_hrk_f22  &f_hrk_f23
+#define FUNCTION_RM FUNCTION_RM_IN  &kp F24
+#define FUNCTION_RB_IN &trans  &trans  &bootloader  &sys_reset  &kp SCROLLLOCK
+#define FUNCTION_RB FUNCTION_RB_IN  &kp PAUSE_BREAK
 #define FUNCTION_RH &build_time  &trans  &trans
 #define FUNCTION_RH_5 &trans &trans FUNCTION_RH
 
 // ******************************************  EXTRA layer
 
 #define EXTRA_LZ &trans        &trans    &trans    &trans    &trans    &trans
-#define EXTRA_LT &smart_w      &trans    &kp MENU  &trans    &trans    &kp DELETE
-#define EXTRA_LM &trans        &sk L_M4  &sk L_M3  &sk L_M2  &sk L_M1  &trans
-#define EXTRA_LB &dash_emdash  &trans    &trans    &trans    &trans    &trans
+#define EXTRA_LT_IN &trans  &kp MENU  &trans  &trans  &kp DELETE
+#define EXTRA_LT &smart_w  EXTRA_LT_IN
+#define EXTRA_LM_IN &sk L_M4  &sk L_M3  &sk L_M2  &sk L_M1  &trans
+#define EXTRA_LM &trans  EXTRA_LM_IN
+#define EXTRA_LB_IN &trans  &trans  &trans  &trans  &trans
+#define EXTRA_LB &dash_emdash  EXTRA_LB_IN
 #define EXTRA_LH                      &trans &oneshot_or_to_NAVIGATION &trans
 #define EXTRA_LH_5 &trans &trans EXTRA_LH
 
 
 #define EXTRA_RZ &trans      &trans        &trans    &trans           &trans      &trans
-#define EXTRA_RT &kp INSERT  &at_wgyl_org  &trans    &leader          &phone_alt  &trans
-#define EXTRA_RM &trans      &sk R_M1      &sk R_M2  &sk R_M3         &sk R_M4    &trans
-#define EXTRA_RB &trans      &trans        &trans    &personal_email  &trans      &key_repeat
+#define EXTRA_RT_IN &kp INSERT  &at_wgyl_org  &trans  &leader  &phone_alt
+#define EXTRA_RT EXTRA_RT_IN  &trans
+#define EXTRA_RM_IN &trans  &sk R_M1  &sk R_M2  &sk R_M3  &sk R_M4
+#define EXTRA_RM EXTRA_RM_IN  &trans
+#define EXTRA_RB_IN &trans  &trans  &trans  &personal_email  &trans
+#define EXTRA_RB EXTRA_RB_IN  &key_repeat
 #define EXTRA_RH   		  &trans &oneshot_or_to_NAVIGATION &trans
 #define EXTRA_RH_5 &trans &trans EXTRA_RH
 
@@ -674,14 +716,20 @@ MAKE_ADAPTIVE_REPEAT(f_hrk_f23, hmr, R_M4, F23)
 #define RGB_LZ &trans &trans &trans &trans &trans &trans
 #define RGB_RZ &trans &trans &trans &trans &trans &trans
 
-#define RGB_LT &trans  &trans  &trans  &trans  &trans  &trans
-#define RGB_RT &rgb_ug RGB_HUI  &rgb_ug RGB_SAI  &trans  &trans  &rgb_ug RGB_COLOR_HSB(0,100,100)    &rgb_ug RGB_COLOR_HSB(275,100,100)
+#define RGB_LT_IN &trans  &trans  &trans  &trans  &trans
+#define RGB_LT &trans  RGB_LT_IN
+#define RGB_RT_IN &rgb_ug RGB_HUI  &rgb_ug RGB_SAI  &trans  &trans  &rgb_ug RGB_COLOR_HSB(0,100,100)
+#define RGB_RT RGB_RT_IN  &rgb_ug RGB_COLOR_HSB(275,100,100)
 
-#define RGB_LM &trans  &trans  &trans  &trans  &trans  &trans
-#define RGB_RM &rgb_ug RGB_HUD  &rgb_ug RGB_SAD  &trans  &trans  &rgb_ug RGB_COLOR_HSB(90,100,100)   &rgb_ug RGB_COLOR_HSB(186,100,100)
+#define RGB_LM_IN &trans  &trans  &trans  &trans  &trans
+#define RGB_LM &trans  RGB_LM_IN
+#define RGB_RM_IN &rgb_ug RGB_HUD  &rgb_ug RGB_SAD  &trans  &trans  &rgb_ug RGB_COLOR_HSB(90,100,100)
+#define RGB_RM RGB_RM_IN  &rgb_ug RGB_COLOR_HSB(186,100,100)
 
-#define RGB_LB &trans &trans &trans &trans &trans &trans
-#define RGB_RB &trans &trans &trans &trans &rgb_ug RGB_COLOR_HSB(270,100,100) &rgb_ug RGB_COLOR_HSB(317,100,100)
+#define RGB_LB_IN &trans  &trans  &trans  &trans  &trans
+#define RGB_LB &trans  RGB_LB_IN
+#define RGB_RB_IN &trans  &trans  &trans  &trans  &rgb_ug RGB_COLOR_HSB(270,100,100)
+#define RGB_RB RGB_RB_IN  &rgb_ug RGB_COLOR_HSB(317,100,100)
 
 #define RGB_LH &trans &trans &trans
 #define RGB_RH &trans &trans &trans 
@@ -695,20 +743,26 @@ MAKE_ADAPTIVE_REPEAT(f_hrk_f23, hmr, R_M4, F23)
 
 #define SYSTEM_LZ &trans &trans &trans &trans &trans &trans
 
-#define SYSTEM_LT &bt BT_CLR    &bt BT_CLR_ALL  &trans        &trans        &trans        &trans
+#define SYSTEM_LT_IN &bt BT_CLR_ALL  &trans  &trans  &trans  &trans
+#define SYSTEM_LT &bt BT_CLR  SYSTEM_LT_IN
 
-#define SYSTEM_LM &trans &trans &trans &trans &trans &trans
+#define SYSTEM_LM_IN &trans  &trans  &trans  &trans  &trans
+#define SYSTEM_LM &trans  SYSTEM_LM_IN
 //#define SYSTEM_LM &bt BT_SEL 0  &hml L_M4 &bt BT_SEL 1  &hml L_M3 &bt BT_SEL 2  &hml L_M2 &bt BT_SEL 3  &hml L_M1 &bt BT_SEL 4 &bt BT_SEL 5
 
 
-#define SYSTEM_LB &trans        &trans          &trans        &trans &trans &rgb_ug RGB_EFF
+#define SYSTEM_LB_IN &trans  &trans  &trans  &trans  &rgb_ug RGB_EFF
+#define SYSTEM_LB &trans  SYSTEM_LB_IN
 #define SYSTEM_LH &trans &trans &trans
 #define SYSTEM_LH_5 &trans &trans SYSTEM_LH
 
 #define SYSTEM_RZ &trans &trans &trans &trans &trans &trans
-#define SYSTEM_RT &fancy_bt_0 &fancy_bt_1 &fancy_bt_2 &fancy_bt_3 &fancy_bt_4 &fancy_bt_5
-#define SYSTEM_RM &trans &trans &trans &trans &trans &trans
-#define SYSTEM_RB &rgb_ug RGB_EFR  &rgb_ug RGB_SPI  &rgb_ug RGB_BRI  &rgb_ug RGB_BRD  &kp END   &kp PG_DN
+#define SYSTEM_RT_IN &fancy_bt_0  &fancy_bt_1  &fancy_bt_2  &fancy_bt_3  &fancy_bt_4
+#define SYSTEM_RT SYSTEM_RT_IN  &fancy_bt_5
+#define SYSTEM_RM_IN &trans  &trans  &trans  &trans  &trans
+#define SYSTEM_RM SYSTEM_RM_IN  &trans
+#define SYSTEM_RB_IN &rgb_ug RGB_EFR  &rgb_ug RGB_SPI  &rgb_ug RGB_BRI  &rgb_ug RGB_BRD  &kp END
+#define SYSTEM_RB SYSTEM_RB_IN  &kp PG_DN
 #define SYSTEM_RH &trans &trans &trans
 #define SYSTEM_RH_5 &trans &trans SYSTEM_RH
 
@@ -719,17 +773,23 @@ MAKE_ADAPTIVE_REPEAT(f_hrk_f23, hmr, R_M4, F23)
 // ideally, there would be an elegant way to bind a key to "&trans + modifier"
 
 #define LGN_LZ &trans &trans &trans &trans &trans &trans
-#define LGN_LT &kp LG(TAB)    &kp LG(F)  &kp LG(Z)        &kp LG(U)        &kp LG(Q)     &kp LG(BSPC)
-#define LGN_LM &trans  &trans  &hml L_M3 LG(I)  &hml L_M2 LG(E)  &hml L_M1(A)  &kp LG(P)
-#define LGN_LB &kp LG(BSLH)  &kp LG(COMMA)  &kp LG(Y)        &kp LG(K)        &kp LG(O)     &kp LG(X)
+#define LGN_LT_IN &kp LG(F)  &kp LG(Z)  &kp LG(U)  &kp LG(Q)  &kp LG(BSPC)
+#define LGN_LT &kp LG(TAB)  LGN_LT_IN
+#define LGN_LM_IN &trans  &hml L_M3 LG(I)  &hml L_M2 LG(E)  &hml L_M1(A)  &kp LG(P)
+#define LGN_LM &trans  LGN_LM_IN
+#define LGN_LB_IN &kp LG(COMMA)  &kp LG(Y)  &kp LG(K)  &kp LG(O)  &kp LG(X)
+#define LGN_LB &kp LG(BSLH)  LGN_LB_IN
 #define LGN_LH &kp LG(ESC)  &kp LG(TAB)  &to HIEROPHANT
 #define LGN_LH_5 &trans &trans LGN_LH
 
 
 #define LGN_RZ &trans &trans &trans &trans &trans &trans
-#define LGN_RT &msc LG(SCRL_UP)    &kp LG(HOME)        &kp LG(UP_ARROW)    &kp LG(END)          &kp LG(PG_UP)  &kp LG(BSPC)
-#define LGN_RM &msc LG(SCRL_DOWN)  &kp LG(LEFT_ARROW)  &kp LG(DOWN_ARROW)  &kp LG(RIGHT_ARROW)  &kp LG(PG_DN)  &kp LG(SQT)
-#define LGN_RB &kp LG(V)           &kp LG(C)           &kp LG(M)       &kp LG(J)          &kp LG(DOT)   &kp LG(FSLH)
+#define LGN_RT_IN &msc LG(SCRL_UP)  &kp LG(HOME)  &kp LG(UP_ARROW)  &kp LG(END)  &kp LG(PG_UP)
+#define LGN_RT LGN_RT_IN  &kp LG(BSPC)
+#define LGN_RM_IN &msc LG(SCRL_DOWN)  &kp LG(LEFT_ARROW)  &kp LG(DOWN_ARROW)  &kp LG(RIGHT_ARROW)  &kp LG(PG_DN)
+#define LGN_RM LGN_RM_IN  &kp LG(SQT)
+#define LGN_RB_IN &kp LG(V)  &kp LG(C)  &kp LG(M)  &kp LG(J)  &kp LG(DOT)
+#define LGN_RB LGN_RB_IN  &kp LG(FSLH)
 #define LGN_RH &to HIEROPHANT &numpad_word NUMPAD  &kp LG(RET)
 #define LGN_RH_5 &trans &trans LGN_RH
 
@@ -740,17 +800,23 @@ MAKE_ADAPTIVE_REPEAT(f_hrk_f23, hmr, R_M4, F23)
 // ideally, there would be an elegant way to bind a key to "&trans + modifier"
 
 #define RGN_LZ &trans &trans &trans &trans &trans &trans
-#define RGN_LT &kp RG(TAB)   &kp RG(PG_UP)  &kp RG(DELETE)      &kp RG(UP_ARROW)    &kp RG(HOME)         &msc RG(SCRL_UP)
-#define RGN_LM &trans        &kp RG(PG_DN)  &kp RG(LEFT_ARROW)  &kp RG(DOWN_ARROW)  &kp RG(RIGHT_ARROW)  &msc RG(SCRL_DOWN)
-#define RGN_LB &kp RG(BSLH)  &kp RG(COMMA)  &kp RG(Y)        &kp RG(K)        &kp RG(O)     &kp RG(X)
+#define RGN_LT_IN &kp RG(PG_UP)  &kp RG(DELETE)  &kp RG(UP_ARROW)  &kp RG(HOME)  &msc RG(SCRL_UP)
+#define RGN_LT &kp RG(TAB)  RGN_LT_IN
+#define RGN_LM_IN &kp RG(PG_DN)  &kp RG(LEFT_ARROW)  &kp RG(DOWN_ARROW)  &kp RG(RIGHT_ARROW)  &msc RG(SCRL_DOWN)
+#define RGN_LM &trans  RGN_LM_IN
+#define RGN_LB_IN &kp RG(COMMA)  &kp RG(Y)  &kp RG(K)  &kp RG(O)  &kp RG(X)
+#define RGN_LB &kp RG(BSLH)  RGN_LB_IN
 #define RGN_LH &kp RG(ESC)   &symbol_word SYMBOL   &to HIEROPHANT
 #define RGN_LH_5 &trans &trans RGN_LH
 
 
 #define RGN_RZ &trans &trans &trans &trans &trans &trans
-#define RGN_RT &kp RG(RETURN)  &kp RG(W)     &kp RG(D)        &kp RG(L)        &kp RG(B)     &kp RG(BSPC)
-#define RGN_RM &kp RG(G)       &hmr R_M1(S)  &hmr R_M2 RG(T)  &hmr R_M3 RG(R)  &trans        &kp RG(SQT)
-#define RGN_RB &kp RG(V)       &kp RG(C)     &kp RG(M)        &kp RG(J)        &kp RG(DOT)   &kp RG(FSLH)
+#define RGN_RT_IN &kp RG(RETURN)  &kp RG(W)  &kp RG(D)  &kp RG(L)  &kp RG(B)
+#define RGN_RT RGN_RT_IN  &kp RG(BSPC)
+#define RGN_RM_IN &kp RG(G)  &hmr R_M1(S)  &hmr R_M2 RG(T)  &hmr R_M3 RG(R)  &trans
+#define RGN_RM RGN_RM_IN  &kp RG(SQT)
+#define RGN_RB_IN &kp RG(V)  &kp RG(C)  &kp RG(M)  &kp RG(J)  &kp RG(DOT)
+#define RGN_RB RGN_RB_IN  &kp RG(FSLH)
 #define RGN_RH &to HIEROPHANT  &kp RG(BSPC)  &kp RG(RET)
 #define RGN_RH_5 &trans &trans RGN_RH
 
@@ -760,16 +826,22 @@ MAKE_ADAPTIVE_REPEAT(f_hrk_f23, hmr, R_M4, F23)
 
 		
 #define BLUETOOTH_LZ &trans &trans &trans &trans &trans &trans
-#define BLUETOOTH_LT &bt BT_SEL 0  &bt BT_SEL 1   &bt BT_SEL 2   &bt BT_SEL 3   &bt BT_SEL 4   &bt BT_SEL 5
-#define BLUETOOTH_LM &bt BT_DISC 0 &bt BT_DISC 1  &bt BT_DISC 2  &bt BT_DISC 3  &bt BT_DISC 4  &bt BT_DISC 5
-#define BLUETOOTH_LB &bt BT_CLR &trans &trans &trans &trans &trans
+#define BLUETOOTH_LT_IN &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4  &bt BT_SEL 5
+#define BLUETOOTH_LT &bt BT_SEL 0  BLUETOOTH_LT_IN
+#define BLUETOOTH_LM_IN &bt BT_DISC 1  &bt BT_DISC 2  &bt BT_DISC 3  &bt BT_DISC 4  &bt BT_DISC 5
+#define BLUETOOTH_LM &bt BT_DISC 0  BLUETOOTH_LM_IN
+#define BLUETOOTH_LB_IN &trans  &trans  &trans  &trans  &trans
+#define BLUETOOTH_LB &bt BT_CLR  BLUETOOTH_LB_IN
 #define BLUETOOTH_LH &trans &trans &trans
 #define BLUETOOTH_LH_5 &trans &trans BLUETOOTH_LH
 
 #define BLUETOOTH_RZ &trans &trans &trans &trans &trans &trans
-#define BLUETOOTH_RT &trans &trans &trans &trans &trans &trans
-#define BLUETOOTH_RM &trans &trans &trans &trans &trans &trans
-#define BLUETOOTH_RB &trans &trans &trans &trans &trans &trans
+#define BLUETOOTH_RT_IN &trans  &trans  &trans  &trans  &trans
+#define BLUETOOTH_RT BLUETOOTH_RT_IN  &trans
+#define BLUETOOTH_RM_IN &trans  &trans  &trans  &trans  &trans
+#define BLUETOOTH_RM BLUETOOTH_RM_IN  &trans
+#define BLUETOOTH_RB_IN &trans  &trans  &trans  &trans  &trans
+#define BLUETOOTH_RB BLUETOOTH_RB_IN  &trans
 #define BLUETOOTH_RH &trans &trans &trans
 #define BLUETOOTH_RH_5 &trans &trans BLUETOOTH_RH
 
@@ -780,14 +852,20 @@ MAKE_ADAPTIVE_REPEAT(f_hrk_f23, hmr, R_M4, F23)
 #define SUPERSCRIPT_LZ &trans &trans &trans &trans &trans &trans
 #define SUPERSCRIPT_RZ &trans &trans &trans &trans &trans &trans
 
-#define SUPERSCRIPT_LT &trans &trans &trans &trans &trans &trans
-#define SUPERSCRIPT_RT &trans &trans &trans &trans &trans &trans
+#define SUPERSCRIPT_LT_IN &trans  &trans  &trans  &trans  &trans
+#define SUPERSCRIPT_LT &trans  SUPERSCRIPT_LT_IN
+#define SUPERSCRIPT_RT_IN &trans  &trans  &trans  &trans  &trans
+#define SUPERSCRIPT_RT SUPERSCRIPT_RT_IN  &trans
 
-#define SUPERSCRIPT_LM &trans &trans &trans &trans &trans &trans
-#define SUPERSCRIPT_RM &trans &trans &trans &trans &trans &trans
+#define SUPERSCRIPT_LM_IN &trans  &trans  &trans  &trans  &trans
+#define SUPERSCRIPT_LM &trans  SUPERSCRIPT_LM_IN
+#define SUPERSCRIPT_RM_IN &trans  &trans  &trans  &trans  &trans
+#define SUPERSCRIPT_RM SUPERSCRIPT_RM_IN  &trans
 
-#define SUPERSCRIPT_LB &trans &trans &trans &trans &trans &trans
-#define SUPERSCRIPT_RB &trans &trans &trans &trans &trans &trans
+#define SUPERSCRIPT_LB_IN &trans  &trans  &trans  &trans  &trans
+#define SUPERSCRIPT_LB &trans  SUPERSCRIPT_LB_IN
+#define SUPERSCRIPT_RB_IN &trans  &trans  &trans  &trans  &trans
+#define SUPERSCRIPT_RB SUPERSCRIPT_RB_IN  &trans
 
 #define SUPERSCRIPT_LH &trans &trans &trans
 #define SUPERSCRIPT_RH &trans &trans &trans
@@ -801,17 +879,23 @@ MAKE_ADAPTIVE_REPEAT(f_hrk_f23, hmr, R_M4, F23)
 // ******************************************  NUMPAD layer
 
 #define NUMPAD_LZ &trans &trans &trans &trans &trans &trans
-#define NUMPAD_LT &kp BSLH  &kp N0    &kp N1 &kp N2 &kp N3  &kp QUESTION
-#define NUMPAD_LM &trans    &kp PLUS  &kp N4 &kp N5 &kp N6  &kp SQT
-#define NUMPAD_LB &trans    &kp DOT   &kp N7 &kp N8 &kp N9  &kp LESS_THAN
+#define NUMPAD_LT_IN &kp N0  &kp N1  &kp N2  &kp N3  &kp QUESTION
+#define NUMPAD_LT &kp BSLH  NUMPAD_LT_IN
+#define NUMPAD_LM_IN &kp PLUS  &kp N4  &kp N5  &kp N6  &kp SQT
+#define NUMPAD_LM &trans  NUMPAD_LM_IN
+#define NUMPAD_LB_IN &kp DOT  &kp N7  &kp N8  &kp N9  &kp LESS_THAN
+#define NUMPAD_LB &trans  NUMPAD_LB_IN
 #define NUMPAD_LH &kp N0 &trans &trans
 #define NUMPAD_LH_5 &trans &trans NUMPAD_LH
 
 
 #define NUMPAD_RZ &trans   &trans &trans &trans  &trans     &trans
-#define NUMPAD_RT &kp N0   &kp N1 &kp N2 &kp N3  &kp MINUS  &kp FSLH
-#define NUMPAD_RM &kp DQT  &kp N4 &kp N5 &kp N6  &kp PLUS   &trans
-#define NUMPAD_RB &kp GREATER_THAN   &kp N7 &kp N8 &kp N9  &kp DOT    &trans
+#define NUMPAD_RT_IN &kp N0  &kp N1  &kp N2  &kp N3  &kp MINUS
+#define NUMPAD_RT NUMPAD_RT_IN  &kp FSLH
+#define NUMPAD_RM_IN &kp DQT  &kp N4  &kp N5  &kp N6  &kp PLUS
+#define NUMPAD_RM NUMPAD_RM_IN  &trans
+#define NUMPAD_RB_IN &kp GREATER_THAN  &kp N7  &kp N8  &kp N9  &kp DOT
+#define NUMPAD_RB NUMPAD_RB_IN  &trans
 #define NUMPAD_RH &trans &trans &kp N0
 #define NUMPAD_RH_5 &trans &trans NUMPAD_RH
 
@@ -829,17 +913,23 @@ MAKE_ADAPTIVE_REPEAT(f_hrk_f23, hmr, R_M4, F23)
 // ******************************************  EMPTY layer
 
 #define _LZ &trans &trans &trans &trans &trans &trans
-#define _LT &trans &trans &trans &trans &trans &trans
-#define _LM &trans &trans &trans &trans &trans &trans
-#define _LB &trans &trans &trans &trans &trans &trans
+#define _LT_IN &trans  &trans  &trans  &trans  &trans
+#define _LT &trans  _LT_IN
+#define _LM_IN &trans  &trans  &trans  &trans  &trans
+#define _LM &trans  _LM_IN
+#define _LB_IN &trans  &trans  &trans  &trans  &trans
+#define _LB &trans  _LB_IN
 #define _LH &trans &trans &trans
 #define _LH_5 &trans &trans _LH
 
 
 #define _RZ &trans &trans &trans &trans &trans &trans
-#define _RT &trans &trans &trans &trans &trans &trans
-#define _RM &trans &trans &trans &trans &trans &trans
-#define _RB &trans &trans &trans &trans &trans &trans
+#define _RT_IN &trans  &trans  &trans  &trans  &trans
+#define _RT _RT_IN  &trans
+#define _RM_IN &trans  &trans  &trans  &trans  &trans
+#define _RM _RM_IN  &trans
+#define _RB_IN &trans  &trans  &trans  &trans  &trans
+#define _RB _RB_IN  &trans
 #define _RH &trans &trans &trans
 #define _RH_5 &trans &trans _RH
 

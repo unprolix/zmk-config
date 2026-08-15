@@ -168,15 +168,21 @@ ZMK_SIMPLE_MACRO(dot_slash, <&kp DOT>, <&kp FSLH>)
 
 
 #define HIEROPHANT_LZ &trans &trans &trans &trans &trans &trans
-#define HIEROPHANT_LT &kp TILDE  &adaptive_f_repeat                          &adaptive_z_repeat  &adaptive_u_repeat  &adaptive_q_repeat NUMPAD 0  &backspace_word_delete
-#define HIEROPHANT_LM &sqt_dash  &tap_hold_layer_lgui_adaptive LGUI_NAV_L 0  &adaptive_i_repeat  &adaptive_e_repeat  &adaptive_a_repeat           &adaptive_p_repeat
-#define HIEROPHANT_LB &kp LCTRL   &comma_semicolon                            &kp Y               &kp K               &kp O                        &kp X
+#define HIEROPHANT_LT_IN &adaptive_f_repeat  &adaptive_z_repeat  &adaptive_u_repeat  &adaptive_q_repeat NUMPAD 0  &backspace_word_delete
+#define HIEROPHANT_LT &kp TILDE  HIEROPHANT_LT_IN
+#define HIEROPHANT_LM_IN &tap_hold_layer_lgui_adaptive LGUI_NAV_L 0  &adaptive_i_repeat  &adaptive_e_repeat  &adaptive_a_repeat  &adaptive_p_repeat
+#define HIEROPHANT_LM &sqt_dash  HIEROPHANT_LM_IN
+#define HIEROPHANT_LB_IN &comma_semicolon  &kp Y  &kp K  &kp O  &kp X
+#define HIEROPHANT_LB &kp LCTRL  HIEROPHANT_LB_IN
 #define HIEROPHANT_LH &sl_sym_or_numpad  &arcane_nav_l NAV 0  &lgui_space_tab
 #define HIEROPHANT_LH_5 &trans &trans HIEROPHANT_LH
 
 #define HIEROPHANT_RZ &trans &trans &trans &trans &trans &trans
-#define HIEROPHANT_RT &kp RETURN          &adaptive_w_repeat  &adaptive_d_repeat  &adaptive_l_repeat  &adaptive_b_repeat                 &kp SEMI
-#define HIEROPHANT_RM &adaptive_g_repeat  &adaptive_s_repeat  &adaptive_t_repeat  &adaptive_r_repeat  &tap_hold_layer_rgui RGUI_NAV_R N  &dqt_underscore
-#define HIEROPHANT_RB &kp V               &kp C               &kp M               &adaptive_j_dot     &dot_colon                         &kp FSLH
+#define HIEROPHANT_RT_IN &kp RETURN  &adaptive_w_repeat  &adaptive_d_repeat  &adaptive_l_repeat  &adaptive_b_repeat
+#define HIEROPHANT_RT HIEROPHANT_RT_IN  &kp SEMI
+#define HIEROPHANT_RM_IN &adaptive_g_repeat  &adaptive_s_repeat  &adaptive_t_repeat  &adaptive_r_repeat  &tap_hold_layer_rgui RGUI_NAV_R N
+#define HIEROPHANT_RM HIEROPHANT_RM_IN  &dqt_underscore
+#define HIEROPHANT_RB_IN &kp V  &kp C  &kp M  &adaptive_j_dot  &dot_colon
+#define HIEROPHANT_RB HIEROPHANT_RB_IN  &kp FSLH
 #define HIEROPHANT_RH &rgui_space_ret   &arcane_nav_r NAV 0  &sl_num_or_word
 #define HIEROPHANT_RH_5 &trans &trans HIEROPHANT_RH

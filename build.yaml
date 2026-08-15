@@ -54,6 +54,15 @@ include:
     cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/eyelash_corne_salon.conf"
     artifact-name: eyelash_corne_right_salon-nice_view
 
+  # beekeeb Toucan2 36-key (shield vendored in config/boards/shields/toucan;
+  # trackpad driver modules pinned in config/west.yml)
+  - board: xiao_ble/nrf52840
+    shield: toucan_left nice_view
+    artifact-name: toucan_left-nice_view
+  - board: xiao_ble/nrf52840
+    shield: toucan_right
+    artifact-name: toucan_right
+
   # Other boards
   - board: nice_nano@2.0.0/nrf52840/zmk
     shield: sofle_ergomech_left

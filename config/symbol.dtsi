@@ -13,17 +13,23 @@ MAKE_ANTECEDENT_MORPH(grave_slash, GRAVE, FSLH, TILDE)
 
 
 #define SYMBOL_LZ &trans   &trans                &trans                 &trans                &trans                 &trans
-#define SYMBOL_LT &kp ESC  &kp ESC               &kp PIPE               &kp RS(TAB)           &kp EQUAL              &kp LEFT_BRACE
-#define SYMBOL_LM &trans   &kp SQT               &adaptive_bslh_repeat  &kp UNDERSCORE        &adaptive_lpar_repeat  &kp LEFT_BRACKET
-#define SYMBOL_LB &trans   &kp TILDE             &grave_slash           &trans                &trans                 &kp LESS_THAN
+#define SYMBOL_LT_IN &kp ESC  &kp PIPE  &kp RS(TAB)  &kp EQUAL  &kp LEFT_BRACE
+#define SYMBOL_LT &kp ESC  SYMBOL_LT_IN
+#define SYMBOL_LM_IN &kp SQT  &adaptive_bslh_repeat  &kp UNDERSCORE  &adaptive_lpar_repeat  &kp LEFT_BRACKET
+#define SYMBOL_LM &trans  SYMBOL_LM_IN
+#define SYMBOL_LB_IN &kp TILDE  &grave_slash  &trans  &trans  &kp LESS_THAN
+#define SYMBOL_LB &trans  SYMBOL_LB_IN
 #define SYMBOL_LH &trans &trans &kp TAB
 #define SYMBOL_LH_5 &trans &trans _LH
 
 
 #define SYMBOL_RZ &trans             &trans                 &trans                  &trans                 &trans                &trans
-#define SYMBOL_RT &kp RIGHT_BRACE    &kp PLUS               &kp TAB                 &kp QUESTION           &kp EXCL              &kp ESC
-#define SYMBOL_RM &kp RIGHT_BRACKET  &adaptive_rpar_repeat  &kp MINUS               &adaptive_fslh_repeat  &kp DQT               &trans
-#define SYMBOL_RB &kp GREATER_THAN   &trans                 &trans                  &trans                 &trans                &trans
+#define SYMBOL_RT_IN &kp RIGHT_BRACE  &kp PLUS  &kp TAB  &kp QUESTION  &kp EXCL
+#define SYMBOL_RT SYMBOL_RT_IN  &kp ESC
+#define SYMBOL_RM_IN &kp RIGHT_BRACKET  &adaptive_rpar_repeat  &kp MINUS  &adaptive_fslh_repeat  &kp DQT
+#define SYMBOL_RM SYMBOL_RM_IN  &trans
+#define SYMBOL_RB_IN &kp GREATER_THAN  &trans  &trans  &trans  &trans
+#define SYMBOL_RB SYMBOL_RB_IN  &trans
 #define SYMBOL_RH &kp TAB &trans &trans
 #define SYMBOL_RH_5 &trans &trans _RH
 
