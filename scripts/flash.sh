@@ -150,7 +150,7 @@ fi
 
 # Wait up to 60s so this works as a single invocation: run it first, then
 # double-tap reset on the half being flashed.
-BOOTLOADER_WAIT_SECONDS=60
+BOOTLOADER_WAIT_SECONDS=${BOOTLOADER_WAIT_SECONDS:-60}
 echo "Mounting keyboard device (waiting up to ${BOOTLOADER_WAIT_SECONDS}s — double-tap reset now)..."
 if ! "$SCRIPT_DIR/mount-device.py" $KEYBOARD_ARG $VERBOSE --wait "$BOOTLOADER_WAIT_SECONDS" "$MOUNT_POINT"; then
     echo "Error: Failed to mount keyboard device"
