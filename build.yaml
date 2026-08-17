@@ -57,8 +57,8 @@ include:
   # beekeeb Toucan2 36-key (shield vendored in config/boards/shields/toucan;
   # trackpad driver modules pinned in config/west.yml)
   - board: xiao_ble/nrf52840/zmk
-    shield: toucan_left nice_view
-    artifact-name: toucan_left-nice_view
+    shield: toucan_left toucan_display
+    artifact-name: toucan_left-display
   - board: xiao_ble/nrf52840/zmk
     shield: toucan_right
     artifact-name: toucan_right

@@ -1,0 +1,21 @@
+/* Toucan2 display: Sharp memory-in-pixel LS013B7DH05-class, 144x168.
+ * nice_view_spi is defined by toucan_left.overlay (spi0 on the xiao).
+ * serial-vcom props per the Zephyr 4.1 ls0xx driver (software VCOM). */
+&nice_view_spi {
+    status = "okay";
+    toucan_view: ls0xx@0 {
+        compatible = "sharp,ls0xx";
+        spi-max-frequency = <1000000>;
+        reg = <0>;
+        width = <144>;
+        height = <168>;
+        serial-vcom-inversion;
+        serial-vcom-interval = <33>;
+    };
+};
+
+/ {
+    chosen {
+        zephyr,display = &toucan_view;
+    };
+};
