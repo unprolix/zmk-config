@@ -255,6 +255,12 @@ ZMK_TAP_DANCE(smart_num_lock_dance, bindings = <&sl NUM>, <&num_word NUM>, <&rgb
 MAKE_HRM(hml, &kp, &kp, KEYS_R THUMBS) // Left-hand HRMs.
 MAKE_HRM(hmr, &kp, &kp, KEYS_L THUMBS) // Right-hand HRMs.
 
+// SUPERSCRIPT home-row mods (&sup_uc lives in layer-mod-macros.dtsi): same timings as the ordinary HRMs, but tapping
+// emits a superscript instead of a letter. Without these the SUPERSCRIPT layer
+// would drop every home-row mod for as long as it is toggled on.
+MAKE_HRM(hml_sup, &kp, &sup_uc, KEYS_R THUMBS)
+MAKE_HRM(hmr_sup, &kp, &sup_uc, KEYS_L THUMBS)
+
 MAKE_HRM_SYM(hml_sym, &kp, &kp, KEYS_R THUMBS) // SYMBOL-layer left HRMs (longer term, more prior-idle).
 MAKE_HRM_SYM(hmr_sym, &kp, &kp, KEYS_L THUMBS) // SYMBOL-layer right HRMs.
 
@@ -904,11 +910,11 @@ MAKE_ADAPTIVE_REPEAT(f_hrk_f23, hmr, R_M4, F23)
 #define SUPERSCRIPT_RT_IN &trans  SUP_W  SUP_D  SUP_L  SUP_B
 #define SUPERSCRIPT_RT SUPERSCRIPT_RT_IN  &trans
 
-//                         h      i      e      a      p
-#define SUPERSCRIPT_LM_IN SUP_H  SUP_I  SUP_E  SUP_A  SUP_P
+// Home row keeps its mods, mirroring hierophant: h=LGUI i=LALT e=LSHIFT a=LCTRL.
+#define SUPERSCRIPT_LM_IN &hml_sup L_M4 0x02B0  &hml_sup L_M3 0x2071  &hml_sup L_M2 0x1D49  &hml_sup L_M1 0x1D43  SUP_P
 #define SUPERSCRIPT_LM &trans  SUPERSCRIPT_LM_IN
-//                         g      s      t      r      n
-#define SUPERSCRIPT_RM_IN SUP_G  SUP_S  SUP_T  SUP_R  SUP_N
+// Mirrored on the right: s=RCTRL t=RSHIFT r=RALT n=RGUI.
+#define SUPERSCRIPT_RM_IN SUP_G  &hmr_sup R_M1 0x02E2  &hmr_sup R_M2 0x1D57  &hmr_sup R_M3 0x02B3  &hmr_sup R_M4 0x207F
 #define SUPERSCRIPT_RM SUPERSCRIPT_RM_IN  &trans
 
 //                         ,      y      k      o      x

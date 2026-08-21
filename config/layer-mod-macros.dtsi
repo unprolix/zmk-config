@@ -151,3 +151,18 @@ layer_rgui: layer_rgui {
         , <&macro_release &kp RGUI>
         ;
 };
+
+
+// Unicode codepoint as a single-parameter behaviour, so it can serve as the tap
+// half of a hold-tap. &uc itself takes two cells, which a hold-tap cannot feed:
+// a hold-tap passes exactly one parameter to each of its two bindings. Used by
+// hml_sup/hmr_sup to keep home-row mods alive on the SUPERSCRIPT layer.
+sup_uc: sup_uc {
+    compatible = "zmk,behavior-macro-one-param";
+    #binding-cells = <1>;
+    wait-ms = <0>;
+    tap-ms = <0>;
+    bindings
+        = <&macro_param_1to1>
+        , <&uc MACRO_PLACEHOLDER 0>;
+};
