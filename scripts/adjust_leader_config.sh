@@ -35,6 +35,59 @@ count_leader_sequences() {
     echo "$count"
 }
 
+# Function to count the bindings in the longest macro.
+#
+# Macros default to MACRO_MODE_TAP, which enqueues TWO behaviour-queue slots per
+# binding (a press and a release). A macro longer than half the queue therefore
+# loses its tail silently -- no error, it just stops partway. The long address
+# macros hit this: home_address_web needs 82 slots against a default queue of 64
+# and never reached the phone number.
+count_longest_macro() {
+    python3 - "$CONFIG_DIR" <<'PYEOF'
+import glob, os, re, sys
+
+config_dir = sys.argv[1]
+longest = 0
+
+for path in glob.glob(os.path.join(config_dir, "*.dtsi")) + \
+            glob.glob(os.path.join(config_dir, "*.keymap")):
+    try:
+        text = open(path, errors="ignore").read()
+    except OSError:
+        continue
+
+    # Join line continuations so multi-line macro bodies count as one.
+    text = text.replace("\\\n", " ")
+
+    for line in text.splitlines():
+        if "ZMK_SIMPLE_MACRO" not in line and "macro_tap" not in line:
+            continue
+        # Commented-out definitions do not generate anything.
+        if line.lstrip().startswith("//"):
+            continue
+        longest = max(longest, len(re.findall(r"&kp\b", line)))
+
+print(longest)
+PYEOF
+}
+
+# Function to update an arbitrary CONFIG_ symbol, raising it only.
+update_conf_symbol() {
+    local config_file="$1" symbol="$2" value="$3"
+
+    if grep -q "^${symbol}=" "$config_file"; then
+        local current
+        current=$(grep "^${symbol}=" "$config_file" | cut -d= -f2)
+        if [[ $value -gt $current ]]; then
+            sed -i "s/^${symbol}=.*/${symbol}=${value}/" "$config_file"
+            echo "Updated ${symbol} to ${value} in $(basename "$config_file")"
+        fi
+    else
+        echo "${symbol}=${value}" >> "$config_file"
+        echo "Added ${symbol}=${value} to $(basename "$config_file")"
+    fi
+}
+
 # Function to update config file with new sequence limit
 update_config_file() {
     local config_file="$1"
@@ -88,11 +141,23 @@ main() {
     echo "Found $sequence_count leader sequences in $LEADER_FILE"
     echo "Calculated required limit: $required_limit (with $safety_margin safety margin)"
 
+    # Behaviour-queue guard: two slots per macro binding, plus room for whatever
+    # else is queued alongside a running macro.
+    local longest_macro required_queue
+    longest_macro=$(count_longest_macro)
+    required_queue=$(( longest_macro * 2 + 32 ))
+    if [[ $required_queue -lt 64 ]]; then
+        required_queue=64  # never drop below ZMK's own default
+    fi
+    echo "Longest macro: $longest_macro bindings -> needs $(( longest_macro * 2 )) queue slots; setting $required_queue"
+
     # If no specific config file specified, update all .conf files
     if [[ -z "$target_config" ]]; then
         local updated_files=0
         for config_file in "$CONFIG_DIR"/*.conf; do
             if [[ -f "$config_file" ]]; then
+                update_conf_symbol "$config_file" CONFIG_ZMK_BEHAVIORS_QUEUE_SIZE "$required_queue"
+
                 local current_limit
                 current_limit=$(get_current_config "$config_file")
 
