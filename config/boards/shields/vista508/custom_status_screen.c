@@ -29,6 +29,7 @@
 #include <zmk/events/endpoint_changed.h>
 #include <zmk/events/layer_state_changed.h>
 #include <zmk/keymap.h>
+#include <zmk-leader-key/leader_state.h>
 #include <zmk/display/widgets/wpm_status.h>
 
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
@@ -50,6 +51,7 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
  */
 static lv_obj_t *conn_label;
 static lv_obj_t *batt_label;
+static lv_obj_t *leader_label;
 
 /* Peripheral level arrives by event; there is no polling accessor for it. */
 static uint8_t peripheral_soc;
@@ -212,6 +214,65 @@ ZMK_DISPLAY_WIDGET_LISTENER(rolio_batt_status, struct rolio_batt_state, rolio_ba
 ZMK_SUBSCRIPTION(rolio_batt_status, zmk_battery_state_changed);
 ZMK_SUBSCRIPTION(rolio_batt_status, zmk_peripheral_battery_state_changed);
 
+/* ------------------------------------------------------------------ */
+/* Leader sequence                                                     */
+/* ------------------------------------------------------------------ */
+
+/*
+ * While a leader sequence is being entered, replace the layer name with what
+ * is still reachable. With 116 sequences defined, listing them all the instant
+ * leader is pressed would be noise, so nothing is listed until the candidate
+ * set is small enough to be worth reading.
+ */
+#define LEADER_LIST_THRESHOLD 6
+#define LEADER_TEXT_MAX       96
+
+static void rolio_leader_update_cb(struct zmk_leader_state_changed state) {
+    if (leader_label == NULL || layer_label == NULL) {
+        return;
+    }
+
+    if (!state.active) {
+        /* Hand the screen back to the layer name. */
+        lv_label_set_text(leader_label, "");
+        lv_obj_clear_flag(layer_label, LV_OBJ_FLAG_HIDDEN);
+        return;
+    }
+
+    lv_obj_add_flag(layer_label, LV_OBJ_FLAG_HIDDEN);
+
+    char text[LEADER_TEXT_MAX];
+    int used = snprintf(text, sizeof(text), "LEADER");
+
+    if (state.candidate_count == 0) {
+        snprintf(text, sizeof(text), "LEADER\nno match");
+    } else if (state.candidate_count > LEADER_LIST_THRESHOLD) {
+        snprintf(text, sizeof(text), "LEADER\n%d options", state.candidate_count);
+    } else {
+        for (uint8_t i = 0; i < state.candidate_count && used < (int)sizeof(text) - 1; i++) {
+            const char *name = zmk_leader_candidate_name(i);
+            if (name == NULL) {
+                break;
+            }
+            used += snprintf(text + used, sizeof(text) - used, "\n%s", name);
+        }
+    }
+
+    lv_label_set_text(leader_label, text);
+}
+
+static struct zmk_leader_state_changed rolio_leader_get_state(const zmk_event_t *eh) {
+    const struct zmk_leader_state_changed *ev = as_zmk_leader_state_changed(eh);
+    if (ev != NULL) {
+        return *ev;
+    }
+    return (struct zmk_leader_state_changed){0};
+}
+
+ZMK_DISPLAY_WIDGET_LISTENER(rolio_leader_status, struct zmk_leader_state_changed,
+                            rolio_leader_update_cb, rolio_leader_get_state)
+ZMK_SUBSCRIPTION(rolio_leader_status, zmk_leader_state_changed);
+
 lv_obj_t *zmk_display_status_screen(void) {
     lv_obj_t *screen = lv_obj_create(NULL);
 
@@ -251,6 +312,15 @@ lv_obj_t *zmk_display_status_screen(void) {
     lv_obj_set_style_text_align(layer_label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
     lv_obj_align(layer_label, LV_ALIGN_CENTER, 0, 0);
     rolio_layer_status_init();
+
+    /* Occupies the same middle band as the layer name; only one shows at a time. */
+    leader_label = lv_label_create(screen);
+    lv_obj_set_width(leader_label, CONTENT_W);
+    lv_label_set_long_mode(leader_label, LV_LABEL_LONG_WRAP);
+    lv_obj_set_style_text_align(leader_label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
+    lv_obj_align(leader_label, LV_ALIGN_CENTER, 0, 0);
+    lv_label_set_text(leader_label, "");
+    rolio_leader_status_init();
 
     /* WPM along the bottom. */
 #if IS_ENABLED(CONFIG_ZMK_WIDGET_WPM_STATUS)

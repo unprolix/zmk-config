@@ -100,7 +100,13 @@ manifest:
       path: modules/zmk/auto-layer
     - name: zmk-helpers
       path: modules/zmk/helpers
+    # User fork: adds a zmk_leader_state_changed event plus candidate accessors
+    # so the display can show an in-progress leader sequence and what can still
+    # be typed. Upstream (urob) keeps all of that in file-scope statics and
+    # raises no events, so none of it is observable.
     - name: zmk-leader-key
+      remote: unprolix
+      revision: cb711961a4c29aee6dd5abee702e666e87d2330a
       path: modules/zmk/leader-key
     - name: zmk-tri-state
       path: modules/zmk/tri-state
