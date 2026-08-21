@@ -78,6 +78,7 @@ ZMK_LEADER_SEQUENCE(gr_phi, &el_phi, P H I)  // ϕ
 
 ZMK_LEADER_SEQUENCE(gaming,      &to GAMING,     G A M E)
 ZMK_LEADER_SEQUENCE(bluetooth,      &to BLUETOOTH, B T)
+ZMK_LEADER_SEQUENCE(rgb,         &to RGB,       R G B)  // the Rolio has no joystick to reach it with
 
 
 ZMK_LEADER_SEQUENCE(reset,      &sys_reset,     R E S E T)

@@ -722,12 +722,16 @@ MAKE_ADAPTIVE_REPEAT(f_hrk_f23, hmr, R_M4, F23)
 #define RGB_LZ &trans &trans &trans &trans &trans &trans
 #define RGB_RZ &trans &trans &trans &trans &trans &trans
 
-#define RGB_LT_IN &trans  &trans  &trans  &trans  &trans
+// Left half drives the global underglow state; the right half (below) sets
+// hue/saturation and jumps to preset colours.
+//                     on/off              next effect          prev effect
+#define RGB_LT_IN &rgb_ug RGB_TOG  &rgb_ug RGB_EFF  &rgb_ug RGB_EFR  &trans  &trans
 #define RGB_LT &trans  RGB_LT_IN
 #define RGB_RT_IN &rgb_ug RGB_HUI  &rgb_ug RGB_SAI  &trans  &trans  &rgb_ug RGB_COLOR_HSB(0,100,100)
 #define RGB_RT RGB_RT_IN  &rgb_ug RGB_COLOR_HSB(275,100,100)
 
-#define RGB_LM_IN &trans  &trans  &trans  &trans  &trans
+//                     brighter            dimmer             faster             slower
+#define RGB_LM_IN &rgb_ug RGB_BRI  &rgb_ug RGB_BRD  &rgb_ug RGB_SPI  &rgb_ug RGB_SPD  &trans
 #define RGB_LM &trans  RGB_LM_IN
 #define RGB_RM_IN &rgb_ug RGB_HUD  &rgb_ug RGB_SAD  &trans  &trans  &rgb_ug RGB_COLOR_HSB(90,100,100)
 #define RGB_RM RGB_RM_IN  &rgb_ug RGB_COLOR_HSB(186,100,100)
@@ -737,8 +741,9 @@ MAKE_ADAPTIVE_REPEAT(f_hrk_f23, hmr, R_M4, F23)
 #define RGB_RB_IN &trans  &trans  &trans  &trans  &rgb_ug RGB_COLOR_HSB(270,100,100)
 #define RGB_RB RGB_RB_IN  &rgb_ug RGB_COLOR_HSB(317,100,100)
 
-#define RGB_LH &trans &trans &trans
-#define RGB_RH &trans &trans &trans 
+// The layer is otherwise transparent, so without these there is no way back.
+#define RGB_LH &trans &trans &to HIEROPHANT
+#define RGB_RH &to HIEROPHANT &trans &trans 
 
 #define RGB_LH_5 &trans &trans RGB_LH
 #define RGB_RH_5 &trans &trans RGB_RH
@@ -832,23 +837,29 @@ MAKE_ADAPTIVE_REPEAT(f_hrk_f23, hmr, R_M4, F23)
 
 		
 #define BLUETOOTH_LZ &trans &trans &trans &trans &trans &trans
-#define BLUETOOTH_LT_IN &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4  &bt BT_SEL 5
+// ZMK_BLE_PROFILE_COUNT = BT_MAX_PAIRED(6) - SPLIT_PERIPHERALS(1) = 5, so the
+// valid profiles are 0-4 and the old `BT_SEL 5` here was a dead key. Raising
+// CONFIG_BT_MAX_PAIRED to 7 would give a sixth, at the cost of re-pairing.
+#define BLUETOOTH_LT_IN &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4  &trans
 #define BLUETOOTH_LT &bt BT_SEL 0  BLUETOOTH_LT_IN
 #define BLUETOOTH_LM_IN &bt BT_DISC 1  &bt BT_DISC 2  &bt BT_DISC 3  &bt BT_DISC 4  &bt BT_DISC 5
 #define BLUETOOTH_LM &bt BT_DISC 0  BLUETOOTH_LM_IN
 #define BLUETOOTH_LB_IN &trans  &trans  &trans  &trans  &trans
 #define BLUETOOTH_LB &bt BT_CLR  BLUETOOTH_LB_IN
-#define BLUETOOTH_LH &trans &trans &trans
+#define BLUETOOTH_LH &trans &trans &to HIEROPHANT
 #define BLUETOOTH_LH_5 &trans &trans BLUETOOTH_LH
 
 #define BLUETOOTH_RZ &trans &trans &trans &trans &trans &trans
-#define BLUETOOTH_RT_IN &trans  &trans  &trans  &trans  &trans
+// Output routing. Without these there is no way to force USB or BLE: with both
+// connected ZMK picks USB, and nothing in this config could override that.
+//                       force USB      force BLE      toggle
+#define BLUETOOTH_RT_IN &out OUT_USB  &out OUT_BLE  &out OUT_TOG  &trans  &trans
 #define BLUETOOTH_RT BLUETOOTH_RT_IN  &trans
 #define BLUETOOTH_RM_IN &trans  &trans  &trans  &trans  &trans
 #define BLUETOOTH_RM BLUETOOTH_RM_IN  &trans
 #define BLUETOOTH_RB_IN &trans  &trans  &trans  &trans  &trans
 #define BLUETOOTH_RB BLUETOOTH_RB_IN  &trans
-#define BLUETOOTH_RH &trans &trans &trans
+#define BLUETOOTH_RH &to HIEROPHANT &trans &trans
 #define BLUETOOTH_RH_5 &trans &trans BLUETOOTH_RH
 
 
