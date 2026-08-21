@@ -72,11 +72,27 @@
         sensitivity = "2x";
         data-mode = "relative";
         primary-tap-enable;
+        /*
+         * The pad is mounted rotated: without this, moving left on the pad
+         * moves the pointer up. The vendor corrects the same thing in their
+         * input listener with INPUT_TRANSFORM_XY_SWAP; the in-tree driver can
+         * do it itself. Note invert-x/invert-y are absolute-mode only, so any
+         * remaining mirroring has to be fixed with zip_xy_transform instead.
+         */
+        swap-xy;
     };
 };
 
+/*
+ * swap-xy on the driver fixes the transposition, but the pad is also mirrored
+ * top-to-bottom. invert-x/invert-y are absolute-mode only and this pad runs in
+ * relative mode, so the flip has to be an input processor. It lives here on the
+ * peripheral rather than in the central's listener so that the correction
+ * travels with the hardware it corrects.
+ */
 &glidepoint_split {
     device = <&glidepoint>;
+    input-processors = <&zip_xy_transform (INPUT_TRANSFORM_Y_INVERT)>;
 };
 
 /************************************************/
