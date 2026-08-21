@@ -22,10 +22,10 @@ choice ZMK_DISPLAY_WORK_QUEUE
     default ZMK_DISPLAY_WORK_QUEUE_DEDICATED
 endchoice
 
-# The vendor's custom LVGL status screen (animations, WPM chart, pairing view)
-# is not ported; ZMK's built-in screen needs no widget C in the config dir.
+# Custom screen: the built-in one is laid out for a nice!view 160x68 and
+# truncates the layer name on this 144x168 portrait panel.
 choice ZMK_DISPLAY_STATUS_SCREEN
-    default ZMK_DISPLAY_STATUS_SCREEN_BUILT_IN
+    default ZMK_DISPLAY_STATUS_SCREEN_CUSTOM
 endchoice
 
 # 144x168 is ~2.2x the pixel count of a nice!view; give LVGL more headroom.
