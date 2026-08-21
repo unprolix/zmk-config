@@ -21,11 +21,14 @@
 
 #include <zmk/display/status_screen.h>
 #include <zmk/display.h>
+#include <zmk/battery.h>
+#include <zmk/ble.h>
+#include <zmk/endpoints.h>
+#include <zmk/events/battery_state_changed.h>
+#include <zmk/events/ble_active_profile_changed.h>
+#include <zmk/events/endpoint_changed.h>
 #include <zmk/events/layer_state_changed.h>
 #include <zmk/keymap.h>
-#include <zmk/display/widgets/battery_status.h>
-#include <zmk/display/widgets/output_status.h>
-#include <zmk/display/widgets/peripheral_status.h>
 #include <zmk/display/widgets/wpm_status.h>
 
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
@@ -36,16 +39,21 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
 /* Leave room for the themed screen's own padding on each side. */
 #define CONTENT_W  (SCREEN_W - 16)
+#define ROW_H      22
+#define STATUS_MAX 24
 
-#if IS_ENABLED(CONFIG_ZMK_WIDGET_BATTERY_STATUS)
-static struct zmk_widget_battery_status battery_status_widget;
-#endif
-#if IS_ENABLED(CONFIG_ZMK_WIDGET_OUTPUT_STATUS)
-static struct zmk_widget_output_status output_status_widget;
-#endif
-#if IS_ENABLED(CONFIG_ZMK_WIDGET_PERIPHERAL_STATUS)
-static struct zmk_widget_peripheral_status peripheral_status_widget;
-#endif
+/*
+ * Connection and battery are drawn here rather than with ZMK's own widgets.
+ * Those render LVGL glyphs -- WIFI/USB/OK/CLOSE/SETTINGS -- which are compact
+ * enough for a nice!view but cryptic, and this panel has room for words.
+ * The state comes from the same APIs ZMK's widgets use.
+ */
+static lv_obj_t *conn_label;
+static lv_obj_t *batt_label;
+
+/* Peripheral level arrives by event; there is no polling accessor for it. */
+static uint8_t peripheral_soc;
+static bool peripheral_seen;
 /*
  * Local layer-name widget.
  *
@@ -94,6 +102,116 @@ ZMK_SUBSCRIPTION(rolio_layer_status, zmk_layer_state_changed);
 static struct zmk_widget_wpm_status wpm_status_widget;
 #endif
 
+/* ------------------------------------------------------------------ */
+/* Connection                                                          */
+/* ------------------------------------------------------------------ */
+
+struct rolio_conn_state {
+    struct zmk_endpoint_instance selected;
+    enum zmk_transport preferred;
+    bool profile_connected;
+    bool profile_bonded;
+};
+
+static void rolio_conn_update_cb(struct rolio_conn_state state) {
+    if (conn_label == NULL) {
+        return;
+    }
+
+    char text[STATUS_MAX];
+    enum zmk_transport transport = state.selected.transport;
+    bool connected = transport != ZMK_TRANSPORT_NONE;
+
+    /* When nothing is connected, show what it is reaching for instead. */
+    if (!connected) {
+        transport = state.preferred;
+    }
+
+    switch (transport) {
+    case ZMK_TRANSPORT_USB:
+        snprintf(text, sizeof(text), connected ? "USB" : "USB ...");
+        break;
+    case ZMK_TRANSPORT_BLE:
+        if (!state.profile_bonded) {
+            snprintf(text, sizeof(text), "BT%d unpaired",
+                     zmk_ble_active_profile_index() + 1);
+        } else {
+            snprintf(text, sizeof(text), "BT%d %s", zmk_ble_active_profile_index() + 1,
+                     state.profile_connected ? "ok" : "...");
+        }
+        break;
+    default:
+        snprintf(text, sizeof(text), "offline");
+        break;
+    }
+
+    lv_label_set_text(conn_label, text);
+}
+
+static struct rolio_conn_state rolio_conn_get_state(const zmk_event_t *eh) {
+    return (struct rolio_conn_state){
+        .selected = zmk_endpoint_get_selected(),
+        .preferred = zmk_endpoint_get_preferred_transport(),
+        .profile_connected = zmk_ble_active_profile_is_connected(),
+        .profile_bonded = !zmk_ble_active_profile_is_open(),
+    };
+}
+
+ZMK_DISPLAY_WIDGET_LISTENER(rolio_conn_status, struct rolio_conn_state, rolio_conn_update_cb,
+                            rolio_conn_get_state)
+ZMK_SUBSCRIPTION(rolio_conn_status, zmk_endpoint_changed);
+ZMK_SUBSCRIPTION(rolio_conn_status, zmk_ble_active_profile_changed);
+
+/* ------------------------------------------------------------------ */
+/* Battery, both halves                                                */
+/* ------------------------------------------------------------------ */
+
+struct rolio_batt_state {
+    uint8_t central;
+    uint8_t peripheral;
+    bool have_peripheral;
+};
+
+static void rolio_batt_update_cb(struct rolio_batt_state state) {
+    if (batt_label == NULL) {
+        return;
+    }
+
+    char text[STATUS_MAX];
+
+    if (state.have_peripheral) {
+        snprintf(text, sizeof(text), "L%d%%  R%d%%", state.central, state.peripheral);
+    } else {
+        snprintf(text, sizeof(text), "L%d%%", state.central);
+    }
+
+    lv_label_set_text(batt_label, text);
+}
+
+static struct rolio_batt_state rolio_batt_get_state(const zmk_event_t *eh) {
+    /*
+     * The peripheral's level only ever arrives as an event, so latch it as it
+     * goes past; there is no accessor to poll it back out of ZMK.
+     */
+    const struct zmk_peripheral_battery_state_changed *ev =
+        as_zmk_peripheral_battery_state_changed(eh);
+    if (ev != NULL) {
+        peripheral_soc = ev->state_of_charge;
+        peripheral_seen = true;
+    }
+
+    return (struct rolio_batt_state){
+        .central = zmk_battery_state_of_charge(),
+        .peripheral = peripheral_soc,
+        .have_peripheral = peripheral_seen,
+    };
+}
+
+ZMK_DISPLAY_WIDGET_LISTENER(rolio_batt_status, struct rolio_batt_state, rolio_batt_update_cb,
+                            rolio_batt_get_state)
+ZMK_SUBSCRIPTION(rolio_batt_status, zmk_battery_state_changed);
+ZMK_SUBSCRIPTION(rolio_batt_status, zmk_peripheral_battery_state_changed);
+
 lv_obj_t *zmk_display_status_screen(void) {
     lv_obj_t *screen = lv_obj_create(NULL);
 
@@ -106,22 +224,19 @@ lv_obj_t *zmk_display_status_screen(void) {
      */
     lv_obj_remove_flag(screen, LV_OBJ_FLAG_SCROLLABLE);
 
-    /* Top row: connection on the left, battery on the right. */
-#if IS_ENABLED(CONFIG_ZMK_WIDGET_OUTPUT_STATUS)
-    zmk_widget_output_status_init(&output_status_widget, screen);
-    lv_obj_align(zmk_widget_output_status_obj(&output_status_widget), LV_ALIGN_TOP_LEFT, 0, 0);
-#endif
+    /* Top: connection, then battery for both halves. */
+    conn_label = lv_label_create(screen);
+    lv_obj_set_width(conn_label, CONTENT_W);
+    lv_obj_set_style_text_align(conn_label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
+    lv_obj_align(conn_label, LV_ALIGN_TOP_MID, 0, 0);
 
-#if IS_ENABLED(CONFIG_ZMK_WIDGET_PERIPHERAL_STATUS)
-    zmk_widget_peripheral_status_init(&peripheral_status_widget, screen);
-    lv_obj_align(zmk_widget_peripheral_status_obj(&peripheral_status_widget), LV_ALIGN_TOP_LEFT, 0,
-                 0);
-#endif
+    batt_label = lv_label_create(screen);
+    lv_obj_set_width(batt_label, CONTENT_W);
+    lv_obj_set_style_text_align(batt_label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
+    lv_obj_align(batt_label, LV_ALIGN_TOP_MID, 0, ROW_H);
 
-#if IS_ENABLED(CONFIG_ZMK_WIDGET_BATTERY_STATUS)
-    zmk_widget_battery_status_init(&battery_status_widget, screen);
-    lv_obj_align(zmk_widget_battery_status_obj(&battery_status_widget), LV_ALIGN_TOP_RIGHT, 0, 0);
-#endif
+    rolio_conn_status_init();
+    rolio_batt_status_init();
 
     /*
      * Layer name: the whole point of this screen. LV_LABEL_LONG_WRAP breaks on
