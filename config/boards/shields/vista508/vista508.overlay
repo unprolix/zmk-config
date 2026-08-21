@@ -1,9 +1,11 @@
 /*
  * Vista508 — Sharp memory-in-pixel display, 144x168, on the Rolio left half.
  *
- * The vendor drives this with their zmk-ls0xxvcom-driver fork ("sharp,ls0xx-vcom").
- * Zephyr 4.1's in-tree ls0xx driver gained the same software-VCOM support, so
- * the stock `sharp,ls0xx` compatible is used here.
+ * Uses the vendor's zmk-ls0xxvcom-driver fork rather than Zephyr's in-tree
+ * `sharp,ls0xx`. Both do software VCOM, but only the fork has `rotate-180`,
+ * and this panel is mounted upside down. LVGL cannot rotate a 1-bit display
+ * (lv_draw_sw_rotate covers L8/RGB565/RGB888/XRGB8888 but not I1), so the
+ * rotation has to be done by the driver as it writes lines out.
  *
  * `vista508_spi` is provided by rolio_left.overlay (spi0, CS on P0.20).
  */
@@ -11,13 +13,14 @@
 &vista508_spi {
     status = "okay";
     vista508: ls0xx@0 {
-        compatible = "sharp,ls0xx";
+        compatible = "sharp,ls0xx-vcom";
         spi-max-frequency = <1000000>;
         reg = <0>;
         width = <144>;
         height = <168>;
         serial-vcom-inversion;
         serial-vcom-interval = <17>;
+        rotate-180;
     };
 };
 

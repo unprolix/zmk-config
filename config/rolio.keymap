@@ -20,9 +20,22 @@
 #include "jjb.keymap"
 
 /* Bottom-row extras, left pair is (outer, inner), right pair is (inner, outer).
-   Left as &trans, matching how the sofle build leaves its extra thumb keys. */
-#define ROLIO_LX &trans &trans
+   The shared layout has no slot for these, so they are bound here.
+
+   On the base layers the left pair splits apart the tap-dance that the outer
+   left thumb (&sl_sym_or_numpad) otherwise packs onto one key: tap for sticky
+   SYMBOL, double-tap for smart NUMPAD. Given dedicated keys, both are a single
+   press. Swap the two if the inner position suits SYMBOL better in practice.
+
+   The right pair stays inert -- mirroring these would collide with the right
+   half's own thumb behaviours. */
+#define ROLIO_LX &sl SYMBOL  &numpad_word NUMPAD
 #define ROLIO_RX &trans &trans
+
+/* Non-base layers inherit rather than re-triggering a layer switch from within
+   a layer, so the extras fall through there. */
+#define ROLIO_LX_T &trans &trans
+#define ROLIO_RX_T &trans &trans
 
 /* Roller push switches, left and right. The eyelash_corne binds its equivalent
    inner key (LEC) to &kp C_MUTE; left inert here pending your preference. */
@@ -76,7 +89,7 @@ ROLIO_LX GAMING_LH  GAMING_RH ROLIO_RX
 CAPS_LT CAPS_RT
 CAPS_LM CAPS_RM
 CAPS_LB ROLIO_CLICKS CAPS_RB
-ROLIO_LX CAPS_LH  CAPS_RH ROLIO_RX
+ROLIO_LX_T CAPS_LH  CAPS_RH ROLIO_RX_T
             >;
         };
 
@@ -86,7 +99,7 @@ ROLIO_LX CAPS_LH  CAPS_RH ROLIO_RX
 SUPERSCRIPT_LT SUPERSCRIPT_RT
 SUPERSCRIPT_LM SUPERSCRIPT_RM
 SUPERSCRIPT_LB ROLIO_CLICKS SUPERSCRIPT_RB
-ROLIO_LX SUPERSCRIPT_LH  SUPERSCRIPT_RH ROLIO_RX
+ROLIO_LX_T SUPERSCRIPT_LH  SUPERSCRIPT_RH ROLIO_RX_T
             >;
         };
 
@@ -96,7 +109,7 @@ ROLIO_LX SUPERSCRIPT_LH  SUPERSCRIPT_RH ROLIO_RX
 NUMERIC_LT NUMERIC_RT
 NUMERIC_LM NUMERIC_RM
 NUMERIC_LB ROLIO_CLICKS NUMERIC_RB
-ROLIO_LX NUMERIC_LH  NUMERIC_RH ROLIO_RX
+ROLIO_LX_T NUMERIC_LH  NUMERIC_RH ROLIO_RX_T
             >;
         };
 
@@ -106,7 +119,7 @@ ROLIO_LX NUMERIC_LH  NUMERIC_RH ROLIO_RX
 NUMPAD_LT NUMPAD_RT
 NUMPAD_LM NUMPAD_RM
 NUMPAD_LB ROLIO_CLICKS NUMPAD_RB
-ROLIO_LX NUMPAD_LH  NUMPAD_RH ROLIO_RX
+ROLIO_LX_T NUMPAD_LH  NUMPAD_RH ROLIO_RX_T
             >;
         };
 
@@ -116,7 +129,7 @@ ROLIO_LX NUMPAD_LH  NUMPAD_RH ROLIO_RX
 SYMBOL_LT SYMBOL_RT
 SYMBOL_LM SYMBOL_RM
 SYMBOL_LB ROLIO_CLICKS SYMBOL_RB
-ROLIO_LX SYMBOL_LH  SYMBOL_RH ROLIO_RX
+ROLIO_LX_T SYMBOL_LH  SYMBOL_RH ROLIO_RX_T
             >;
         };
 
@@ -126,7 +139,7 @@ ROLIO_LX SYMBOL_LH  SYMBOL_RH ROLIO_RX
 NAVIGATION_LT NAVIGATION_RT
 NAVIGATION_LM NAVIGATION_RM
 NAVIGATION_LB ROLIO_CLICKS NAVIGATION_RB
-ROLIO_LX NAVIGATION_LH  NAVIGATION_RH ROLIO_RX
+ROLIO_LX_T NAVIGATION_LH  NAVIGATION_RH ROLIO_RX_T
             >;
         };
 
@@ -136,7 +149,7 @@ ROLIO_LX NAVIGATION_LH  NAVIGATION_RH ROLIO_RX
 LGN_LT LGN_RT
 LGN_LM LGN_RM
 LGN_LB ROLIO_CLICKS LGN_RB
-ROLIO_LX LGN_LH  LGN_RH ROLIO_RX
+ROLIO_LX_T LGN_LH  LGN_RH ROLIO_RX_T
             >;
         };
 
@@ -146,7 +159,7 @@ ROLIO_LX LGN_LH  LGN_RH ROLIO_RX
 RGN_LT RGN_RT
 RGN_LM RGN_RM
 RGN_LB ROLIO_CLICKS RGN_RB
-ROLIO_LX RGN_LH  RGN_RH ROLIO_RX
+ROLIO_LX_T RGN_LH  RGN_RH ROLIO_RX_T
             >;
         };
 
@@ -156,7 +169,7 @@ ROLIO_LX RGN_LH  RGN_RH ROLIO_RX
 EXTRA_LT EXTRA_RT
 EXTRA_LM EXTRA_RM
 EXTRA_LB ROLIO_CLICKS EXTRA_RB
-ROLIO_LX EXTRA_LH  EXTRA_RH ROLIO_RX
+ROLIO_LX_T EXTRA_LH  EXTRA_RH ROLIO_RX_T
             >;
         };
 
@@ -166,7 +179,7 @@ ROLIO_LX EXTRA_LH  EXTRA_RH ROLIO_RX
 FUNCTION_LT FUNCTION_RT
 FUNCTION_LM FUNCTION_RM
 FUNCTION_LB ROLIO_CLICKS FUNCTION_RB
-ROLIO_LX FUNCTION_LH  FUNCTION_RH ROLIO_RX
+ROLIO_LX_T FUNCTION_LH  FUNCTION_RH ROLIO_RX_T
             >;
         };
 
@@ -176,7 +189,7 @@ ROLIO_LX FUNCTION_LH  FUNCTION_RH ROLIO_RX
 RGB_LT RGB_RT
 RGB_LM RGB_RM
 RGB_LB ROLIO_CLICKS RGB_RB
-ROLIO_LX RGB_LH  RGB_RH ROLIO_RX
+ROLIO_LX_T RGB_LH  RGB_RH ROLIO_RX_T
             >;
         };
 
@@ -186,7 +199,7 @@ ROLIO_LX RGB_LH  RGB_RH ROLIO_RX
 BLUETOOTH_LT BLUETOOTH_RT
 BLUETOOTH_LM BLUETOOTH_RM
 BLUETOOTH_LB ROLIO_CLICKS BLUETOOTH_RB
-ROLIO_LX BLUETOOTH_LH  BLUETOOTH_RH ROLIO_RX
+ROLIO_LX_T BLUETOOTH_LH  BLUETOOTH_RH ROLIO_RX_T
             >;
         };
 
@@ -196,7 +209,7 @@ ROLIO_LX BLUETOOTH_LH  BLUETOOTH_RH ROLIO_RX
 SYSTEM_LT SYSTEM_RT
 SYSTEM_LM SYSTEM_RM
 SYSTEM_LB ROLIO_CLICKS SYSTEM_RB
-ROLIO_LX SYSTEM_LH  SYSTEM_RH ROLIO_RX
+ROLIO_LX_T SYSTEM_LH  SYSTEM_RH ROLIO_RX_T
             >;
         };
 

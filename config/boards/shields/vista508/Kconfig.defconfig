@@ -29,7 +29,13 @@ choice ZMK_DISPLAY_STATUS_SCREEN
 endchoice
 
 # 144x168 is ~2.2x the pixel count of a nice!view; give LVGL more headroom.
+# NOTE: an earlier `default` elsewhere wins over this one, so the effective
+# value is set in vista508.conf instead -- a .conf assignment beats defaults.
 config LV_Z_MEM_POOL_SIZE
     default 8192
+
+# Rotation is handled by the driver's rotate-180 property, not by LVGL.
+config LS0XX_VCOM_THREAD_PRIO
+    default 11
 
 endif # SHIELD_VISTA508

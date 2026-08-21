@@ -56,6 +56,10 @@ manifest:
     - name: beekeeb
       url-base: https://github.com/beekeeb
 
+    # for the Rolio's Sharp display driver fork (adds rotate-180)
+    - name: mickiusmousius
+      url-base: https://github.com/MickiusMousius
+
   projects:
     - name: zmk
       remote: zmkfirmware
@@ -112,6 +116,15 @@ manifest:
       remote: ssbb
       revision: v1.0.1
       path: modules/zmk/zmk-antecedent-morph
+
+    # Sharp LS0XX display driver fork: software VCOM plus a native rotate-180
+    # property. The Rolio's panel is mounted upside down, and LVGL cannot
+    # software-rotate a 1-bit display (lv_draw_sw_rotate handles L8/RGB565/
+    # RGB888/XRGB8888 only), so the rotation has to happen in the driver.
+    - name: zmk-ls0xxvcom-driver
+      remote: mickiusmousius
+      revision: fc2043152a0b442d3109fca02955c8c64371e96b  # main as of 2026-08-21
+      path: modules/drivers/ls0xxvcom
 
     # for beekeeb toucan2 trackpad (shield is vendored in config/boards/shields/toucan)
     - name: zmk_driver_azoteq
