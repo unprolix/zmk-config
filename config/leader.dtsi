@@ -221,4 +221,4 @@ ZMK_LEADER_SEQUENCE(super_z, &uc 0x1DBB 0, S U P Z) // ᶻ
 
 
 // Superscript mode toggle
-//ZMK_LEADER_SEQUENCE(superscript_mode, &tog SUPERSCRIPT, S U P E R) // Toggle superscript mode
+ZMK_LEADER_SEQUENCE(superscript_mode, &tog SUPERSCRIPT, S U P E R) // Toggle superscript mode

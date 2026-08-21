@@ -848,32 +848,82 @@ MAKE_ADAPTIVE_REPEAT(f_hrk_f23, hmr, R_M4, F23)
 
 		
 // ****************************************** SUPERSCRIPT layer
+//
+// Each letter position emits the Unicode superscript of the letter that sits
+// there on the hierophant base layer. Everything else -- backspace, enter,
+// mods, punctuation, the thumbs -- stays &trans so it keeps working while the
+// layer is on; without that the layer would be a trap.
+//
+// Enter with LEADER S U P E R (leader.dtsi), leave with either inner thumb,
+// matching how the LGN/RGN layers exit.
+//
+// NOTE: the original design in alphanumerics.dtsi took a different route --
+// per-letter "smart_*" morphs behind #ifdef SUPERSCRIPT_REALLY, emitting the
+// superscript only while this layer was active. That depends on
+// zmk,behavior-layer-morph-fixed, which does not exist in ZMK or in any module
+// here, so it could never have compiled. Doing it as a plain layer needs no
+// new behaviour.
+//
+// q is deliberately &trans: Unicode has no superscript q in the modifier-letter
+// block that the rest of these come from, so it falls through and types a
+// normal q rather than emitting something no font will render.
+
+#define SUP_A &uc 0x1D43 0     // ᵃ
+#define SUP_B &uc 0x1D47 0     // ᵇ
+#define SUP_C &uc 0x1D9C 0     // ᶜ
+#define SUP_D &uc 0x1D48 0     // ᵈ
+#define SUP_E &uc 0x1D49 0     // ᵉ
+#define SUP_F &uc 0x1DA0 0     // ᶠ
+#define SUP_G &uc 0x1D4D 0     // ᵍ
+#define SUP_H &uc 0x02B0 0     // ʰ
+#define SUP_I &uc 0x2071 0     // ⁱ
+#define SUP_J &uc 0x02B2 0     // ʲ
+#define SUP_K &uc 0x1D4F 0     // ᵏ
+#define SUP_L &uc 0x02E1 0     // ˡ
+#define SUP_M &uc 0x1D50 0     // ᵐ
+#define SUP_N &uc 0x207F 0     // ⁿ
+#define SUP_O &uc 0x1D52 0     // ᵒ
+#define SUP_P &uc 0x1D56 0     // ᵖ
+#define SUP_R &uc 0x02B3 0     // ʳ
+#define SUP_S &uc 0x02E2 0     // ˢ
+#define SUP_T &uc 0x1D57 0     // ᵗ
+#define SUP_U &uc 0x1D58 0     // ᵘ
+#define SUP_V &uc 0x1D5B 0     // ᵛ
+#define SUP_W &uc 0x02B7 0     // ʷ
+#define SUP_X &uc 0x02E3 0     // ˣ
+#define SUP_Y &uc 0x02B8 0     // ʸ
+#define SUP_Z &uc 0x1DBB 0     // ᶻ
 
 #define SUPERSCRIPT_LZ &trans &trans &trans &trans &trans &trans
 #define SUPERSCRIPT_RZ &trans &trans &trans &trans &trans &trans
 
-#define SUPERSCRIPT_LT_IN &trans  &trans  &trans  &trans  &trans
+//                         f      z      u      q(none)  bspc
+#define SUPERSCRIPT_LT_IN SUP_F  SUP_Z  SUP_U  &trans   &trans
 #define SUPERSCRIPT_LT &trans  SUPERSCRIPT_LT_IN
-#define SUPERSCRIPT_RT_IN &trans  &trans  &trans  &trans  &trans
+//                         w      d      l      b
+#define SUPERSCRIPT_RT_IN &trans  SUP_W  SUP_D  SUP_L  SUP_B
 #define SUPERSCRIPT_RT SUPERSCRIPT_RT_IN  &trans
 
-#define SUPERSCRIPT_LM_IN &trans  &trans  &trans  &trans  &trans
+//                         h      i      e      a      p
+#define SUPERSCRIPT_LM_IN SUP_H  SUP_I  SUP_E  SUP_A  SUP_P
 #define SUPERSCRIPT_LM &trans  SUPERSCRIPT_LM_IN
-#define SUPERSCRIPT_RM_IN &trans  &trans  &trans  &trans  &trans
+//                         g      s      t      r      n
+#define SUPERSCRIPT_RM_IN SUP_G  SUP_S  SUP_T  SUP_R  SUP_N
 #define SUPERSCRIPT_RM SUPERSCRIPT_RM_IN  &trans
 
-#define SUPERSCRIPT_LB_IN &trans  &trans  &trans  &trans  &trans
+//                         ,      y      k      o      x
+#define SUPERSCRIPT_LB_IN &trans  SUP_Y  SUP_K  SUP_O  SUP_X
 #define SUPERSCRIPT_LB &trans  SUPERSCRIPT_LB_IN
-#define SUPERSCRIPT_RB_IN &trans  &trans  &trans  &trans  &trans
+//                         v      c      m      j      .
+#define SUPERSCRIPT_RB_IN SUP_V  SUP_C  SUP_M  SUP_J  &trans
 #define SUPERSCRIPT_RB SUPERSCRIPT_RB_IN  &trans
 
-#define SUPERSCRIPT_LH &trans &trans &trans
-#define SUPERSCRIPT_RH &trans &trans &trans
+// Inner thumbs leave the layer, as in LGN/RGN.
+#define SUPERSCRIPT_LH &trans &trans &to HIEROPHANT
+#define SUPERSCRIPT_RH &to HIEROPHANT &trans &trans
 
 #define SUPERSCRIPT_LH_5 &trans &trans SUPERSCRIPT_LH
 #define SUPERSCRIPT_RH_5 &trans &trans SUPERSCRIPT_RH
-
-
 
 
 // ******************************************  NUMPAD layer
