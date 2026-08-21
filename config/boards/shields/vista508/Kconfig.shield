@@ -1,0 +1,4 @@
+# Vista508: the Rolio's 144x168 Sharp memory-in-pixel panel.
+# (NOT nice!view 160x68 geometry.)
+config SHIELD_VISTA508
+    def_bool $(shields_list_contains,vista508)

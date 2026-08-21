@@ -1,0 +1,8 @@
+# Rolio46 Gen2 / "Rolio Three" — split halves on the Rolio Core V3 board.
+# SPDX-License-Identifier: MIT
+
+config SHIELD_ROLIO_LEFT
+    def_bool $(shields_list_contains,rolio_left)
+
+config SHIELD_ROLIO_RIGHT
+    def_bool $(shields_list_contains,rolio_right)

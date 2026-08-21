@@ -1,0 +1,204 @@
+// -*- mode: dts -*-
+/*
+ * Rolio ("Rolio Three") running the shared jjb layout.
+ *
+ * 48 matrix positions, 46 keycaps. Six columns per half exactly like the corne,
+ * so X_LT / X_LM / X_LB drop straight in. What the shared layout has no slot
+ * for is the bottom row's two outer "sometimes" keys per side (Sofle-style)
+ * and the roller's push switch -- bound below rather than in jjb.keymap, since
+ * no other board in this config has them.
+ *
+ * Hardware: Rolio Core V3 (config/boards/rolio/rolio3), vista508 display and
+ * roller on the left half, Cirque trackpad and a second roller on the right.
+ * Matrix wiring verified against the board, not taken from the vendor tree --
+ * see config/boards/shields/rolio/rolio.dtsi.
+ */
+
+#define CONFIG_WIRELESS
+
+#include "rolio48.h"
+#include "jjb.keymap"
+
+/* Bottom-row extras, left pair is (outer, inner), right pair is (inner, outer).
+   Left as &trans, matching how the sofle build leaves its extra thumb keys. */
+#define ROLIO_LX &trans &trans
+#define ROLIO_RX &trans &trans
+
+/* Roller push switches, left and right. The eyelash_corne binds its equivalent
+   inner key (LEC) to &kp C_MUTE; left inert here pending your preference. */
+#define ROLIO_CLICKS &trans &trans
+
+/* Both halves have a roller. Left: volume. Right: page up/down -- matching the
+   sofle build. NOTE: the encoders are currently disabled in the shield because
+   their GPIOs are still unidentified, so these bindings are inert for now. */
+#define ROLIO_SENSORS <&inc_dec_kp C_VOL_UP C_VOL_DN &inc_dec_kp PG_UP PG_DN>
+
+/ {
+    keymap {
+        compatible = "zmk,keymap";
+
+        hierophant_layer {
+            display-name = "hierophant";
+            bindings = <
+HIEROPHANT_LT HIEROPHANT_RT
+HIEROPHANT_LM HIEROPHANT_RM
+HIEROPHANT_LB ROLIO_CLICKS HIEROPHANT_RB
+ROLIO_LX HIEROPHANT_LH  HIEROPHANT_RH ROLIO_RX
+            >;
+            sensor-bindings = ROLIO_SENSORS;
+        };
+
+        qwerty_layer {
+            display-name = "qwerty";
+            bindings = <
+QWERTY_LT QWERTY_RT
+QWERTY_LM QWERTY_RM
+QWERTY_LB ROLIO_CLICKS QWERTY_RB
+ROLIO_LX QWERTY_LH  QWERTY_RH ROLIO_RX
+            >;
+            sensor-bindings = ROLIO_SENSORS;
+        };
+
+        gaming_layer {
+            display-name = "gaming";
+            bindings = <
+GAMING_LT GAMING_RT
+GAMING_LM GAMING_RM
+GAMING_LB ROLIO_CLICKS GAMING_RB
+ROLIO_LX GAMING_LH  GAMING_RH ROLIO_RX
+            >;
+            sensor-bindings = ROLIO_SENSORS;
+        };
+
+        caps_layer {
+            display-name = "caps";
+            bindings = <
+CAPS_LT CAPS_RT
+CAPS_LM CAPS_RM
+CAPS_LB ROLIO_CLICKS CAPS_RB
+ROLIO_LX CAPS_LH  CAPS_RH ROLIO_RX
+            >;
+        };
+
+        superscript_layer {
+            display-name = "superscript";
+            bindings = <
+SUPERSCRIPT_LT SUPERSCRIPT_RT
+SUPERSCRIPT_LM SUPERSCRIPT_RM
+SUPERSCRIPT_LB ROLIO_CLICKS SUPERSCRIPT_RB
+ROLIO_LX SUPERSCRIPT_LH  SUPERSCRIPT_RH ROLIO_RX
+            >;
+        };
+
+        numeric_layer {
+            display-name = "numeric";
+            bindings = <
+NUMERIC_LT NUMERIC_RT
+NUMERIC_LM NUMERIC_RM
+NUMERIC_LB ROLIO_CLICKS NUMERIC_RB
+ROLIO_LX NUMERIC_LH  NUMERIC_RH ROLIO_RX
+            >;
+        };
+
+        numpad_layer {
+            display-name = "numpad";
+            bindings = <
+NUMPAD_LT NUMPAD_RT
+NUMPAD_LM NUMPAD_RM
+NUMPAD_LB ROLIO_CLICKS NUMPAD_RB
+ROLIO_LX NUMPAD_LH  NUMPAD_RH ROLIO_RX
+            >;
+        };
+
+        symbol_layer {
+            display-name = "symbol";
+            bindings = <
+SYMBOL_LT SYMBOL_RT
+SYMBOL_LM SYMBOL_RM
+SYMBOL_LB ROLIO_CLICKS SYMBOL_RB
+ROLIO_LX SYMBOL_LH  SYMBOL_RH ROLIO_RX
+            >;
+        };
+
+        navigation_layer {
+            display-name = "navigation";
+            bindings = <
+NAVIGATION_LT NAVIGATION_RT
+NAVIGATION_LM NAVIGATION_RM
+NAVIGATION_LB ROLIO_CLICKS NAVIGATION_RB
+ROLIO_LX NAVIGATION_LH  NAVIGATION_RH ROLIO_RX
+            >;
+        };
+
+        mod_l_nav_layer {
+            display-name = "LGUI+nav";
+            bindings = <
+LGN_LT LGN_RT
+LGN_LM LGN_RM
+LGN_LB ROLIO_CLICKS LGN_RB
+ROLIO_LX LGN_LH  LGN_RH ROLIO_RX
+            >;
+        };
+
+        mod_r_nav_layer {
+            display-name = "RGUI+nav";
+            bindings = <
+RGN_LT RGN_RT
+RGN_LM RGN_RM
+RGN_LB ROLIO_CLICKS RGN_RB
+ROLIO_LX RGN_LH  RGN_RH ROLIO_RX
+            >;
+        };
+
+        extra_layer {
+            display-name = "extra";
+            bindings = <
+EXTRA_LT EXTRA_RT
+EXTRA_LM EXTRA_RM
+EXTRA_LB ROLIO_CLICKS EXTRA_RB
+ROLIO_LX EXTRA_LH  EXTRA_RH ROLIO_RX
+            >;
+        };
+
+        function_layer {
+            display-name = "function";
+            bindings = <
+FUNCTION_LT FUNCTION_RT
+FUNCTION_LM FUNCTION_RM
+FUNCTION_LB ROLIO_CLICKS FUNCTION_RB
+ROLIO_LX FUNCTION_LH  FUNCTION_RH ROLIO_RX
+            >;
+        };
+
+        rgb_layer {
+            display-name = "rgb";
+            bindings = <
+RGB_LT RGB_RT
+RGB_LM RGB_RM
+RGB_LB ROLIO_CLICKS RGB_RB
+ROLIO_LX RGB_LH  RGB_RH ROLIO_RX
+            >;
+        };
+
+        bluetooth_layer {
+            display-name = "bluetooth";
+            bindings = <
+BLUETOOTH_LT BLUETOOTH_RT
+BLUETOOTH_LM BLUETOOTH_RM
+BLUETOOTH_LB ROLIO_CLICKS BLUETOOTH_RB
+ROLIO_LX BLUETOOTH_LH  BLUETOOTH_RH ROLIO_RX
+            >;
+        };
+
+        system_layer {
+            display-name = "system";
+            bindings = <
+SYSTEM_LT SYSTEM_RT
+SYSTEM_LM SYSTEM_RM
+SYSTEM_LB ROLIO_CLICKS SYSTEM_RB
+ROLIO_LX SYSTEM_LH  SYSTEM_RH ROLIO_RX
+            >;
+        };
+
+    }; /* keymap */
+}; // root node

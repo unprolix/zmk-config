@@ -1,0 +1,8 @@
+board:
+  name: rolio3
+  full_name: Rolio Core V3
+  vendor: rolio
+  socs:
+    - name: nrf52840
+      variants:
+        - name: zmk

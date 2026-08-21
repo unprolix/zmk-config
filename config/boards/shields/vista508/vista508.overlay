@@ -1,0 +1,28 @@
+/*
+ * Vista508 — Sharp memory-in-pixel display, 144x168, on the Rolio left half.
+ *
+ * The vendor drives this with their zmk-ls0xxvcom-driver fork ("sharp,ls0xx-vcom").
+ * Zephyr 4.1's in-tree ls0xx driver gained the same software-VCOM support, so
+ * the stock `sharp,ls0xx` compatible is used here.
+ *
+ * `vista508_spi` is provided by rolio_left.overlay (spi0, CS on P0.20).
+ */
+
+&vista508_spi {
+    status = "okay";
+    vista508: ls0xx@0 {
+        compatible = "sharp,ls0xx";
+        spi-max-frequency = <1000000>;
+        reg = <0>;
+        width = <144>;
+        height = <168>;
+        serial-vcom-inversion;
+        serial-vcom-interval = <17>;
+    };
+};
+
+/ {
+    chosen {
+        zephyr,display = &vista508;
+    };
+};

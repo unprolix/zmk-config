@@ -35,9 +35,6 @@ manifest:
     - name: ergomechstore
       url-base: https://github.com/ergomechstore
 
-    # for rolio2
-    - name: rolio2
-      url-base: git@github.com:MickiusMousius
 
     # for usb raw hid (not yet used)
     - name: zzeneg
@@ -77,10 +74,15 @@ manifest:
       path: modules/vendors/ergomech-sofle
       revision: zephyr-4.1-ws2812-fix
 
-    - name: Rolio2Firmware
-      remote: rolio2
-      path: modules/vendors/rolio2
-      revision: main
+    # Rolio46 Gen2 ("Rolio Three") is NOT a west module. The vendor tree
+    # (private: git@github.com:MickiusMousius/Rolio2Firmware, branch
+    # choc2-revision1) targets Zephyr 3.5 / HWMv1 and cannot be consumed
+    # directly by this Zephyr 4.1 workspace. The board and shields are
+    # vendored and forward-ported under config/boards instead:
+    #   config/boards/rolio/rolio3          (board, migrated to HWMv2)
+    #   config/boards/shields/rolio         (rolio_left / rolio_right)
+    #   config/boards/shields/vista508      (144x168 Sharp display)
+    # Vendored from choc2-revision1 @ a17d0da (2026-08-07).
 
     # for default layer
     - name: zmk-userspace

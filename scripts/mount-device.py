@@ -210,6 +210,12 @@ def match_keyboard_name(keyboard_info, target_name):
        # advertises Seeed/XIAO strings — distinct from nice!nano, so a
        # toucan flash can't grab an eyelash-corne bootloader or vice versa.
        'toucan':  ['toucan',  'xiao', 'seeed'],
+       # Rolio Core V3 ships a custom Adafruit-derived bootloader
+       # (rolio_bootloader-0.9.3), volume label ROLIO-BOOT, USB 1209:7a01.
+       # Observed INFO_UF2.TXT: Model "Rolio nRF52840",
+       # Board-ID "nRF52840-rolio-463". Distinct from nice!nano and XIAO, so
+       # a rolio flash can't grab an eyelash-corne or toucan bootloader.
+       'rolio':   ['rolio'],
    }
 
    for pattern_name, patterns in keyboard_patterns.items():

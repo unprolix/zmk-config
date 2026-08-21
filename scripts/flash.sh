@@ -64,6 +64,7 @@ derive_bootloader_family() {
     local fname
     fname=$(basename "$1")
     case "$fname" in
+        *rolio*)   echo "rolio" ;;
         *toucan*)  echo "toucan" ;;
         *corne*)   echo "corne" ;;
         *sofle*)   echo "sofle" ;;

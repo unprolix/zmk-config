@@ -1,0 +1,102 @@
+/*
+ * Rolio right half — split peripheral, Cirque Pinnacle trackpad, roller.
+ *
+ * Columns mirror the left half: listed inner -> outer pinky, with col-offset
+ * placing them at global columns 7-13.
+ *
+ * NOTE: unverified against hardware. The left half's wiring turned out to
+ * match branch `main` rather than choc2-revision*, so these are `main`'s
+ * right-half pins; expect to re-run the supermatrix diagnostic on this half.
+ *
+ * SPDX-License-Identifier: MIT
+ */
+
+#include "rolio.dtsi"
+
+/************************************************/
+/*           Key Matrix configuration           */
+/************************************************/
+&default_transform {
+    col-offset = <7>;
+};
+
+&kscan0 {
+    col-gpios
+        = <&gpio0 9 GPIO_ACTIVE_HIGH>   // COL0 -> global 7: roller click + wide thumb
+        , <&gpio1 4 GPIO_ACTIVE_HIGH>   // COL1 -> global 8: index
+        , <&gpio0 5 GPIO_ACTIVE_HIGH>   // COL2 -> global 9
+        , <&gpio1 9 GPIO_ACTIVE_HIGH>   // COL3 -> global 10
+        , <&gpio0 4 GPIO_ACTIVE_HIGH>   // COL4 -> global 11
+        , <&gpio0 7 GPIO_ACTIVE_HIGH>   // COL5 -> global 12
+        , <&gpio1 2 GPIO_ACTIVE_HIGH>   // COL6 -> global 13: outer pinky
+        ;
+};
+
+&encoder_right {
+    status = "okay";
+};
+
+/************************************************/
+/*        Underglow power configuration         */
+/************************************************/
+&pwm0 {
+    status = "okay";
+    pinctrl-0 = <&pwm0_default>;
+    pinctrl-1 = <&pwm0_sleep>;
+    pinctrl-names = "default", "sleep";
+};
+
+/************************************************/
+/*            Trackpad configuration            */
+/************************************************/
+/*
+ * The vendor tree uses petejohanson's out-of-tree cirque-input-module, whose
+ * binding spells the data-ready pin `dr-gpios` and takes a boolean `sleep`.
+ * Zephyr 4.1 ships its own `cirque,pinnacle` SPI driver, so this uses the
+ * in-tree property names: `data-ready-gpios` and `sleep-mode-enable`.
+ */
+&spi0 {
+    compatible = "nordic,nrf-spim";
+    status = "okay";
+    pinctrl-0 = <&spi0_default>;
+    pinctrl-1 = <&spi0_sleep>;
+    pinctrl-names = "default", "sleep";
+    cs-gpios = <&gpio0 20 GPIO_ACTIVE_LOW>;
+
+    glidepoint: glidepoint@0 {
+        compatible = "cirque,pinnacle";
+        reg = <0>;
+        spi-max-frequency = <1000000>;
+        status = "okay";
+        data-ready-gpios = <&gpio0 12 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>;
+        sensitivity = "2x";
+        data-mode = "relative";
+        primary-tap-enable;
+    };
+};
+
+&glidepoint_split {
+    device = <&glidepoint>;
+};
+
+/************************************************/
+/*            Soft off configuration            */
+/************************************************/
+/ {
+    keys {
+        compatible = "gpio-keys";
+        soft_off_gpio_key: soft_off_gpio_key {
+            gpios = <&gpio0 28 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>; // ROW3
+        };
+    };
+    wakeup_scan: wakeup_scan {
+        compatible = "zmk,gpio-key-wakeup-trigger";
+        trigger = <&soft_off_gpio_key>;
+        wakeup-source;
+        extra-gpios = <&gpio1 4 GPIO_ACTIVE_HIGH>; // COL1
+    };
+    soft_off_wakers {
+        compatible = "zmk,soft-off-wakeup-sources";
+        wakeup-sources = <&wakeup_scan>;
+    };
+};

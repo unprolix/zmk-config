@@ -1,0 +1,206 @@
+/*
+ * Rolio Core V3 — nRF52840 keyboard controller (beekeeb/keydio Rolio).
+ *
+ * Ported to Zephyr hardware-model v2 from the vendor's HWMv1 board at
+ * MickiusMousius/Rolio2Firmware, branch choc2-revision1 (boards/arm/rolio3).
+ * The vendor tree targets Zephyr 3.5; this workspace is on Zephyr 4.1, so the
+ * board is redefined here rather than consumed as a west module.
+ *
+ * SPDX-License-Identifier: MIT
+ */
+
+/dts-v1/;
+#include <nordic/nrf52840_qiaa.dtsi>
+#include <common/nordic/nrf52840_uf2_boot_mode.dtsi>
+
+/ {
+    model = "Rolio Core V3";
+    compatible = "rolio,core";
+
+    chosen {
+        zephyr,code-partition = &code_partition;
+        zephyr,sram = &sram0;
+        zephyr,flash = &flash0;
+        zmk,battery = &vbatt;
+    };
+
+    leds {
+        compatible = "gpio-leds";
+        blue_led: led_0 {
+            gpios = <&gpio0 15 GPIO_ACTIVE_HIGH>;
+        };
+    };
+
+    /*
+     * Peripheral power enable = P1.11. Found by driving candidate pins over a
+     * GPIO shell and watching the panel: P1.11 alone powers the display, and
+     * neither P0.03 nor P1.06 has any effect on it.
+     *
+     * The vendor's `main` board file puts EXT_POWER on P0.03, but that same
+     * branch's shield also puts the encoder's A line on P0.03 -- they cannot
+     * both be right, and since P1.11 is demonstrably the power enable, P0.03
+     * is the encoder. This board file therefore differs from every vendor
+     * branch; P1.11 appears in none of them, nor in either schematic.
+     *
+     * Node name must match the original "EXT_POWER" label to preserve settings.
+     */
+    EXT_POWER {
+        compatible = "zmk,ext-power-generic";
+        control-gpios = <&gpio1 11 GPIO_ACTIVE_HIGH>;
+        init-delay-ms = <100>;
+    };
+
+    /*
+     * Battery sense divider. The fitted pair is 2M / 806k; the vendor fudges the
+     * high side to 1.92M so a fully-charged cell reads as 100%.
+     */
+    vbatt: vbatt {
+        compatible = "zmk,battery-voltage-divider";
+        io-channels = <&adc 6>;
+        output-ohms = <1920000>;
+        full-ohms = <(1920000 + 806000)>;
+    };
+};
+
+&adc {
+    status = "okay";
+    #address-cells = <1>;
+    #size-cells = <0>;
+
+    /*
+     * The divider is high-impedance (2.7M total), so the SAADC needs a long
+     * acquisition time to settle. RC ~= 2.7M * 15pF = 40.5us; 200us is ~5T
+     * (99.3% settled).
+     */
+    channel@6 {
+        reg = <6>;
+        zephyr,gain = "ADC_GAIN_1";
+        zephyr,reference = "ADC_REF_INTERNAL";
+        zephyr,acquisition-time = <ADC_ACQ_TIME(ADC_ACQ_TIME_MICROSECONDS, 200)>;
+        zephyr,input-positive = <NRF_SAADC_AIN6>;
+    };
+};
+
+/*
+ * The DCDC converter is fitted (the vendor board set BOARD_ENABLE_DCDC). In
+ * Zephyr 4.1 CONFIG_SOC_DCDC_NRF52X is deprecated and no longer user-settable;
+ * it is a devicetree property now. REG0 (the high-voltage stage the vendor also
+ * enabled via BOARD_ENABLE_DCDC_HV) has no devicetree node on nRF52840 in this
+ * Zephyr, so it stays in LDO mode — only relevant while running from USB.
+ */
+&reg1 {
+    regulator-initial-mode = <NRF5X_REG_MODE_DCDC>;
+};
+
+&gpiote {
+    status = "okay";
+};
+
+&gpio0 {
+    status = "okay";
+};
+
+&gpio1 {
+    status = "okay";
+};
+
+/* Left unenabled: nothing on either half uses I2C (the trackpad is SPI). */
+&i2c0 {
+    compatible = "nordic,nrf-twi";
+    pinctrl-0 = <&i2c0_default>;
+    pinctrl-1 = <&i2c0_sleep>;
+    pinctrl-names = "default", "sleep";
+};
+
+&spi0 {
+    compatible = "nordic,nrf-spim";
+    pinctrl-0 = <&spi0_default>;
+    pinctrl-1 = <&spi0_sleep>;
+    pinctrl-names = "default", "sleep";
+};
+
+zephyr_udc0: &usbd {
+    status = "okay";
+};
+
+&pinctrl {
+    i2c0_default: i2c0_default {
+        group1 {
+            psels = <NRF_PSEL(TWIM_SDA, 0, 6)>,
+                    <NRF_PSEL(TWIM_SCL, 0, 8)>;
+            bias-pull-up;
+        };
+    };
+
+    i2c0_sleep: i2c0_sleep {
+        group1 {
+            psels = <NRF_PSEL(TWIM_SDA, 0, 6)>,
+                    <NRF_PSEL(TWIM_SCL, 0, 8)>;
+            low-power-enable;
+            bias-pull-up;
+        };
+    };
+
+    spi0_default: spi0_default {
+        group1 {
+            psels = <NRF_PSEL(SPIM_SCK, 0, 22)>,
+                <NRF_PSEL(SPIM_MOSI, 1, 0)>,
+                <NRF_PSEL(SPIM_MISO, 0, 17)>;
+        };
+    };
+
+    spi0_sleep: spi0_sleep {
+        group1 {
+            psels = <NRF_PSEL(SPIM_SCK, 0, 22)>,
+                <NRF_PSEL(SPIM_MOSI, 1, 0)>,
+                <NRF_PSEL(SPIM_MISO, 0, 17)>;
+            low-power-enable;
+            bias-pull-down;
+        };
+    };
+
+    /*
+     * Drives the underglow power gate, not a backlight LED. P1.13 on this
+     * revision -- the choc2-revision* branches use P0.28, which here is the
+     * fourth matrix row (verified on hardware).
+     */
+    pwm0_default: pwm0_default {
+        group1 {
+            psels = <NRF_PSEL(PWM_OUT0, 1, 13)>;
+        };
+    };
+
+    pwm0_sleep: pwm0_sleep {
+        group1 {
+            psels = <NRF_PSEL(PWM_OUT0, 1, 13)>;
+            low-power-enable;
+        };
+    };
+};
+
+&flash0 {
+    partitions {
+        compatible = "fixed-partitions";
+        #address-cells = <1>;
+        #size-cells = <1>;
+
+        sd_partition: partition@0 {
+            reg = <0x00000000 0x00026000>;
+        };
+        code_partition: partition@26000 {
+            reg = <0x00026000 0x000c6000>;
+        };
+
+        /*
+         * The flash starting at 0x000ec000 and ending at 0x000f3fff is
+         * reserved for use by the application (settings storage).
+         */
+        storage_partition: partition@ec000 {
+            reg = <0x000ec000 0x00008000>;
+        };
+
+        boot_partition: partition@f4000 {
+            reg = <0x000f4000 0x0000c000>;
+        };
+    };
+};

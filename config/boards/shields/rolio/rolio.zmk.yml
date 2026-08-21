@@ -1,0 +1,16 @@
+file_format: "1"
+id: rolio
+name: Rolio46 Gen2
+type: shield
+url: https://keydio.io
+requires: [rolio3]
+features:
+  - keys
+  - encoder
+  - underglow
+  - backlight
+  - pointer
+  - studio
+siblings:
+  - rolio_left
+  - rolio_right

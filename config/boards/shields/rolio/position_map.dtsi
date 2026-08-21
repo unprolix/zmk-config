@@ -1,0 +1,7 @@
+/ {
+    layout_rolio_position_map: layout_rolio_position_map {
+        compatible = "zmk,physical-layout-position-map";
+
+        complete;
+    };
+};

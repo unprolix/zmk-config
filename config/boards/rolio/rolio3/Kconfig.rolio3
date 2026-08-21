@@ -1,0 +1,10 @@
+# Rolio Core V3 board configuration
+#
+# SPDX-License-Identifier: MIT
+
+config BOARD_ROLIO3
+    select SOC_NRF52840_QIAA
+    select ZMK_BOARD_COMPAT
+    imply RETAINED_MEM
+    imply RETENTION
+    imply RETENTION_BOOT_MODE

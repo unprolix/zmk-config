@@ -63,6 +63,18 @@ include:
     shield: toucan_right
     artifact-name: toucan_right
 
+  # Rolio46 Gen2 / "Rolio Three" (board + shields vendored in config/boards;
+  # forward-ported from MickiusMousius/Rolio2Firmware @ choc2-revision1)
+  - board: rolio3/nrf52840/zmk
+    shield: rolio_left vista508
+    artifact-name: rolio_left-vista508
+  - board: rolio3/nrf52840/zmk
+    shield: rolio_right
+    artifact-name: rolio_right
+  - board: rolio3/nrf52840/zmk
+    shield: settings_reset
+    artifact-name: rolio3-settings_reset
+
   # Other boards
   - board: nice_nano@2.0.0/nrf52840/zmk
     shield: sofle_ergomech_left

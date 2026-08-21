@@ -1,0 +1,38 @@
+# SPDX-License-Identifier: MIT
+
+# Enable MPU
+CONFIG_ARM_MPU=y
+
+# enable GPIO
+CONFIG_GPIO=y
+
+# Use pinctrl
+CONFIG_PINCTRL=y
+
+# Enable SPI (display / trackpad / ws2812)
+CONFIG_SPI=y
+CONFIG_SPI_NRFX=y
+
+# Column 6 is P0.09, which is NFC1 by default on the nRF52840 and only works as
+# GPIO once UICR NFCPINS is programmed. The board currently has it programmed
+# (the column scans), but that lives in UICR, not in the firmware image -- a
+# UICR erase would silently kill the roller click and the wide thumb key.
+# Setting this makes the firmware itself responsible for it.
+CONFIG_NFCT_PINS_AS_GPIOS=y
+
+# 32kHz crystal is fitted on the Rolio Core V3
+CONFIG_CLOCK_CONTROL_NRF_K32SRC_XTAL=y
+CONFIG_CLOCK_CONTROL_NRF_K32SRC_30PPM=y
+
+CONFIG_USE_DT_CODE_PARTITION=y
+CONFIG_BUILD_OUTPUT_UF2=y
+
+CONFIG_MPU_ALLOW_FLASH_WRITE=y
+CONFIG_NVS=y
+CONFIG_SETTINGS_NVS=y
+CONFIG_FLASH=y
+CONFIG_FLASH_PAGE_LAYOUT=y
+CONFIG_FLASH_MAP=y
+
+CONFIG_ZMK_BLE=y
+CONFIG_ZMK_USB=y

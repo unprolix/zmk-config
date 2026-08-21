@@ -1,0 +1,17 @@
+file_format: "1"
+id: rolio3//zmk
+name: Rolio Core V3
+type: board
+arch: arm
+features:
+  - keys
+  - encoder
+  - underglow
+  - backlight
+  - display
+  - pointer
+  - studio
+outputs:
+  - usb
+  - ble
+url: https://keydio.io

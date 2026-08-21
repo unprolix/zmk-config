@@ -1,0 +1,40 @@
+// -*- mode: dts -*-
+/*
+ * Rolio matrix diagnostic keymap. NOT a usable layout.
+ *
+ * Deliberately does not include jjb.keymap: no combos, no home-row mods, no
+ * hold-taps, no adaptive keys, no leader. Every one of the 46 positions emits
+ * exactly one distinct keycode, so a single pass over the keyboard reveals the
+ * true position -> physical key mapping with no behaviour swallowing presses.
+ *
+ * Build:
+ *   west build -s zmk/app -d .build/rolio_diag -b rolio3/nrf52840/zmk -p -- \
+ *     -DZMK_CONFIG=$PWD/config -DSHIELD="rolio_left vista508" \
+ *     -DKEYMAP_FILE=$PWD/config/rolio-diag.keymap
+ *
+ * Expected output per position:
+ *   row0 L 0-5   a b c d e f      row0 R 6-11   g h i j k l
+ *   row1 L 12-17 m n o p q r      row1 R 18-23  s t u v w x
+ *   row2 L 24-29 y z 1 2 3 4      row2 R 30-35  5 6 7 8 9 0
+ *   row3 L 36-40 F1 F2 F3 F4 F5   row3 R 41-45  F6 F7 F8 F9 F10
+ */
+
+#include <behaviors.dtsi>
+#include <dt-bindings/zmk/keys.h>
+
+/ {
+    keymap {
+        compatible = "zmk,keymap";
+
+        diag_layer {
+            display-name = "diag";
+            bindings = <
+&kp A  &kp B  &kp C  &kp D  &kp E  &kp F        &kp G  &kp H  &kp I  &kp J  &kp K  &kp L
+&kp M  &kp N  &kp O  &kp P  &kp Q  &kp R        &kp S  &kp T  &kp U  &kp V  &kp W  &kp X
+&kp Y  &kp Z  &kp N1 &kp N2 &kp N3 &kp N4       &kp N5 &kp N6 &kp N7 &kp N8 &kp N9 &kp N0
+       &kp F1 &kp F2 &kp F3 &kp F4 &kp F5    &kp F6 &kp F7 &kp F8 &kp F9 &kp F10
+            >;
+            sensor-bindings = <&inc_dec_kp LEFT RIGHT &inc_dec_kp UP DOWN>;
+        };
+    };
+};
