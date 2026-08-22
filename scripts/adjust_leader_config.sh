@@ -71,6 +71,16 @@ print(longest)
 PYEOF
 }
 
+# A .conf file whose last line lacks a trailing newline would otherwise get an
+# appended symbol glued onto it, silently commenting it out when that last line
+# is a comment. Call before any append.
+ensure_trailing_newline() {
+    local config_file="$1"
+    if [[ -s "$config_file" ]] && [[ -n $(tail -c 1 "$config_file") ]]; then
+        echo "" >> "$config_file"
+    fi
+}
+
 # Function to update an arbitrary CONFIG_ symbol, raising it only.
 update_conf_symbol() {
     local config_file="$1" symbol="$2" value="$3"
@@ -83,6 +93,7 @@ update_conf_symbol() {
             echo "Updated ${symbol} to ${value} in $(basename "$config_file")"
         fi
     else
+        ensure_trailing_newline "$config_file"
         echo "${symbol}=${value}" >> "$config_file"
         echo "Added ${symbol}=${value} to $(basename "$config_file")"
     fi
@@ -110,6 +121,7 @@ update_config_file() {
             sed -i "/CONFIG_ZMK_.*=/a CONFIG_ZMK_LEADER_MAX_SEQUENCES=${new_limit}" "$config_file"
         else
             # Add at the end
+            ensure_trailing_newline "$config_file"
             echo "CONFIG_ZMK_LEADER_MAX_SEQUENCES=${new_limit}" >> "$config_file"
         fi
         echo "Added CONFIG_ZMK_LEADER_MAX_SEQUENCES=$new_limit to $config_file"
