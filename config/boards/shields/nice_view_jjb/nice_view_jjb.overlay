@@ -1,12 +1,25 @@
 /*
- * Intentionally empty.
+ * This shield adds no display hardware -- the nice!view panel, its SPI bus and
+ * the zephyr,display chosen node all come from ZMK's own `nice_view` shield,
+ * which must be listed alongside this one. (The file also has to exist at all,
+ * because Zephyr discovers shields by globbing for <shield>.overlay; a shield
+ * directory with no overlay is silently not a shield.)
  *
- * This shield adds no hardware -- the nice!view panel, its SPI bus and the
- * zephyr,display chosen node all come from ZMK's own `nice_view` shield, which
- * must be listed alongside this one. The only reason this file exists is that
- * Zephyr discovers shields by globbing for <shield>.overlay (see
- * zephyr/cmake/modules/shields.cmake): a shield directory with no overlay is
- * silently not a shield at all, and the build fails with "unknown shield".
+ * What it does add is the leader relay behaviour, which is what lets the
+ * peripheral's screen show a leader sequence the central is running. It lives
+ * here rather than in the shared keymap so that no other board gains a node it
+ * has no driver for.
  */
 
-/ { };
+/ {
+    behaviors {
+        /*
+         * Never bound to a key. The central's status screen invokes it, and
+         * GLOBAL locality makes ZMK relay it to every peripheral.
+         */
+        ldrelay: ldrelay {
+            compatible = "zmk,behavior-leader-relay";
+            #binding-cells = <2>;
+        };
+    };
+};

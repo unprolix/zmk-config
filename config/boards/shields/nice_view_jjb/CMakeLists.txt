@@ -10,6 +10,9 @@ if(CONFIG_ZMK_DISPLAY AND CONFIG_ZMK_DISPLAY_STATUS_SCREEN_CUSTOM)
   # Rotation machinery, needed by whichever screen is built.
   zephyr_library_sources(canvas_util.c)
 
+  # Both halves: the central invokes it, the peripheral acts on it.
+  zephyr_library_sources(leader_relay.c)
+
   if(NOT CONFIG_ZMK_SPLIT OR CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
     zephyr_library_sources(custom_status_screen.c)
   else()

@@ -1,0 +1,19 @@
+# Copyright (c) 2026 Jeremy Bornstein
+# SPDX-License-Identifier: MIT
+#
+# Carries leader-key state from the central to a split peripheral so the
+# peripheral's display can show it. The leader behaviour is central-only, so
+# without this a peripheral knows nothing about a sequence in progress.
+#
+# Not meant to be bound to a key. The behaviour is declared with GLOBAL
+# locality, which is what makes ZMK relay every invocation to each peripheral;
+# the central invokes it from its status screen whenever leader state changes.
+#
+# param1 packs the active flag, candidate count and press count.
+# param2 packs up to four candidate sequence indices, one byte each.
+
+description: Relay leader-key state to split peripherals for display
+
+compatible: "zmk,behavior-leader-relay"
+
+include: two_param.yaml

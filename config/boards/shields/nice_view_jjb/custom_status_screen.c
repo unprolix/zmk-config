@@ -36,27 +36,37 @@
 #include <zmk/events/battery_state_changed.h>
 #include <zmk/events/ble_active_profile_changed.h>
 #include <zmk/events/endpoint_changed.h>
+#include <zmk/events/keycode_state_changed.h>
 #include <zmk/events/layer_state_changed.h>
 #include <zmk/events/wpm_state_changed.h>
+#include <zmk/hid.h>
+#include <zmk/keys.h>
+#include <zmk/behavior.h>
 #include <zmk/keymap.h>
+#include <zmk/split/central.h>
 #include <zmk/wpm.h>
 #include <zmk-leader-key/leader_state.h>
 
+#include <zmk/split/bluetooth/service.h>
+
 #include "canvas_util.h"
+#include "leader_relay.h"
 
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
+/*
+ * The BLE split payload carries the behaviour's name in a
+ * ZMK_SPLIT_RUN_BEHAVIOR_DEV_LEN buffer -- nine bytes, not the sixteen that
+ * struct zmk_split_transport_central_command advertises. A longer name is
+ * silently strlcpy'd short, the peripheral then fails to find the truncated
+ * name, and nothing happens: no error reaches the central, which still sees a
+ * successful queue. "ldr_relay" was exactly nine characters and lost its "y".
+ */
+BUILD_ASSERT(sizeof("ldrelay") <= ZMK_SPLIT_RUN_BEHAVIOR_DEV_LEN,
+             "Relay behaviour name is too long to survive the split payload intact");
+
 #define STATUS_MAX     24
 #define LAYER_NAME_MAX 32
-
-/*
- * With well over a hundred sequences defined, listing them the instant leader
- * is pressed would be noise, so nothing is listed until the candidate set is
- * small enough to read. Three fit the middle band once names wrap.
- */
-#define LEADER_LIST_THRESHOLD 3
-#define LEADER_TEXT_MAX       128
-#define LEADER_NAME_MAX       32
 
 /*
  * Canvases have to be redrawn wholesale, so unlike a screen built from labels
@@ -73,15 +83,13 @@ struct jjb_status {
     uint8_t peripheral_batt;
     bool have_peripheral;
 
-    /* middle band */
+    /* middle band -- the leader list lives on the peripheral, not here */
     zmk_keymap_layer_index_t layer_index;
     const char *layer_label;
-    bool leader_active;
-    uint8_t leader_candidates;
-    char leader_text[LEADER_TEXT_MAX];
 
     /* bottom band */
     uint8_t wpm;
+    zmk_mod_flags_t mods;
 };
 
 static struct jjb_status status;
@@ -155,23 +163,17 @@ static void draw_middle(void) {
 
     lv_canvas_fill_bg(band_middle, CANVAS_BACKGROUND, LV_OPA_COVER);
 
-    if (status.leader_active) {
-        /* Smaller face: the candidate list needs the lines more than the size. */
-        lv_draw_label_dsc_t dsc;
-        jjb_init_label_dsc(&dsc, &lv_font_montserrat_12, LV_TEXT_ALIGN_CENTER);
-        jjb_canvas_draw_text(band_middle, 0, 2, CANVAS_SIZE, &dsc, status.leader_text);
-    } else {
-        lv_draw_label_dsc_t dsc;
-        jjb_init_label_dsc(&dsc, &lv_font_montserrat_14, LV_TEXT_ALIGN_CENTER);
+    lv_draw_label_dsc_t dsc;
+    jjb_init_label_dsc(&dsc, &lv_font_montserrat_14, LV_TEXT_ALIGN_CENTER);
 
-        char text[LAYER_NAME_MAX];
-        if (status.layer_label == NULL || strlen(status.layer_label) == 0) {
-            snprintf(text, sizeof(text), "%i", status.layer_index);
-        } else {
-            snprintf(text, sizeof(text), "%s", status.layer_label);
-        }
-        jjb_canvas_draw_text(band_middle, 0, 20, CANVAS_SIZE, &dsc, text);
+    char text[LAYER_NAME_MAX];
+
+    if (status.layer_label == NULL || strlen(status.layer_label) == 0) {
+        snprintf(text, sizeof(text), "%i", status.layer_index);
+    } else {
+        snprintf(text, sizeof(text), "%s", status.layer_label);
     }
+    jjb_canvas_draw_text(band_middle, 0, 20, CANVAS_SIZE, &dsc, text);
 
     jjb_rotate_canvas(band_middle);
 }
@@ -188,11 +190,37 @@ static void draw_bottom(void) {
 
     /*
      * Only BAND_BOTTOM_VISIBLE pixels of this band are on screen, so anything
-     * drawn here has to sit right at the top of the canvas.
+     * drawn here has to sit right at the top of the canvas -- one line, and at
+     * 68 pixels wide, about nine characters of it.
+     *
+     * Held modifiers take the line when there are any: they are what you want
+     * to see at the instant you are looking, whereas WPM is idle curiosity.
      */
-    char text[STATUS_MAX];
-    snprintf(text, sizeof(text), "%d wpm", status.wpm);
-    jjb_canvas_draw_text(band_bottom, 0, 2, CANVAS_SIZE, &dsc, text);
+    if (status.mods != 0) {
+        /*
+         * One slot per modifier, left and right folded together, each slot in
+         * the same place every time so position identifies the modifier as
+         * much as the glyph does.
+         */
+        static const zmk_mod_flags_t slot_mods[MOD_ICON_SLOTS] = {
+            [JJB_MOD_ICON_CTRL] = MOD_LCTL | MOD_RCTL,
+            [JJB_MOD_ICON_SHIFT] = MOD_LSFT | MOD_RSFT,
+            [JJB_MOD_ICON_ALT] = MOD_LALT | MOD_RALT,
+            [JJB_MOD_ICON_GUI] = MOD_LGUI | MOD_RGUI,
+        };
+
+        const lv_coord_t inset = (MOD_ICON_SLOT_W - MOD_ICON_SIZE) / 2;
+        for (uint8_t slot = 0; slot < MOD_ICON_SLOTS; slot++) {
+            if (status.mods & slot_mods[slot]) {
+                jjb_draw_mod_icon(band_bottom, slot * MOD_ICON_SLOT_W + inset, 3,
+                                  (enum jjb_mod_icon)slot);
+            }
+        }
+    } else {
+        char text[STATUS_MAX];
+        snprintf(text, sizeof(text), "%d wpm", status.wpm);
+        jjb_canvas_draw_text(band_bottom, 0, 2, CANVAS_SIZE, &dsc, text);
+    }
 
     jjb_rotate_canvas(band_bottom);
 }
@@ -323,54 +351,106 @@ ZMK_DISPLAY_WIDGET_LISTENER(jjb_wpm_status, struct jjb_wpm_state, jjb_wpm_update
 ZMK_SUBSCRIPTION(jjb_wpm_status, zmk_wpm_state_changed);
 
 /* ------------------------------------------------------------------ */
+/* Held modifiers                                                      */
+/* ------------------------------------------------------------------ */
+
+/*
+ * zmk_modifiers_state_changed exists as a type but nothing in ZMK ever raises
+ * it, so there is no modifier event to subscribe to. Every modifier change
+ * does come with a keycode event, though, and the live flags can just be read
+ * back out of the HID state -- including the ones a home-row mod registered.
+ */
+struct jjb_mods_state {
+    zmk_mod_flags_t mods;
+};
+
+static void jjb_mods_update_cb(struct jjb_mods_state state) {
+    status.mods = state.mods;
+    draw_bottom();
+}
+
+static struct jjb_mods_state jjb_mods_get_state(const zmk_event_t *eh) {
+    return (struct jjb_mods_state){.mods = zmk_hid_get_explicit_mods()};
+}
+
+ZMK_DISPLAY_WIDGET_LISTENER(jjb_mods_status, struct jjb_mods_state, jjb_mods_update_cb,
+                            jjb_mods_get_state)
+ZMK_SUBSCRIPTION(jjb_mods_status, zmk_keycode_state_changed);
+
+/* ------------------------------------------------------------------ */
 /* Leader sequence                                                     */
 /* ------------------------------------------------------------------ */
 
-static void jjb_leader_update_cb(struct zmk_leader_state_changed state) {
-    status.leader_active = state.active;
-    status.leader_candidates = state.candidate_count;
+/*
+ * The candidate list is shown on the *peripheral*, which has the whole panel
+ * free for it, so this half only forwards the state and otherwise carries on
+ * showing the layer name. Sending is what GLOBAL locality is for: ZMK relays
+ * the invocation to every peripheral and then runs it locally, where the relay
+ * behaviour ignores it.
+ */
+static void jjb_leader_relay(struct zmk_leader_state_changed state) {
+    uint32_t param2 = 0;
+    uint8_t listed = 0;
 
-    if (state.active) {
-        int used = snprintf(status.leader_text, sizeof(status.leader_text), "LEADER");
-
-        if (state.candidate_count == 0) {
-            snprintf(status.leader_text, sizeof(status.leader_text), "LEADER\nno match");
-        } else if (state.candidate_count > LEADER_LIST_THRESHOLD) {
-            snprintf(status.leader_text, sizeof(status.leader_text), "LEADER\n%d options",
-                     state.candidate_count);
-        } else {
-            for (uint8_t i = 0;
-                 i < state.candidate_count && used < (int)sizeof(status.leader_text) - 1; i++) {
-                const char *name = zmk_leader_candidate_name(i);
-                if (name == NULL) {
-                    break;
-                }
-                /* Copy before humanising: the fork hands back its own storage. */
-                char pretty[LEADER_NAME_MAX];
-                snprintf(pretty, sizeof(pretty), "%s", name);
-                jjb_humanize(pretty);
-                used += snprintf(status.leader_text + used, sizeof(status.leader_text) - used,
-                                 "\n%s", pretty);
-            }
+    if (state.active && state.candidate_count > 0 &&
+        state.candidate_count <= LEADER_RELAY_MAX_INDICES) {
+        for (uint8_t i = 0; i < state.candidate_count && i < LEADER_RELAY_MAX_INDICES; i++) {
+            uint16_t seq = zmk_leader_candidate_sequence_index(i);
+            /* One byte per index on the wire; anything larger cannot be named. */
+            param2 = leader_relay_set_index(
+                param2, i, seq > LEADER_RELAY_INDEX_MAX ? LEADER_RELAY_INDEX_NONE : (uint8_t)seq);
+            listed++;
         }
     }
 
-    draw_middle();
-}
+    struct zmk_behavior_binding binding = {
+        .behavior_dev = DEVICE_DT_NAME(DT_NODELABEL(ldrelay)),
+        .param1 = leader_relay_pack_param1(state.active, state.candidate_count, state.press_count,
+                                           listed),
+        .param2 = param2,
+    };
+    struct zmk_behavior_binding_event event = {
+        .position = 0,
+        .timestamp = k_uptime_get(),
+    };
 
-static struct zmk_leader_state_changed jjb_leader_get_state(const zmk_event_t *eh) {
-    /* NULL on the listener macro's synthetic init call -- see jjb_batt_get_state. */
-    const struct zmk_leader_state_changed *ev =
-        (eh == NULL) ? NULL : as_zmk_leader_state_changed(eh);
-    if (ev != NULL) {
-        return *ev;
+    /*
+     * Sent straight down the split rather than through
+     * zmk_behavior_invoke_binding(): GLOBAL locality would do the same thing,
+     * but it returns the result of the *local* invocation and throws away the
+     * send's, so a failed send looks like success. Calling the transport
+     * directly surfaces the real error, and the local invocation was useless
+     * here anyway -- this half reads leader state directly.
+     *
+     * Nothing is drawn from here. This runs on the event thread, and LVGL may
+     * only be touched from ZMK's display work queue; drawing here raced the
+     * display thread (and jjb_rotate_canvas's shared scratch buffer) and
+     * crashed the board after a few sequences.
+     */
+    int err = zmk_split_central_invoke_behavior(0, &binding, event, true);
+    if (err) {
+        LOG_WRN("Failed to relay leader state to peripheral: %d", err);
     }
-    return (struct zmk_leader_state_changed){0};
 }
 
-ZMK_DISPLAY_WIDGET_LISTENER(jjb_leader_status, struct zmk_leader_state_changed,
-                            jjb_leader_update_cb, jjb_leader_get_state)
-ZMK_SUBSCRIPTION(jjb_leader_status, zmk_leader_state_changed);
+/*
+ * A plain listener rather than ZMK_DISPLAY_WIDGET_LISTENER, deliberately.
+ * Nothing here draws: this half's screen is unaffected by leader state now, so
+ * there is no reason to hop onto the display work queue -- and good reason not
+ * to, since invoking a behaviour from there would push a BLE write onto the
+ * thread that repaints the panel. Running on the event thread keeps the
+ * invocation where behaviour invocations normally come from.
+ */
+static int jjb_leader_relay_listener(const zmk_event_t *eh) {
+    const struct zmk_leader_state_changed *ev = as_zmk_leader_state_changed(eh);
+    if (ev != NULL) {
+        jjb_leader_relay(*ev);
+    }
+    return ZMK_EV_EVENT_BUBBLE;
+}
+
+ZMK_LISTENER(jjb_leader_relay_mod, jjb_leader_relay_listener);
+ZMK_SUBSCRIPTION(jjb_leader_relay_mod, zmk_leader_state_changed);
 
 /* ------------------------------------------------------------------ */
 
@@ -402,7 +482,7 @@ lv_obj_t *zmk_display_status_screen(void) {
     jjb_batt_status_init();
     jjb_layer_status_init();
     jjb_wpm_status_init();
-    jjb_leader_status_init();
+    jjb_mods_status_init();
 
     return screen;
 }

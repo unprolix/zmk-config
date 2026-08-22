@@ -47,6 +47,36 @@
 
 #define BAND_BOTTOM_VISIBLE 24
 
+/*
+ * Modifier glyphs.
+ *
+ * There is no font here that has them: LVGL's LV_SYMBOL_* set is a FontAwesome
+ * subset with no modifier keys in it, and Montserrat carries no U+21E7 / U+2303
+ * / U+2325 / U+2318 either. Adding a font with them would mean generating one
+ * offline. Since these bands are canvases rather than labels, it is less work
+ * and less flash to draw the four glyphs as line art.
+ *
+ * Drawn into a MOD_ICON_SIZE box with its top-left at (x, y).
+ *
+ * The four sit in fixed slots spanning the full 68px, so a given modifier is
+ * always in the same place and can be recognised by position as much as by
+ * shape. Left and right are not distinguished: which hand a mod came from is
+ * not worth a second row of glyphs, and marking it under every icon just adds
+ * clutter.
+ */
+#define MOD_ICON_SLOTS 4
+#define MOD_ICON_SLOT_W (CANVAS_SIZE / MOD_ICON_SLOTS) /* 17 */
+#define MOD_ICON_SIZE  15
+
+enum jjb_mod_icon {
+    JJB_MOD_ICON_CTRL = 0,  /* the chevron */
+    JJB_MOD_ICON_SHIFT = 1, /* the outlined up arrow */
+    JJB_MOD_ICON_ALT = 2,   /* the option glyph */
+    JJB_MOD_ICON_GUI = 3,   /* the looped square */
+};
+
+void jjb_draw_mod_icon(lv_obj_t *canvas, lv_coord_t x, lv_coord_t y, enum jjb_mod_icon icon);
+
 void jjb_rotate_canvas(lv_obj_t *canvas);
 void jjb_init_label_dsc(lv_draw_label_dsc_t *label_dsc, const lv_font_t *font, lv_text_align_t align);
 void jjb_canvas_draw_text(lv_obj_t *canvas, lv_coord_t x, lv_coord_t y, lv_coord_t max_w,
