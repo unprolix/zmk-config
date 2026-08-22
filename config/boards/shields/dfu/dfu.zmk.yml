@@ -1,0 +1,5 @@
+file_format: "1"
+id: dfu
+name: Raw-HID bootloader trigger (TEMPORARY)
+type: shield
+requires: [eyelash_corne]

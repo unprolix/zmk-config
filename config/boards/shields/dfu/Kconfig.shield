@@ -1,0 +1,9 @@
+# TEMPORARY development convenience: lets the host put either half into the
+# bootloader over raw HID, so a flash cycle needs no keypress.
+#
+# THIS IS NOT MEANT TO SHIP. It is a remote "reboot into a writable state" path
+# on a keyboard that types passwords, and the trigger has to be present in the
+# firmware being flashed *in* -- so every build carries the hole and a bad
+# flash strands it. Remove when the current display/RGB work ends.
+config SHIELD_DFU
+    def_bool $(shields_list_contains,dfu)

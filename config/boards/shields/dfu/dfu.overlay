@@ -1,0 +1,7 @@
+/*
+ * Empty: this shield adds no hardware. It exists because Zephyr discovers
+ * shields by globbing <shield>.overlay, and because the behaviour it needs
+ * (&bootloader, node `bootload`) is already part of ZMK.
+ */
+
+/ { };

@@ -110,6 +110,18 @@ static K_WORK_DELAYABLE_DEFINE(rgbzone_tick_work, rgbzone_tick);
 
 static void rgbzone_tick(struct k_work *work) {
     ARG_UNUSED(work);
+
+    /*
+     * Underglow can switch itself back on without being asked: with
+     * AUTO_OFF_IDLE it restores whatever it was doing before the keyboard went
+     * idle, so a single off() at boot is not enough. Two writers on one strip
+     * shows up as wrong colours at random brightness, not as an error.
+     */
+    bool on = false;
+    if (zmk_rgb_underglow_get_state(&on) == 0 && on) {
+        zmk_rgb_underglow_off();
+    }
+
     refresh();
     k_work_reschedule(&rgbzone_tick_work, K_SECONDS(RGBZONE_REFRESH_SECONDS));
 }

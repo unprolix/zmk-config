@@ -17,6 +17,7 @@
 #include <zephyr/logging/log.h>
 
 #include <drivers/ext_power.h>
+#include <zmk/workqueue.h>
 
 #include "rgbzone.h"
 
@@ -49,10 +50,20 @@ static void set_power(bool on) {
     }
 }
 
-void rgbzone_apply(uint32_t packed) {
-    if (!device_is_ready(strip)) {
-        return;
-    }
+/*
+ * WS2812 data is clocked out as precisely-timed SPI bits, so a transfer that
+ * gets preempted comes out corrupted -- which looks like the wrong colour, or
+ * the right colour at the wrong brightness, rather than like an error. Writing
+ * from the event thread on every keycode put those transfers right next to BLE
+ * and display work. Do them on the low-priority queue instead, the same one
+ * ZMK's own underglow uses, and only when something actually changed.
+ */
+static atomic_t pending;
+
+static void strip_write(struct k_work *work) {
+    ARG_UNUSED(work);
+
+    uint32_t packed = (uint32_t)atomic_get(&pending);
 
     memset(pixels, 0, sizeof(pixels));
 
@@ -75,5 +86,27 @@ void rgbzone_apply(uint32_t packed) {
     if (led_strip_update_rgb(strip, pixels, STRIP_COUNT) != 0) {
         LOG_WRN("Failed to update LED strip");
     }
+}
+
+static K_WORK_DEFINE(strip_work, strip_write);
+
+void rgbzone_apply(uint32_t packed) {
+    if (!device_is_ready(strip)) {
+        return;
+    }
+
+    /*
+     * Repainting an unchanged strip is pure risk: every write is another
+     * chance to be preempted mid-transfer, and this is called on every
+     * keycode event.
+     */
+    static atomic_t last = ATOMIC_INIT(0xFFFFFFFF);
+    if (atomic_get(&last) == (atomic_val_t)packed) {
+        return;
+    }
+    atomic_set(&last, (atomic_val_t)packed);
+
+    atomic_set(&pending, (atomic_val_t)packed);
+    k_work_submit_to_queue(zmk_workqueue_lowprio_work_q(), &strip_work);
 }
 
