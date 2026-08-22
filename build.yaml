@@ -103,6 +103,28 @@ include:
     cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/eyelash_corne_xan.conf"
     artifact-name: eyelash_corne_right_xan-nice_view
 
+  # One-off RGB calibration build -- works out which LED sits under which key.
+  # NOT for daily use: it takes over the LED strip, swallows keypresses and
+  # types its findings out. See config/boards/shields/rgbcal.
+  - board: nice_nano@2.0.0/nrf52840/zmk
+    shield: eyelash_corne_left nice_view nice_view_jjb rgbcal
+    cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/rgbcal_lavendre.conf"
+    artifact-name: eyelash_corne_left_lavendre-rgbcal
+  - board: nice_nano@2.0.0/nrf52840/zmk
+    shield: eyelash_corne_right nice_view nice_view_jjb rgbcal
+    cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/rgbcal_lavendre.conf"
+    artifact-name: eyelash_corne_right_lavendre-rgbcal
+
+  # Per-column layer indication (RGB is per-column on this board, not per-key).
+  - board: nice_nano@2.0.0/nrf52840/zmk
+    shield: eyelash_corne_left nice_view nice_view_jjb rgbzone
+    cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/eyelash_corne_lavendre.conf"
+    artifact-name: eyelash_corne_left_lavendre-rgbzone
+  - board: nice_nano@2.0.0/nrf52840/zmk
+    shield: eyelash_corne_right nice_view nice_view_jjb rgbzone
+    cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/eyelash_corne_lavendre.conf"
+    artifact-name: eyelash_corne_right_lavendre-rgbzone
+
   # Settings reset (universal across both sides)
   - board: nice_nano@2.0.0/nrf52840/zmk
     shield: settings_reset

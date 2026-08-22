@@ -1,0 +1,14 @@
+# Copyright (c) 2026 Jeremy Bornstein
+# SPDX-License-Identifier: MIT
+#
+# Carries per-column LED colours to a split peripheral, which has no keymap and
+# so cannot work out its own. GLOBAL locality is what makes ZMK relay it.
+#
+# param1 packs six zones, two bits each (see enum zone_kind).
+# param2 is unused.
+
+description: Relay per-column LED zone colours to split peripherals
+
+compatible: "zmk,behavior-rgb-zone"
+
+include: two_param.yaml

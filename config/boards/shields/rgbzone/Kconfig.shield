@@ -1,0 +1,5 @@
+# Per-column layer indication. The eyelash's RGB is one addressable LED per
+# column, not per key, so this colours columns by what they do on the active
+# layer -- see zone_map.h.
+config SHIELD_RGBZONE
+    def_bool $(shields_list_contains,rgbzone)

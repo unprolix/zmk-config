@@ -1,0 +1,5 @@
+file_format: "1"
+id: rgbzone
+name: Per-column layer indication
+type: shield
+requires: [eyelash_corne]

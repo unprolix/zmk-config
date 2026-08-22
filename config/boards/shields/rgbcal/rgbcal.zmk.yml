@@ -1,0 +1,5 @@
+file_format: "1"
+id: rgbcal
+name: RGB calibration (one-off)
+type: shield
+requires: [eyelash_corne]

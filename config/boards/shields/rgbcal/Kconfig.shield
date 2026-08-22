@@ -1,0 +1,9 @@
+# One-off calibration build: works out which WS2812 in the chain sits under
+# which key position, because nothing documents it and the vendor sources for
+# this class of board have been wrong before.
+#
+# Not for daily use -- it takes over the LED strip and types its findings out
+# as keystrokes. Build it alongside the normal shields:
+#   -DSHIELD="eyelash_corne_left nice_view nice_view_jjb rgbcal"
+config SHIELD_RGBCAL
+    def_bool $(shields_list_contains,rgbcal)

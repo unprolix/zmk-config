@@ -1,0 +1,13 @@
+/*
+ * Required for shield discovery (Zephyr globs <shield>.overlay), and home for
+ * the relay behaviour that carries the far half's zone colours.
+ */
+
+/ {
+    behaviors {
+        rgbzone: rgbzone {
+            compatible = "zmk,behavior-rgb-zone";
+            #binding-cells = <2>;
+        };
+    };
+};

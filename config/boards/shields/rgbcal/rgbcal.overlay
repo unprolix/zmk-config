@@ -1,0 +1,17 @@
+/*
+ * Empty but required: Zephyr discovers shields by globbing <shield>.overlay,
+ * so a directory without one is silently not a shield.
+ *
+ * The behaviour the central uses to drive the peripheral's strip lives here.
+ * Name kept to eight characters -- the BLE split payload carries it in a
+ * nine-byte field and silently truncates anything longer.
+ */
+
+/ {
+    behaviors {
+        rgbcal: rgbcal {
+            compatible = "zmk,behavior-rgb-calibrate";
+            #binding-cells = <2>;
+        };
+    };
+};

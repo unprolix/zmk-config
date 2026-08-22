@@ -1,0 +1,15 @@
+# Copyright (c) 2026 Jeremy Bornstein
+# SPDX-License-Identifier: MIT
+#
+# Lights a single LED on whichever half receives it, so the central can walk
+# the peripheral's chain during calibration. GLOBAL locality is what makes ZMK
+# relay it across the split.
+#
+# param1 is the LED index to light, or RGBCAL_ALL_OFF to clear.
+# param2 is unused.
+
+description: Light one LED during RGB calibration
+
+compatible: "zmk,behavior-rgb-calibrate"
+
+include: two_param.yaml
