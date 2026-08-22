@@ -1,0 +1,11 @@
+# A status-screen-only shield for the nice!view.
+#
+# It defines no hardware: the nice!view panel itself still comes from ZMK's
+# own `nice_view` shield, which must be listed alongside this one, e.g.
+#   -DSHIELD="eyelash_corne_left nice_view nice_view_jjb"
+#
+# All this does is replace nice_view's status screen with one that shows the
+# connection and battery as words, both halves' battery levels, and the
+# in-progress leader sequence.
+config SHIELD_NICE_VIEW_JJB
+    def_bool $(shields_list_contains,nice_view_jjb)

@@ -1,0 +1,12 @@
+/*
+ * Intentionally empty.
+ *
+ * This shield adds no hardware -- the nice!view panel, its SPI bus and the
+ * zephyr,display chosen node all come from ZMK's own `nice_view` shield, which
+ * must be listed alongside this one. The only reason this file exists is that
+ * Zephyr discovers shields by globbing for <shield>.overlay (see
+ * zephyr/cmake/modules/shields.cmake): a shield directory with no overlay is
+ * silently not a shield at all, and the build fails with "unknown shield".
+ */
+
+/ { };
