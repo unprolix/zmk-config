@@ -30,6 +30,13 @@
 /* How many of the four index slots in param2 are populated. */
 #define LEADER_RELAY_LISTED_SHIFT 16
 #define LEADER_RELAY_LISTED_MASK  0xFU
+/*
+ * Layer state rides along in the spare bits. The peripheral has no keymap and
+ * so no idea which layer is active, but it wants to show the hierophant emblem
+ * when that layer is; one bit says so without a second relay behaviour or a
+ * layer-name lookup it could not perform anyway.
+ */
+#define LEADER_RELAY_HIEROPHANT_BIT BIT(20)
 
 /*
  * Sequence indices are sent as single bytes, so a configuration with more than
@@ -40,11 +47,17 @@
 #define LEADER_RELAY_INDEX_MAX  0xFEU
 
 static inline uint32_t leader_relay_pack_param1(bool active, uint8_t candidate_count,
-                                                uint8_t press_count, uint8_t listed) {
+                                                uint8_t press_count, uint8_t listed,
+                                                bool hierophant) {
     return (active ? LEADER_RELAY_ACTIVE_BIT : 0) |
+           (hierophant ? LEADER_RELAY_HIEROPHANT_BIT : 0) |
            ((uint32_t)(candidate_count & LEADER_RELAY_COUNT_MASK) << LEADER_RELAY_COUNT_SHIFT) |
            ((uint32_t)(press_count & LEADER_RELAY_PRESS_MASK) << LEADER_RELAY_PRESS_SHIFT) |
            ((uint32_t)(listed & LEADER_RELAY_LISTED_MASK) << LEADER_RELAY_LISTED_SHIFT);
+}
+
+static inline bool leader_relay_hierophant(uint32_t param1) {
+    return (param1 & LEADER_RELAY_HIEROPHANT_BIT) != 0;
 }
 
 static inline bool leader_relay_active(uint32_t param1) {

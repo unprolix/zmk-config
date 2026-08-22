@@ -3,29 +3,32 @@
  *
  * On its own the peripheral knows almost nothing: not the layer, not the
  * endpoint, not the central's battery. Only its own charge and whether the
- * split link is up -- which is the pair worth showing when this half stops
- * responding, and all this screen used to show.
+ * split link is up.
  *
- * It now also shows the leader sequence the *central* is running. The leader
- * behaviour is central-only, so that state arrives over the split link as a
- * relayed behaviour invocation (see leader_relay.h), carrying sequence indices
- * rather than names; the names come from the devicetree table the zmk-leader-key
- * fork compiles into both halves.
+ * Everything else arrives over the split link as a relayed behaviour
+ * invocation (see leader_relay.h): the leader sequence the central is running,
+ * carried as sequence indices rather than names -- those come from the
+ * devicetree table the zmk-leader-key fork compiles into both halves -- plus
+ * one bit saying whether the base layer is active, since this half cannot work
+ * that out for itself.
  *
- * Putting the list here rather than on the central is the point of the
- * exercise: this panel is otherwise idle, so the candidates get all three
- * bands, and the central's layer name never has to be displaced.
+ * Putting the candidate list here rather than on the central is the point of
+ * the exercise: this panel is otherwise idle, so the list gets the full height
+ * and the central's layer display never has to be displaced.
  *
- * Same rotated-canvas machinery as the central screen -- see canvas_util.h for
- * why a nice!view cannot simply be drawn on.
+ * Status is compressed into a single top row -- link on the left, charge on
+ * the right -- leaving everything below it free.
+ *
+ * Same drawing surface as the central screen; see canvas_util.h for why a
+ * nice!view cannot simply be drawn on.
  *
  * SPDX-License-Identifier: MIT
  */
 
 #include <zephyr/devicetree.h>
 #include <zephyr/kernel.h>
-#include <zephyr/sys/atomic.h>
 #include <zephyr/logging/log.h>
+#include <zephyr/sys/atomic.h>
 
 #include <zmk/battery.h>
 #include <zmk/display.h>
@@ -37,102 +40,87 @@
 #include <zmk-leader-key/leader_state.h>
 
 #include "canvas_util.h"
+#include "hierophant_img.h"
 #include "leader_relay.h"
 
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
 #define STATUS_MAX      24
-#define LEADER_TEXT_MAX 160
+#define LEADER_TEXT_MAX 224
 #define LEADER_NAME_MAX 32
 
-/*
- * With well over a hundred sequences defined, listing them the instant leader
- * is pressed would be noise. The relay only sends indices when the candidate
- * set is down to LEADER_RELAY_MAX_INDICES, so beyond that all this half knows
- * is the count -- which is the right thing to show anyway.
- */
+/* Upright panel coordinates; the emblem sits where the central's does. */
+#define ROW_STATUS 4
+#define ROW_LEADER 30
+#define IMG_Y      50
 
 struct jjb_periph_status {
     bool connected;
     uint8_t level;
 
     bool leader_active;
+    bool hierophant;
     char leader_text[LEADER_TEXT_MAX];
 };
 
 static struct jjb_periph_status status;
-static lv_obj_t *band_top;
-static lv_obj_t *band_middle;
-static lv_obj_t *band_bottom;
+static lv_obj_t *panel_draw;
+static lv_obj_t *panel_show;
 
-static uint8_t cbuf_top[CANVAS_BUF_SIZE];
-static uint8_t cbuf_middle[CANVAS_BUF_SIZE];
-static uint8_t cbuf_bottom[CANVAS_BUF_SIZE];
+static uint8_t draw_buf[PANEL_DRAW_BUF_SIZE];
+static uint8_t show_buf[PANEL_SHOW_BUF_SIZE];
 
-static void draw_top(void) {
-    if (band_top == NULL) {
+static void draw_panel(void) {
+    if (panel_draw == NULL) {
         return;
     }
 
-    lv_draw_label_dsc_t dsc;
-    jjb_init_label_dsc(&dsc, &lv_font_montserrat_14, LV_TEXT_ALIGN_CENTER);
+    lv_canvas_fill_bg(panel_draw, CANVAS_BACKGROUND, LV_OPA_COVER);
 
-    lv_canvas_fill_bg(band_top, CANVAS_BACKGROUND, LV_OPA_COVER);
+    /*
+     * Status row: the link as a glyph hard left, the charge right-aligned.
+     * LV_SYMBOL_* live in the FontAwesome range LVGL builds into its Montserrat
+     * faces, so this costs no extra font.
+     */
+    lv_draw_label_dsc_t left;
+    jjb_init_label_dsc(&left, &lv_font_montserrat_14, LV_TEXT_ALIGN_LEFT);
+    jjb_canvas_draw_text(panel_draw, 0, ROW_STATUS, PANEL_W / 2, 20, &left,
+                         status.connected ? LV_SYMBOL_WIFI : LV_SYMBOL_CLOSE);
 
-    /* While a sequence is running this band names what is going on instead. */
+    lv_draw_label_dsc_t right;
+    jjb_init_label_dsc(&right, &lv_font_montserrat_14, LV_TEXT_ALIGN_RIGHT);
+    char batt[STATUS_MAX];
+    snprintf(batt, sizeof(batt), "%d%%", status.level);
+    jjb_canvas_draw_text(panel_draw, PANEL_W / 2, ROW_STATUS, PANEL_W / 2, 20, &right, batt);
+
+    /*
+     * A leader sequence takes the rest of the panel; otherwise the base
+     * layer's emblem does, when the central says that layer is active.
+     */
     if (status.leader_active) {
-        jjb_canvas_draw_text(band_top, 0, 8, CANVAS_SIZE, &dsc, "LEADER");
-    } else {
-        jjb_canvas_draw_text(band_top, 0, 8, CANVAS_SIZE, &dsc,
-                             status.connected ? "linked" : "no link");
+        lv_draw_label_dsc_t dsc;
+        jjb_init_label_dsc(&dsc, &lv_font_montserrat_12, LV_TEXT_ALIGN_CENTER);
+        jjb_canvas_draw_text(panel_draw, 0, ROW_LEADER, PANEL_W, PANEL_H - ROW_LEADER, &dsc,
+                             status.leader_text);
+    } else if (status.hierophant) {
+        jjb_draw_bitmap(panel_draw, (PANEL_W - HIEROPHANT_W) / 2, IMG_Y, hierophant_bits,
+                        HIEROPHANT_W, HIEROPHANT_H, HIEROPHANT_STRIDE);
     }
 
-    jjb_rotate_canvas(band_top);
-}
-
-/*
- * Middle and bottom together are the candidate list: 68 pixels plus the 24
- * that are on screen of the last band. Drawing one label across both would be
- * simpler but the bands are separate canvases, so the text is split between
- * them -- middle takes as much as it holds, bottom takes the remainder.
- */
-static void draw_leader_bands(void) {
-    if (band_middle == NULL || band_bottom == NULL) {
-        return;
-    }
-
-    lv_draw_label_dsc_t dsc;
-    jjb_init_label_dsc(&dsc, &lv_font_montserrat_12, LV_TEXT_ALIGN_CENTER);
-
-    lv_canvas_fill_bg(band_middle, CANVAS_BACKGROUND, LV_OPA_COVER);
-    lv_canvas_fill_bg(band_bottom, CANVAS_BACKGROUND, LV_OPA_COVER);
-
-    if (status.leader_active) {
-        jjb_canvas_draw_text(band_middle, 0, 2, CANVAS_SIZE, &dsc, status.leader_text);
-    } else {
-        /* Idle: the one number anybody walks over to this half to read. */
-        lv_draw_label_dsc_t big;
-        jjb_init_label_dsc(&big, &lv_font_montserrat_18, LV_TEXT_ALIGN_CENTER);
-
-        char text[STATUS_MAX];
-        snprintf(text, sizeof(text), "R%d%%", status.level);
-        jjb_canvas_draw_text(band_middle, 0, 20, CANVAS_SIZE, &big, text);
-    }
-
-    jjb_rotate_canvas(band_middle);
-    jjb_rotate_canvas(band_bottom);
+    jjb_panel_present(panel_draw, panel_show);
 }
 
 /* ------------------------------------------------------------------ */
-/* Leader state, arriving over the split link                          */
+/* State arriving over the split link                                  */
 /* ------------------------------------------------------------------ */
 
 /* Written by the split thread, consumed by the display work queue. */
 static atomic_t relay_param1;
 static atomic_t relay_param2;
 
-static void jjb_leader_apply(uint32_t param1, uint32_t param2) {
+static void jjb_relay_apply(uint32_t param1, uint32_t param2) {
     status.leader_active = leader_relay_active(param1);
+    status.hierophant = leader_relay_hierophant(param1);
 
     if (!status.leader_active) {
         status.leader_text[0] = '\0';
@@ -166,24 +154,22 @@ static void jjb_leader_apply(uint32_t param1, uint32_t param2) {
         }
     }
 
-    draw_top();
-    draw_leader_bands();
+    draw_panel();
 }
 
-static void jjb_leader_work_cb(struct k_work *work) {
+static void jjb_relay_work_cb(struct k_work *work) {
     ARG_UNUSED(work);
-    jjb_leader_apply((uint32_t)atomic_get(&relay_param1), (uint32_t)atomic_get(&relay_param2));
+    jjb_relay_apply((uint32_t)atomic_get(&relay_param1), (uint32_t)atomic_get(&relay_param2));
 }
 
-static K_WORK_DEFINE(jjb_leader_work, jjb_leader_work_cb);
+static K_WORK_DEFINE(jjb_relay_work, jjb_relay_work_cb);
 
 /*
- * Called from the behaviour that the central relayed, which runs on the split
+ * Called from the behaviour the central relayed, which runs on the split
  * thread -- NOT the display work queue. LVGL is not thread-safe and ZMK drives
- * the panel from its own queue, so nothing here may touch LVGL directly;
- * stash the two words and let the display thread do the drawing. Formatting
- * happens over there too, so the text buffer is only ever touched by one
- * thread.
+ * the panel from its own queue, so nothing here may touch LVGL directly: stash
+ * the two words and let the display thread draw. Formatting happens over there
+ * too, so the text buffer is only ever touched by one thread.
  */
 void jjb_leader_relay_received(uint32_t param1, uint32_t param2) {
     atomic_set(&relay_param1, (atomic_val_t)param1);
@@ -192,7 +178,7 @@ void jjb_leader_relay_received(uint32_t param1, uint32_t param2) {
     if (!zmk_display_is_initialized()) {
         return;
     }
-    k_work_submit_to_queue(zmk_display_work_q(), &jjb_leader_work);
+    k_work_submit_to_queue(zmk_display_work_q(), &jjb_relay_work);
 }
 
 /* ------------------------------------------------------------------ */
@@ -205,7 +191,7 @@ struct jjb_link_state {
 
 static void jjb_link_update_cb(struct jjb_link_state state) {
     status.connected = state.connected;
-    draw_top();
+    draw_panel();
 }
 
 static struct jjb_link_state jjb_link_get_state(const zmk_event_t *eh) {
@@ -226,7 +212,7 @@ struct jjb_periph_batt_state {
 
 static void jjb_periph_batt_update_cb(struct jjb_periph_batt_state state) {
     status.level = state.level;
-    draw_leader_bands();
+    draw_panel();
 }
 
 static struct jjb_periph_batt_state jjb_periph_batt_get_state(const zmk_event_t *eh) {
@@ -241,19 +227,8 @@ ZMK_SUBSCRIPTION(jjb_periph_batt_status, zmk_battery_state_changed);
 
 lv_obj_t *zmk_display_status_screen(void) {
     lv_obj_t *screen = lv_obj_create(NULL);
-    lv_obj_remove_flag(screen, LV_OBJ_FLAG_SCROLLABLE);
 
-    band_top = lv_canvas_create(screen);
-    lv_obj_align(band_top, LV_ALIGN_TOP_RIGHT, BAND_TOP_X, 0);
-    lv_canvas_set_buffer(band_top, cbuf_top, CANVAS_SIZE, CANVAS_SIZE, CANVAS_COLOR_FORMAT);
-
-    band_middle = lv_canvas_create(screen);
-    lv_obj_align(band_middle, LV_ALIGN_TOP_LEFT, BAND_MIDDLE_X, 0);
-    lv_canvas_set_buffer(band_middle, cbuf_middle, CANVAS_SIZE, CANVAS_SIZE, CANVAS_COLOR_FORMAT);
-
-    band_bottom = lv_canvas_create(screen);
-    lv_obj_align(band_bottom, LV_ALIGN_TOP_LEFT, BAND_BOTTOM_X, 0);
-    lv_canvas_set_buffer(band_bottom, cbuf_bottom, CANVAS_SIZE, CANVAS_SIZE, CANVAS_COLOR_FORMAT);
+    jjb_panel_init(screen, &panel_draw, &panel_show, draw_buf, show_buf);
 
     /* Both callbacks paint on their first, immediate call -- canvases first. */
     jjb_link_status_init();

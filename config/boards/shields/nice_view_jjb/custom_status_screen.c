@@ -2,24 +2,21 @@
  * Central-half status screen for the nice!view.
  *
  * The widgets are the ones worked out on the Rolio's vista508 screen --
- * connection as words rather than glyphs, both halves' battery, the live
- * leader sequence -- but neither that screen's layout nor its implementation
- * ports. vista508 is a 144x168 panel that LVGL can address directly with
- * ordinary labels. A nice!view cannot be: its framebuffer is 160x68 while the
- * readable orientation is 68x160, and a 1-bit display cannot be rotated by
- * LVGL (see canvas_util.h). Everything therefore goes through rotated L8
- * canvases, which means drawing rather than laying out labels, and redrawing
- * a whole band whenever anything in it changes.
+ * connection as words rather than glyphs, both halves' battery -- but that
+ * screen's implementation does not port: a nice!view cannot be drawn on
+ * directly (see canvas_util.h), so everything is rendered upright into an
+ * off-screen 68x160 canvas and rotated onto the panel.
  *
- * Three bands down the panel:
- *   top     connection, then both batteries
- *   middle  layer name -- or the leader sequence while one is in progress
- *   bottom  WPM (only 24 pixels of this band are on screen)
+ * Down the panel:
+ *   connection, then both batteries
+ *   the layer -- its name, or the hierophant emblem on the base layer
+ *   held modifiers, or WPM when none are down
  *
- * 68 pixels of width is the binding constraint. Montserrat 14 fits roughly
- * nine characters, so the longest layer names ("superscript", "hierophant")
- * wrap to two lines, and leader names wrap too -- which is the other reason
- * underscores become spaces.
+ * The leader candidate list is NOT here; it is on the peripheral, which has a
+ * whole idle panel for it, and this half relays the state across.
+ *
+ * 68 pixels of width is the binding constraint: Montserrat 14 fits roughly
+ * nine characters, so the longer layer names wrap to two lines.
  *
  * SPDX-License-Identifier: MIT
  */
@@ -50,7 +47,11 @@
 #include <zmk/split/bluetooth/service.h>
 
 #include "canvas_util.h"
+#include "hierophant_img.h"
 #include "leader_relay.h"
+
+/* The layer that gets an emblem instead of its name. */
+#define HIEROPHANT_LAYER_NAME "hierophant"
 
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
@@ -93,27 +94,61 @@ struct jjb_status {
 };
 
 static struct jjb_status status;
-static lv_obj_t *band_top;
-static lv_obj_t *band_middle;
-static lv_obj_t *band_bottom;
 
-static uint8_t cbuf_top[CANVAS_BUF_SIZE];
-static uint8_t cbuf_middle[CANVAS_BUF_SIZE];
-static uint8_t cbuf_bottom[CANVAS_BUF_SIZE];
+/*
+ * Relay state, owned by the event thread. Layer and leader share one relay
+ * message; the leader half has to be remembered so a layer change can re-send
+ * it, whereas the layer is read live (see jjb_leader_relay) because at boot
+ * there has been no layer *change* to have cached.
+ */
+static struct zmk_leader_state_changed jjb_last_leader;
+static bool jjb_layer_was_hierophant;
+
+/*
+ * Nothing tells the central that a peripheral has connected -- ZMK raises
+ * zmk_split_peripheral_status_changed only on the peripheral itself -- and the
+ * relay is otherwise sent only on change. So a peripheral that boots, or
+ * reconnects, into an unchanged layer would show nothing until the next layer
+ * change. Re-send on the peripheral's battery reports, which only arrive when
+ * the link is up, and on a timer as a backstop -- short enough to be the boot
+ * path in its own right, since the first tick after the display comes up may
+ * still precede the split link.
+ */
+#define RELAY_HEARTBEAT_SECONDS 10
+
+static lv_obj_t *panel_draw;
+static lv_obj_t *panel_show;
+
+static uint8_t draw_buf[PANEL_DRAW_BUF_SIZE];
+static uint8_t show_buf[PANEL_SHOW_BUF_SIZE];
+
+/*
+ * Vertical layout of the one drawing surface, in upright panel coordinates.
+ * The emblem is the tallest thing here at 91 pixels, so it sets the spacing:
+ * it runs IMG_Y..IMG_Y+91, and the modifier row starts below that.
+ */
+#define ROW_STATUS  4
+#define IMG_Y       38
+#define ROW_LAYER   70
+#define ROW_BOTTOM  143
+#define TEXT_BOX_H  40
+
 
 /* ------------------------------------------------------------------ */
-/* Band painting                                                       */
+/* Painting                                                            */
 /* ------------------------------------------------------------------ */
 
-static void draw_top(void) {
-    if (band_top == NULL) {
+/*
+ * One surface, repainted whole. Canvases have no retained scene graph, so
+ * there is nothing to update incrementally; redrawing the lot is simpler than
+ * tracking which region changed, and at 68x160 it is cheap.
+ */
+static void draw_panel(void) {
+    if (panel_draw == NULL) {
         return;
     }
 
-    lv_draw_label_dsc_t dsc;
-    jjb_init_label_dsc(&dsc, &lv_font_montserrat_14, LV_TEXT_ALIGN_CENTER);
-
-    lv_canvas_fill_bg(band_top, CANVAS_BACKGROUND, LV_OPA_COVER);
+    lv_canvas_fill_bg(panel_draw, CANVAS_BACKGROUND, LV_OPA_COVER);
 
     char text[STATUS_MAX];
     enum zmk_transport transport = status.selected.transport;
@@ -124,84 +159,62 @@ static void draw_top(void) {
         transport = status.preferred;
     }
 
+    /*
+     * Kept to four characters or so: this shares one 68-pixel line with the
+     * charge, and spelling the state out ("BT2 open") overflows it. The
+     * ellipsis means reaching-but-not-connected, the star means unpaired.
+     */
     switch (transport) {
     case ZMK_TRANSPORT_USB:
-        snprintf(text, sizeof(text), connected ? "USB" : "USB ...");
+        snprintf(text, sizeof(text), connected ? "USB" : "USB.");
         break;
     case ZMK_TRANSPORT_BLE:
         if (!status.profile_bonded) {
-            snprintf(text, sizeof(text), "BT%d open", zmk_ble_active_profile_index() + 1);
+            snprintf(text, sizeof(text), "BT%d*", zmk_ble_active_profile_index() + 1);
         } else {
-            snprintf(text, sizeof(text), "BT%d %s", zmk_ble_active_profile_index() + 1,
-                     status.profile_connected ? "ok" : "...");
+            snprintf(text, sizeof(text), "BT%d%s", zmk_ble_active_profile_index() + 1,
+                     status.profile_connected ? "" : ".");
         }
         break;
     default:
-        snprintf(text, sizeof(text), "offline");
+        snprintf(text, sizeof(text), "--");
         break;
     }
-    jjb_canvas_draw_text(band_top, 0, 8, CANVAS_SIZE, &dsc, text);
 
-    /*
-     * No "%" and no space between the halves: "L100 R100" is already at the
-     * width limit for this font.
-     */
-    if (status.have_peripheral) {
-        snprintf(text, sizeof(text), "L%d R%d", status.central_batt, status.peripheral_batt);
-    } else {
-        snprintf(text, sizeof(text), "L%d", status.central_batt);
-    }
-    jjb_canvas_draw_text(band_top, 0, 32, CANVAS_SIZE, &dsc, text);
+    lv_draw_label_dsc_t left;
+    jjb_init_label_dsc(&left, &lv_font_montserrat_14, LV_TEXT_ALIGN_LEFT);
+    jjb_canvas_draw_text(panel_draw, 0, ROW_STATUS, PANEL_W / 2, 20, &left, text);
 
-    jjb_rotate_canvas(band_top);
-}
-
-static void draw_middle(void) {
-    if (band_middle == NULL) {
-        return;
-    }
-
-    lv_canvas_fill_bg(band_middle, CANVAS_BACKGROUND, LV_OPA_COVER);
+    /* Own charge, right-aligned, laid out the same way as the peripheral's. */
+    lv_draw_label_dsc_t right;
+    jjb_init_label_dsc(&right, &lv_font_montserrat_14, LV_TEXT_ALIGN_RIGHT);
+    snprintf(text, sizeof(text), "%d%%", status.central_batt);
+    jjb_canvas_draw_text(panel_draw, PANEL_W / 2, ROW_STATUS, PANEL_W / 2, 20, &right, text);
 
     lv_draw_label_dsc_t dsc;
     jjb_init_label_dsc(&dsc, &lv_font_montserrat_14, LV_TEXT_ALIGN_CENTER);
 
-    char text[LAYER_NAME_MAX];
-
-    if (status.layer_label == NULL || strlen(status.layer_label) == 0) {
-        snprintf(text, sizeof(text), "%i", status.layer_index);
+    /* The base layer gets its emblem rather than its name. */
+    if (status.layer_label != NULL && strcmp(status.layer_label, HIEROPHANT_LAYER_NAME) == 0) {
+        jjb_draw_bitmap(panel_draw, (PANEL_W - HIEROPHANT_W) / 2, IMG_Y, hierophant_bits,
+                        HIEROPHANT_W, HIEROPHANT_H, HIEROPHANT_STRIDE);
     } else {
-        snprintf(text, sizeof(text), "%s", status.layer_label);
+        char name[LAYER_NAME_MAX];
+        if (status.layer_label == NULL || strlen(status.layer_label) == 0) {
+            snprintf(name, sizeof(name), "%i", status.layer_index);
+        } else {
+            snprintf(name, sizeof(name), "%s", status.layer_label);
+        }
+        jjb_canvas_draw_text(panel_draw, 0, ROW_LAYER, PANEL_W, TEXT_BOX_H, &dsc, name);
     }
-    jjb_canvas_draw_text(band_middle, 0, 20, CANVAS_SIZE, &dsc, text);
-
-    jjb_rotate_canvas(band_middle);
-}
-
-static void draw_bottom(void) {
-    if (band_bottom == NULL) {
-        return;
-    }
-
-    lv_draw_label_dsc_t dsc;
-    jjb_init_label_dsc(&dsc, &lv_font_montserrat_12, LV_TEXT_ALIGN_CENTER);
-
-    lv_canvas_fill_bg(band_bottom, CANVAS_BACKGROUND, LV_OPA_COVER);
 
     /*
-     * Only BAND_BOTTOM_VISIBLE pixels of this band are on screen, so anything
-     * drawn here has to sit right at the top of the canvas -- one line, and at
-     * 68 pixels wide, about nine characters of it.
-     *
-     * Held modifiers take the line when there are any: they are what you want
-     * to see at the instant you are looking, whereas WPM is idle curiosity.
+     * Held modifiers take the last row when there are any: they are what you
+     * want to see at the instant you are looking, whereas WPM is idle
+     * curiosity. One slot per modifier, left and right folded together, each
+     * always in the same place so position identifies it as much as the glyph.
      */
     if (status.mods != 0) {
-        /*
-         * One slot per modifier, left and right folded together, each slot in
-         * the same place every time so position identifies the modifier as
-         * much as the glyph does.
-         */
         static const zmk_mod_flags_t slot_mods[MOD_ICON_SLOTS] = {
             [JJB_MOD_ICON_CTRL] = MOD_LCTL | MOD_RCTL,
             [JJB_MOD_ICON_SHIFT] = MOD_LSFT | MOD_RSFT,
@@ -212,17 +225,18 @@ static void draw_bottom(void) {
         const lv_coord_t inset = (MOD_ICON_SLOT_W - MOD_ICON_SIZE) / 2;
         for (uint8_t slot = 0; slot < MOD_ICON_SLOTS; slot++) {
             if (status.mods & slot_mods[slot]) {
-                jjb_draw_mod_icon(band_bottom, slot * MOD_ICON_SLOT_W + inset, 3,
+                jjb_draw_mod_icon(panel_draw, slot * MOD_ICON_SLOT_W + inset, ROW_BOTTOM,
                                   (enum jjb_mod_icon)slot);
             }
         }
     } else {
-        char text[STATUS_MAX];
+        lv_draw_label_dsc_t small;
+        jjb_init_label_dsc(&small, &lv_font_montserrat_12, LV_TEXT_ALIGN_CENTER);
         snprintf(text, sizeof(text), "%d wpm", status.wpm);
-        jjb_canvas_draw_text(band_bottom, 0, 2, CANVAS_SIZE, &dsc, text);
+        jjb_canvas_draw_text(panel_draw, 0, ROW_BOTTOM, PANEL_W, 18, &small, text);
     }
 
-    jjb_rotate_canvas(band_bottom);
+    jjb_panel_present(panel_draw, panel_show);
 }
 
 /* ------------------------------------------------------------------ */
@@ -241,7 +255,7 @@ static void jjb_conn_update_cb(struct jjb_conn_state state) {
     status.preferred = state.preferred;
     status.profile_connected = state.profile_connected;
     status.profile_bonded = state.profile_bonded;
-    draw_top();
+    draw_panel();
 }
 
 static struct jjb_conn_state jjb_conn_get_state(const zmk_event_t *eh) {
@@ -276,7 +290,7 @@ static void jjb_batt_update_cb(struct jjb_batt_state state) {
     status.central_batt = state.central;
     status.peripheral_batt = state.peripheral;
     status.have_peripheral = state.have_peripheral;
-    draw_top();
+    draw_panel();
 }
 
 static struct jjb_batt_state jjb_batt_get_state(const zmk_event_t *eh) {
@@ -316,7 +330,7 @@ struct jjb_layer_state {
 static void jjb_layer_update_cb(struct jjb_layer_state state) {
     status.layer_index = state.index;
     status.layer_label = state.label;
-    draw_middle();
+    draw_panel();
 }
 
 static struct jjb_layer_state jjb_layer_get_state(const zmk_event_t *eh) {
@@ -339,7 +353,7 @@ struct jjb_wpm_state {
 
 static void jjb_wpm_update_cb(struct jjb_wpm_state state) {
     status.wpm = state.wpm;
-    draw_bottom();
+    draw_panel();
 }
 
 static struct jjb_wpm_state jjb_wpm_get_state(const zmk_event_t *eh) {
@@ -366,7 +380,7 @@ struct jjb_mods_state {
 
 static void jjb_mods_update_cb(struct jjb_mods_state state) {
     status.mods = state.mods;
-    draw_bottom();
+    draw_panel();
 }
 
 static struct jjb_mods_state jjb_mods_get_state(const zmk_event_t *eh) {
@@ -388,6 +402,13 @@ ZMK_SUBSCRIPTION(jjb_mods_status, zmk_keycode_state_changed);
  * the invocation to every peripheral and then runs it locally, where the relay
  * behaviour ignores it.
  */
+/* Read live rather than cached: at boot no layer change has happened yet. */
+static bool jjb_layer_hierophant_now(void) {
+    zmk_keymap_layer_index_t index = zmk_keymap_highest_layer_active();
+    const char *name = zmk_keymap_layer_name(zmk_keymap_layer_index_to_id(index));
+    return name != NULL && strcmp(name, HIEROPHANT_LAYER_NAME) == 0;
+}
+
 static void jjb_leader_relay(struct zmk_leader_state_changed state) {
     uint32_t param2 = 0;
     uint8_t listed = 0;
@@ -406,7 +427,7 @@ static void jjb_leader_relay(struct zmk_leader_state_changed state) {
     struct zmk_behavior_binding binding = {
         .behavior_dev = DEVICE_DT_NAME(DT_NODELABEL(ldrelay)),
         .param1 = leader_relay_pack_param1(state.active, state.candidate_count, state.press_count,
-                                           listed),
+                                           listed, jjb_layer_hierophant_now()),
         .param2 = param2,
     };
     struct zmk_behavior_binding_event event = {
@@ -444,6 +465,7 @@ static void jjb_leader_relay(struct zmk_leader_state_changed state) {
 static int jjb_leader_relay_listener(const zmk_event_t *eh) {
     const struct zmk_leader_state_changed *ev = as_zmk_leader_state_changed(eh);
     if (ev != NULL) {
+        jjb_last_leader = *ev;
         jjb_leader_relay(*ev);
     }
     return ZMK_EV_EVENT_BUBBLE;
@@ -452,37 +474,71 @@ static int jjb_leader_relay_listener(const zmk_event_t *eh) {
 ZMK_LISTENER(jjb_leader_relay_mod, jjb_leader_relay_listener);
 ZMK_SUBSCRIPTION(jjb_leader_relay_mod, zmk_leader_state_changed);
 
+/*
+ * The peripheral wants the hierophant emblem too, but it has no keymap and so
+ * no idea which layer is active. Layer state therefore rides the same relay,
+ * which means re-sending on layer changes as well -- with whatever the leader
+ * state currently is, so a layer change mid-sequence does not blank the list.
+ *
+ * Also a plain listener, for the same reason as above: this runs on the event
+ * thread and must not touch LVGL.
+ */
+static int jjb_layer_relay_listener(const zmk_event_t *eh) {
+    bool hierophant = jjb_layer_hierophant_now();
+
+    /* Only the emblem crosses the link, so only a change in it is worth a write. */
+    if (hierophant == jjb_layer_was_hierophant) {
+        return ZMK_EV_EVENT_BUBBLE;
+    }
+    jjb_layer_was_hierophant = hierophant;
+    jjb_leader_relay(jjb_last_leader);
+    return ZMK_EV_EVENT_BUBBLE;
+}
+
+ZMK_LISTENER(jjb_layer_relay_mod, jjb_layer_relay_listener);
+ZMK_SUBSCRIPTION(jjb_layer_relay_mod, zmk_layer_state_changed);
+
+/*
+ * The peripheral only reports its charge while connected, so these double as
+ * proof the link is up -- and the first one after a connect is the earliest
+ * moment a re-send can land.
+ */
+static int jjb_periph_alive_listener(const zmk_event_t *eh) {
+    jjb_leader_relay(jjb_last_leader);
+    return ZMK_EV_EVENT_BUBBLE;
+}
+
+ZMK_LISTENER(jjb_periph_alive_mod, jjb_periph_alive_listener);
+ZMK_SUBSCRIPTION(jjb_periph_alive_mod, zmk_peripheral_battery_state_changed);
+
+static void jjb_relay_heartbeat_cb(struct k_work *work);
+static K_WORK_DELAYABLE_DEFINE(jjb_relay_heartbeat, jjb_relay_heartbeat_cb);
+
+static void jjb_relay_heartbeat_cb(struct k_work *work) {
+    ARG_UNUSED(work);
+    jjb_leader_relay(jjb_last_leader);
+    k_work_reschedule(&jjb_relay_heartbeat, K_SECONDS(RELAY_HEARTBEAT_SECONDS));
+}
+
 /* ------------------------------------------------------------------ */
 
 lv_obj_t *zmk_display_status_screen(void) {
     lv_obj_t *screen = lv_obj_create(NULL);
-    lv_obj_remove_flag(screen, LV_OBJ_FLAG_SCROLLABLE);
+
+    jjb_panel_init(screen, &panel_draw, &panel_show, draw_buf, show_buf);
 
     /*
-     * Band offsets are ZMK's nice_view values, which are known to land the
-     * right way up on this panel. See canvas_util.h for what they mean.
-     */
-    band_top = lv_canvas_create(screen);
-    lv_obj_align(band_top, LV_ALIGN_TOP_RIGHT, BAND_TOP_X, 0);
-    lv_canvas_set_buffer(band_top, cbuf_top, CANVAS_SIZE, CANVAS_SIZE, CANVAS_COLOR_FORMAT);
-
-    band_middle = lv_canvas_create(screen);
-    lv_obj_align(band_middle, LV_ALIGN_TOP_LEFT, BAND_MIDDLE_X, 0);
-    lv_canvas_set_buffer(band_middle, cbuf_middle, CANVAS_SIZE, CANVAS_SIZE, CANVAS_COLOR_FORMAT);
-
-    band_bottom = lv_canvas_create(screen);
-    lv_obj_align(band_bottom, LV_ALIGN_TOP_LEFT, BAND_BOTTOM_X, 0);
-    lv_canvas_set_buffer(band_bottom, cbuf_bottom, CANVAS_SIZE, CANVAS_SIZE, CANVAS_COLOR_FORMAT);
-
-    /*
-     * Each of these runs its callback once immediately, which paints the band
-     * it owns -- so all three canvases must already exist by this point.
+     * Each of these runs its callback once immediately, and every callback
+     * repaints the whole surface -- so both canvases must already exist.
      */
     jjb_conn_status_init();
     jjb_batt_status_init();
     jjb_layer_status_init();
     jjb_wpm_status_init();
     jjb_mods_status_init();
+
+    jjb_layer_was_hierophant = jjb_layer_hierophant_now();
+    k_work_reschedule(&jjb_relay_heartbeat, K_SECONDS(2));
 
     return screen;
 }
