@@ -104,9 +104,13 @@ manifest:
     # so the display can show an in-progress leader sequence and what can still
     # be typed. Upstream (urob) keeps all of that in file-scope statics and
     # raises no events, so none of it is observable.
+    #
+    # Also tabulates the sequence names on BOTH halves of a split. The
+    # behaviour itself is central-only, so without this a peripheral display
+    # cannot name a candidate; with it, only indices need crossing the link.
     - name: zmk-leader-key
       remote: unprolix
-      revision: cb711961a4c29aee6dd5abee702e666e87d2330a
+      revision: 9fbd41de82a48d8188297277b6d793d096349f1f
       path: modules/zmk/leader-key
     - name: zmk-tri-state
       path: modules/zmk/tri-state
