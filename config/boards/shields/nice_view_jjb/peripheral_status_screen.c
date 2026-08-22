@@ -1,14 +1,14 @@
 /*
- * Peripheral-half status screen for the nice!view's 160x68 landscape panel.
+ * Peripheral-half status screen for the nice!view.
  *
  * The peripheral knows almost nothing: not the layer, not the endpoint, not
  * the central's battery. What it does know is its own charge and whether the
  * split link is up, which is exactly the pair worth showing when the right
- * half stops responding.
+ * half stops responding. ZMK's own widget renders that as LV_SYMBOL_WIFI plus
+ * OK or CLOSE; there is room here for the words.
  *
- * ZMK's own peripheral_status widget shows this as LV_SYMBOL_WIFI plus OK or
- * CLOSE. That is compact enough for the stock canvas layout but tells you
- * nothing at a glance, and there is room here for the words instead.
+ * Same rotated-canvas machinery as the central screen -- see canvas_util.h for
+ * why a nice!view cannot simply be drawn on.
  *
  * SPDX-License-Identifier: MIT
  */
@@ -25,15 +25,54 @@
 #include <zmk/events/split_peripheral_status_changed.h>
 #include <zmk/split/bluetooth/peripheral.h>
 
+#include "canvas_util.h"
+
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
-#define SCREEN_W DT_PROP(DT_CHOSEN(zephyr_display), width)
-
 #define STATUS_MAX 24
-#define ROW_TOP_H  15
 
-static lv_obj_t *link_label;
-static lv_obj_t *batt_label;
+struct jjb_periph_status {
+    bool connected;
+    uint8_t level;
+};
+
+static struct jjb_periph_status status;
+static lv_obj_t *band_top;
+static lv_obj_t *band_middle;
+
+static uint8_t cbuf_top[CANVAS_BUF_SIZE];
+static uint8_t cbuf_middle[CANVAS_BUF_SIZE];
+
+static void draw_top(void) {
+    if (band_top == NULL) {
+        return;
+    }
+
+    lv_draw_label_dsc_t dsc;
+    jjb_init_label_dsc(&dsc, &lv_font_montserrat_14, LV_TEXT_ALIGN_CENTER);
+
+    lv_canvas_fill_bg(band_top, CANVAS_BACKGROUND, LV_OPA_COVER);
+    jjb_canvas_draw_text(band_top, 0, 8, CANVAS_SIZE, &dsc, status.connected ? "linked" : "no link");
+    jjb_rotate_canvas(band_top);
+}
+
+static void draw_middle(void) {
+    if (band_middle == NULL) {
+        return;
+    }
+
+    lv_draw_label_dsc_t dsc;
+    jjb_init_label_dsc(&dsc, &lv_font_montserrat_18, LV_TEXT_ALIGN_CENTER);
+
+    lv_canvas_fill_bg(band_middle, CANVAS_BACKGROUND, LV_OPA_COVER);
+
+    /* The one number anybody walks over to this half to read. */
+    char text[STATUS_MAX];
+    snprintf(text, sizeof(text), "R%d%%", status.level);
+    jjb_canvas_draw_text(band_middle, 0, 20, CANVAS_SIZE, &dsc, text);
+
+    jjb_rotate_canvas(band_middle);
+}
 
 /* ------------------------------------------------------------------ */
 /* Split link                                                          */
@@ -44,11 +83,8 @@ struct jjb_link_state {
 };
 
 static void jjb_link_update_cb(struct jjb_link_state state) {
-    if (link_label == NULL) {
-        return;
-    }
-
-    lv_label_set_text(link_label, state.connected ? "linked" : "no link");
+    status.connected = state.connected;
+    draw_top();
 }
 
 static struct jjb_link_state jjb_link_get_state(const zmk_event_t *eh) {
@@ -68,14 +104,8 @@ struct jjb_periph_batt_state {
 };
 
 static void jjb_periph_batt_update_cb(struct jjb_periph_batt_state state) {
-    if (batt_label == NULL) {
-        return;
-    }
-
-    char text[STATUS_MAX];
-    /* "R" because this is the right half on every board that builds it. */
-    snprintf(text, sizeof(text), "R%d%%", state.level);
-    lv_label_set_text(batt_label, text);
+    status.level = state.level;
+    draw_middle();
 }
 
 static struct jjb_periph_batt_state jjb_periph_batt_get_state(const zmk_event_t *eh) {
@@ -90,22 +120,17 @@ ZMK_SUBSCRIPTION(jjb_periph_batt_status, zmk_battery_state_changed);
 
 lv_obj_t *zmk_display_status_screen(void) {
     lv_obj_t *screen = lv_obj_create(NULL);
-
-    /* Same reasoning as the central screen: keep the theme, drop the padding. */
     lv_obj_remove_flag(screen, LV_OBJ_FLAG_SCROLLABLE);
-    lv_obj_set_style_pad_all(screen, 0, LV_PART_MAIN);
 
-    link_label = lv_label_create(screen);
-    lv_obj_set_style_text_font(link_label, &lv_font_montserrat_12, LV_PART_MAIN);
-    lv_obj_align(link_label, LV_ALIGN_TOP_LEFT, 0, 0);
+    band_top = lv_canvas_create(screen);
+    lv_obj_align(band_top, LV_ALIGN_TOP_RIGHT, BAND_TOP_X, 0);
+    lv_canvas_set_buffer(band_top, cbuf_top, CANVAS_SIZE, CANVAS_SIZE, CANVAS_COLOR_FORMAT);
 
-    /* The one number anybody walks over to this half to read. */
-    batt_label = lv_label_create(screen);
-    lv_obj_set_width(batt_label, SCREEN_W);
-    lv_obj_set_style_text_font(batt_label, &lv_font_montserrat_18, LV_PART_MAIN);
-    lv_obj_set_style_text_align(batt_label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
-    lv_obj_align(batt_label, LV_ALIGN_TOP_MID, 0, ROW_TOP_H + 12);
+    band_middle = lv_canvas_create(screen);
+    lv_obj_align(band_middle, LV_ALIGN_TOP_LEFT, BAND_MIDDLE_X, 0);
+    lv_canvas_set_buffer(band_middle, cbuf_middle, CANVAS_SIZE, CANVAS_SIZE, CANVAS_COLOR_FORMAT);
 
+    /* Both callbacks paint on their first, immediate call -- canvases first. */
     jjb_link_status_init();
     jjb_periph_batt_status_init();
 
