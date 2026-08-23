@@ -67,10 +67,13 @@ manifest:
 
     # for eyelash_corne (user fork tracking upstream shield-based architecture;
     # the HWMv2 board form lives on branch eyelash-corne-hwmv2 if rollback is needed)
+    # The eyelash_corne shield. Pinned by commit rather than by branch: this
+    # sat for months as a branch name that existed only in the local checkout,
+    # so the workspace built here and nowhere else. A SHA cannot rot that way.
     - name: corne-j-keyboard-zmk
       remote: unprolix
       path: zmk-new_corne
-      revision: eyelash-corne-shield
+      revision: 6304c02587e776e45e1d09730349a3dd3406f8b1
 
     # for sofle hybrid (user fork: WS2812_STRIP fix for Zephyr 4.1.0)
     - name: sofle-hybrid-ergomech-zmk
