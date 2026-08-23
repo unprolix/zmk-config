@@ -136,10 +136,15 @@ static const struct zone_layer zone_layers[] = {
     {"numeric",    {ZC_OFF, ZC_OFF, ZC_OFF, ZC_OFF, ZC_OFF, ZC_CYAN},
                    {ZC_OFF, ZC_OFF, ZC_OFF, ZC_OFF, ZC_OFF, ZC_CYAN}},
 
-    /* Not yet specified; left as they were, to be tuned. */
+    /* Outer two columns, both halves -- not sided. */
+    {"function",   {ZC_OFF, ZC_OFF, ZC_OFF, ZC_OFF, ZC_RED, ZC_RED},
+                   {ZC_OFF, ZC_OFF, ZC_OFF, ZC_OFF, ZC_RED, ZC_RED}},
 
-    {"function",   {ZC_YELLOW, ZC_YELLOW, ZC_AMBER, ZC_OFF, ZC_OFF, ZC_OFF},
-                   {ZC_YELLOW, ZC_YELLOW, ZC_AMBER, ZC_OFF, ZC_OFF, ZC_OFF}},
+    /* Outermost cyan, the one inside it violet, both halves -- not sided. */
+    {"extra",      {ZC_OFF, ZC_OFF, ZC_OFF, ZC_OFF, ZC_VIOLET, ZC_CYAN},
+                   {ZC_OFF, ZC_OFF, ZC_OFF, ZC_OFF, ZC_VIOLET, ZC_CYAN}},
+
+    /* Not yet specified; left as they were, to be tuned. */
 
     {"superscript", {ZC_TEAL, ZC_TEAL, ZC_TEAL, ZC_TEAL, ZC_TEAL, ZC_OFF},
                     {ZC_TEAL, ZC_TEAL, ZC_TEAL, ZC_TEAL, ZC_TEAL, ZC_OFF}},
