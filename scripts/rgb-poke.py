@@ -196,18 +196,25 @@ def main():
                              data[14], data[15], data[16]))
                     seen += 1
                     continue
-                if len(data) < 17 or bytes(data[:7]) != b"ZMKST8!":
+                if len(data) < 19 or bytes(data[:7]) != b"ZMKST8!":
                     continue
                 seen += 1
                 layer = data[7]
                 mods = data[8]
                 pl = int.from_bytes(data[9:13], "little")
                 pr = int.from_bytes(data[13:17], "little")
-                name = bytes(data[17:]).split(b"\0")[0].decode("ascii", "replace")
+                ind = data[17]
+                ep = data[18]
+                name = bytes(data[19:]).split(b"\0")[0].decode("ascii", "replace")
                 zl = [(pl >> (i * 4)) & 0xF for i in range(6)]
                 zr = [(pr >> (i * 4)) & 0xF for i in range(6)]
-                print("layer=%-12s idx=%-2d mods=%02x  L=%s  R=%s"
-                      % (name, layer, mods, zl, zr))
+                # Lock keys as the host reports them, and the endpoint that
+                # value was read from -- they are stored per endpoint.
+                locks = "".join(n for b, n in
+                                ((0x01, "num"), (0x02, "CAPS"), (0x04, "scr")) if ind & b) or "-"
+                print("layer=%-12s idx=%-2d mods=%02x  ind=%02x(%s) ep=%s  L=%s  R=%s"
+                      % (name, layer, mods, ind, locks,
+                         {0: "none", 1: "USB", 2: "BLE"}.get(ep, ep), zl, zr))
         except KeyboardInterrupt:
             print()
         finally:

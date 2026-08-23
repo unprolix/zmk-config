@@ -145,7 +145,8 @@ static bool report_enabled;
 static uint8_t report_buf[CONFIG_RAW_HID_REPORT_SIZE];
 
 void rgbzone_diag_report(uint8_t layer_index, const char *layer_name, uint8_t mods,
-                         uint32_t packed_left, uint32_t packed_right) {
+                         uint32_t packed_left, uint32_t packed_right, uint8_t indicators,
+                         uint8_t endpoint) {
     if (!report_enabled) {
         return;
     }
@@ -165,8 +166,18 @@ void rgbzone_diag_report(uint8_t layer_index, const char *layer_name, uint8_t mo
     p[8] = (packed_right >> 16) & 0xFF;
     p[9] = (packed_right >> 24) & 0xFF;
 
+    /*
+     * What the host says its lock keys are doing, and which endpoint that came
+     * from. Both, because they can disagree: the indicators are stored per
+     * endpoint and read back for the selected one, so a report arriving over
+     * USB while the keyboard is talking Bluetooth is filed somewhere the
+     * lighting never looks.
+     */
+    p[10] = indicators;
+    p[11] = endpoint;
+
     /* Whatever of the name fits in what is left. */
-    size_t used = sizeof(ST_MAGIC) + 10;
+    size_t used = sizeof(ST_MAGIC) + 12;
     size_t room = sizeof(report_buf) - used - 1;
     if (layer_name != NULL) {
         strncpy((char *)report_buf + used, layer_name, room);
@@ -256,12 +267,15 @@ void rgbzone_diag_report_write(uint32_t packed, uint8_t r0, uint8_t g0, uint8_t 
 }
 
 void rgbzone_diag_report(uint8_t layer_index, const char *layer_name, uint8_t mods,
-                         uint32_t packed_left, uint32_t packed_right) {
+                         uint32_t packed_left, uint32_t packed_right, uint8_t indicators,
+                         uint8_t endpoint) {
     ARG_UNUSED(layer_index);
     ARG_UNUSED(layer_name);
     ARG_UNUSED(mods);
     ARG_UNUSED(packed_left);
     ARG_UNUSED(packed_right);
+    ARG_UNUSED(indicators);
+    ARG_UNUSED(endpoint);
 }
 
 #endif

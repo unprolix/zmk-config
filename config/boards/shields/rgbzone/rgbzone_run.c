@@ -24,6 +24,7 @@
 #include <zmk/events/keycode_state_changed.h>
 #include <zmk/events/layer_state_changed.h>
 #include <zmk/events/position_state_changed.h>
+#include <zmk/endpoints.h>
 #include <zmk/hid.h>
 #include <zmk/keymap.h>
 #include <zmk/rgb_underglow.h>
@@ -34,7 +35,8 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
 void rgbzone_relay_send(uint32_t packed);
 void rgbzone_diag_report(uint8_t layer_index, const char *layer_name, uint8_t mods,
-                         uint32_t packed_left, uint32_t packed_right);
+                         uint32_t packed_left, uint32_t packed_right, uint8_t indicators,
+                         uint8_t endpoint);
 
 /*
  * Which half is holding the layer open.
@@ -139,13 +141,21 @@ static void overlay_mods(const struct zone_hrm *table, size_t len, zmk_mod_flags
  */
 #define HID_LED_CAPS_LOCK BIT(1)
 
-static bool host_caps_lock(void) {
-#if IS_ENABLED(CONFIG_ZMK_HID_INDICATORS)
-    return (zmk_hid_indicators_get_current_profile() & HID_LED_CAPS_LOCK) != 0;
-#else
-    return false;
-#endif
-}
+/*
+ * Cached rather than read fresh on every repaint.
+ *
+ * The indicators are stored per endpoint and read back for whichever one is
+ * selected, so any repaint that lands while the endpoint is switching -- or
+ * while nothing is selected at all, which happens on every disconnect --
+ * reads an empty slot and decides caps lock is off. The host has not changed
+ * its mind; we simply asked at a bad moment. Caps lock changes only when the
+ * host says so, so remember what it last said and repaint from that.
+ */
+static uint8_t cached_indicators;
+
+static uint8_t host_indicators(void) { return cached_indicators; }
+
+static bool host_caps_lock(void) { return (host_indicators() & HID_LED_CAPS_LOCK) != 0; }
 
 static void refresh(void) {
     zmk_keymap_layer_index_t index = zmk_keymap_highest_layer_active();
@@ -217,13 +227,20 @@ static void refresh(void) {
     uint32_t pr = rgbzone_with_level(rgbzone_pack(right), level);
     rgbzone_apply(pl);
     rgbzone_relay_send(pr);
-    rgbzone_diag_report((uint8_t)index, name, mods, pl, pr);
+    rgbzone_diag_report((uint8_t)index, name, mods, pl, pr, host_indicators(),
+                        (uint8_t)zmk_endpoint_get_selected().transport);
 }
 
 /* For the brightness keys, which change the picture without any event. */
 void rgbzone_refresh(void) { refresh(); }
 
 static int rgbzone_layer_listener(const zmk_event_t *eh) {
+#if IS_ENABLED(CONFIG_ZMK_HID_INDICATORS)
+    const struct zmk_hid_indicators_changed *ind = as_zmk_hid_indicators_changed(eh);
+    if (ind != NULL) {
+        cached_indicators = (uint8_t)ind->indicators;
+    }
+#endif
     refresh();
     return ZMK_EV_EVENT_BUBBLE;
 }
