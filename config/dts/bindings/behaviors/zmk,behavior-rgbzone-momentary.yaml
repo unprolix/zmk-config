@@ -1,0 +1,21 @@
+# Copyright (c) 2026 Jeremy Bornstein
+# SPDX-License-Identifier: MIT
+#
+# A drop-in replacement for ZMK's momentary-layer behaviour that also records
+# which key opened the layer, so the per-column lighting can colour relative to
+# the half actually holding it rather than to whichever hand typed last.
+#
+# rgbzone.overlay retargets ZMK's own &mo node at this compatible, so every
+# route into a momentary layer -- &mo, &lt, the hold-tap halves, the
+# layer+modifier macros -- is covered without touching the keymap.
+
+description: Momentary layer that records the key holding it open
+
+compatible: "zmk,behavior-rgbzone-momentary"
+
+include: one_param.yaml
+
+properties:
+  locking:
+    type: boolean
+    description: Whether to "lock" the layer active, preventing behaviors without the "locking" property from deactivating the layer

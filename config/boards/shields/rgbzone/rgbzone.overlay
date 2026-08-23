@@ -20,3 +20,20 @@
         };
     };
 };
+
+/*
+ * Ask the keymap to retarget ZMK's momentary-layer node at the copy in
+ * rgbzone_owner.c, which records which key opened the layer.
+ *
+ * It cannot be done here: &mo is defined by behaviors.dtsi, which the keymap
+ * includes, and the keymap is preprocessed after every shield overlay -- the
+ * label does not exist yet at this point. Zephyr feeds all the devicetree
+ * sources through one preprocessor run, in order, so a #define set here does
+ * reach the keymap, which is where jjb.keymap acts on it.
+ *
+ * Doing it to &mo rather than to individual keys covers every route into a
+ * momentary layer -- &lt and the hold-tap halves bind it, the layer+modifier
+ * macros press it -- and leaves builds without this shield on ZMK's own
+ * behaviour.
+ */
+#define RGBZONE_OWNS_MO 1

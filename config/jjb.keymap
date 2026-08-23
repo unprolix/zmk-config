@@ -1004,3 +1004,16 @@ MAKE_ADAPTIVE_REPEAT(f_hrk_f23, hmr, R_M4, F23)
 
 		
 }; // root node
+
+/*
+ * Per-column lighting needs to know which half is holding a layer open, and
+ * the only place that is known for certain is the behaviour that opens it.
+ * rgbzone.overlay defines RGBZONE_OWNS_MO to ask for its own momentary-layer
+ * driver, which records the invoking key before activating the layer; without
+ * that shield this is not defined and ZMK's own behaviour stands.
+ */
+#ifdef RGBZONE_OWNS_MO
+&mo {
+    compatible = "zmk,behavior-rgbzone-momentary";
+};
+#endif

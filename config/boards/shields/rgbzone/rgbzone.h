@@ -38,6 +38,20 @@ static inline enum zone_colour rgbzone_unpack(uint32_t packed, uint8_t zone) {
 void rgbzone_apply(uint32_t packed);
 
 /* ------------------------------------------------------------------ */
+/* Layer ownership                                                     */
+/* ------------------------------------------------------------------ */
+
+/*
+ * Which half is holding a layer open, recorded by the momentary-layer
+ * behaviour in rgbzone_owner.c rather than inferred from key presses -- see
+ * the note there for why inference does not work. rgbzone_owner_side()
+ * returns false for a layer that was not opened by holding a key.
+ */
+void rgbzone_owner_pressed(uint8_t layer, uint32_t position, bool from_right);
+void rgbzone_owner_released(uint8_t layer, uint32_t position);
+bool rgbzone_owner_side(uint8_t layer, bool *from_right);
+
+/* ------------------------------------------------------------------ */
 /* Diagnostics                                                         */
 /* ------------------------------------------------------------------ */
 

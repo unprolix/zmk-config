@@ -33,80 +33,17 @@ void rgbzone_diag_report(uint8_t layer_index, const char *layer_name, uint8_t mo
 /*
  * Which half is holding the layer open.
  *
- * Latched when the layer changes, NOT on every press: hold a layer key with
- * one hand and type with the other, and following the most recent press would
- * make the layer's colours jump to the typing hand.
+ * Not inferred from key presses -- two rounds of trying that failed, and the
+ * note in rgbzone_owner.c records why. The momentary-layer behaviour is told
+ * the position that invoked it, so it records the owner outright and this only
+ * has to ask.
  *
- * The split source distinguishes the halves for free -- a peripheral press
- * carries its peripheral index, a local one carries
- * ZMK_POSITION_STATE_CHANGE_SOURCE_LOCAL -- so no position table is needed.
+ * Sticky: a layer reached some other way (&tog, &sl, auto-layer) has no
+ * holding hand at all, and keeping the last known side leaves those layers
+ * steady. They are also the layers whose palette rows are symmetrical, so the
+ * value is not used for anything visible.
  */
 static bool layer_from_right;
-
-/*
- * Which keys are down, and on which half.
- *
- * The obvious approach -- remember the side of the last press and latch it
- * when the layer changes -- does not work, because the layer-opening keys are
- * hold-taps. Their layer does not open on the press; it opens when the hold
- * resolves, which is after the position event has been and gone. At that point
- * the last press looks like it changed nothing, and the side left over is
- * whichever hand typed most recently. Holding symbol on the right then lit the
- * left.
- *
- * Tracking what is still held answers it directly: whatever opened the layer
- * is, by definition, still down.
- */
-#define MAX_HELD 10
-
-static struct held_key {
-    uint32_t position;
-    bool from_right;
-    uint32_t seq; /* 0 = slot free */
-} held_keys[MAX_HELD];
-
-static uint32_t held_seq;
-
-static void held_press(uint32_t position, bool from_right) {
-    for (int i = 0; i < MAX_HELD; i++) {
-        if (held_keys[i].seq == 0) {
-            held_keys[i] = (struct held_key){position, from_right, ++held_seq};
-            return;
-        }
-    }
-    /* Full: drop the oldest rather than ignore the newest. */
-    int oldest = 0;
-    for (int i = 1; i < MAX_HELD; i++) {
-        if (held_keys[i].seq < held_keys[oldest].seq) {
-            oldest = i;
-        }
-    }
-    held_keys[oldest] = (struct held_key){position, from_right, ++held_seq};
-}
-
-static void held_release(uint32_t position) {
-    for (int i = 0; i < MAX_HELD; i++) {
-        if (held_keys[i].seq != 0 && held_keys[i].position == position) {
-            held_keys[i].seq = 0;
-            return;
-        }
-    }
-}
-
-/* The most recently pressed key that is still down, if any. */
-static bool held_newest_side(bool *from_right) {
-    int best = -1;
-    for (int i = 0; i < MAX_HELD; i++) {
-        if (held_keys[i].seq != 0 && (best < 0 || held_keys[i].seq > held_keys[best].seq)) {
-            best = i;
-        }
-    }
-    if (best < 0) {
-        return false;
-    }
-    *from_right = held_keys[best].from_right;
-    return true;
-}
 
 /*
  * Colours are looked up by the layer's display-name rather than its index, so
@@ -155,16 +92,18 @@ static void refresh(void) {
 
     /*
      * Layer colours are written relative to the half holding the key, so they
-     * have to be assigned to a side here. Which side that is comes from the
-     * split source of the last press: a peripheral press carries its index,
-     * a local one carries ZMK_POSITION_STATE_CHANGE_SOURCE_LOCAL.
+     * have to be assigned to a side here. Which side that is was recorded by
+     * the key that opened the layer, in rgbzone_owner.c.
      */
     const struct zone_layer *layer_row = row_for(name);
     const enum zone_colour *pressed = layer_row ? layer_row->pressed : dark;
     const enum zone_colour *other = layer_row ? layer_row->other : dark;
 
-    /* Whatever opened the layer is still down; that is the holding half. */
-    held_newest_side(&layer_from_right);
+    /* Ask the key that opened the layer; keep the last answer if none did. */
+    bool owner_side;
+    if (rgbzone_owner_side((uint8_t)id, &owner_side)) {
+        layer_from_right = owner_side;
+    }
 
     if (layer_from_right) {
         memcpy(right, pressed, sizeof(right));
@@ -209,13 +148,10 @@ ZMK_LISTENER(rgbzone_run, rgbzone_layer_listener);
 ZMK_SUBSCRIPTION(rgbzone_run, zmk_layer_state_changed);
 
 /*
- * Position events serve two purposes: they carry the split source that says
- * which half is holding, and they give a second chance to repaint. ZMK's
- * keymap handles a position event before any shield listener and raises the
- * layer change from inside that handling, so the layer listener can run before
- * this one has seen the press that caused it. Refreshing here too settles it
- * on the very next event, and the dedupe means a redundant refresh costs
- * nothing.
+ * A second chance to repaint. A layer can open or close without a layer-change
+ * event reaching this file in a usable state -- a hold-tap resolving, a macro
+ * still working through its queue -- so refreshing on the next position event
+ * settles it. The dedupe downstream means a redundant refresh costs nothing.
  */
 static int rgbzone_position_listener(const zmk_event_t *eh) {
     const struct zmk_position_state_changed *ev = as_zmk_position_state_changed(eh);
@@ -223,11 +159,7 @@ static int rgbzone_position_listener(const zmk_event_t *eh) {
         return ZMK_EV_EVENT_BUBBLE;
     }
 
-    if (ev->state) {
-        held_press(ev->position, ev->source != ZMK_POSITION_STATE_CHANGE_SOURCE_LOCAL);
-    } else {
-        held_release(ev->position);
-    }
+    ARG_UNUSED(ev);
 
     refresh();
     return ZMK_EV_EVENT_BUBBLE;
