@@ -75,6 +75,29 @@ include:
     shield: settings_reset
     artifact-name: rolio3-settings_reset
 
+  # One-off RGB calibration build -- works out which LED sits under which key.
+  # NOT for daily use: it takes over the LED strip, swallows keypresses and
+  # types its findings out. See config/boards/shields/rgbcal.
+  - board: rolio3/nrf52840/zmk
+    shield: rolio_left vista508 rgbcal
+    cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/rgbcal_rolio.conf"
+    artifact-name: rolio_left-rgbcal
+  - board: rolio3/nrf52840/zmk
+    shield: rolio_right rgbcal
+    cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/rgbcal_rolio.conf"
+    artifact-name: rolio_right-rgbcal
+
+  # Per-key lighting: held home-row mods in their signature colour, plus the
+  # gaming and navigation key groups. See config/boards/shields/rgbkey.
+  - board: rolio3/nrf52840/zmk
+    shield: rolio_left vista508 rgbkey
+    cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/rgbkey_rolio.conf"
+    artifact-name: rolio_left-rgbkey
+  - board: rolio3/nrf52840/zmk
+    shield: rolio_right rgbkey
+    cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/rgbkey_rolio.conf"
+    artifact-name: rolio_right-rgbkey
+
   # Other boards
   - board: nice_nano@2.0.0/nrf52840/zmk
     shield: sofle_ergomech_left
@@ -118,12 +141,70 @@ include:
   # Per-column layer indication (RGB is per-column on this board, not per-key).
   - board: nice_nano@2.0.0/nrf52840/zmk
     shield: eyelash_corne_left nice_view nice_view_jjb rgbzone
-    cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/eyelash_corne_lavendre.conf"
+    cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/rgbzone_lavendre.conf"
     artifact-name: eyelash_corne_left_lavendre-rgbzone
   - board: nice_nano@2.0.0/nrf52840/zmk
     shield: eyelash_corne_right nice_view nice_view_jjb rgbzone
-    cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/eyelash_corne_lavendre.conf"
+    cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/rgbzone_lavendre.conf"
     artifact-name: eyelash_corne_right_lavendre-rgbzone
+
+  - board: nice_nano@2.0.0/nrf52840/zmk
+    shield: eyelash_corne_left nice_view nice_view_jjb rgbzone
+    cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/rgbzone_bureau.conf"
+    artifact-name: eyelash_corne_left_bureau-rgbzone
+  - board: nice_nano@2.0.0/nrf52840/zmk
+    shield: eyelash_corne_right nice_view nice_view_jjb rgbzone
+    cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/rgbzone_bureau.conf"
+    artifact-name: eyelash_corne_right_bureau-rgbzone
+
+  - board: nice_nano@2.0.0/nrf52840/zmk
+    shield: eyelash_corne_left nice_view nice_view_jjb rgbzone
+    cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/rgbzone_salon.conf"
+    artifact-name: eyelash_corne_left_salon-rgbzone
+  - board: nice_nano@2.0.0/nrf52840/zmk
+    shield: eyelash_corne_right nice_view nice_view_jjb rgbzone
+    cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/rgbzone_salon.conf"
+    artifact-name: eyelash_corne_right_salon-rgbzone
+
+  # TEMPORARY: adds the raw-HID bootloader trigger to the lavendre. See
+  # config/boards/shields/dfu -- this is a development convenience and is
+  # meant to be removed, not shipped.
+  - board: nice_nano@2.0.0/nrf52840/zmk
+    shield: eyelash_corne_left nice_view nice_view_jjb rgbzone dfu
+    cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/rgbzone_lavendre.conf"
+    artifact-name: eyelash_corne_left_lavendre-dfu
+  - board: nice_nano@2.0.0/nrf52840/zmk
+    shield: eyelash_corne_right nice_view nice_view_jjb rgbzone dfu
+    cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/rgbzone_lavendre.conf"
+    artifact-name: eyelash_corne_right_lavendre-dfu
+
+  # TEMPORARY: adds the raw-HID bootloader trigger to the Rolio. See
+  # config/boards/shields/dfu -- this is a development convenience and is
+  # meant to be removed, not shipped. Kept as its own targets so the ordinary
+  # rgbkey builds above stay free of it.
+  #
+  # The trigger itself is central-only (RAW_HID depends on
+  # ZMK_SPLIT_ROLE_CENTRAL), but the right half is built to match so that both
+  # sides of a flash cycle come from the same pair of lines. The peripheral
+  # needs no code: the central relays &bootloader to it, and behavior_reset's
+  # EVENT_SOURCE locality lands it on the correct half.
+  - board: rolio3/nrf52840/zmk
+    shield: rolio_left vista508 rgbkey dfu
+    cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/rgbkey_rolio.conf"
+    artifact-name: rolio_left-dfu
+  - board: rolio3/nrf52840/zmk
+    shield: rolio_right rgbkey dfu
+    cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/rgbkey_rolio.conf"
+    artifact-name: rolio_right-dfu
+
+  - board: nice_nano@2.0.0/nrf52840/zmk
+    shield: eyelash_corne_left nice_view nice_view_jjb rgbzone
+    cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/rgbzone_fuligin.conf"
+    artifact-name: eyelash_corne_left_fuligin-rgbzone
+  - board: nice_nano@2.0.0/nrf52840/zmk
+    shield: eyelash_corne_right nice_view nice_view_jjb rgbzone
+    cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/rgbzone_fuligin.conf"
+    artifact-name: eyelash_corne_right_fuligin-rgbzone
 
   # Settings reset (universal across both sides)
   - board: nice_nano@2.0.0/nrf52840/zmk
