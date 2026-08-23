@@ -1,4 +1,3 @@
-ZMK_SIMPLE_MACRO(comma_space, <&kp COMMA>, <&kp SPACE>)
 ZMK_SIMPLE_MACRO(cant_wont_tail, <&kp SQT>, <&kp T>)
 ZMK_SIMPLE_MACRO(dot_slash, <&kp DOT>, <&kp FSLH>)
 / {
@@ -84,12 +83,30 @@ ZMK_SIMPLE_MACRO(dot_slash, <&kp DOT>, <&kp FSLH>)
 			mods = <(MOD_LSFT|MOD_RSFT)>;
 		};
 
+		/*
+		 * Comma is just a comma. It used to emit ", " -- comma and a
+		 * space in one tap -- which is right for prose and wrong
+		 * everywhere else: every list in code, every CSV, every
+		 * "a,b" argument had a space to take back out. The space now
+		 * lives on the key next door, which only becomes a space when
+		 * a comma has just been typed, so prose still costs two keys
+		 * and nothing else pays for it.
+		 */
 		comma_semicolon: comma_semicolon {
 			compatible = "zmk,behavior-mod-morph";
 			#binding-cells = <0>;
-			bindings = <&comma_space>, <&kp SEMI>;
+			bindings = <&kp COMMA>, <&kp SEMI>;
 			mods = <(MOD_LSFT|MOD_RSFT)>;
 		};
+
+		/*
+		 * Y, but a space straight after a comma -- the same trick the
+		 * symbol layer plays with ` becoming / after ~. Y sits next to
+		 * the comma on the bottom row, and "y" never follows a comma
+		 * in English without a space in between, so the letter loses
+		 * nothing.
+		 */
+		MAKE_ANTECEDENT_MORPH(y_comma_space, Y, SPACE, COMMA)
 
 		adaptive_h_quote: adaptive_h_quote {
 			compatible = "zmk,behavior-antecedent-morph";
@@ -172,7 +189,7 @@ ZMK_SIMPLE_MACRO(dot_slash, <&kp DOT>, <&kp FSLH>)
 #define HIEROPHANT_LT &kp TILDE  HIEROPHANT_LT_IN
 #define HIEROPHANT_LM_IN &tap_hold_layer_lgui_adaptive LGUI_NAV_L 0  &adaptive_i_repeat  &adaptive_e_repeat  &adaptive_a_repeat  &adaptive_p_repeat
 #define HIEROPHANT_LM &sqt_dash  HIEROPHANT_LM_IN
-#define HIEROPHANT_LB_IN &comma_semicolon  &kp Y  &kp K  &kp O  &kp X
+#define HIEROPHANT_LB_IN &comma_semicolon  &y_comma_space  &kp K  &kp O  &kp X
 #define HIEROPHANT_LB &kp LCTRL  HIEROPHANT_LB_IN
 #define HIEROPHANT_LH &sl_sym_or_numpad  &arcane_nav_l NAV 0  &lgui_space_tab
 #define HIEROPHANT_LH_5 &trans &trans HIEROPHANT_LH
