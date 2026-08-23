@@ -85,9 +85,28 @@ void vista_draw_bitmap(lv_obj_t *canvas, lv_coord_t x, lv_coord_t y, const uint8
  */
 #define VISTA_MOD_ICON_SIZE   13
 #define VISTA_MOD_ICON_SLOTS  4
-#define VISTA_MOD_ICON_SLOT_W 15
-#define VISTA_MOD_ROW_W       (VISTA_MOD_ICON_SLOTS * VISTA_MOD_ICON_SLOT_W)
-#define VISTA_MOD_ROW_H       VISTA_MOD_ICON_SIZE
+#define VISTA_MOD_ICON_SLOT_W 17
+
+/*
+ * Stroke weight for the glyphs. A single pixel is what LVGL defaults to and it
+ * reads as faint at this size on a reflective panel; 2 doubles the ink without
+ * the strokes closing up the inside of the GUI square or the Shift arrow.
+ *
+ * At 3 the strokes spread about a pixel and a half either side of the path, so
+ * the slot went to 17 to keep neighbouring glyphs from touching -- four of them
+ * come to 68, which still clears the roughly 62-70 the emblem leaves free in
+ * this corner. Going further would need the glyphs themselves made smaller,
+ * which defeats the point.
+ */
+#define VISTA_MOD_ICON_STROKE 3
+#define VISTA_MOD_ROW_W (VISTA_MOD_ICON_SLOTS * VISTA_MOD_ICON_SLOT_W)
+/*
+ * A stroke straddles the path it is drawn along, so half of it falls outside
+ * the glyph's nominal box. Without this padding the top and bottom strokes are
+ * clipped by the canvas edge and the glyphs look cut off rather than bold.
+ */
+#define VISTA_MOD_ROW_H (VISTA_MOD_ICON_SIZE + VISTA_MOD_ICON_STROKE)
+#define VISTA_MOD_ICON_PAD (VISTA_MOD_ICON_STROKE / 2)
 
 enum vista_mod_icon {
     VISTA_MOD_ICON_CTRL = 0,  /* the chevron */

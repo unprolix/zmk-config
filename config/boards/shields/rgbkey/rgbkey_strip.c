@@ -171,6 +171,25 @@ static void flush(bool any) {
  */
 #define RGBKEY_SELFTEST_SECONDS 20
 
+/*
+ * Set to 1 to light the chain in four coloured SEGMENTS instead of three single
+ * LEDs. Three points confirm three points; they do not validate a 23-entry map,
+ * and the calibration walk that produced it is exactly the kind of thing that
+ * can be right at the ends and wrong in the middle. This paints
+ *
+ *     LED  0..5   red     LED 12..17  blue
+ *     LED  6..11  green   LED 18..22  white
+ *
+ * so one glance says which physical keys each run of the chain actually covers.
+ *
+ * Left at 0 because the map IS trusted: run on hardware 2026-08-23, it gave
+ * red across the whole top row, green the middle, blue the bottom and white the
+ * thumbs, on both halves -- exactly what rgbkey_map.h claims. Set it back to 1
+ * if the map is ever in doubt again; three single LEDs confirm three points,
+ * not twenty-three.
+ */
+#define RGBKEY_SELFTEST_SEGMENTS 0
+
 static atomic_t selftest_running = ATOMIC_INIT(1);
 
 /* Hoisted out of rgbkey_apply so the self-test can invalidate it on the way out. */
@@ -190,6 +209,20 @@ static void selftest_begin(struct k_work *work) {
     }
 
     memset(pixels, 0, sizeof(pixels));
+
+#if RGBKEY_SELFTEST_SEGMENTS
+    for (int i = 0; i < STRIP_COUNT; i++) {
+        if (i < 6) {
+            pixels[i].r = RGBKEY_MID;
+        } else if (i < 12) {
+            pixels[i].g = RGBKEY_MID;
+        } else if (i < 18) {
+            pixels[i].b = RGBKEY_MID;
+        } else {
+            pixels[i].r = pixels[i].g = pixels[i].b = RGBKEY_MID;
+        }
+    }
+#else
     /* First, middle and last LED, in three colours that cannot be confused. */
     pixels[0].r = RGBKEY_MID;
     if (STRIP_COUNT > 11) {
@@ -198,6 +231,7 @@ static void selftest_begin(struct k_work *work) {
     if (STRIP_COUNT > 0) {
         pixels[STRIP_COUNT - 1].b = RGBKEY_MID;
     }
+#endif
     flush(true);
 
     k_work_reschedule_for_queue(zmk_workqueue_lowprio_work_q(), &selftest_end_work,
@@ -239,7 +273,29 @@ static void strip_write(struct k_work *work) {
 
     const struct rgbkey_layer *row = row_for_scene(scene);
 
-    /* The layer's key groups first, so a held modifier can draw over them. */
+    /*
+     * Column washes first, then named keys over them, then held modifiers over
+     * everything -- broadest to most specific, so the more precise statement
+     * always wins the pixel.
+     *
+     * Both halves' column tables are painted unconditionally: a position that
+     * belongs to the other half has no LED in this half's map and is dropped by
+     * paint(), so neither side needs to know which one it is.
+     */
+    if (row != NULL) {
+        for (uint8_t c = 0; c < RGBKEY_COLUMNS; c++) {
+            for (uint8_t k = 0; k < RGBKEY_COLUMN_KEYS; k++) {
+                if (row->left[c] != RK_OFF) {
+                    paint(rgbkey_column_left[c][k], row->left[c]);
+                }
+                if (row->right[c] != RK_OFF) {
+                    paint(rgbkey_column_right[c][k], row->right[c]);
+                }
+            }
+        }
+    }
+
+    /* The layer's named keys, over any wash. */
     if (row != NULL) {
         for (size_t g = 0; g < ARRAY_SIZE(row->groups); g++) {
             const struct rgbkey_group *group = &row->groups[g];
@@ -266,6 +322,22 @@ static void strip_write(struct k_work *work) {
             }
         }
     }
+
+#if RGBKEY_DEBUG
+    /*
+     * PROBE, and it deliberately bypasses everything above: no position map, no
+     * layer table, no home-row table. LED 1 lights white if ANY modifier is live
+     * at the moment this runs, straight from the relayed flags.
+     *
+     * It separates the two things the symptom cannot: whether a modifier is
+     * reaching us at all, and whether the code that decides which key to paint
+     * is at fault. Lit means the modifier is visible and the fault is mine; dark
+     * means no modifier ever arrives and the fault is upstream of this shield.
+     */
+    if (mods != 0 && STRIP_COUNT > 1) {
+        pixels[1].r = pixels[1].g = pixels[1].b = 0xFF;
+    }
+#endif
 
     bool any = false;
     for (int i = 0; i < STRIP_COUNT; i++) {

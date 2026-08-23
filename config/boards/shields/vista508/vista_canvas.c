@@ -52,7 +52,7 @@ static void icon_line(lv_obj_t *canvas, const lv_point_t *points, uint32_t count
     lv_draw_line_dsc_t dsc;
     lv_draw_line_dsc_init(&dsc);
     dsc.color = VISTA_CANVAS_FOREGROUND;
-    dsc.width = 1;
+    dsc.width = VISTA_MOD_ICON_STROKE;
 
     lv_layer_t layer;
     lv_canvas_init_layer(canvas, &layer);

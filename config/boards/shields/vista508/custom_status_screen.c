@@ -60,6 +60,9 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #define CORNER_H 18
 #define CORNER_FONT (&lv_font_montserrat_14)
 
+/* How far the modifier glyphs sit above the bottom edge. */
+#define MODS_LIFT 3
+
 /*
  * Connection and battery are drawn here rather than with ZMK's own widgets.
  * Those render LVGL glyphs -- WIFI/USB/OK/CLOSE/SETTINGS -- which are compact
@@ -68,7 +71,6 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
  */
 static lv_obj_t *conn_label;
 static lv_obj_t *batt_label;
-static lv_obj_t *leader_label;
 
 /*
  * The base layer gets an emblem instead of its name, and held modifiers get a
@@ -103,7 +105,89 @@ static bool peripheral_seen;
  */
 #define LAYER_NAME_MAX 32
 
-static lv_obj_t *layer_label;
+
+/*
+ * Faux-bold for the layer name: the same text drawn twice, one pixel apart, so
+ * the strokes thicken. LVGL ships Montserrat in regular weight only -- there is
+ * no bold face to switch to, and generating one offline would mean carrying a
+ * second full glyph set for a single label. Overdrawing costs one more object
+ * and nothing in flash.
+ *
+ * Both copies must always be set and shown together; layer_set_text() is the
+ * only thing that should touch either.
+ */
+/*
+ * A label drawn several times over, to fake a bold weight. LVGL ships
+ * Montserrat in regular only, and generating a bold face offline would mean
+ * carrying a second full glyph set for two labels.
+ */
+#define BOLD_COPIES 9
+
+struct bold_label {
+    lv_obj_t *copies[BOLD_COPIES];
+};
+
+static struct bold_label layer_bold;
+static struct bold_label leader_bold;
+
+/*
+ * Faux-bold by dilation: the same text drawn at every offset in a 3x3
+ * neighbourhood, so each stem grows a pixel in EVERY direction; the first
+ * offset is the undisplaced copy.
+ *
+ * Offsetting only right and down, as this did at first, thickens the stem by a
+ * pixel but also shifts the whole word half a pixel off centre and reads as
+ * blurred rather than bold. Going out in all directions keeps it centred and is
+ * what actually looks heavier.
+ *
+ * A larger face would be the other way to get weight, but the middle band is
+ * only CONTENT_W wide and LV_LABEL_LONG_WRAP cannot break a single word:
+ * "superscript" already fills the line at this size, so a bigger one would be
+ * clipped rather than wrapped.
+ */
+static const lv_coord_t bold_offsets[BOLD_COPIES][2] = {
+    {0, 0},  {-1, -1}, {0, -1}, {1, -1}, {-1, 0},
+    {1, 0},  {-1, 1},  {0, 1},  {1, 1},
+};
+
+static void bold_label_create(struct bold_label *bl, lv_obj_t *parent, lv_coord_t dy) {
+    for (size_t i = 0; i < BOLD_COPIES; i++) {
+        lv_obj_t *l = lv_label_create(parent);
+        lv_obj_set_width(l, CONTENT_W);
+        lv_label_set_long_mode(l, LV_LABEL_LONG_WRAP);
+        lv_obj_set_style_text_align(l, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
+        lv_obj_align(l, LV_ALIGN_CENTER, bold_offsets[i][0], bold_offsets[i][1] + dy);
+        lv_label_set_text(l, "");
+        bl->copies[i] = l;
+    }
+}
+
+static void bold_label_set_text(struct bold_label *bl, const char *text) {
+    for (size_t i = 0; i < BOLD_COPIES; i++) {
+        if (bl->copies[i] != NULL) {
+            lv_label_set_text(bl->copies[i], text);
+        }
+    }
+}
+
+static void bold_label_set_hidden(struct bold_label *bl, bool hidden) {
+    for (size_t i = 0; i < BOLD_COPIES; i++) {
+        if (bl->copies[i] == NULL) {
+            continue;
+        }
+        if (hidden) {
+            lv_obj_add_flag(bl->copies[i], LV_OBJ_FLAG_HIDDEN);
+        } else {
+            lv_obj_remove_flag(bl->copies[i], LV_OBJ_FLAG_HIDDEN);
+        }
+    }
+}
+
+static bool bold_label_ready(const struct bold_label *bl) { return bl->copies[0] != NULL; }
+
+static void layer_set_text(const char *text) { bold_label_set_text(&layer_bold, text); }
+
+static void layer_set_hidden(bool hidden) { bold_label_set_hidden(&layer_bold, hidden); }
 
 struct rolio_layer_state {
     zmk_keymap_layer_index_t index;
@@ -111,7 +195,7 @@ struct rolio_layer_state {
 };
 
 static void rolio_layer_update_cb(struct rolio_layer_state state) {
-    if (layer_label == NULL) {
+    if (!bold_label_ready(&layer_bold)) {
         return;
     }
 
@@ -123,7 +207,7 @@ static void rolio_layer_update_cb(struct rolio_layer_state state) {
         snprintf(text, sizeof(text), "%s", state.label);
     }
 
-    lv_label_set_text(layer_label, text);
+    layer_set_text(text);
 
     /*
      * The base layer is where the keyboard sits almost all the time, so it
@@ -138,11 +222,7 @@ static void rolio_layer_update_cb(struct rolio_layer_state state) {
             lv_obj_add_flag(emblem_canvas, LV_OBJ_FLAG_HIDDEN);
         }
     }
-    if (emblem) {
-        lv_obj_add_flag(layer_label, LV_OBJ_FLAG_HIDDEN);
-    } else {
-        lv_obj_remove_flag(layer_label, LV_OBJ_FLAG_HIDDEN);
-    }
+    layer_set_hidden(emblem);
 }
 
 static struct rolio_layer_state rolio_layer_get_state(const zmk_event_t *eh) {
@@ -308,8 +388,8 @@ static void rolio_mods_update_cb(struct rolio_mods_state state) {
     const lv_coord_t inset = (VISTA_MOD_ICON_SLOT_W - VISTA_MOD_ICON_SIZE) / 2;
     for (uint8_t slot = 0; slot < VISTA_MOD_ICON_SLOTS; slot++) {
         if (state.mods & slot_mods[slot]) {
-            vista_draw_mod_icon(mods_canvas, slot * VISTA_MOD_ICON_SLOT_W + inset, 0,
-                                (enum vista_mod_icon)slot);
+            vista_draw_mod_icon(mods_canvas, slot * VISTA_MOD_ICON_SLOT_W + inset,
+                                VISTA_MOD_ICON_PAD, (enum vista_mod_icon)slot);
         }
     }
 }
@@ -337,7 +417,7 @@ ZMK_SUBSCRIPTION(rolio_mods_status, zmk_keycode_state_changed);
 #define LEADER_NAME_MAX       32
 
 static void rolio_leader_update_cb(struct zmk_leader_state_changed state) {
-    if (leader_label == NULL || layer_label == NULL) {
+    if (!bold_label_ready(&leader_bold) || !bold_label_ready(&layer_bold)) {
         return;
     }
 
@@ -347,12 +427,12 @@ static void rolio_leader_update_cb(struct zmk_leader_state_changed state) {
          * reappear depends on the layer, so ask the layer widget rather than
          * guessing here.
          */
-        lv_label_set_text(leader_label, "");
+        bold_label_set_text(&leader_bold, "");
         rolio_layer_update_cb(rolio_layer_get_state(NULL));
         return;
     }
 
-    lv_obj_add_flag(layer_label, LV_OBJ_FLAG_HIDDEN);
+    layer_set_hidden(true);
     if (emblem_canvas != NULL) {
         lv_obj_add_flag(emblem_canvas, LV_OBJ_FLAG_HIDDEN);
     }
@@ -382,7 +462,7 @@ static void rolio_leader_update_cb(struct zmk_leader_state_changed state) {
         }
     }
 
-    lv_label_set_text(leader_label, text);
+    bold_label_set_text(&leader_bold, text);
 }
 
 static struct zmk_leader_state_changed rolio_leader_get_state(const zmk_event_t *eh) {
@@ -471,21 +551,13 @@ lv_obj_t *zmk_display_status_screen(void) {
      * clipped. Use the smaller face so the longest layer name fits on one line,
      * and keep WRAP as a fallback for multi-word names.
      */
-    layer_label = lv_label_create(screen);
-    lv_obj_set_width(layer_label, CONTENT_W);
-    lv_label_set_long_mode(layer_label, LV_LABEL_LONG_WRAP);
-    lv_obj_set_style_text_align(layer_label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
-    lv_obj_align(layer_label, LV_ALIGN_CENTER, 0, 0);
+    bold_label_create(&layer_bold, screen, 0);
+
 
     rolio_layer_status_init();
 
     /* Occupies the same middle band as the layer name; only one shows at a time. */
-    leader_label = lv_label_create(screen);
-    lv_obj_set_width(leader_label, CONTENT_W);
-    lv_label_set_long_mode(leader_label, LV_LABEL_LONG_WRAP);
-    lv_obj_set_style_text_align(leader_label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
-    lv_obj_align(leader_label, LV_ALIGN_CENTER, 0, 0);
-    lv_label_set_text(leader_label, "");
+    bold_label_create(&leader_bold, screen, 0);
     rolio_leader_status_init();
 
     /*
@@ -496,7 +568,11 @@ lv_obj_t *zmk_display_status_screen(void) {
     lv_canvas_set_buffer(mods_canvas, mods_buf, VISTA_MOD_ROW_W, VISTA_MOD_ROW_H,
                          VISTA_CANVAS_COLOR_FORMAT);
     lv_canvas_fill_bg(mods_canvas, VISTA_CANVAS_BACKGROUND, LV_OPA_COVER);
-    lv_obj_align(mods_canvas, LV_ALIGN_BOTTOM_LEFT, 0, 0);
+    /*
+     * Lifted off the bottom edge: sitting flush, the glyphs' lowest stroke
+     * merged into the panel border and they read as clipped.
+     */
+    lv_obj_align(mods_canvas, LV_ALIGN_BOTTOM_LEFT, 0, -MODS_LIFT);
     rolio_mods_status_init();
 
     /* WPM along the bottom. */
