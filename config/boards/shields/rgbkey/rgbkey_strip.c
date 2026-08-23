@@ -274,39 +274,21 @@ static void strip_write(struct k_work *work) {
     const struct rgbkey_layer *row = row_for_scene(scene);
 
     /*
-     * Column washes first, then named keys over them, then held modifiers over
-     * everything -- broadest to most specific, so the more precise statement
-     * always wins the pixel.
+     * The layer's key groups, then held modifiers over them -- broadest first,
+     * so the more specific statement wins the pixel.
      *
-     * Both halves' column tables are painted unconditionally: a position that
-     * belongs to the other half has no LED in this half's map and is dropped by
-     * paint(), so neither side needs to know which one it is.
+     * A group may name keys on either half; a position belonging to the other
+     * half has no LED in this half's map and is dropped by paint(), so neither
+     * side needs to know which one it is.
      */
-    if (row != NULL) {
-        for (uint8_t c = 0; c < RGBKEY_COLUMNS; c++) {
-            for (uint8_t k = 0; k < RGBKEY_COLUMN_KEYS; k++) {
-                if (row->left[c] != RK_OFF) {
-                    paint(rgbkey_column_left[c][k], row->left[c]);
-                }
-                if (row->right[c] != RK_OFF) {
-                    paint(rgbkey_column_right[c][k], row->right[c]);
-                }
-            }
-        }
-    }
-
-    /* The layer's named keys, over any wash. */
     if (row != NULL) {
         for (size_t g = 0; g < ARRAY_SIZE(row->groups); g++) {
             const struct rgbkey_group *group = &row->groups[g];
-            if (group->colour == RK_OFF) {
+            if (group->positions == NULL || group->colour == RK_OFF) {
                 continue; /* an unused slot in the row */
             }
-            for (size_t p = 0; p < RGBKEY_GROUP_MAX; p++) {
-                if (group->positions[p] == RGBKEY_POS_NONE) {
-                    continue;
-                }
-                paint(group->positions[p], group->colour);
+            for (const uint8_t *pos = group->positions; *pos != RGBKEY_POS_NONE; pos++) {
+                paint(*pos, group->colour);
             }
         }
     }

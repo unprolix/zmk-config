@@ -118,28 +118,42 @@ static const uint8_t rgbkey_palette[RK_COUNT][3] = {
 };
 
 /*
- * COLUMNS.
+ * COLUMNS, as key lists.
  *
  * rgbzone can only address columns -- that is all the eyelash's hardware
- * offers -- so every layer it colours is stated as a colour per column. To
- * carry those layers across without inventing a per-key design for each, the
- * same idea is expressible here: a column is just its three keys.
+ * offers -- so the layers copied from it are stated column by column. There is
+ * no column mechanism here, though: a column IS its three keys, so these expand
+ * into an ordinary key list and the renderer only ever knows about keys.
  *
- * Index 0 is the INNERMOST column, matching rgbzone's ordering, so a row copied
- * from zone_palette.h keeps its shape. Thumbs are not part of a column; a layer
- * that wants one names it in a key group instead.
+ * That keeps one way of saying things instead of two, and it means any row
+ * copied wholesale can be tuned key by key afterwards just by editing the list
+ * -- which is the point of having per-key hardware.
+ *
+ * C0 is the INNERMOST column, matching rgbzone's ordering so a row copied from
+ * zone_palette.h keeps its shape. Positions are from config/rolio48.h: top,
+ * middle, bottom. Thumbs belong to no column and are named directly.
  */
-#define RGBKEY_COLUMNS 6
-#define RGBKEY_COLUMN_KEYS 3
+#define RK_L_C0 5, 17, 29
+#define RK_L_C1 4, 16, 28
+#define RK_L_C2 3, 15, 27
+#define RK_L_C3 2, 14, 26
+#define RK_L_C4 1, 13, 25
+#define RK_L_C5 0, 12, 24
 
-/* From config/rolio48.h: top, middle and bottom of each column, inner to outer. */
-static const uint8_t rgbkey_column_left[RGBKEY_COLUMNS][RGBKEY_COLUMN_KEYS] = {
-    {5, 17, 29}, {4, 16, 28}, {3, 15, 27}, {2, 14, 26}, {1, 13, 25}, {0, 12, 24},
-};
+#define RK_R_C0 6, 18, 32
+#define RK_R_C1 7, 19, 33
+#define RK_R_C2 8, 20, 34
+#define RK_R_C3 9, 21, 35
+#define RK_R_C4 10, 22, 36
+#define RK_R_C5 11, 23, 37
 
-static const uint8_t rgbkey_column_right[RGBKEY_COLUMNS][RGBKEY_COLUMN_KEYS] = {
-    {6, 18, 32}, {7, 19, 33}, {8, 20, 34}, {9, 21, 35}, {10, 22, 36}, {11, 23, 37},
-};
+/* Both halves' copy of a column, for the layers that are not sided. */
+#define RK_BOTH_C0 RK_L_C0, RK_R_C0
+#define RK_BOTH_C1 RK_L_C1, RK_R_C1
+#define RK_BOTH_C2 RK_L_C2, RK_R_C2
+#define RK_BOTH_C3 RK_L_C3, RK_R_C3
+#define RK_BOTH_C4 RK_L_C4, RK_R_C4
+#define RK_BOTH_C5 RK_L_C5, RK_R_C5
 
 /*
  * What the active layer lights. Resolved on the central from the layer's
@@ -172,12 +186,25 @@ BUILD_ASSERT(RKS_COUNT <= 0xFF, "Scene must fit in the byte the split link carri
  * positions from config/rolio48.h; a group may name positions on either half,
  * since each half simply finds no LED for the other's.
  */
-#define RGBKEY_GROUP_MAX 6
-#define RGBKEY_POS_NONE  0xFF
+#define RGBKEY_POS_NONE 0xFF
+
+/* The most colours any one layer uses; "lighting" needs six. */
+#define RGBKEY_GROUPS 6
+
+/*
+ * A key list is terminated rather than counted or padded to a fixed width. A
+ * fixed array would have to be as wide as the largest layer -- superscript
+ * names thirty keys -- and every shorter row would pad with a value that has to
+ * mean "nothing"; zero cannot, because zero is a real key position.
+ *
+ * RK_KEYS builds the list inline so a row still reads as one statement.
+ */
+#define RK_KEYS(...) ((const uint8_t[]){__VA_ARGS__, RGBKEY_POS_NONE})
 
 struct rgbkey_group {
     enum rgbkey_colour colour;
-    uint8_t positions[RGBKEY_GROUP_MAX];
+    /* RGBKEY_POS_NONE terminated; NULL for an unused slot. */
+    const uint8_t *positions;
 };
 
 struct rgbkey_layer {
@@ -185,18 +212,12 @@ struct rgbkey_layer {
     const char *name;
     enum rgbkey_scene scene;
     /*
-     * Whole-column washes, innermost column first, as copied from rgbzone.
-     * Left blank by the layers that name individual keys below instead.
-     */
-    enum rgbkey_colour left[RGBKEY_COLUMNS];
-    enum rgbkey_colour right[RGBKEY_COLUMNS];
-    /*
      * Whether a held modifier should light its home-row key on this layer.
      * False on gaming, whose home row is a plain A S D F G -- lighting
      * "the LALT key" there would light S, which is a lie.
      */
     bool hrm;
-    struct rgbkey_group groups[2];
+    struct rgbkey_group groups[RGBKEY_GROUPS];
 };
 
 /*
@@ -204,36 +225,30 @@ struct rgbkey_layer {
  * NAVIGATION_LT_IN puts UP at LT2 and NAVIGATION_LM_IN puts LEFT/DOWN/RIGHT at
  * LM3/LM2/LM1, so UP sits directly above DOWN on both hands.
  */
-#define RGBKEY_ARROWS_LEFT   3, 14, 15, 16, RGBKEY_POS_NONE, RGBKEY_POS_NONE
-#define RGBKEY_ARROWS_RIGHT  8, 19, 20, 21, RGBKEY_POS_NONE, RGBKEY_POS_NONE
+#define RGBKEY_ARROWS_LEFT  3, 14, 15, 16
+#define RGBKEY_ARROWS_RIGHT 8, 19, 20, 21
 
 /* GAMING_LT_IN / GAMING_LM_IN: W at LT3, A S D at LM4 LM3 LM2. */
-#define RGBKEY_WASD          2, 13, 14, 15, RGBKEY_POS_NONE, RGBKEY_POS_NONE
+#define RGBKEY_WASD 2, 13, 14, 15
 
 /*
  * THIS IS THE TABLE TO EDIT.
  *
- * Two ways to say what a layer looks like, and a row may use either:
+ * Each layer names groups of keys and the colour to paint them. Rows carried
+ * over from the eyelash's rgbzone use the RK_*_C* column macros, since that is
+ * the only vocabulary its hardware has; rows written for this board name the
+ * keys directly. They are the same thing -- a column expands to its three keys
+ * -- so a copied row can be tuned key by key just by editing its list.
  *
- *   left/right   whole columns, innermost first. This is rgbzone's vocabulary,
- *                and the rows carried over from it keep its colours so the two
- *                keyboards read alike.
- *   groups       individual keys. Only this hardware can do it, so it is used
- *                where naming the actual keys says more than washing a column:
- *                WASD, and the arrow clusters.
- *
- * A layer absent from here stays dark, which costs nothing -- the strip's gate
- * is only opened when a pixel is actually lit.
- *
- *                                inner -------------------------> outer
+ * A layer absent from here stays dark, which costs nothing: the strip's gate is
+ * only opened when a pixel is actually lit.
  */
 static const struct rgbkey_layer rgbkey_layers[] = {
     /* Per-key, because this board can: the keys you actually press. */
-    {"gaming", RKS_GAMING, {RK_OFF, RK_OFF, RK_OFF, RK_OFF, RK_OFF, RK_OFF}, {RK_OFF, RK_OFF, RK_OFF, RK_OFF, RK_OFF, RK_OFF}, false,
-     {{RK_DIM_RED, {RGBKEY_WASD}}}},
+    {"gaming", RKS_GAMING, false, {{RK_DIM_RED, RK_KEYS(RGBKEY_WASD)}}},
 
-    {"navigation", RKS_NAV, {RK_OFF, RK_OFF, RK_OFF, RK_OFF, RK_OFF, RK_OFF}, {RK_OFF, RK_OFF, RK_OFF, RK_OFF, RK_OFF, RK_OFF}, true,
-     {{RK_DIM_GREEN, {RGBKEY_ARROWS_LEFT}}, {RK_DIM_GREEN, {RGBKEY_ARROWS_RIGHT}}}},
+    {"navigation", RKS_NAV, true,
+     {{RK_DIM_GREEN, RK_KEYS(RGBKEY_ARROWS_LEFT, RGBKEY_ARROWS_RIGHT)}}},
 
     /*
      * The GUI is held by the left hand on LGUI+nav and by the right on
@@ -246,32 +261,26 @@ static const struct rgbkey_layer rgbkey_layers[] = {
      * comes free: the GUI being held is what put us on this layer, so the
      * modifier overlay already paints its key violet.
      */
-    {"LGUI+nav", RKS_LGUI_NAV, {RK_OFF, RK_OFF, RK_OFF, RK_OFF, RK_OFF, RK_OFF}, {RK_OFF, RK_OFF, RK_OFF, RK_OFF, RK_OFF, RK_OFF}, true,
-     {{RK_DIM_WHITE, {RGBKEY_ARROWS_RIGHT}}}},
-    {"RGUI+nav", RKS_RGUI_NAV, {RK_OFF, RK_OFF, RK_OFF, RK_OFF, RK_OFF, RK_OFF}, {RK_OFF, RK_OFF, RK_OFF, RK_OFF, RK_OFF, RK_OFF}, true,
-     {{RK_DIM_WHITE, {RGBKEY_ARROWS_LEFT}}}},
+    {"LGUI+nav", RKS_LGUI_NAV, true, {{RK_DIM_WHITE, RK_KEYS(RGBKEY_ARROWS_RIGHT)}}},
+    {"RGUI+nav", RKS_RGUI_NAV, true, {{RK_DIM_WHITE, RK_KEYS(RGBKEY_ARROWS_LEFT)}}},
 
     /*
      * Carried over from rgbzone, column for column. Where its rows are stated
      * relative to "the half holding the key", the holding half is fixed here:
-     * NUMPAD and SYMBOL are entered from the left thumb on this board, so left
-     * is the pressed side.
+     * NUMPAD and SYMBOL are entered from the left thumb on this board.
      */
-    {"numpad", RKS_NUMPAD, {RK_OFF, RK_YELLOW, RK_OFF, RK_OFF, RK_OFF, RK_OFF},
-     {RK_OFF, RK_OFF, RK_CYAN, RK_OFF, RK_OFF, RK_OFF}, true, {}},
+    {"numpad", RKS_NUMPAD, true,
+     {{RK_YELLOW, RK_KEYS(RK_L_C1)}, {RK_CYAN, RK_KEYS(RK_R_C2)}}},
 
-    {"symbol", RKS_SYMBOL, {RK_OFF, RK_OFF, RK_BLUE, RK_OFF, RK_OFF, RK_OFF}, {RK_OFF, RK_OFF, RK_OFF, RK_OFF, RK_OFF, RK_OFF}, false, {}},
+    {"symbol", RKS_SYMBOL, false, {{RK_BLUE, RK_KEYS(RK_L_C2)}}},
 
-    /* Not sided: the outer column on both halves. */
-    {"numeric", RKS_NUMERIC, {RK_OFF, RK_OFF, RK_OFF, RK_OFF, RK_OFF, RK_CYAN},
-     {RK_OFF, RK_OFF, RK_OFF, RK_OFF, RK_OFF, RK_CYAN}, true, {}},
+    {"numeric", RKS_NUMERIC, true, {{RK_CYAN, RK_KEYS(RK_BOTH_C5)}}},
 
-    {"function", RKS_FUNCTION, {RK_YELLOW, RK_YELLOW, RK_AMBER, RK_OFF, RK_OFF, RK_OFF},
-     {RK_YELLOW, RK_YELLOW, RK_AMBER, RK_OFF, RK_OFF, RK_OFF}, false, {}},
+    {"function", RKS_FUNCTION, false,
+     {{RK_YELLOW, RK_KEYS(RK_BOTH_C0, RK_BOTH_C1)}, {RK_AMBER, RK_KEYS(RK_BOTH_C2)}}},
 
-    {"superscript", RKS_SUPERSCRIPT,
-     {RK_TEAL, RK_TEAL, RK_TEAL, RK_TEAL, RK_TEAL, RK_OFF},
-     {RK_TEAL, RK_TEAL, RK_TEAL, RK_TEAL, RK_TEAL, RK_OFF}, true, {}},
+    {"superscript", RKS_SUPERSCRIPT, true,
+     {{RK_TEAL, RK_KEYS(RK_BOTH_C0, RK_BOTH_C1, RK_BOTH_C2, RK_BOTH_C3, RK_BOTH_C4)}}},
 
     /*
      * The one layer where the colours are the point rather than a code.
@@ -279,20 +288,30 @@ static const struct rgbkey_layer rgbkey_layers[] = {
      * became a brightness knob, and a row naming the old layer matches nothing
      * and simply stays dark.
      */
-    {"lighting", RKS_LIGHTING,
-     {RK_RED, RK_GREEN, RK_BLUE, RK_YELLOW, RK_CYAN, RK_MAGENTA},
-     {RK_RED, RK_GREEN, RK_BLUE, RK_YELLOW, RK_CYAN, RK_MAGENTA},
-     false, {}},
+    {"lighting", RKS_LIGHTING, false,
+     {{RK_RED, RK_KEYS(RK_BOTH_C0)},
+      {RK_GREEN, RK_KEYS(RK_BOTH_C1)},
+      {RK_BLUE, RK_KEYS(RK_BOTH_C2)},
+      {RK_YELLOW, RK_KEYS(RK_BOTH_C3)},
+      {RK_CYAN, RK_KEYS(RK_BOTH_C4)},
+      {RK_MAGENTA, RK_KEYS(RK_BOTH_C5)}}},
 
-    {"bluetooth", RKS_BLUETOOTH, {RK_BLUE, RK_BLUE, RK_BLUE, RK_OFF, RK_OFF, RK_OFF},
-     {RK_BLUE, RK_BLUE, RK_BLUE, RK_OFF, RK_OFF, RK_OFF}, false, {}},
+    {"bluetooth", RKS_BLUETOOTH, false,
+     {{RK_BLUE, RK_KEYS(RK_BOTH_C0, RK_BOTH_C1, RK_BOTH_C2)}}},
 
-    {"system", RKS_SYSTEM, {RK_WHITE, RK_WHITE, RK_DIM_WHITE, RK_OFF, RK_OFF, RK_OFF},
-     {RK_WHITE, RK_WHITE, RK_DIM_WHITE, RK_OFF, RK_OFF, RK_OFF}, false, {}},
+    {"system", RKS_SYSTEM, false,
+     {{RK_WHITE, RK_KEYS(RK_BOTH_C0, RK_BOTH_C1)}, {RK_DIM_WHITE, RK_KEYS(RK_BOTH_C2)}}},
 
-    /* Not in rgbzone; the sticky-modifier layer, so it borrows their colours. */
-    {"extra", RKS_EXTRA, {RK_OFF, RK_CTRL, RK_SHIFT, RK_ALT, RK_GUI, RK_OFF},
-     {RK_OFF, RK_CTRL, RK_SHIFT, RK_ALT, RK_GUI, RK_OFF}, false, {}},
+    /*
+     * Not in rgbzone. The sticky-modifier layer, so each column wears the
+     * colour of the modifier it applies -- the same signatures the home-row
+     * overlay uses.
+     */
+    {"extra", RKS_EXTRA, false,
+     {{RK_CTRL, RK_KEYS(RK_BOTH_C1)},
+      {RK_SHIFT, RK_KEYS(RK_BOTH_C2)},
+      {RK_ALT, RK_KEYS(RK_BOTH_C3)},
+      {RK_GUI, RK_KEYS(RK_BOTH_C4)}}},
 };
 
 #define RGBKEY_LAYER_COUNT ARRAY_SIZE(rgbkey_layers)
