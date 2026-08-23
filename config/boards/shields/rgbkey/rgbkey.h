@@ -133,6 +133,35 @@ static const uint8_t rgbkey_palette[RK_COUNT][3] = {
  * zone_palette.h keeps its shape. Positions are from config/rolio48.h: top,
  * middle, bottom. Thumbs belong to no column and are named directly.
  */
+/*
+ * RGBKEY_TOP_ROW_ONLY collapses every column to just its top key.
+ *
+ * The keycaps on this board are opaque and block most of the light from below,
+ * and the top row reads best -- it is the row that was legible during
+ * calibration when the others needed looking for. Since a column is a macro
+ * rather than a mechanism, moving every effect up is this one switch, and it
+ * changes only how far each column expands.
+ *
+ * Rows that name keys directly (WASD, the arrow clusters) are unaffected: they
+ * are deliberate per-key designs, not columns, so they stay where the keys are.
+ */
+#define RGBKEY_TOP_ROW_ONLY 0
+
+#if RGBKEY_TOP_ROW_ONLY
+#define RK_L_C0 5
+#define RK_L_C1 4
+#define RK_L_C2 3
+#define RK_L_C3 2
+#define RK_L_C4 1
+#define RK_L_C5 0
+
+#define RK_R_C0 6
+#define RK_R_C1 7
+#define RK_R_C2 8
+#define RK_R_C3 9
+#define RK_R_C4 10
+#define RK_R_C5 11
+#else
 #define RK_L_C0 5, 17, 29
 #define RK_L_C1 4, 16, 28
 #define RK_L_C2 3, 15, 27
@@ -146,6 +175,7 @@ static const uint8_t rgbkey_palette[RK_COUNT][3] = {
 #define RK_R_C3 9, 21, 35
 #define RK_R_C4 10, 22, 36
 #define RK_R_C5 11, 23, 37
+#endif
 
 /* Both halves' copy of a column, for the layers that are not sided. */
 #define RK_BOTH_C0 RK_L_C0, RK_R_C0
