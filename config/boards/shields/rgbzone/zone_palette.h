@@ -171,9 +171,6 @@ static const struct zone_layer zone_layers[] = {
     {"gaming",     {ZC_OFF, ZC_OFF, ZC_OFF, ZC_DIM_WHITE, ZC_OFF, ZC_OFF},
                    {ZC_OFF, ZC_OFF, ZC_OFF, ZC_DIM_WHITE, ZC_OFF, ZC_OFF}},
 
-    {"caps",       {ZC_PINK, ZC_PINK, ZC_PINK, ZC_PINK, ZC_PINK, ZC_PINK},
-                   {ZC_PINK, ZC_PINK, ZC_PINK, ZC_PINK, ZC_PINK, ZC_PINK}},
-
     /*
      * Every colour at once, which is the point: this is the layer where
      * brightness is set, and a single hue makes it hard to see what a step
@@ -190,6 +187,26 @@ static const struct zone_layer zone_layers[] = {
 };
 
 #define ZONE_LAYER_COUNT ARRAY_SIZE(zone_layers)
+
+/*
+ * Caps lock, from the host rather than from a layer.
+ *
+ * There is no row for it above, and deliberately so: a layer the keyboard
+ * toggles alongside CAPS is only ever a guess at what the host did with the
+ * keypress, and the two come apart the first time the two disagree -- press
+ * CAPS with a shift still pending and some hosts ignore it, leaving the board
+ * lit for a caps lock that never happened. The host reports the real state in
+ * its LED report, so read that instead.
+ *
+ * Painted over everything, layers included. Caps lock changes what every
+ * letter does; there is no layer whose colours matter more than knowing it is
+ * on.
+ */
+#define ZONE_CAPS_COLOUR ZC_YELLOW
+
+/* The two innermost columns, both halves. The strip is one LED per column, so
+   rows are not addressable -- see zone_map.h. */
+static const uint8_t zone_caps_zones[] = {0, 1};
 
 /*
  * Home-row mods on the base layer.

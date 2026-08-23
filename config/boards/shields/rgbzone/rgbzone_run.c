@@ -17,6 +17,10 @@
 #include <zmk/behavior.h>
 #include <zmk/event_manager.h>
 #include <zmk/events/ble_active_profile_changed.h>
+#if IS_ENABLED(CONFIG_ZMK_HID_INDICATORS)
+#include <zmk/events/hid_indicators_changed.h>
+#include <zmk/hid_indicators.h>
+#endif
 #include <zmk/events/keycode_state_changed.h>
 #include <zmk/events/layer_state_changed.h>
 #include <zmk/events/position_state_changed.h>
@@ -127,6 +131,22 @@ static void overlay_mods(const struct zone_hrm *table, size_t len, zmk_mod_flags
     }
 }
 
+/*
+ * Caps lock as the host has it.
+ *
+ * Bit 1 of the HID keyboard LED report, per the USB HID usage tables; ZMK
+ * carries the report through but names none of the bits.
+ */
+#define HID_LED_CAPS_LOCK BIT(1)
+
+static bool host_caps_lock(void) {
+#if IS_ENABLED(CONFIG_ZMK_HID_INDICATORS)
+    return (zmk_hid_indicators_get_current_profile() & HID_LED_CAPS_LOCK) != 0;
+#else
+    return false;
+#endif
+}
+
 static void refresh(void) {
     zmk_keymap_layer_index_t index = zmk_keymap_highest_layer_active();
     zmk_keymap_layer_id_t id = zmk_keymap_layer_index_to_id(index);
@@ -180,6 +200,17 @@ static void refresh(void) {
         overlay_mods(zone_hrm_right, ARRAY_SIZE(zone_hrm_right), mods, right);
     }
 
+    /* Caps lock goes on top of all of it -- see zone_palette.h for why. */
+    if (host_caps_lock()) {
+        for (size_t i = 0; i < ARRAY_SIZE(zone_caps_zones); i++) {
+            uint8_t zone = zone_caps_zones[i];
+            if (zone < ZONE_COUNT) {
+                left[zone] = ZONE_CAPS_COLOUR;
+                right[zone] = ZONE_CAPS_COLOUR;
+            }
+        }
+    }
+
     /* Brightness rides along with the colours so the far half stays in step. */
     uint8_t level = rgbzone_level_get();
     uint32_t pl = rgbzone_with_level(rgbzone_pack(left), level);
@@ -228,6 +259,10 @@ ZMK_SUBSCRIPTION(rgbzone_pos, zmk_position_state_changed);
 ZMK_SUBSCRIPTION(rgbzone_run, zmk_keycode_state_changed);
 /* The bluetooth layer draws live profile state, so it has to follow it. */
 ZMK_SUBSCRIPTION(rgbzone_run, zmk_ble_active_profile_changed);
+#if IS_ENABLED(CONFIG_ZMK_HID_INDICATORS)
+/* Caps lock arrives from the host, not from a keypress here. */
+ZMK_SUBSCRIPTION(rgbzone_run, zmk_hid_indicators_changed);
+#endif
 
 /*
  * Same problem the display relay has: nothing tells the central that a

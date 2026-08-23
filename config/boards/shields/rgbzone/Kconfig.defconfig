@@ -1,0 +1,9 @@
+# Caps lock is shown from what the HOST reports, not from a layer the keyboard
+# toggles alongside it -- the two drift the moment anything presses CAPS that
+# the keyboard did not see, and a wrong caps indicator is worse than none.
+if SHIELD_RGBZONE
+
+config ZMK_HID_INDICATORS
+    default y
+
+endif
