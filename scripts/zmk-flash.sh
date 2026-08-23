@@ -108,7 +108,15 @@ echo "  -> $(basename "$fw")"
 # udisksctl needs polkit and a controlling terminal, neither of which exists
 # over a non-interactive ssh; mount directly.
 sudo mkdir -p "$MOUNT"
-mountpoint -q "$MOUNT" || sudo mount -t vfat "/dev/$dev" "$MOUNT" || {
+
+# Always mount the device we just identified by serial, never trust whatever is
+# already at $MOUNT. A half that reboots while still mounted leaves the
+# mountpoint occupied by a volume that no longer exists, and skipping the mount
+# because "something is mounted there" reads the wrong thing entirely -- which
+# shows up as REFUSING: unexpected Board-ID 'none', with the correct half
+# plugged in and nothing wrong with it.
+mountpoint -q "$MOUNT" && sudo umount "$MOUNT"
+sudo mount -t vfat "/dev/$dev" "$MOUNT" || {
     echo "Could not mount /dev/$dev"; exit 1; }
 
 board=$(sed -n 's/^Board-ID: *//p' "$MOUNT/INFO_UF2.TXT" 2>/dev/null | tr -d '\r')
