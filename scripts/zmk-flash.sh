@@ -2,7 +2,7 @@
 #
 # Flash whichever keyboard half is currently in its bootloader.
 #
-# Takes no arguments: it finds the NICENANO volume, reads the nRF52840 serial,
+# Takes no arguments: it finds the bootloader volume, reads the nRF52840 serial,
 # and picks the matching firmware from ~/zmk-flash. Anything whose serial is
 # not in the table below is refused rather than guessed at -- several different
 # keyboards get plugged into these machines, and a Rolio once turned up where
@@ -13,6 +13,11 @@
 #
 # Put the half in bootloader first: the FUNCTION-layer &bootloader key works on
 # whichever half it is pressed on, or double-tap that half's reset button.
+#
+# On firmware carrying the (temporary) dfu shield, dfu-trigger.py does it from
+# here without touching the keyboard -- including relaying to the peripheral.
+# Pass it --name when more than one device advertises usage page 0xFF60, which
+# on this machine it does: a Ploopy trackball claims the same vendor page.
 
 set -uo pipefail
 
@@ -32,12 +37,21 @@ serial_to_fw() {
         A783532A83EAAD26) echo "eyelash_corne_right_fuligin|Fuligin Right" ;;
         B055E5020DDF4EA9) echo "eyelash_corne_left_xan|Xan Left" ;;
         4FF0B46AD2AF9292) echo "eyelash_corne_right_xan|Xan Right" ;;
+        # The Rolio is not a nice!nano: its bootloader volume is ROLIO-BOOT,
+        # and its firmware names carry no variant, so the suffixes differ in
+        # shape from the eyelash ones above. Serials read off the hardware
+        # 2026-08-23. These name the -dfu builds, which is what is on them; drop
+        # the suffix once the raw-HID trigger is removed.
+        536DB3A90D5D42F8) echo "rolio_left-dfu|Rolio Left" ;;
+        C996C64AEB32F99C) echo "rolio_right-dfu|Rolio Right" ;;
         *) return 1 ;;
     esac
 }
 
 find_bootloader() {
-    lsblk -rno NAME,LABEL | awk '$2=="NICENANO"{print $1; exit}'
+    # NICENANO is the eyelash's; ROLIO-BOOT is the Rolio's. Matching on the
+    # label rather than on size keeps a stray USB stick out of the running.
+    lsblk -rno NAME,LABEL | awk '$2=="NICENANO" || $2=="ROLIO-BOOT"{print $1; exit}'
 }
 
 if [ "${1:-}" = "--list" ]; then

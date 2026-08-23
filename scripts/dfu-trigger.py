@@ -7,9 +7,16 @@ development; the firmware side lives in config/boards/shields/dfu and is meant
 to be removed, not shipped.
 
 Usage:
-    scripts/dfu-trigger.py left       # the central
-    scripts/dfu-trigger.py right      # relayed to the peripheral
-    scripts/dfu-trigger.py --list     # show candidate raw-HID interfaces
+    scripts/dfu-trigger.py left                 # the central
+    scripts/dfu-trigger.py right                # relayed to the peripheral
+    scripts/dfu-trigger.py --list               # show candidate interfaces
+    scripts/dfu-trigger.py left --name Rolio    # only devices matching a name
+
+0xFF60 is a vendor-defined page, so it is not ours alone: a Ploopy trackball on
+the same machine advertises it too, and sorts ahead of the keyboard. Writing to
+a foreign device generally SUCCEEDS at the OS level and is then ignored, so
+without --name the command can be reported as sent and never reach the
+keyboard. Use --name whenever more than one interface is listed.
 
 The keyboard exposes a vendor-defined HID interface (usage page 0xFF60, usage
 0x61). Writing the magic below makes it reboot into DFU about a quarter of a
@@ -72,7 +79,25 @@ def main():
         print(__doc__)
         return 0
 
+    # Optional --name SUBSTRING, matched against the interface's HID_NAME.
+    name_filter = None
+    if "--name" in args:
+        i = args.index("--name")
+        if i + 1 >= len(args):
+            print("--name needs a value")
+            return 1
+        name_filter = args[i + 1]
+        del args[i:i + 2]
+        if not args:
+            print("--name filters the device; still need a target (left/right)")
+            return 1
+
     devices = candidate_devices()
+    if name_filter is not None:
+        devices = [(n, nm) for n, nm in devices if name_filter.lower() in nm.lower()]
+        if not devices:
+            print("No raw-HID interface whose name contains %r." % name_filter)
+            return 1
 
     if args[0] == "--list":
         if not devices:
@@ -97,6 +122,13 @@ def main():
     # Which hidraw node is the raw interface is not knowable without opening
     # it, and a keyboard presents several; try each and stop at the first that
     # accepts the write.
+    if len(devices) > 1:
+        print("warning: %d interfaces advertise usage page 0x%04X; trying each in"
+              " turn. If the wrong one swallows it, re-run with --name."
+              % (len(devices), USAGE_PAGE))
+        for node, name in devices:
+            print("    %s  %s" % (node, name))
+
     for node, name in devices:
         try:
             fd = os.open(node, os.O_WRONLY)
