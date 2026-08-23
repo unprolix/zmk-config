@@ -18,7 +18,6 @@ ZMK_SIMPLE_MACRO(caps_toggle, <&kp CAPS>, <&tog CAPS_LAYER>)
 
 ZMK_SIMPLE_MACRO(at_wgyl_org, <&kp AT>, <&kp W>, <&kp G>, <&kp Y>, <&kp L>, <&kp DOT>, <&kp O>, <&kp R>, <&kp G>, <&kp TAB>)
 
-ZMK_SIMPLE_MACRO(rgb_tog_num, <&macro_tap &rgb_ug RGB_ON>, <&macro_tap &rgb_ug RGB_COLOR_HSB(43,100,100)>)
 
 
 

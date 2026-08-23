@@ -32,18 +32,34 @@ ARCANE_EXPANSION(y, <&kp E>, <&kp A>, <&kp H>)
 // to consider: special values for non-alphabetic keys
 
 
+/*
+ * What the arcane key does when the preceding key has no expansion: shift, in
+ * three depths.
+ *
+ * A tap-dance rather than a mod-morph on the held shift. The morph could tell
+ * the first tap from the second, because the second happened while the first
+ * one's sticky shift was still down -- but it could never see a third, since
+ * that sticky is spent by then. Counting taps can, and it costs nothing in
+ * practice: a tap-dance resolves the moment any other key is pressed, so
+ * tap-then-type still shifts the letter you typed with no wait at all. Only
+ * stopping after two taps waits out the term.
+ *
+ *   1 tap   sticky shift
+ *   2 taps  caps_word -- until the next word boundary
+ *   3 taps  caps lock, plus the CAPS layer so the board turns pink
+ */
 arcane_left_default: arcane_left_default {
-        compatible = "zmk,behavior-mod-morph";
+        compatible = "zmk,behavior-tap-dance";
         #binding-cells = <0>;
-        bindings = <&sk LSHIFT>, <&caps_word>;
-        mods = <(MOD_LSFT|MOD_RSFT)>;
+        tapping-term-ms = <300>;
+        bindings = <&sk LSHIFT>, <&caps_word>, <&caps_toggle>;
 };
  
 arcane_right_default: arcane_right_default {
-        compatible = "zmk,behavior-mod-morph";
+        compatible = "zmk,behavior-tap-dance";
         #binding-cells = <0>;
-        bindings = <&sk RSHIFT>, <&caps_word>;
-        mods = <(MOD_LSFT|MOD_RSFT)>;
+        tapping-term-ms = <300>;
+        bindings = <&sk RSHIFT>, <&caps_word>, <&caps_toggle>;
 };
  
 arcane_left: arcane_left {

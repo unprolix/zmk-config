@@ -197,10 +197,6 @@ ZMK_TAP_DANCE(num_dance, bindings = <&num_word NUM>, <&sl NUM>;
     };
 };
 
-ZMK_TAP_DANCE(caps_word_lock_dance, bindings = <&sk LSHIFT>, <&caps_word>, <&kp CAPS>;
-              tapping-term-ms = <300>;)
-ZMK_TAP_DANCE(smart_num_lock_dance, bindings = <&sl NUM>, <&num_word NUM>, <&rgb_tog_num>;
-              tapping-term-ms = <300>;)
 
 
 #define HRM_PRIOR_IDLE 150	// increased from 80 to fix inconsistent hold activation (particularly A->LCTRL). 80 was too low, causing holds to fail when typing quickly
@@ -322,35 +318,9 @@ ZMK_KEY_LAYER(DQT,NUM)
 ZMK_KEY_LAYER(ENTER, NAV)
 
 		
-// RGB control behaviors for delayed activation
-rgb_on_behavior: rgb_on_behavior {
-    compatible = "zmk,behavior-macro";
-    #binding-cells = <0>;
-    bindings = <&rgb_ug RGB_ON>;
-};
-        
-rgb_off_behavior: rgb_off_behavior {
-    compatible = "zmk,behavior-macro";
-    #binding-cells = <0>;
-    bindings = <&rgb_ug RGB_OFF>;
-};
         
 
 
-// for testing behavior-delayed, which does not currently work
-delayed_rgb_on: delayed_rgb_on {
-    compatible = "zmk,behavior-delayed";
-    #binding-cells = <1>;  // delay in milliseconds
-    bindings = <&rgb_on_behavior>;
-    delay-ms = <1000>; // Default delay if not specified in binding
-};
-        
-delayed_rgb_off: delayed_rgb_off {
-    compatible = "zmk,behavior-delayed";
-    #binding-cells = <1>;  // delay in milliseconds
-    bindings = <&rgb_off_behavior>;
-    delay-ms = <1000>;
-};
 
 
 
@@ -598,6 +568,13 @@ arcane_nav_r: arcane_nav_r {
 
 // ****************************************** CAPS layer
 
+// Caps lock, made visible. The layer is deliberately transparent -- typing has
+// to carry on exactly as it does on the base layer -- so all it changes is the
+// lighting, which turns pink, and where the way out is.
+//
+// The way out is the way in: the arcane thumbs, which reached this layer on
+// their third tap, leave on a single one. Without that the layer would be a
+// room with the door on the outside, which is what it used to be.
 #define CAPS_LZ &trans &trans &trans &trans &trans &trans
 #define CAPS_LT_IN &trans  &trans  &trans  &trans  &trans
 #define CAPS_LT &caps_toggle  CAPS_LT_IN
@@ -605,7 +582,7 @@ arcane_nav_r: arcane_nav_r {
 #define CAPS_LM &trans  CAPS_LM_IN
 #define CAPS_LB_IN &trans  &trans  &trans  &trans  &trans
 #define CAPS_LB &trans  CAPS_LB_IN
-#define CAPS_LH &trans &trans &trans
+#define CAPS_LH &trans &caps_toggle &trans
 #define CAPS_LH_5 &trans &trans CAPS_LH
 
 #define CAPS_RZ &trans &trans &trans &trans &trans &trans
@@ -615,7 +592,7 @@ arcane_nav_r: arcane_nav_r {
 #define CAPS_RM CAPS_RM_IN  &trans
 #define CAPS_RB_IN &trans  &trans  &trans  &trans  &trans
 #define CAPS_RB CAPS_RB_IN  &trans
-#define CAPS_RH &trans &trans &trans
+#define CAPS_RH &trans &caps_toggle &trans
 #define CAPS_RH_5 &trans &trans CAPS_RH
 
 

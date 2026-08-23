@@ -194,13 +194,11 @@ ZMK_COMBO_PLUS(num_skip_0, &kp N0, RT3, RT0)  // double skip!
 // middle row
 ZMK_COMBO_PLUS_SLOW(tab_horiz, &kp TAB, LM4, LM5)
 ZMK_COMBO_PLUS(alt_l, &sk LALT, LM3, LM4)
-ZMK_COMBO_PLUS(caps_word_l, &caps_word_lock_dance, LM2, LM3)
 ZMK_COMBO_PLUS(ctrl_shift_l, &sk_ctrl_shift, LM1, LM2)
 ZMK_COMBO_PLUS(enter_nav_l, &key_layer_ENTER_NAV, LM0, LM1)
 
 ZMK_COMBO_PLUS(enter_nav_r, &key_layer_ENTER_NAV, RM0, RM1)
 ZMK_COMBO_PLUS(ctrl_shift_r, &sk_ctrl_shift, RM1, RM2)
-ZMK_COMBO_PLUS(caps_word_r, &caps_word_lock_dance, RM2, RM3)
 ZMK_COMBO_PLUS(alt_r, &sk RALT, RM3, RM4)
 ZMK_COMBO_PLUS_SLOW(dash, &kp MINUS, RM4, RM5)
 
