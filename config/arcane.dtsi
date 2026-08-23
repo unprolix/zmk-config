@@ -46,20 +46,24 @@ ARCANE_EXPANSION(y, <&kp E>, <&kp A>, <&kp H>)
  *
  *   1 tap   sticky shift
  *   2 taps  caps_word -- until the next word boundary
- *   3 taps  caps lock, plus the CAPS layer so the board turns pink
+ *   3 taps  caps lock
+ *
+ * Caps lock is only the keycode. Nothing here tracks whether the host acted on
+ * it: the lighting reads the host's own LED report, so there is no second copy
+ * of the state to disagree with the first.
  */
 arcane_left_default: arcane_left_default {
         compatible = "zmk,behavior-tap-dance";
         #binding-cells = <0>;
         tapping-term-ms = <300>;
-        bindings = <&sk LSHIFT>, <&caps_word>, <&caps_toggle>;
+        bindings = <&sk LSHIFT>, <&caps_word>, <&kp CAPS>;
 };
  
 arcane_right_default: arcane_right_default {
         compatible = "zmk,behavior-tap-dance";
         #binding-cells = <0>;
         tapping-term-ms = <300>;
-        bindings = <&sk RSHIFT>, <&caps_word>, <&caps_toggle>;
+        bindings = <&sk RSHIFT>, <&caps_word>, <&kp CAPS>;
 };
  
 arcane_left: arcane_left {

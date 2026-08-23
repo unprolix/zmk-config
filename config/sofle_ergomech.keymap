@@ -45,14 +45,14 @@ GAMING_LH_5 GAMING_RH_5
             sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN &inc_dec_kp PG_UP PG_DN>;
         };
 
-	caps_layer {
-		display-name = "caps";
+	empty_2_layer {
+		display-name = "empty 2";
 		bindings = <
-CAPS_LZ CAPS_RZ
-CAPS_LT CAPS_RT
-CAPS_LM CAPS_RM
-CAPS_LB CAPS_RB
-CAPS_LH_5 CAPS_RH_5
+EMPTY_2_LZ EMPTY_2_RZ
+EMPTY_2_LT EMPTY_2_RT
+EMPTY_2_LM EMPTY_2_RM
+EMPTY_2_LB EMPTY_2_RB
+EMPTY_2_LH_5 EMPTY_2_RH_5
 				>;
             sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN &inc_dec_kp PG_UP PG_DN>;
 	};

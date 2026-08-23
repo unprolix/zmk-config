@@ -52,13 +52,13 @@ GAMING_LH GAMING_RH
             >;
         };
 
-        caps_layer {
-            display-name = "caps";
+        empty_2_layer {
+            display-name = "empty 2";
             bindings = <
-OUTER CAPS_LT_IN  CAPS_RT_IN OUTER
-OUTER CAPS_LM_IN  CAPS_RM_IN OUTER
-OUTER CAPS_LB_IN  CAPS_RB_IN OUTER
-CAPS_LH CAPS_RH
+OUTER EMPTY_2_LT_IN  EMPTY_2_RT_IN OUTER
+OUTER EMPTY_2_LM_IN  EMPTY_2_RM_IN OUTER
+OUTER EMPTY_2_LB_IN  EMPTY_2_RB_IN OUTER
+EMPTY_2_LH EMPTY_2_RH
             >;
         };
 

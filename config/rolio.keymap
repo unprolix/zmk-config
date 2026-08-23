@@ -83,13 +83,13 @@ ROLIO_LX GAMING_LH  GAMING_RH ROLIO_RX
             sensor-bindings = ROLIO_SENSORS;
         };
 
-        caps_layer {
-            display-name = "caps";
+        empty_2_layer {
+            display-name = "empty 2";
             bindings = <
-CAPS_LT CAPS_RT
-CAPS_LM CAPS_RM
-CAPS_LB ROLIO_CLICKS CAPS_RB
-ROLIO_LX_T CAPS_LH  CAPS_RH ROLIO_RX_T
+EMPTY_2_LT EMPTY_2_RT
+EMPTY_2_LM EMPTY_2_RM
+EMPTY_2_LB ROLIO_CLICKS EMPTY_2_RB
+ROLIO_LX_T EMPTY_2_LH  EMPTY_2_RH ROLIO_RX_T
             >;
         };
 

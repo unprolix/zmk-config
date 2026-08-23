@@ -103,7 +103,10 @@ key numbers
 #define HIEROPHANT 0
 #define QWERTY 1
 #define GAMING 2
-#define CAPS_LAYER 3
+// Slot 3 held the CAPS layer. Caps lock needs no layer -- the lighting
+// reads the host's LED report -- but the numbering below it is shared with
+// rolio.keymap and toucan.keymap, so the slot stays, empty.
+#define EMPTY_2 3
 #define SUPERSCRIPT 4
 
 #define NUMERIC 5
@@ -568,32 +571,27 @@ arcane_nav_r: arcane_nav_r {
 
 // ****************************************** CAPS layer
 
-// Caps lock, made visible. The layer is deliberately transparent -- typing has
-// to carry on exactly as it does on the base layer -- so all it changes is the
-// lighting, which turns pink, and where the way out is.
-//
-// The way out is the way in: the arcane thumbs, which reached this layer on
-// their third tap, leave on a single one. Without that the layer would be a
-// room with the door on the outside, which is what it used to be.
-#define CAPS_LZ &trans &trans &trans &trans &trans &trans
-#define CAPS_LT_IN &trans  &trans  &trans  &trans  &trans
-#define CAPS_LT &caps_toggle  CAPS_LT_IN
-#define CAPS_LM_IN &trans  &trans  &trans  &trans  &trans
-#define CAPS_LM &trans  CAPS_LM_IN
-#define CAPS_LB_IN &trans  &trans  &trans  &trans  &trans
-#define CAPS_LB &trans  CAPS_LB_IN
-#define CAPS_LH &trans &caps_toggle &trans
-#define CAPS_LH_5 &trans &trans CAPS_LH
+// Placeholder layer, entirely transparent. Nothing activates it; it exists so
+// the layers numbered after it keep their indices.
+#define EMPTY_2_LZ &trans &trans &trans &trans &trans &trans
+#define EMPTY_2_LT_IN &trans  &trans  &trans  &trans  &trans
+#define EMPTY_2_LT &trans  EMPTY_2_LT_IN
+#define EMPTY_2_LM_IN &trans  &trans  &trans  &trans  &trans
+#define EMPTY_2_LM &trans  EMPTY_2_LM_IN
+#define EMPTY_2_LB_IN &trans  &trans  &trans  &trans  &trans
+#define EMPTY_2_LB &trans  EMPTY_2_LB_IN
+#define EMPTY_2_LH &trans &trans &trans
+#define EMPTY_2_LH_5 &trans &trans EMPTY_2_LH
 
-#define CAPS_RZ &trans &trans &trans &trans &trans &trans
-#define CAPS_RT_IN &trans  &trans  &trans  &trans  &trans
-#define CAPS_RT CAPS_RT_IN  &trans
-#define CAPS_RM_IN &trans  &trans  &trans  &trans  &trans
-#define CAPS_RM CAPS_RM_IN  &trans
-#define CAPS_RB_IN &trans  &trans  &trans  &trans  &trans
-#define CAPS_RB CAPS_RB_IN  &trans
-#define CAPS_RH &trans &caps_toggle &trans
-#define CAPS_RH_5 &trans &trans CAPS_RH
+#define EMPTY_2_RZ &trans &trans &trans &trans &trans &trans
+#define EMPTY_2_RT_IN &trans  &trans  &trans  &trans  &trans
+#define EMPTY_2_RT EMPTY_2_RT_IN  &trans
+#define EMPTY_2_RM_IN &trans  &trans  &trans  &trans  &trans
+#define EMPTY_2_RM EMPTY_2_RM_IN  &trans
+#define EMPTY_2_RB_IN &trans  &trans  &trans  &trans  &trans
+#define EMPTY_2_RB EMPTY_2_RB_IN  &trans
+#define EMPTY_2_RH &trans &trans &trans
+#define EMPTY_2_RH_5 &trans &trans EMPTY_2_RH
 
 
 // ******************************************  NUMERIC layer
