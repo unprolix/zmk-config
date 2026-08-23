@@ -148,7 +148,7 @@ draw:
     set -euo pipefail
     keymap -c "{{ draw }}/config.yaml" parse -z "{{ config }}/eyelash_corne.keymap" --virtual-layers Combos >"{{ draw }}/base.yaml"
     yq -Yi '.combos.[].l = ["Combos"]' "{{ draw }}/base.yaml"
-    keymap -c "{{ draw }}/config.yaml" draw "{{ draw }}/base.yaml" -d "zmk-new_corne/boards/arm/eyelash_corne/eyelash_corne-layouts.dtsi" >"{{ draw }}/keymap.png"
+    keymap -c "{{ draw }}/config.yaml" draw "{{ draw }}/base.yaml" -d "zmk-new_corne/boards/shields/eyelash_corne/eyelash_corne-layouts.dtsi" >"{{ draw }}/keymap.png"
 
 # initialize west
 init:

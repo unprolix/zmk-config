@@ -5,6 +5,9 @@ parse_config:
   zmk_preamble: |
     #include <zmk-helpers/key-labels/eyelash42.h>
     #define CONFIG_WIRELESS
+    // The rgbzone shield's overlay normally sets this; the parser only sees
+    // the keymap, so without it the lighting layer draws as blank.
+    #define RGBZONE_PRESENT 1
 
   raw_binding_map:
     "&sys_reset": Reset
@@ -49,6 +52,13 @@ parse_config:
     "&msc SCRL_DOWN": Scroll ↓
     "&msc SCRL_LEFT": Scroll ←
     "&msc SCRL_RIGHT": Scroll →
+
+    "&rgbz_tog": Lights
+    "&rgbz_up": Brighter
+    "&rgbz_dn": Dimmer
+
+    "&comma_semicolon": { "t": ",", "right": ";" }
+    "&y_comma_space": { "t": "Y", "h": "spc after ," }
 
     "&mkp LCLK": Left Click
     "&mkp RCLK": Right Click
