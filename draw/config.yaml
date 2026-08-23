@@ -53,12 +53,150 @@ parse_config:
     "&msc SCRL_LEFT": Scroll ←
     "&msc SCRL_RIGHT": Scroll →
 
+    # Adaptive keys: the letter is what you press, so it is what the diagram
+    # shows. The corner note is the layer or modifier on hold; anything that
+    # changes with the preceding key is spelled out in the other corner.
+    "&adaptive_f_repeat": { "t": "F", "h": "fn" }
+    "&adaptive_z_repeat": { "t": "Z", "h": "extra" }
+    "&adaptive_u_repeat": { "t": "U", "h": "symbol" }
+    "&adaptive_q_base": { "t": "Q", "right": "K after U" }
+    "&adaptive_w_repeat": { "t": "W", "h": "numpad" }
+    "&adaptive_d_repeat": { "t": "D", "h": "symbol" }
+    "&adaptive_l_repeat": { "t": "L", "h": "extra" }
+    "&adaptive_b_repeat": { "t": "B", "h": "fn" }
+    "&adaptive_i_repeat": { "t": "I", "h": "alt" }
+    "&adaptive_e_repeat": { "t": "E", "h": "shift" }
+    "&adaptive_a_repeat": { "t": "A", "h": "ctrl" }
+    "&adaptive_p_repeat": { "t": "P", "h": "num" }
+    "&adaptive_g_repeat": { "t": "G", "h": "num" }
+    "&adaptive_s_repeat": { "t": "S", "h": "ctrl" }
+    "&adaptive_t_repeat": { "t": "T", "h": "shift" }
+    "&adaptive_r_repeat": { "t": "R", "h": "alt" }
+    "&adaptive_h_quote": { "t": "H", "right": "'t after I" }
+    "&adaptive_j_dot": { "t": "J", "right": "./ after ." }
+    "&tap_hold_layer_lgui_adaptive LGUI_NAV_L 0": { "t": "H", "h": "gui+nav" }
+    "&tap_hold_layer_rgui RGUI_NAV_R N": { "t": "N", "h": "gui+nav" }
+
+    "&sqt_dash": { "t": "'", "s": "-", "h": "num" }
+    "&dqt_underscore": { "t": "\"", "s": "_", "h": "num" }
+    "&dot_colon": { "t": ".", "s": ":" }
+
+    "&backspace_word_delete": { "t": "\u232b", "right": "x2 word" }
+    "&delete_delete_word": { "t": "del", "right": "x2 word" }
+    "&key_repeat": Repeat
+
+    "&lgui_space_tab": { "t": "space", "h": "gui", "right": "x2 tab" }
+    "&rgui_space_ret": { "t": "space", "h": "gui", "right": "x2 enter" }
+    "&arcane_left": { "t": "arcane", "h": "nav" }
+    "&arcane_right": { "t": "arcane", "h": "nav" }
+    "&sl_sym_or_numpad": { "t": "symbol", "right": "x2 numpad" }
+    "&sl_num_or_word": { "t": "num", "right": "x2 numpad" }
+
+    # Superscripts drawn as the character they produce, not as a codepoint.
+    "&uc 0x1D43 0": "ᵃ"
+    "&sup_uc 0x1D43": { "t": "ᵃ", "h": "mod" }
+    "&uc 0x1D47 0": "ᵇ"
+    "&sup_uc 0x1D47": { "t": "ᵇ", "h": "mod" }
+    "&uc 0x1D9C 0": "ᶜ"
+    "&sup_uc 0x1D9C": { "t": "ᶜ", "h": "mod" }
+    "&uc 0x1D48 0": "ᵈ"
+    "&sup_uc 0x1D48": { "t": "ᵈ", "h": "mod" }
+    "&uc 0x1D49 0": "ᵉ"
+    "&sup_uc 0x1D49": { "t": "ᵉ", "h": "mod" }
+    "&uc 0x1DA0 0": "ᶠ"
+    "&sup_uc 0x1DA0": { "t": "ᶠ", "h": "mod" }
+    "&uc 0x1D4D 0": "ᵍ"
+    "&sup_uc 0x1D4D": { "t": "ᵍ", "h": "mod" }
+    "&uc 0x02B0 0": "ʰ"
+    "&sup_uc 0x02B0": { "t": "ʰ", "h": "mod" }
+    "&uc 0x2071 0": "ⁱ"
+    "&sup_uc 0x2071": { "t": "ⁱ", "h": "mod" }
+    "&uc 0x02B2 0": "ʲ"
+    "&sup_uc 0x02B2": { "t": "ʲ", "h": "mod" }
+    "&uc 0x1D4F 0": "ᵏ"
+    "&sup_uc 0x1D4F": { "t": "ᵏ", "h": "mod" }
+    "&uc 0x02E1 0": "ˡ"
+    "&sup_uc 0x02E1": { "t": "ˡ", "h": "mod" }
+    "&uc 0x1D50 0": "ᵐ"
+    "&sup_uc 0x1D50": { "t": "ᵐ", "h": "mod" }
+    "&uc 0x207F 0": "ⁿ"
+    "&sup_uc 0x207F": { "t": "ⁿ", "h": "mod" }
+    "&uc 0x1D52 0": "ᵒ"
+    "&sup_uc 0x1D52": { "t": "ᵒ", "h": "mod" }
+    "&uc 0x1D56 0": "ᵖ"
+    "&sup_uc 0x1D56": { "t": "ᵖ", "h": "mod" }
+    "&uc 0x02B3 0": "ʳ"
+    "&sup_uc 0x02B3": { "t": "ʳ", "h": "mod" }
+    "&uc 0x02E2 0": "ˢ"
+    "&sup_uc 0x02E2": { "t": "ˢ", "h": "mod" }
+    "&uc 0x1D57 0": "ᵗ"
+    "&sup_uc 0x1D57": { "t": "ᵗ", "h": "mod" }
+    "&uc 0x1D58 0": "ᵘ"
+    "&sup_uc 0x1D58": { "t": "ᵘ", "h": "mod" }
+    "&uc 0x1D5B 0": "ᵛ"
+    "&sup_uc 0x1D5B": { "t": "ᵛ", "h": "mod" }
+    "&uc 0x02B7 0": "ʷ"
+    "&sup_uc 0x02B7": { "t": "ʷ", "h": "mod" }
+    "&uc 0x02E3 0": "ˣ"
+    "&sup_uc 0x02E3": { "t": "ˣ", "h": "mod" }
+    "&uc 0x02B8 0": "ʸ"
+    "&sup_uc 0x02B8": { "t": "ʸ", "h": "mod" }
+    "&uc 0x1DBB 0": "ᶻ"
+    "&sup_uc 0x1DBB": { "t": "ᶻ", "h": "mod" }
+
+    # Symbol layer home row: the symbol is the point, the mod is the note.
+    "&adaptive_bslh_repeat": { "t": "\\", "h": "alt" }
+    "&adaptive_lpar_repeat": { "t": "(", "h": "ctrl" }
+    "&adaptive_rpar_repeat": { "t": ")", "h": "ctrl" }
+    "&adaptive_fslh_repeat": { "t": "/", "h": "alt" }
+    "&grave_slash": { "t": "`", "right": "/ after ~" }
+
+    "&key_layer_SQT_NUM": { "t": "'", "h": "num" }
+    "&key_layer_DQT_NUM": { "t": "\"", "h": "num" }
+    "&layer_lgui 9": gui+nav
+    "&layer_rgui 10": gui+nav
+    "&oneshot_or_to_NAVIGATION": { "t": "nav", "right": "x2 lock" }
+    "&numpad_word 6": Numpad word
+    "&symbol_word 7": Symbol word
+    "&caps_toggle": { "t": "CAPS", "right": "leaves layer" }
+    "&leader": Leader
+    "&cancel": Cancel
+    "&build_time": Build info
+    "&smart_w": W
+    "&em_dash_lower": "\u2014"
+
+    # Named rather than expanded: this page gets committed, the addresses
+    # in personal.dtsi deliberately do not.
+    "&personal_email": Email
+    "&at_wgyl_org": "@domain"
+    "&phone_alt": Phone
+
+    "&hml LCTRL(A)": { "t": "A", "h": "ctrl" }
+    "&hmr RCTRL(S)": { "t": "S", "h": "ctrl" }
+    "&mkp MB1": Left Click
+    "&mkp MB2": Right Click
+    "&mkp MB3": Middle Click
+    "&msc MOVE_Y(20)": Scroll ↑
+    "&msc MOVE_Y(-20)": Scroll ↓
+    "&msc LG(SCRL_UP)": Zoom +
+    "&msc LG(SCRL_DOWN)": Zoom −
+    "&msc RG(SCRL_UP)": Zoom +
+    "&msc RG(SCRL_DOWN)": Zoom −
+    "&f_hrk_f14": { "t": "F14", "h": "mod" }
+    "&f_hrk_f15": { "t": "F15", "h": "mod" }
+    "&f_hrk_f16": { "t": "F16", "h": "mod" }
+    "&f_hrk_f17": { "t": "F17", "h": "mod" }
+    "&f_hrk_f20": { "t": "F20", "h": "mod" }
+    "&f_hrk_f21": { "t": "F21", "h": "mod" }
+    "&f_hrk_f22": { "t": "F22", "h": "mod" }
+    "&f_hrk_f23": { "t": "F23", "h": "mod" }
+
     "&rgbz_tog": Lights
     "&rgbz_up": Brighter
     "&rgbz_dn": Dimmer
 
     "&comma_semicolon": { "t": ",", "right": ";" }
-    "&y_comma_space": { "t": "Y", "h": "spc after ," }
+    "&y_comma_space": { "t": "Y", "right": "space after ," }
 
     "&mkp LCLK": Left Click
     "&mkp RCLK": Right Click
