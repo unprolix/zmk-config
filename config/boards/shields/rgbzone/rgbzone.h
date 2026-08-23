@@ -34,6 +34,27 @@ static inline enum zone_colour rgbzone_unpack(uint32_t packed, uint8_t zone) {
     return c < ZC_COUNT ? c : ZC_OFF;
 }
 
+/*
+ * Brightness rides in the byte above the six zones.
+ *
+ * It has to reach the far half, and the relayed behaviour that carries the
+ * colours is the only channel there is. Six four-bit zones leave the top eight
+ * bits of that word free, so the level travels with the picture it applies to
+ * rather than as a second message that could arrive out of order -- and the
+ * repaint dedupe then covers brightness changes for free.
+ */
+#define RGBZONE_LEVEL_SHIFT 24
+#define RGBZONE_LEVEL_MASK  0x7
+
+static inline uint32_t rgbzone_with_level(uint32_t packed, uint8_t level) {
+    return packed | ((uint32_t)(level & RGBZONE_LEVEL_MASK) << RGBZONE_LEVEL_SHIFT);
+}
+
+static inline uint8_t rgbzone_level_of(uint32_t packed) {
+    uint8_t level = (packed >> RGBZONE_LEVEL_SHIFT) & RGBZONE_LEVEL_MASK;
+    return level < ZONE_LEVEL_COUNT ? level : ZONE_LEVEL_DEFAULT;
+}
+
 /* Light this half's zones from a packed set of palette indices. */
 void rgbzone_apply(uint32_t packed);
 
@@ -50,6 +71,19 @@ void rgbzone_apply(uint32_t packed);
 void rgbzone_owner_pressed(uint8_t layer, uint32_t position, bool from_right);
 void rgbzone_owner_released(uint8_t layer, uint32_t position);
 bool rgbzone_owner_side(uint8_t layer, bool *from_right);
+
+/* ------------------------------------------------------------------ */
+/* Brightness                                                          */
+/* ------------------------------------------------------------------ */
+
+/*
+ * The live level, 0 (off) to ZONE_LEVEL_COUNT - 1. Central only: the far half
+ * has no say, it applies whatever arrives packed with the colours. Kept in
+ * settings, so it survives a reboot.
+ */
+uint8_t rgbzone_level_get(void);
+void rgbzone_level_step(int delta);
+void rgbzone_level_toggle(void);
 
 /* ------------------------------------------------------------------ */
 /* Diagnostics                                                         */

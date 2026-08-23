@@ -183,14 +183,14 @@ FUNCTION_LH_5 FUNCTION_RH_5
             sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN &inc_dec_kp PG_UP PG_DN>;
         };
 
-        rgb_layer {
-            display-name = "rgb";
+        lighting_layer {
+            display-name = "lighting";
             bindings = <
-RGB_LZ RGB_RZ
-RGB_LT RGB_RT
-RGB_LM RGB_RM
-RGB_LB RGB_RB
-RGB_LH_5 RGB_RH_5
+LIGHTING_LZ LIGHTING_RZ
+LIGHTING_LT LIGHTING_RT
+LIGHTING_LM LIGHTING_RM
+LIGHTING_LB LIGHTING_RB
+LIGHTING_LH_5 LIGHTING_RH_5
             >;
             sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN &inc_dec_kp PG_UP PG_DN>;
         };

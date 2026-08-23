@@ -38,6 +38,24 @@
 #define ZONE_DIM 0x30
 #define ZONE_MID 0x50
 
+/*
+ * Runtime brightness, on top of the two constants above.
+ *
+ * ZONE_DIM and ZONE_MID set what the palette means; this scales the result on
+ * the way to the strip, so the colours keep their relative weights. Sixteen
+ * sixteenths is what the palette says literally, which is why the default sits
+ * there with room on both sides of it. Level 0 is off, and off costs nothing:
+ * with every channel at zero the strip's supply is dropped as well.
+ *
+ * Eight levels because the level travels to the far half in the same word as
+ * the colours, in the byte left over above six four-bit zones.
+ */
+#define ZONE_LEVEL_COUNT   8
+#define ZONE_LEVEL_DEFAULT 4
+#define ZONE_LEVEL_UNIT    16
+
+static const uint8_t zone_level_scale[ZONE_LEVEL_COUNT] = {0, 4, 8, 12, 16, 24, 32, 48};
+
 /* Palette. Sixteen slots; indices are what travel over the split. */
 enum zone_colour {
     ZC_OFF = 0,
@@ -149,13 +167,19 @@ static const struct zone_layer zone_layers[] = {
     {"superscript", {ZC_TEAL, ZC_TEAL, ZC_TEAL, ZC_TEAL, ZC_TEAL, ZC_OFF},
                     {ZC_TEAL, ZC_TEAL, ZC_TEAL, ZC_TEAL, ZC_TEAL, ZC_OFF}},
 
-    {"gaming",     {ZC_RED, ZC_RED, ZC_RED, ZC_RED, ZC_RED, ZC_RED},
-                   {ZC_RED, ZC_RED, ZC_RED, ZC_RED, ZC_RED, ZC_RED}},
+    /* Just the one column, both halves -- not sided. */
+    {"gaming",     {ZC_OFF, ZC_OFF, ZC_OFF, ZC_DIM_WHITE, ZC_OFF, ZC_OFF},
+                   {ZC_OFF, ZC_OFF, ZC_OFF, ZC_DIM_WHITE, ZC_OFF, ZC_OFF}},
 
     {"caps",       {ZC_PINK, ZC_PINK, ZC_PINK, ZC_PINK, ZC_PINK, ZC_PINK},
                    {ZC_PINK, ZC_PINK, ZC_PINK, ZC_PINK, ZC_PINK, ZC_PINK}},
 
-    {"rgb",        {ZC_RED, ZC_GREEN, ZC_BLUE, ZC_YELLOW, ZC_CYAN, ZC_MAGENTA},
+    /*
+     * Every colour at once, which is the point: this is the layer where
+     * brightness is set, and a single hue makes it hard to see what a step
+     * does to the dimmer end of the palette.
+     */
+    {"lighting",   {ZC_RED, ZC_GREEN, ZC_BLUE, ZC_YELLOW, ZC_CYAN, ZC_MAGENTA},
                    {ZC_RED, ZC_GREEN, ZC_BLUE, ZC_YELLOW, ZC_CYAN, ZC_MAGENTA}},
 
     {"bluetooth",  {ZC_BLUE, ZC_BLUE, ZC_BLUE, ZC_OFF, ZC_OFF, ZC_OFF},

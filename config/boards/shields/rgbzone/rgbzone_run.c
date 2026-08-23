@@ -13,8 +13,10 @@
 #include <zephyr/logging/log.h>
 #include <string.h>
 
+#include <zmk/ble.h>
 #include <zmk/behavior.h>
 #include <zmk/event_manager.h>
+#include <zmk/events/ble_active_profile_changed.h>
 #include <zmk/events/keycode_state_changed.h>
 #include <zmk/events/layer_state_changed.h>
 #include <zmk/events/position_state_changed.h>
@@ -44,6 +46,50 @@ void rgbzone_diag_report(uint8_t layer_index, const char *layer_name, uint8_t mo
  * value is not used for anything visible.
  */
 static bool layer_from_right;
+
+/*
+ * The bluetooth layer is drawn from live state, not from the palette.
+ *
+ * Its whole purpose is answering "which profile is which, and what is it
+ * doing", and a fixed row cannot say that. BT_SEL 0..4 sit along the left top
+ * row running outward, so profile i takes the column its own key is in: zone 0
+ * is the innermost column, position 0 is the outermost key, hence the reversal.
+ *
+ * The left half carries the state and the right half marks the selection --
+ * two facts about one profile, and only one colour per column to say them in.
+ * Splitting them across the halves means neither has to be encoded in a shade
+ * of the other.
+ */
+#define BLUETOOTH_LAYER_NAME "bluetooth"
+
+static bool bluetooth_zones(const char *name, enum zone_colour *left, enum zone_colour *right) {
+    if (name == NULL || strcmp(name, BLUETOOTH_LAYER_NAME) != 0) {
+        return false;
+    }
+
+    memset(left, ZC_OFF, ZONE_COUNT * sizeof(*left));
+    memset(right, ZC_OFF, ZONE_COUNT * sizeof(*right));
+
+    uint8_t count = ZMK_BLE_PROFILE_COUNT < ZONE_COUNT ? ZMK_BLE_PROFILE_COUNT : ZONE_COUNT;
+    int active = zmk_ble_active_profile_index();
+
+    for (uint8_t i = 0; i < count; i++) {
+        uint8_t zone = ZONE_COUNT - 1 - i;
+
+        if (zmk_ble_profile_is_connected(i)) {
+            left[zone] = ZC_GREEN;
+        } else if (!zmk_ble_profile_is_open(i)) {
+            /* Paired, but the host is asleep or out of range. */
+            left[zone] = ZC_BLUE;
+        }
+
+        if (i == (uint8_t)active) {
+            right[zone] = ZC_WHITE;
+        }
+    }
+
+    return true;
+}
 
 /*
  * Colours are looked up by the layer's display-name rather than its index, so
@@ -95,22 +141,24 @@ static void refresh(void) {
      * have to be assigned to a side here. Which side that is was recorded by
      * the key that opened the layer, in rgbzone_owner.c.
      */
-    const struct zone_layer *layer_row = row_for(name);
-    const enum zone_colour *pressed = layer_row ? layer_row->pressed : dark;
-    const enum zone_colour *other = layer_row ? layer_row->other : dark;
+    if (!bluetooth_zones(name, left, right)) {
+        const struct zone_layer *layer_row = row_for(name);
+        const enum zone_colour *pressed = layer_row ? layer_row->pressed : dark;
+        const enum zone_colour *other = layer_row ? layer_row->other : dark;
 
-    /* Ask the key that opened the layer; keep the last answer if none did. */
-    bool owner_side;
-    if (rgbzone_owner_side((uint8_t)id, &owner_side)) {
-        layer_from_right = owner_side;
-    }
+        /* Ask the key that opened the layer; keep the last answer if none did. */
+        bool owner_side;
+        if (rgbzone_owner_side((uint8_t)id, &owner_side)) {
+            layer_from_right = owner_side;
+        }
 
-    if (layer_from_right) {
-        memcpy(right, pressed, sizeof(right));
-        memcpy(left, other, sizeof(left));
-    } else {
-        memcpy(left, pressed, sizeof(left));
-        memcpy(right, other, sizeof(right));
+        if (layer_from_right) {
+            memcpy(right, pressed, sizeof(right));
+            memcpy(left, other, sizeof(left));
+        } else {
+            memcpy(left, pressed, sizeof(left));
+            memcpy(right, other, sizeof(right));
+        }
     }
 
     /*
@@ -124,7 +172,7 @@ static void refresh(void) {
     zmk_mod_flags_t mods = zmk_hid_get_explicit_mods();
     bool layer_speaks = false;
     for (uint8_t i = 0; i < ZONE_COUNT && !layer_speaks; i++) {
-        layer_speaks = pressed[i] != ZC_OFF || other[i] != ZC_OFF;
+        layer_speaks = left[i] != ZC_OFF || right[i] != ZC_OFF;
     }
 
     if (!layer_speaks) {
@@ -132,12 +180,17 @@ static void refresh(void) {
         overlay_mods(zone_hrm_right, ARRAY_SIZE(zone_hrm_right), mods, right);
     }
 
-    uint32_t pl = rgbzone_pack(left);
-    uint32_t pr = rgbzone_pack(right);
+    /* Brightness rides along with the colours so the far half stays in step. */
+    uint8_t level = rgbzone_level_get();
+    uint32_t pl = rgbzone_with_level(rgbzone_pack(left), level);
+    uint32_t pr = rgbzone_with_level(rgbzone_pack(right), level);
     rgbzone_apply(pl);
     rgbzone_relay_send(pr);
     rgbzone_diag_report((uint8_t)index, name, mods, pl, pr);
 }
+
+/* For the brightness keys, which change the picture without any event. */
+void rgbzone_refresh(void) { refresh(); }
 
 static int rgbzone_layer_listener(const zmk_event_t *eh) {
     refresh();
@@ -173,6 +226,8 @@ ZMK_SUBSCRIPTION(rgbzone_pos, zmk_position_state_changed);
  * are read back out of the HID state on every keycode instead.
  */
 ZMK_SUBSCRIPTION(rgbzone_run, zmk_keycode_state_changed);
+/* The bluetooth layer draws live profile state, so it has to follow it. */
+ZMK_SUBSCRIPTION(rgbzone_run, zmk_ble_active_profile_changed);
 
 /*
  * Same problem the display relay has: nothing tells the central that a

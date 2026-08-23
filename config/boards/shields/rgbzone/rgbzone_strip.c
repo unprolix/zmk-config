@@ -77,6 +77,11 @@ static atomic_t pending;
 void rgbzone_diag_report_write(uint32_t packed, uint8_t r0, uint8_t g0, uint8_t b0, uint8_t r1,
                                uint8_t g1, uint8_t b1);
 
+static uint8_t scale_channel(uint8_t value, uint8_t scale) {
+    uint32_t scaled = ((uint32_t)value * scale) / ZONE_LEVEL_UNIT;
+    return scaled > UINT8_MAX ? UINT8_MAX : (uint8_t)scaled;
+}
+
 static void strip_write(struct k_work *work) {
     ARG_UNUSED(work);
 
@@ -84,13 +89,22 @@ static void strip_write(struct k_work *work) {
 
     memset(pixels, 0, sizeof(pixels));
 
+    /*
+     * Brightness is applied here rather than in the palette so that both
+     * halves scale identically from the same number, and so that a colour
+     * keeps its relative weights as the level moves. Rounding down means the
+     * dimmest levels can extinguish a channel that was already faint, which is
+     * what dim is supposed to look like.
+     */
+    uint8_t scale = zone_level_scale[rgbzone_level_of(packed)];
+
     bool any = false;
     for (uint8_t zone = 0; zone < ZONE_COUNT && zone < STRIP_COUNT; zone++) {
         enum zone_colour c = rgbzone_unpack(packed, zone);
-        pixels[zone].r = zone_palette[c][0];
-        pixels[zone].g = zone_palette[c][1];
-        pixels[zone].b = zone_palette[c][2];
-        if (c != ZC_OFF) {
+        pixels[zone].r = scale_channel(zone_palette[c][0], scale);
+        pixels[zone].g = scale_channel(zone_palette[c][1], scale);
+        pixels[zone].b = scale_channel(zone_palette[c][2], scale);
+        if (pixels[zone].r || pixels[zone].g || pixels[zone].b) {
             any = true;
         }
     }

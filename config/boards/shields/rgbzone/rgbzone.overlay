@@ -18,22 +18,48 @@
             compatible = "zmk,behavior-rgb-diag";
             #binding-cells = <2>;
         };
+
+        /*
+         * Brightness. Three keys rather than one parameterised behaviour, so
+         * the keymap says &rgbz_up instead of carrying a table of command
+         * numbers that has to agree with the driver.
+         */
+        rgbz_tog: rgbz_tog {
+            compatible = "zmk,behavior-rgbzone-level";
+            #binding-cells = <0>;
+            step = <0>;
+        };
+
+        rgbz_up: rgbz_up {
+            compatible = "zmk,behavior-rgbzone-level";
+            #binding-cells = <0>;
+            step = <1>;
+        };
+
+        rgbz_dn: rgbz_dn {
+            compatible = "zmk,behavior-rgbzone-level";
+            #binding-cells = <0>;
+            step = <(-1)>;
+        };
     };
 };
 
 /*
- * Ask the keymap to retarget ZMK's momentary-layer node at the copy in
- * rgbzone_owner.c, which records which key opened the layer.
+ * Tell the keymap this shield is in the build.
  *
- * It cannot be done here: &mo is defined by behaviors.dtsi, which the keymap
- * includes, and the keymap is preprocessed after every shield overlay -- the
- * label does not exist yet at this point. Zephyr feeds all the devicetree
- * sources through one preprocessor run, in order, so a #define set here does
- * reach the keymap, which is where jjb.keymap acts on it.
+ * The keymap is shared with boards that do not have it, and it needs to know
+ * two things: that &rgbz_tog and friends exist to be bound, and that ZMK's
+ * momentary-layer node should be retargeted at the copy in rgbzone_owner.c
+ * which records who opened the layer.
  *
- * Doing it to &mo rather than to individual keys covers every route into a
+ * The retarget cannot be done here: &mo comes from behaviors.dtsi, which the
+ * *keymap* includes, and the keymap is preprocessed after every shield
+ * overlay, so the label does not exist yet at this point. Zephyr feeds all the
+ * devicetree sources through one preprocessor run, in order, so a #define set
+ * here does reach the keymap, which is where jjb.keymap acts on it.
+ *
+ * Retargeting &mo rather than individual keys covers every route into a
  * momentary layer -- &lt and the hold-tap halves bind it, the layer+modifier
- * macros press it -- and leaves builds without this shield on ZMK's own
- * behaviour.
+ * macros press it.
  */
-#define RGBZONE_OWNS_MO 1
+#define RGBZONE_PRESENT 1

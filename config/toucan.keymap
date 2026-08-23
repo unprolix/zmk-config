@@ -152,16 +152,16 @@ FUNCTION_LH FUNCTION_RH
             >;
         };
 
-        /* No RGB hardware on the toucan; layer kept so shared layer indices
-           (RGB=13, BLUETOOTH=14, SYSTEM=15) stay valid. Exit returns to
+        /* No lighting hardware on the toucan; layer kept so shared layer indices
+           (LIGHTING=13, BLUETOOTH=14, SYSTEM=15) stay valid. Exit returns to
            hierophant like on the other boards. */
-        rgb_layer {
-            display-name = "rgb";
+        lighting_layer {
+            display-name = "lighting";
             bindings = <
-OUTER RGB_LT_IN  RGB_RT_IN OUTER
-OUTER RGB_LM_IN  RGB_RM_IN OUTER
-OUTER RGB_LB_IN  RGB_RB_IN OUTER
-RGB_LH RGB_RH
+OUTER LIGHTING_LT_IN  LIGHTING_RT_IN OUTER
+OUTER LIGHTING_LM_IN  LIGHTING_RM_IN OUTER
+OUTER LIGHTING_LB_IN  LIGHTING_RB_IN OUTER
+LIGHTING_LH LIGHTING_RH
             >;
         };
 

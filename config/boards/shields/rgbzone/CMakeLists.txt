@@ -13,4 +13,7 @@ zephyr_library_sources(rgbzone_diag.c)
 if(NOT CONFIG_ZMK_SPLIT OR CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
   zephyr_library_sources(rgbzone_run.c)
   zephyr_library_sources(rgbzone_owner.c)
+  # Brightness is decided here and sent packed with the colours, so the far
+  # half needs none of it.
+  zephyr_library_sources(rgbzone_level.c)
 endif()

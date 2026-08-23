@@ -23,7 +23,7 @@
 				display-name = "hierophant";
 				bindings = <
 HIEROPHANT_LT                       &kp UP              HIEROPHANT_RT
-HIEROPHANT_LM             &kp LEFT  &to RGB   &kp RIGHT HIEROPHANT_RM
+HIEROPHANT_LM             &kp LEFT  &mkp LCLK &kp RIGHT HIEROPHANT_RM
 HIEROPHANT_LB &kp C_MUTE            &kp DOWN            HIEROPHANT_RB
 HIEROPHANT_LH HIEROPHANT_RH
 				>;				
@@ -35,7 +35,7 @@ HIEROPHANT_LH HIEROPHANT_RH
             display-name = "qwerty";
             bindings = <
 QWERTY_LT                       &kp UP              QWERTY_RT
-QWERTY_LM             &kp LEFT  &to RGB   &kp RIGHT QWERTY_RM
+QWERTY_LM             &kp LEFT  &mkp LCLK &kp RIGHT QWERTY_RM
 QWERTY_LB &kp C_MUTE            &kp DOWN            QWERTY_RB
 QWERTY_LH QWERTY_RH
 				>;				
@@ -46,7 +46,7 @@ QWERTY_LH QWERTY_RH
             display-name = "gaming";
             bindings = <
 GAMING_LT                       &kp UP              GAMING_RT
-GAMING_LM             &kp LEFT  &to RGB   &kp RIGHT GAMING_RM
+GAMING_LM             &kp LEFT  &mkp LCLK &kp RIGHT GAMING_RM
 GAMING_LB &kp C_MUTE            &kp DOWN            GAMING_RB
 GAMING_LH GAMING_RH
              >;
@@ -167,15 +167,15 @@ FUNCTION_LH FUNCTION_RH
             sensor-bindings = <&scroll_encoder>;
         };
 
-        rgb_layer {
-            display-name = "rgb";
+        lighting_layer {
+            display-name = "lighting";
             bindings = <
-RGB_LT                                    &rgb_ug RGB_SPI                    RGB_RT
-RGB_LM                   &rgb_ug RGB_EFR  &to HIEROPHANT     &rgb_ug RGB_EFF   RGB_RM
-RGB_LB  &rgb_ug RGB_TOG                   &rgb_ug RGB_SPD                    RGB_RB
-RGB_LH RGB_RH
+LIGHTING_LT                            &trans                          LIGHTING_RT
+LIGHTING_LM              &trans        &to HIEROPHANT   &trans         LIGHTING_RM
+LIGHTING_LB  LIGHT_TOG                 &trans                          LIGHTING_RB
+LIGHTING_LH LIGHTING_RH
             >;
-            sensor-bindings = <&rgb_encoder>;
+            sensor-bindings = <&lighting_encoder>;
         };
 
 

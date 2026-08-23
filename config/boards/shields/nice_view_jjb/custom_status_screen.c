@@ -53,6 +53,14 @@
 /* The layer that gets an emblem instead of its name. */
 #define HIEROPHANT_LAYER_NAME "hierophant"
 
+/*
+ * The layer that gets a profile list instead of its name. The name is the
+ * least useful thing to show while standing on the layer whose entire job is
+ * moving between bluetooth profiles.
+ */
+#define BLUETOOTH_LAYER_NAME "bluetooth"
+#define PROFILE_ROW_H        14
+
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
 /*
@@ -133,6 +141,10 @@ static uint8_t show_buf[PANEL_SHOW_BUF_SIZE];
 #define ROW_BOTTOM  143
 #define TEXT_BOX_H  40
 
+/* Indent for the bluetooth profile list; a list reads better than a column of
+   centred lines of differing width. */
+#define PROFILE_LIST_X 14
+
 
 /* ------------------------------------------------------------------ */
 /* Painting                                                            */
@@ -198,6 +210,30 @@ static void draw_panel(void) {
     if (status.layer_label != NULL && strcmp(status.layer_label, HIEROPHANT_LAYER_NAME) == 0) {
         jjb_draw_bitmap(panel_draw, (PANEL_W - HIEROPHANT_W) / 2, IMG_Y, hierophant_bits,
                         HIEROPHANT_W, HIEROPHANT_H, HIEROPHANT_STRIDE);
+    } else if (status.layer_label != NULL &&
+               strcmp(status.layer_label, BLUETOOTH_LAYER_NAME) == 0) {
+        /*
+         * One line per profile, in the order the keys select them, so a line
+         * and a key are the same thing. Spelled out rather than shown as
+         * glyphs: five lines of a legend nobody remembers is worse than five
+         * lines of small words, and there is room for the words.
+         *
+         * The columns say the same thing in colour while the layer is held --
+         * this is for when the answer is wanted rather than glanced at.
+         */
+        lv_draw_label_dsc_t list;
+        jjb_init_label_dsc(&list, &lv_font_montserrat_12, LV_TEXT_ALIGN_LEFT);
+
+        int active = zmk_ble_active_profile_index();
+        for (uint8_t i = 0; i < ZMK_BLE_PROFILE_COUNT; i++) {
+            const char *state = zmk_ble_profile_is_connected(i) ? "live"
+                                : !zmk_ble_profile_is_open(i)   ? "idle"
+                                                                : "--";
+            snprintf(text, sizeof(text), "%c%d %s", i == (uint8_t)active ? '>' : ' ', i + 1,
+                     state);
+            jjb_canvas_draw_text(panel_draw, PROFILE_LIST_X, ROW_LAYER + i * PROFILE_ROW_H,
+                                 PANEL_W - PROFILE_LIST_X, PROFILE_ROW_H, &list, text);
+        }
     } else {
         char name[LAYER_NAME_MAX];
         if (status.layer_label == NULL || strlen(status.layer_label) == 0) {

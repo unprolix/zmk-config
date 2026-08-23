@@ -118,7 +118,7 @@ key numbers
 #define EXTRA 11
 #define FN 12
 
-#define RGB 13
+#define LIGHTING 13
 #define BLUETOOTH 14
 #define SYSTEM 15
 
@@ -523,10 +523,19 @@ arcane_nav_r: arcane_nav_r {
 
     /* Using tap_hold_layer_lgui directly in the keymap instead of a custom f_key behavior */
 
-    rgb_encoder: rgb_encoder {
+    /*
+     * The lighting layer's encoder. On a board with rgbzone this drives its
+     * global brightness; elsewhere it still drives ZMK's underglow, which is
+     * what the other boards have.
+     */
+    lighting_encoder: lighting_encoder {
         compatible = "zmk,behavior-sensor-rotate";
         #sensor-binding-cells = <0>;
+#ifdef RGBZONE_PRESENT
+        bindings = <&rgbz_up>, <&rgbz_dn>;
+#else
         bindings = <&rgb_ug RGB_BRI>, <&rgb_ug RGB_BRD>;
+#endif
     };
 
     scroll_encoder: scroll_encoder {
@@ -717,36 +726,53 @@ MAKE_ADAPTIVE_REPEAT(f_hrk_f23, hmr, R_M4, F23)
 #define EXTRA_RH_5 &trans &trans EXTRA_RH
 
 
-// ******************************************  RGB layer
+// ******************************************  LIGHTING layer
+//
+// Was the RGB layer, back when the lighting ran ZMK's underglow effects.
+// rgbzone paints columns by what they do, so hue, saturation, effect and speed
+// have nothing left to act on -- what remains worth reaching is whether the
+// lights are on at all and how bright. Reached with leader L E D.
+//
+// On a board without rgbzone the keys go transparent rather than vanish, so
+// the shared row macros stay usable there.
 
-#define RGB_LZ &trans &trans &trans &trans &trans &trans
-#define RGB_RZ &trans &trans &trans &trans &trans &trans
+#ifdef RGBZONE_PRESENT
+  #define LIGHT_TOG &rgbz_tog
+  #define LIGHT_UP  &rgbz_up
+  #define LIGHT_DN  &rgbz_dn
+#else
+  #define LIGHT_TOG &trans
+  #define LIGHT_UP  &trans
+  #define LIGHT_DN  &trans
+#endif
 
-// Left half drives the global underglow state; the right half (below) sets
-// hue/saturation and jumps to preset colours.
-//                     on/off              next effect          prev effect
-#define RGB_LT_IN &rgb_ug RGB_TOG  &rgb_ug RGB_EFF  &rgb_ug RGB_EFR  &trans  &trans
-#define RGB_LT &trans  RGB_LT_IN
-#define RGB_RT_IN &rgb_ug RGB_HUI  &rgb_ug RGB_SAI  &trans  &trans  &rgb_ug RGB_COLOR_HSB(0,100,100)
-#define RGB_RT RGB_RT_IN  &rgb_ug RGB_COLOR_HSB(275,100,100)
+#define LIGHTING_LZ &trans &trans &trans &trans &trans &trans
+#define LIGHTING_RZ &trans &trans &trans &trans &trans &trans
 
-//                     brighter            dimmer             faster             slower
-#define RGB_LM_IN &rgb_ug RGB_BRI  &rgb_ug RGB_BRD  &rgb_ug RGB_SPI  &rgb_ug RGB_SPD  &trans
-#define RGB_LM &trans  RGB_LM_IN
-#define RGB_RM_IN &rgb_ug RGB_HUD  &rgb_ug RGB_SAD  &trans  &trans  &rgb_ug RGB_COLOR_HSB(90,100,100)
-#define RGB_RM RGB_RM_IN  &rgb_ug RGB_COLOR_HSB(186,100,100)
+// Toggle and brightness keep the keys the old on/off and brighter/dimmer had.
+//                        on/off
+#define LIGHTING_LT_IN LIGHT_TOG  &trans  &trans  &trans  &trans
+#define LIGHTING_LT &trans  LIGHTING_LT_IN
+#define LIGHTING_RT_IN &trans  &trans  &trans  &trans  &trans
+#define LIGHTING_RT LIGHTING_RT_IN  &trans
 
-#define RGB_LB_IN &trans  &trans  &trans  &trans  &trans
-#define RGB_LB &trans  RGB_LB_IN
-#define RGB_RB_IN &trans  &trans  &trans  &trans  &rgb_ug RGB_COLOR_HSB(270,100,100)
-#define RGB_RB RGB_RB_IN  &rgb_ug RGB_COLOR_HSB(317,100,100)
+//                        brighter   dimmer
+#define LIGHTING_LM_IN LIGHT_UP  LIGHT_DN  &trans  &trans  &trans
+#define LIGHTING_LM &trans  LIGHTING_LM_IN
+#define LIGHTING_RM_IN &trans  &trans  &trans  &trans  &trans
+#define LIGHTING_RM LIGHTING_RM_IN  &trans
+
+#define LIGHTING_LB_IN &trans  &trans  &trans  &trans  &trans
+#define LIGHTING_LB &trans  LIGHTING_LB_IN
+#define LIGHTING_RB_IN &trans  &trans  &trans  &trans  &trans
+#define LIGHTING_RB LIGHTING_RB_IN  &trans
 
 // The layer is otherwise transparent, so without these there is no way back.
-#define RGB_LH &trans &trans &to HIEROPHANT
-#define RGB_RH &to HIEROPHANT &trans &trans 
+#define LIGHTING_LH &trans &trans &to HIEROPHANT
+#define LIGHTING_RH &to HIEROPHANT &trans &trans 
 
-#define RGB_LH_5 &trans &trans RGB_LH
-#define RGB_RH_5 &trans &trans RGB_RH
+#define LIGHTING_LH_5 &trans &trans LIGHTING_LH
+#define LIGHTING_RH_5 &trans &trans LIGHTING_RH
 
 
 
@@ -762,7 +788,7 @@ MAKE_ADAPTIVE_REPEAT(f_hrk_f23, hmr, R_M4, F23)
 //#define SYSTEM_LM &bt BT_SEL 0  &hml L_M4 &bt BT_SEL 1  &hml L_M3 &bt BT_SEL 2  &hml L_M2 &bt BT_SEL 3  &hml L_M1 &bt BT_SEL 4 &bt BT_SEL 5
 
 
-#define SYSTEM_LB_IN &trans  &trans  &trans  &trans  &rgb_ug RGB_EFF
+#define SYSTEM_LB_IN &trans  &trans  &trans  &trans  &trans
 #define SYSTEM_LB &trans  SYSTEM_LB_IN
 #define SYSTEM_LH &trans &trans &trans
 #define SYSTEM_LH_5 &trans &trans SYSTEM_LH
@@ -772,7 +798,7 @@ MAKE_ADAPTIVE_REPEAT(f_hrk_f23, hmr, R_M4, F23)
 #define SYSTEM_RT SYSTEM_RT_IN  &fancy_bt_5
 #define SYSTEM_RM_IN &trans  &trans  &trans  &trans  &trans
 #define SYSTEM_RM SYSTEM_RM_IN  &trans
-#define SYSTEM_RB_IN &rgb_ug RGB_EFR  &rgb_ug RGB_SPI  &rgb_ug RGB_BRI  &rgb_ug RGB_BRD  &kp END
+#define SYSTEM_RB_IN &trans  &trans  LIGHT_UP  LIGHT_DN  &kp END
 #define SYSTEM_RB SYSTEM_RB_IN  &kp PG_DN
 #define SYSTEM_RH &trans &trans &trans
 #define SYSTEM_RH_5 &trans &trans SYSTEM_RH
@@ -1008,11 +1034,11 @@ MAKE_ADAPTIVE_REPEAT(f_hrk_f23, hmr, R_M4, F23)
 /*
  * Per-column lighting needs to know which half is holding a layer open, and
  * the only place that is known for certain is the behaviour that opens it.
- * rgbzone.overlay defines RGBZONE_OWNS_MO to ask for its own momentary-layer
+ * rgbzone.overlay defines RGBZONE_PRESENT to ask for its own momentary-layer
  * driver, which records the invoking key before activating the layer; without
  * that shield this is not defined and ZMK's own behaviour stands.
  */
-#ifdef RGBZONE_OWNS_MO
+#ifdef RGBZONE_PRESENT
 &mo {
     compatible = "zmk,behavior-rgbzone-momentary";
 };

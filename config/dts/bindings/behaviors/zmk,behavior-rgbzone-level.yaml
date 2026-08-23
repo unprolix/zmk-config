@@ -1,0 +1,20 @@
+# Copyright (c) 2026 Jeremy Bornstein
+# SPDX-License-Identifier: MIT
+#
+# Global brightness for the per-column lighting. One instance per key: 'step'
+# says what the key does, so the keymap needs no shared constants.
+
+description: Change the per-column lighting's global brightness
+
+compatible: "zmk,behavior-rgbzone-level"
+
+include: zero_param.yaml
+
+properties:
+  step:
+    type: int
+    required: true
+    description: |
+      How far this key moves the level. Zero toggles the lighting off and back
+      to the brightness it was last using; positive brightens, negative dims.
+      Stepping stops at the dimmest lit level rather than reaching off.

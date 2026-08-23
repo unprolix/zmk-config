@@ -183,13 +183,13 @@ ROLIO_LX_T FUNCTION_LH  FUNCTION_RH ROLIO_RX_T
             >;
         };
 
-        rgb_layer {
-            display-name = "rgb";
+        lighting_layer {
+            display-name = "lighting";
             bindings = <
-RGB_LT RGB_RT
-RGB_LM RGB_RM
-RGB_LB ROLIO_CLICKS RGB_RB
-ROLIO_LX_T RGB_LH  RGB_RH ROLIO_RX_T
+LIGHTING_LT LIGHTING_RT
+LIGHTING_LM LIGHTING_RM
+LIGHTING_LB ROLIO_CLICKS LIGHTING_RB
+ROLIO_LX_T LIGHTING_LH  LIGHTING_RH ROLIO_RX_T
             >;
         };
 
