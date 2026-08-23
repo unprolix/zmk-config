@@ -26,7 +26,7 @@ void vista_draw_bitmap(lv_obj_t *canvas, lv_coord_t x, lv_coord_t y, const uint8
     const lv_coord_t canvas_h = (lv_coord_t)buf->header.h;
     const uint32_t canvas_stride =
         lv_draw_buf_width_to_stride(canvas_w, VISTA_CANVAS_COLOR_FORMAT);
-    const uint8_t ink = 0x00; /* L8: one byte per pixel, 0 being black */
+    const uint8_t ink = VISTA_CANVAS_INK;
 
     for (lv_coord_t row = 0; row < h; row++) {
         const lv_coord_t cy = y + row;

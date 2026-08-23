@@ -410,6 +410,18 @@ lv_obj_t *zmk_display_status_screen(void) {
     lv_obj_remove_flag(screen, LV_OBJ_FLAG_SCROLLABLE);
 
     /*
+     * Follow vista_canvas.h's light/dark switch. The mono theme paints the
+     * screen light with dark text; overriding both here rather than in each
+     * widget means the labels inherit it, including ZMK's own WPM widget, which
+     * this file does not construct and so cannot style individually.
+     *
+     * Setting only the background would leave dark text on a dark screen.
+     */
+    lv_obj_set_style_bg_color(screen, VISTA_CANVAS_BACKGROUND, LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(screen, LV_OPA_COVER, LV_PART_MAIN);
+    lv_obj_set_style_text_color(screen, VISTA_CANVAS_FOREGROUND, LV_PART_MAIN);
+
+    /*
      * The emblem covers the whole panel, and the layer name and leader list
      * occupy the middle of it; exactly one of the three is visible at a time.
      * Only the narrow spear reaches the top and bottom edges, so the four

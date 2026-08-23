@@ -28,8 +28,35 @@
     LV_CANVAS_BUF_SIZE((w), (h), LV_COLOR_FORMAT_GET_BPP(VISTA_CANVAS_COLOR_FORMAT),               \
                        LV_DRAW_BUF_STRIDE_ALIGN)
 
+/*
+ * Light or dark, in one place.
+ *
+ * Inverting only the emblem is not an option: the status readouts sit in the
+ * emblem's blank corners, which invert with it, so they have to flip too -- and
+ * once the text is light, the screen behind it must be dark or the layer name
+ * and the leader list, which have no emblem behind them, would be invisible.
+ * So the whole screen follows this one switch, side margins included.
+ *
+ * Worth knowing before flipping it back and forth: this is a REFLECTIVE panel
+ * with no backlight. Its light state is the one that reflects ambient light, so
+ * dark-on-light is the orientation the hardware is built for, the way paper is.
+ * A mostly-dark screen is legible but has less to work with. It costs no more
+ * power either way -- a Sharp memory LCD holds each pixel's state, so the bill
+ * is VCOM inversion and line writes, not how many pixels are ink.
+ */
+#define VISTA_INVERT 1
+
+#if VISTA_INVERT
+#define VISTA_CANVAS_BACKGROUND lv_color_black()
+#define VISTA_CANVAS_FOREGROUND lv_color_white()
+/* L8: one byte per pixel, 0xFF being white. */
+#define VISTA_CANVAS_INK 0xFF
+#else
 #define VISTA_CANVAS_BACKGROUND lv_color_white()
 #define VISTA_CANVAS_FOREGROUND lv_color_black()
+/* L8: one byte per pixel, 0 being black. */
+#define VISTA_CANVAS_INK 0x00
+#endif
 
 /*
  * Blit a 1-bit-per-pixel bitmap, MSB first, a set bit being ink. Writes the
