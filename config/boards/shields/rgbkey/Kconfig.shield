@@ -1,0 +1,7 @@
+# Per-key lighting for the Rolio: held home-row mods in their signature
+# colour, plus a named key group on the gaming and navigation layers.
+#
+# Depends on the strip being genuinely per-key, which is NOT yet verified on
+# this board -- see rgbkey_map.h.
+config SHIELD_RGBKEY
+    def_bool $(shields_list_contains,rgbkey)

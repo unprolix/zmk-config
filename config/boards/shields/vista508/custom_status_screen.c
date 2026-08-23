@@ -31,6 +31,11 @@
 #include <zmk/keymap.h>
 #include <zmk-leader-key/leader_state.h>
 #include <zmk/display/widgets/wpm_status.h>
+#include <zmk/events/keycode_state_changed.h>
+#include <zmk/hid.h>
+
+#include "hierophant_img.h"
+#include "vista_canvas.h"
 
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
@@ -44,6 +49,18 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #define STATUS_MAX 24
 
 /*
+ * The emblem is full height, and the status readouts sit in the four corners it
+ * leaves blank -- only the narrow spear reaches the top and bottom edges, so
+ * each corner has roughly CORNER_W x CORNER_H free. See hierophant_img.h.
+ *
+ * That is why the corners use a smaller face than the middle of the screen: at
+ * the default 20px, "BT2 ok" alone overruns the gap.
+ */
+#define CORNER_W 60
+#define CORNER_H 18
+#define CORNER_FONT (&lv_font_montserrat_14)
+
+/*
  * Connection and battery are drawn here rather than with ZMK's own widgets.
  * Those render LVGL glyphs -- WIFI/USB/OK/CLOSE/SETTINGS -- which are compact
  * enough for a nice!view but cryptic, and this panel has room for words.
@@ -52,6 +69,24 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 static lv_obj_t *conn_label;
 static lv_obj_t *batt_label;
 static lv_obj_t *leader_label;
+
+/*
+ * The base layer gets an emblem instead of its name, and held modifiers get a
+ * row of line-art glyphs. Both are canvases rather than labels: the emblem is
+ * a 1bpp bitmap, and the glyphs exist in no font available here.
+ *
+ * Their buffers are static rather than drawn from LVGL's pool, which is sized
+ * for the widgets (CONFIG_LV_Z_MEM_POOL_SIZE); the emblem alone is larger than
+ * a nice!view's entire screen.
+ */
+static lv_obj_t *emblem_canvas;
+static lv_obj_t *mods_canvas;
+
+static uint8_t emblem_buf[VISTA_CANVAS_BUF_SIZE(HIEROPHANT_W, HIEROPHANT_H)];
+static uint8_t mods_buf[VISTA_CANVAS_BUF_SIZE(VISTA_MOD_ROW_W, VISTA_MOD_ROW_H)];
+
+/* The layer that gets an emblem instead of its name. */
+#define EMBLEM_LAYER_NAME "hierophant"
 
 /* Peripheral level arrives by event; there is no polling accessor for it. */
 static uint8_t peripheral_soc;
@@ -89,6 +124,25 @@ static void rolio_layer_update_cb(struct rolio_layer_state state) {
     }
 
     lv_label_set_text(layer_label, text);
+
+    /*
+     * The base layer is where the keyboard sits almost all the time, so it
+     * shows the emblem rather than repeating a name that never changes. The
+     * two share a band and are never both visible.
+     */
+    bool emblem = state.label != NULL && strcmp(state.label, EMBLEM_LAYER_NAME) == 0;
+    if (emblem_canvas != NULL) {
+        if (emblem) {
+            lv_obj_remove_flag(emblem_canvas, LV_OBJ_FLAG_HIDDEN);
+        } else {
+            lv_obj_add_flag(emblem_canvas, LV_OBJ_FLAG_HIDDEN);
+        }
+    }
+    if (emblem) {
+        lv_obj_add_flag(layer_label, LV_OBJ_FLAG_HIDDEN);
+    } else {
+        lv_obj_remove_flag(layer_label, LV_OBJ_FLAG_HIDDEN);
+    }
 }
 
 static struct rolio_layer_state rolio_layer_get_state(const zmk_event_t *eh) {
@@ -181,10 +235,15 @@ static void rolio_batt_update_cb(struct rolio_batt_state state) {
 
     char text[STATUS_MAX];
 
+    /*
+     * No percent signs: this now lives in a 60px corner beside the emblem's
+     * spear, and "L88% R91%" overruns it. The two numbers are self-evidently
+     * percentages.
+     */
     if (state.have_peripheral) {
-        snprintf(text, sizeof(text), "L%d%%  R%d%%", state.central, state.peripheral);
+        snprintf(text, sizeof(text), "L%d R%d", state.central, state.peripheral);
     } else {
-        snprintf(text, sizeof(text), "L%d%%", state.central);
+        snprintf(text, sizeof(text), "L%d", state.central);
     }
 
     lv_label_set_text(batt_label, text);
@@ -215,6 +274,55 @@ ZMK_SUBSCRIPTION(rolio_batt_status, zmk_battery_state_changed);
 ZMK_SUBSCRIPTION(rolio_batt_status, zmk_peripheral_battery_state_changed);
 
 /* ------------------------------------------------------------------ */
+/* Held modifiers                                                      */
+/* ------------------------------------------------------------------ */
+
+/*
+ * Shows which modifiers are live, which is what makes a home-row mod that
+ * fired when it should not actually visible.
+ *
+ * Driven off keycode events rather than a modifier event: ZMK declares a
+ * zmk_modifiers_state_changed type but never raises it, so the flags are read
+ * back out of HID state instead. Going through ZMK_DISPLAY_WIDGET_LISTENER
+ * matters -- it marshals the callback onto the display work queue, and LVGL
+ * must not be touched from the event thread.
+ */
+struct rolio_mods_state {
+    zmk_mod_flags_t mods;
+};
+
+static void rolio_mods_update_cb(struct rolio_mods_state state) {
+    if (mods_canvas == NULL) {
+        return;
+    }
+
+    lv_canvas_fill_bg(mods_canvas, VISTA_CANVAS_BACKGROUND, LV_OPA_COVER);
+
+    static const zmk_mod_flags_t slot_mods[VISTA_MOD_ICON_SLOTS] = {
+        [VISTA_MOD_ICON_CTRL] = MOD_LCTL | MOD_RCTL,
+        [VISTA_MOD_ICON_SHIFT] = MOD_LSFT | MOD_RSFT,
+        [VISTA_MOD_ICON_ALT] = MOD_LALT | MOD_RALT,
+        [VISTA_MOD_ICON_GUI] = MOD_LGUI | MOD_RGUI,
+    };
+
+    const lv_coord_t inset = (VISTA_MOD_ICON_SLOT_W - VISTA_MOD_ICON_SIZE) / 2;
+    for (uint8_t slot = 0; slot < VISTA_MOD_ICON_SLOTS; slot++) {
+        if (state.mods & slot_mods[slot]) {
+            vista_draw_mod_icon(mods_canvas, slot * VISTA_MOD_ICON_SLOT_W + inset, 0,
+                                (enum vista_mod_icon)slot);
+        }
+    }
+}
+
+static struct rolio_mods_state rolio_mods_get_state(const zmk_event_t *eh) {
+    return (struct rolio_mods_state){.mods = zmk_hid_get_explicit_mods()};
+}
+
+ZMK_DISPLAY_WIDGET_LISTENER(rolio_mods_status, struct rolio_mods_state, rolio_mods_update_cb,
+                            rolio_mods_get_state)
+ZMK_SUBSCRIPTION(rolio_mods_status, zmk_keycode_state_changed);
+
+/* ------------------------------------------------------------------ */
 /* Leader sequence                                                     */
 /* ------------------------------------------------------------------ */
 
@@ -226,6 +334,7 @@ ZMK_SUBSCRIPTION(rolio_batt_status, zmk_peripheral_battery_state_changed);
  */
 #define LEADER_LIST_THRESHOLD 6
 #define LEADER_TEXT_MAX       96
+#define LEADER_NAME_MAX       32
 
 static void rolio_leader_update_cb(struct zmk_leader_state_changed state) {
     if (leader_label == NULL || layer_label == NULL) {
@@ -233,13 +342,20 @@ static void rolio_leader_update_cb(struct zmk_leader_state_changed state) {
     }
 
     if (!state.active) {
-        /* Hand the screen back to the layer name. */
+        /*
+         * Hand the band back. Whether the layer name or the emblem should
+         * reappear depends on the layer, so ask the layer widget rather than
+         * guessing here.
+         */
         lv_label_set_text(leader_label, "");
-        lv_obj_clear_flag(layer_label, LV_OBJ_FLAG_HIDDEN);
+        rolio_layer_update_cb(rolio_layer_get_state(NULL));
         return;
     }
 
     lv_obj_add_flag(layer_label, LV_OBJ_FLAG_HIDDEN);
+    if (emblem_canvas != NULL) {
+        lv_obj_add_flag(emblem_canvas, LV_OBJ_FLAG_HIDDEN);
+    }
 
     char text[LEADER_TEXT_MAX];
     int used = snprintf(text, sizeof(text), "LEADER");
@@ -254,7 +370,15 @@ static void rolio_leader_update_cb(struct zmk_leader_state_changed state) {
             if (name == NULL) {
                 break;
             }
-            used += snprintf(text + used, sizeof(text) - used, "\n%s", name);
+            /*
+             * Names come from the devicetree node, so they arrive as
+             * home_address_web. Underscores read badly at this width and give
+             * the label nowhere to wrap.
+             */
+            char pretty[LEADER_NAME_MAX];
+            snprintf(pretty, sizeof(pretty), "%s", name);
+            vista_humanize(pretty);
+            used += snprintf(text + used, sizeof(text) - used, "\n%s", pretty);
         }
     }
 
@@ -285,16 +409,45 @@ lv_obj_t *zmk_display_status_screen(void) {
      */
     lv_obj_remove_flag(screen, LV_OBJ_FLAG_SCROLLABLE);
 
-    /* Top: connection, then battery for both halves. */
+    /*
+     * The emblem covers the whole panel, and the layer name and leader list
+     * occupy the middle of it; exactly one of the three is visible at a time.
+     * Only the narrow spear reaches the top and bottom edges, so the four
+     * corners stay free for the status readouts -- see hierophant_img.h.
+     *
+     * Created FIRST, for two independent reasons. LVGL's z-order follows
+     * creation order, and this is a full-panel object -- anything made before
+     * it would be painted over, which is the whole corner layout. And
+     * rolio_layer_status_init() runs the layer callback straight away, the
+     * callback being what chooses between the emblem and the layer name; with
+     * the canvas still NULL the base layer would show its name until the first
+     * layer change.
+     */
+    emblem_canvas = lv_canvas_create(screen);
+    lv_canvas_set_buffer(emblem_canvas, emblem_buf, HIEROPHANT_W, HIEROPHANT_H,
+                         VISTA_CANVAS_COLOR_FORMAT);
+    lv_canvas_fill_bg(emblem_canvas, VISTA_CANVAS_BACKGROUND, LV_OPA_COVER);
+    vista_draw_bitmap(emblem_canvas, 0, 0, hierophant_bits, HIEROPHANT_W, HIEROPHANT_H,
+                      HIEROPHANT_STRIDE);
+    lv_obj_align(emblem_canvas, LV_ALIGN_TOP_MID, 0, 0);
+    lv_obj_add_flag(emblem_canvas, LV_OBJ_FLAG_HIDDEN);
+
+    /*
+     * Connection top-left, battery top-right, in the gaps either side of the
+     * spear. These are created after the emblem so they draw over it: LVGL's
+     * z-order follows creation order, and the emblem is a full-panel object.
+     */
     conn_label = lv_label_create(screen);
-    lv_obj_set_width(conn_label, CONTENT_W);
-    lv_obj_set_style_text_align(conn_label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
-    lv_obj_align(conn_label, LV_ALIGN_TOP_MID, 0, 0);
+    lv_obj_set_width(conn_label, CORNER_W);
+    lv_obj_set_style_text_font(conn_label, CORNER_FONT, LV_PART_MAIN);
+    lv_obj_set_style_text_align(conn_label, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
+    lv_obj_align(conn_label, LV_ALIGN_TOP_LEFT, 0, 0);
 
     batt_label = lv_label_create(screen);
-    lv_obj_set_width(batt_label, CONTENT_W);
-    lv_obj_set_style_text_align(batt_label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
-    lv_obj_align(batt_label, LV_ALIGN_TOP_MID, 0, ROW_H);
+    lv_obj_set_width(batt_label, CORNER_W);
+    lv_obj_set_style_text_font(batt_label, CORNER_FONT, LV_PART_MAIN);
+    lv_obj_set_style_text_align(batt_label, LV_TEXT_ALIGN_RIGHT, LV_PART_MAIN);
+    lv_obj_align(batt_label, LV_ALIGN_TOP_RIGHT, 0, 0);
 
     rolio_conn_status_init();
     rolio_batt_status_init();
@@ -311,6 +464,7 @@ lv_obj_t *zmk_display_status_screen(void) {
     lv_label_set_long_mode(layer_label, LV_LABEL_LONG_WRAP);
     lv_obj_set_style_text_align(layer_label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
     lv_obj_align(layer_label, LV_ALIGN_CENTER, 0, 0);
+
     rolio_layer_status_init();
 
     /* Occupies the same middle band as the layer name; only one shows at a time. */
@@ -322,13 +476,25 @@ lv_obj_t *zmk_display_status_screen(void) {
     lv_label_set_text(leader_label, "");
     rolio_leader_status_init();
 
+    /*
+     * Modifier glyphs share the bottom line with WPM: the emblem takes the
+     * whole middle band, so there is no room for a line of their own.
+     */
+    mods_canvas = lv_canvas_create(screen);
+    lv_canvas_set_buffer(mods_canvas, mods_buf, VISTA_MOD_ROW_W, VISTA_MOD_ROW_H,
+                         VISTA_CANVAS_COLOR_FORMAT);
+    lv_canvas_fill_bg(mods_canvas, VISTA_CANVAS_BACKGROUND, LV_OPA_COVER);
+    lv_obj_align(mods_canvas, LV_ALIGN_BOTTOM_LEFT, 0, 0);
+    rolio_mods_status_init();
+
     /* WPM along the bottom. */
 #if IS_ENABLED(CONFIG_ZMK_WIDGET_WPM_STATUS)
     zmk_widget_wpm_status_init(&wpm_status_widget, screen);
     lv_obj_t *wpm = zmk_widget_wpm_status_obj(&wpm_status_widget);
-    lv_obj_set_width(wpm, CONTENT_W);
-    lv_obj_set_style_text_align(wpm, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
-    lv_obj_align(wpm, LV_ALIGN_BOTTOM_MID, 0, 0);
+    lv_obj_set_width(wpm, LV_SIZE_CONTENT);
+    lv_obj_set_style_text_font(wpm, CORNER_FONT, LV_PART_MAIN);
+    lv_obj_set_style_text_align(wpm, LV_TEXT_ALIGN_RIGHT, LV_PART_MAIN);
+    lv_obj_align(wpm, LV_ALIGN_BOTTOM_RIGHT, 0, 0);
 #endif
 
     return screen;

@@ -1,0 +1,19 @@
+/*
+ * Required for shield discovery (Zephyr globs <shield>.overlay), and home for
+ * the relay behaviour that carries the active scene and the live modifiers to
+ * the far half.
+ *
+ * The node name is six characters. The BLE split payload carries it in a
+ * nine-byte field and silently truncates anything longer, so eight is the
+ * usable maximum -- and a binding carries a behaviour's devicetree NODE name,
+ * not its label.
+ */
+
+/ {
+    behaviors {
+        rgbkey: rgbkey {
+            compatible = "zmk,behavior-rgb-key";
+            #binding-cells = <2>;
+        };
+    };
+};

@@ -1,0 +1,5 @@
+file_format: "1"
+id: rgbkey
+name: Per-key modifier and layer lighting
+type: shield
+requires: [rolio]

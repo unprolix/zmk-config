@@ -1,0 +1,15 @@
+# Copyright (c) 2026 Jeremy Bornstein
+# SPDX-License-Identifier: MIT
+#
+# Carries the active lighting scene and the live modifier flags to a split
+# peripheral, which has neither a keymap nor HID state and so cannot work out
+# either for itself. GLOBAL locality is what makes ZMK relay it.
+#
+# param1 is the scene in the high byte and the modifier flags in the low one
+# (see rgbkey_pack). param2 is unused.
+
+description: Relay the active lighting scene and modifiers to split peripherals
+
+compatible: "zmk,behavior-rgb-key"
+
+include: two_param.yaml
