@@ -117,9 +117,13 @@ manifest:
     - name: zmk-unicode
       path: modules/zmk/unicode
 
+    # Fork of zzeneg/zmk-raw-hid. Upstream sends from a stack buffer that the
+    # nRF USB device is still DMA-ing out of after the call returns, so reports
+    # arrive with a good header and a corrupt tail. Pinned to the commit rather
+    # than the branch so a build is reproducible.
     - name: zmk-raw-hid
-      remote: zzeneg
-      revision: main
+      remote: unprolix
+      revision: 33a1360
       path: modules/zmk/zmk-raw-hid
 
     - name: zmk-antecedent-morph
