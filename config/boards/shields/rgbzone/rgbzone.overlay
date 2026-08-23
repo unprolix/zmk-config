@@ -9,5 +9,14 @@
             compatible = "zmk,behavior-rgb-zone";
             #binding-cells = <2>;
         };
+
+        /*
+         * Carries a host-driven pixel poke to the far half. Seven characters,
+         * inside the nine-byte name field the split payload provides.
+         */
+        rgbdiag: rgbdiag {
+            compatible = "zmk,behavior-rgb-diag";
+            #binding-cells = <2>;
+        };
     };
 };

@@ -27,12 +27,16 @@
 #include "zone_map.h"
 
 /*
- * Deliberately dim. Twenty-one emitters a side at full brightness is both
- * dazzling at arm's length and the difference between weeks of battery and
- * hours on a keyboard that otherwise idles in single-digit milliamps.
+ * The only brightness knob: every palette entry is built from these two.
+ *
+ * Still well short of full scale, deliberately. Twenty-one emitters a side at
+ * maximum is dazzling at arm's length, and current draw scales with them --
+ * on a keyboard that otherwise idles in single-digit milliamps, that is the
+ * difference between weeks of battery and hours. Raise further if these are
+ * still too dim; halve them if the strip starts costing noticeable runtime.
  */
-#define ZONE_DIM 0x18
-#define ZONE_MID 0x28
+#define ZONE_DIM 0x30
+#define ZONE_MID 0x50
 
 /* Palette. Sixteen slots; indices are what travel over the split. */
 enum zone_colour {
@@ -50,7 +54,10 @@ enum zone_colour {
     ZC_LIME,
     ZC_PINK,
     ZC_AMBER,
-    ZC_INDIGO,
+    /* Violet took indigo's slot: the palette is exactly full at sixteen, the
+       two are barely distinguishable on these emitters, and only the
+       bluetooth row used indigo. */
+    ZC_VIOLET,
     ZC_DIM_WHITE,
     ZC_COUNT
 };
@@ -72,43 +79,67 @@ static const uint8_t zone_palette[ZC_COUNT][3] = {
     [ZC_LIME] = {ZONE_DIM, ZONE_MID, 0},
     [ZC_PINK] = {ZONE_MID, 0, ZONE_DIM},
     [ZC_AMBER] = {ZONE_MID, ZONE_DIM / 2, 0},
-    [ZC_INDIGO] = {0, 0, ZONE_DIM},
+    /* Clearly bluer than ZC_PURPLE, which alt uses. */
+    [ZC_VIOLET] = {ZONE_DIM, 0, ZONE_MID + 0x10},
     [ZC_DIM_WHITE] = {ZONE_DIM, ZONE_DIM, ZONE_DIM},
 };
 
+/*
+ * A layer's colours are given relative to the half whose key is being held,
+ * not as fixed left/right. Which side that is comes from the split source of
+ * the press that activated the layer, so "the opposite side from the pressed
+ * mod key" is expressible -- and a pair like LGUI+nav / RGUI+nav collapses to
+ * a single row, since symmetrical means identical once stated this way.
+ */
 struct zone_layer {
     /* Matches the layer's display-name in the keymap. */
     const char *name;
-    /* Inner column first, outer last. */
-    enum zone_colour left[ZONE_COUNT];
-    enum zone_colour right[ZONE_COUNT];
+    /* The half holding the key. Inner column first (col 0), outer last. */
+    enum zone_colour pressed[ZONE_COUNT];
+    /* The other half. */
+    enum zone_colour other[ZONE_COUNT];
 };
 
 /*
- * Starting point only -- rewrite these rows to taste. The base layer is left
- * dark on purpose: it is where the keyboard sits essentially all the time, so
- * lighting it turns "occasionally lit" into "always lit".
+ * A layer with no row here stays dark, which costs nothing: the strip's supply
+ * is only raised when something is lit.
  *
- *                          inner ---------------------> outer
+ *                        col: 0     1     2     3     4     5
  */
 static const struct zone_layer zone_layers[] = {
+    /* Base: dark. Held modifiers paint over this from zone_hrm_* below. */
     {"hierophant", {ZC_OFF, ZC_OFF, ZC_OFF, ZC_OFF, ZC_OFF, ZC_OFF},
                    {ZC_OFF, ZC_OFF, ZC_OFF, ZC_OFF, ZC_OFF, ZC_OFF}},
 
-    {"numeric",    {ZC_CYAN, ZC_CYAN, ZC_CYAN, ZC_BLUE, ZC_BLUE, ZC_OFF},
-                   {ZC_CYAN, ZC_CYAN, ZC_CYAN, ZC_BLUE, ZC_BLUE, ZC_OFF}},
+    /* Yellow on the pressed side, cyan on col 2 of the other hand. */
+    {"numpad",     {ZC_OFF, ZC_YELLOW, ZC_OFF, ZC_OFF, ZC_OFF, ZC_OFF},
+                   {ZC_OFF, ZC_OFF, ZC_CYAN, ZC_OFF, ZC_OFF, ZC_OFF}},
 
-    {"numpad",     {ZC_OFF, ZC_OFF, ZC_OFF, ZC_OFF, ZC_OFF, ZC_OFF},
-                   {ZC_AMBER, ZC_AMBER, ZC_AMBER, ZC_ORANGE, ZC_OFF, ZC_OFF}},
+    {"symbol",     {ZC_OFF, ZC_OFF, ZC_BLUE, ZC_OFF, ZC_OFF, ZC_OFF},
+                   {ZC_OFF, ZC_OFF, ZC_OFF, ZC_OFF, ZC_OFF, ZC_OFF}},
 
-    {"symbol",     {ZC_MAGENTA, ZC_MAGENTA, ZC_MAGENTA, ZC_PURPLE, ZC_PURPLE, ZC_OFF},
-                   {ZC_MAGENTA, ZC_MAGENTA, ZC_MAGENTA, ZC_PURPLE, ZC_PURPLE, ZC_OFF}},
+    {"navigation", {ZC_OFF, ZC_GREEN, ZC_OFF, ZC_OFF, ZC_OFF, ZC_OFF},
+                   {ZC_OFF, ZC_OFF, ZC_OFF, ZC_OFF, ZC_OFF, ZC_OFF}},
 
-    {"navigation", {ZC_GREEN, ZC_GREEN, ZC_GREEN, ZC_LIME, ZC_LIME, ZC_OFF},
-                   {ZC_GREEN, ZC_GREEN, ZC_GREEN, ZC_LIME, ZC_LIME, ZC_OFF}},
+    /*
+     * The pinky nav layers: violet on col 4 of the holding half, white on
+     * col 2 of the other. One row serves both, which is what "symmetrical"
+     * means once colours are stated relative to the pressed side.
+     */
+    {"LGUI+nav",   {ZC_OFF, ZC_OFF, ZC_OFF, ZC_OFF, ZC_VIOLET, ZC_OFF},
+                   {ZC_OFF, ZC_OFF, ZC_WHITE, ZC_OFF, ZC_OFF, ZC_OFF}},
 
-    {"function",   {ZC_YELLOW, ZC_YELLOW, ZC_YELLOW, ZC_AMBER, ZC_AMBER, ZC_OFF},
-                   {ZC_YELLOW, ZC_YELLOW, ZC_YELLOW, ZC_AMBER, ZC_AMBER, ZC_OFF}},
+    {"RGUI+nav",   {ZC_OFF, ZC_OFF, ZC_OFF, ZC_OFF, ZC_VIOLET, ZC_OFF},
+                   {ZC_OFF, ZC_OFF, ZC_WHITE, ZC_OFF, ZC_OFF, ZC_OFF}},
+
+    /* Outer column, both halves -- not sided. */
+    {"numeric",    {ZC_OFF, ZC_OFF, ZC_OFF, ZC_OFF, ZC_OFF, ZC_CYAN},
+                   {ZC_OFF, ZC_OFF, ZC_OFF, ZC_OFF, ZC_OFF, ZC_CYAN}},
+
+    /* Not yet specified; left as they were, to be tuned. */
+
+    {"function",   {ZC_YELLOW, ZC_YELLOW, ZC_AMBER, ZC_OFF, ZC_OFF, ZC_OFF},
+                   {ZC_YELLOW, ZC_YELLOW, ZC_AMBER, ZC_OFF, ZC_OFF, ZC_OFF}},
 
     {"superscript", {ZC_TEAL, ZC_TEAL, ZC_TEAL, ZC_TEAL, ZC_TEAL, ZC_OFF},
                     {ZC_TEAL, ZC_TEAL, ZC_TEAL, ZC_TEAL, ZC_TEAL, ZC_OFF}},
@@ -122,11 +153,11 @@ static const struct zone_layer zone_layers[] = {
     {"rgb",        {ZC_RED, ZC_GREEN, ZC_BLUE, ZC_YELLOW, ZC_CYAN, ZC_MAGENTA},
                    {ZC_RED, ZC_GREEN, ZC_BLUE, ZC_YELLOW, ZC_CYAN, ZC_MAGENTA}},
 
-    {"bluetooth",  {ZC_INDIGO, ZC_INDIGO, ZC_INDIGO, ZC_BLUE, ZC_BLUE, ZC_OFF},
-                   {ZC_INDIGO, ZC_INDIGO, ZC_INDIGO, ZC_BLUE, ZC_BLUE, ZC_OFF}},
+    {"bluetooth",  {ZC_BLUE, ZC_BLUE, ZC_BLUE, ZC_OFF, ZC_OFF, ZC_OFF},
+                   {ZC_BLUE, ZC_BLUE, ZC_BLUE, ZC_OFF, ZC_OFF, ZC_OFF}},
 
-    {"system",     {ZC_WHITE, ZC_WHITE, ZC_WHITE, ZC_DIM_WHITE, ZC_DIM_WHITE, ZC_OFF},
-                   {ZC_WHITE, ZC_WHITE, ZC_WHITE, ZC_DIM_WHITE, ZC_DIM_WHITE, ZC_OFF}},
+    {"system",     {ZC_WHITE, ZC_WHITE, ZC_DIM_WHITE, ZC_OFF, ZC_OFF, ZC_OFF},
+                   {ZC_WHITE, ZC_WHITE, ZC_DIM_WHITE, ZC_OFF, ZC_OFF, ZC_OFF}},
 };
 
 #define ZONE_LAYER_COUNT ARRAY_SIZE(zone_layers)
@@ -156,14 +187,14 @@ struct zone_hrm {
 
 static const struct zone_hrm zone_hrm_left[] = {
     {MOD_LCTL, 1, ZC_RED},
-    {MOD_LSFT, 2, ZC_YELLOW},
-    {MOD_LALT, 3, ZC_GREEN},
-    {MOD_LGUI, 4, ZC_BLUE},
+    {MOD_LSFT, 2, ZC_CYAN},
+    {MOD_LALT, 3, ZC_PURPLE},
+    {MOD_LGUI, 0, ZC_VIOLET},
 };
 
 static const struct zone_hrm zone_hrm_right[] = {
     {MOD_RCTL, 1, ZC_RED},
-    {MOD_RSFT, 2, ZC_YELLOW},
-    {MOD_RALT, 3, ZC_GREEN},
-    {MOD_RGUI, 4, ZC_BLUE},
+    {MOD_RSFT, 2, ZC_CYAN},
+    {MOD_RALT, 3, ZC_PURPLE},
+    {MOD_RGUI, 0, ZC_VIOLET},
 };
