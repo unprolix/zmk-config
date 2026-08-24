@@ -23,13 +23,23 @@ choice ZMK_DISPLAY_WORK_QUEUE
     default ZMK_DISPLAY_WORK_QUEUE_DEDICATED
 endchoice
 
-# Built-in status screen: no custom widget C, so this builds from the
-# config directory (beekeeb's nice_view_gem widgets need a zephyr module).
+# Custom screen: ZMK's built-in one is laid out for a nice!view 160x68 and
+# truncates the layer name on this 144x168 portrait panel. The screen itself
+# is shared with the Rolio's Vista508 -- same panel, same layout -- and is
+# compiled from ../vista508 by this shield's CMakeLists.
+#
+# (An earlier note here claimed custom widget C could not be built from the
+# config directory. That was wrong: a shield in config/boards/shields can
+# carry a CMakeLists like any other. What actually does not work is beekeeb's
+# nice_view_gem, for unrelated reasons.)
 choice ZMK_DISPLAY_STATUS_SCREEN
-    default ZMK_DISPLAY_STATUS_SCREEN_BUILT_IN
+    default ZMK_DISPLAY_STATUS_SCREEN_CUSTOM
 endchoice
 
 # 144x168 is ~2.2x the pixel count of a nice!view; give LVGL more headroom.
+# NOTE: an earlier `default` elsewhere wins over this one, so the effective
+# value is set in toucan_display.conf instead -- a .conf assignment beats
+# defaults.
 config LV_Z_MEM_POOL_SIZE
     default 8192
 

@@ -63,6 +63,22 @@ include:
     shield: toucan_right
     artifact-name: toucan_right
 
+  # TEMPORARY: adds the raw-HID bootloader trigger to the Toucan. See
+  # config/boards/shields/dfu -- this is a development convenience and is
+  # meant to be removed, not shipped. Both halves live on plaquette and the
+  # trackpad is dead pending an RMA, so every flash cycle here is remote.
+  #
+  # The trigger is central-only (RAW_HID depends on ZMK_SPLIT_ROLE_CENTRAL);
+  # the right half carries the shield anyway so both sides of a cycle come
+  # from the same pair of lines, and so the peripheral is never left on a
+  # build whose central cannot relay &bootloader to it.
+  - board: xiao_ble/nrf52840/zmk
+    shield: toucan_left toucan_display dfu
+    artifact-name: toucan_left-dfu
+  - board: xiao_ble/nrf52840/zmk
+    shield: toucan_right dfu
+    artifact-name: toucan_right-dfu
+
   # Rolio46 Gen2 / "Rolio Three" (board + shields vendored in config/boards;
   # forward-ported from MickiusMousius/Rolio2Firmware @ choc2-revision1)
   - board: rolio3/nrf52840/zmk
