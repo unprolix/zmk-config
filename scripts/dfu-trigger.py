@@ -20,7 +20,8 @@ keyboard. Use --name whenever more than one interface is listed.
 
 The keyboard exposes a vendor-defined HID interface (usage page 0xFF60, usage
 0x61). Writing the magic below makes it reboot into DFU about a quarter of a
-second later, at which point it enumerates as a NICENANO mass-storage volume.
+second later, at which point it enumerates as a mass-storage volume: NICENANO
+on the eyelash, ROLIO-BOOT on the Rolio, XIAO-BOOT on the Toucan.
 """
 
 import glob
@@ -138,7 +139,8 @@ def main():
         try:
             os.write(fd, report)
             print("Sent DFU command for %r via %s (%s)" % (args[0], node, name))
-            print("It should enumerate as NICENANO in a moment.")
+            print("It should enumerate as a bootloader volume in a moment\n"
+                  "(NICENANO / ROLIO-BOOT / XIAO-BOOT, by keyboard).")
             return 0
         except OSError as e:
             print("%s: write failed (%s)" % (node, e))

@@ -45,7 +45,7 @@ serial_to_fw() {
         536DB3A90D5D42F8) echo "rolio_left-dfu|Rolio Left" ;;
         C996C64AEB32F99C) echo "rolio_right-dfu|Rolio Right" ;;
         # The Toucan is a Seeed XIAO nRF52840: its bootloader volume is
-        # XIAO-SENSE, not NICENANO. Serials read off the hardware 2026-08-15.
+        # XIAO-BOOT, not NICENANO. Serials read off the hardware 2026-08-15.
         # These name the -dfu builds, which is what is on them; drop the
         # suffix once the raw-HID trigger is removed.
         692C03EA68AC36B1) echo "toucan_left-dfu|Toucan Left" ;;
@@ -55,10 +55,10 @@ serial_to_fw() {
 }
 
 find_bootloader() {
-    # NICENANO is the eyelash's; ROLIO-BOOT is the Rolio's; XIAO-SENSE is the
+    # NICENANO is the eyelash's; ROLIO-BOOT is the Rolio's; XIAO-BOOT is the
     # Toucan's (Seeed XIAO nRF52840). Matching on the label rather than on size
     # keeps a stray USB stick out of the running.
-    lsblk -rno NAME,LABEL | awk '$2=="NICENANO" || $2=="ROLIO-BOOT" || $2=="XIAO-SENSE"{print $1; exit}'
+    lsblk -rno NAME,LABEL | awk '$2=="NICENANO" || $2=="ROLIO-BOOT" || $2=="XIAO-BOOT"{print $1; exit}'
 }
 
 if [ "${1:-}" = "--list" ]; then
