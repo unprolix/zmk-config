@@ -299,27 +299,15 @@ static void strip_write(struct k_work *work) {
      */
     if (row == NULL || row->hrm) {
         for (size_t i = 0; i < ARRAY_SIZE(rgbkey_hrms); i++) {
-            if (mods & rgbkey_hrms[i].mod) {
-                paint(rgbkey_hrms[i].position, rgbkey_hrms[i].colour);
+            if ((mods & rgbkey_hrms[i].mod) == 0 || rgbkey_hrms[i].positions == NULL) {
+                continue;
+            }
+            for (const uint8_t *pos = rgbkey_hrms[i].positions; *pos != RGBKEY_POS_NONE;
+                 pos++) {
+                paint(*pos, rgbkey_hrms[i].colour);
             }
         }
     }
-
-#if RGBKEY_DEBUG
-    /*
-     * PROBE, and it deliberately bypasses everything above: no position map, no
-     * layer table, no home-row table. LED 1 lights white if ANY modifier is live
-     * at the moment this runs, straight from the relayed flags.
-     *
-     * It separates the two things the symptom cannot: whether a modifier is
-     * reaching us at all, and whether the code that decides which key to paint
-     * is at fault. Lit means the modifier is visible and the fault is mine; dark
-     * means no modifier ever arrives and the fault is upstream of this shield.
-     */
-    if (mods != 0 && STRIP_COUNT > 1) {
-        pixels[1].r = pixels[1].g = pixels[1].b = 0xFF;
-    }
-#endif
 
     bool any = false;
     for (int i = 0; i < STRIP_COUNT; i++) {

@@ -47,17 +47,20 @@
  * arrow key.
  */
 /*
- * RGBKEY_DEBUG raises everything to full and adds the probe in
- * rgbkey_strip.c. The keycaps here are opaque, so ordinary working brightness
- * is hard to read at a glance; for diagnosis, legibility beats battery and
- * beats not being dazzled.
+ * Full brightness, because on this board it is not optional.
  *
- * Set back to 0 for daily use -- 23 emitters a side at full is both dazzling
- * and the difference between weeks of battery and hours.
+ * The keycaps are opaque and swallow most of the light: at the levels the
+ * eyelash uses, lit keys were hard to find at all. Every placement decision in
+ * this file was made at full, so turning it down changes what is legible, not
+ * just how bright it is.
+ *
+ * It does cost real current -- two dozen emitters a side, lit for as long as a
+ * layer is held -- so it wants revisiting for battery use, probably together
+ * with lighting fewer keys rather than the same keys more dimly.
  */
-#define RGBKEY_DEBUG 1
+#define RGBKEY_BRIGHT 1
 
-#if RGBKEY_DEBUG
+#if RGBKEY_BRIGHT
 #define RGBKEY_DIM 0xC0
 #define RGBKEY_MID 0xFF
 #else
@@ -105,7 +108,13 @@ static const uint8_t rgbkey_palette[RK_COUNT][3] = {
     [RK_CTRL] = {RGBKEY_MID, 0, 0},                  /* red,    = ZC_RED */
     [RK_SHIFT] = {0, RGBKEY_MID, RGBKEY_MID},        /* cyan,   = ZC_CYAN */
     [RK_ALT] = {RGBKEY_DIM, 0, RGBKEY_MID},          /* purple, = ZC_PURPLE */
-    [RK_GUI] = {RGBKEY_DIM, 0, RGBKEY_MID},          /* violet, = ZC_VIOLET */
+    /*
+     * Violet is purple with less red, NOT purple with more blue. rgbzone gets
+     * its separation by adding to the blue channel, which cannot work here:
+     * at full brightness blue is already at maximum, so adding wrapped and left
+     * violet byte-identical to purple -- two modifiers sharing a colour.
+     */
+    [RK_GUI] = {RGBKEY_DIM / 3, 0, RGBKEY_MID},      /* violet, = ZC_VIOLET */
     [RK_RED] = {RGBKEY_MID, 0, 0},
     [RK_GREEN] = {0, RGBKEY_MID, 0},
     [RK_BLUE] = {0, 0, RGBKEY_MID},
@@ -176,6 +185,75 @@ static const uint8_t rgbkey_palette[RK_COUNT][3] = {
 #define RK_R_C4 10, 22, 36
 #define RK_R_C5 11, 23, 37
 #endif
+
+/*
+ * THE TOP ROW AND THE THUMB ROW ARE THE ONES YOU CAN SEE.
+ *
+ * Measured on hardware: the keycaps swallow the middle rows almost entirely,
+ * while the top row and the thumbs read clearly. Lighting a buried LED is not
+ * harmful -- it just costs current and shows nothing -- so the way to make a
+ * layer legible is to cover more of the visible surface, not to stop lighting
+ * the rest.
+ *
+ * A column already contains its top key, so any column wash lights something
+ * visible. The layers that were hard to see were simply the ones using very few
+ * columns; those spend the whole top row instead.
+ */
+/*
+ * A column's top two keys: the top row and the home row beneath it. Twice the
+ * light of the top key alone, and on a modifier's mirrored column the second of
+ * the two IS the opposite hand's own key for that modifier.
+ */
+#define RK_L_C0_TOP2 5, 17
+#define RK_L_C1_TOP2 4, 16
+#define RK_L_C2_TOP2 3, 15
+#define RK_L_C3_TOP2 2, 14
+#define RK_L_C4_TOP2 1, 13
+#define RK_L_C5_TOP2 0, 12
+
+#define RK_R_C0_TOP2 6, 18
+#define RK_R_C1_TOP2 7, 19
+#define RK_R_C2_TOP2 8, 20
+#define RK_R_C3_TOP2 9, 21
+#define RK_R_C4_TOP2 10, 22
+#define RK_R_C5_TOP2 11, 23
+
+/* A single column's top key, for when only the visible one is wanted. */
+#define RK_L_C0_TOP 5
+#define RK_L_C1_TOP 4
+#define RK_L_C2_TOP 3
+#define RK_L_C3_TOP 2
+#define RK_L_C4_TOP 1
+#define RK_L_C5_TOP 0
+
+#define RK_R_C0_TOP 6
+#define RK_R_C1_TOP 7
+#define RK_R_C2_TOP 8
+#define RK_R_C3_TOP 9
+#define RK_R_C4_TOP 10
+#define RK_R_C5_TOP 11
+
+#define RK_L_TOP 0, 1, 2, 3, 4, 5
+#define RK_R_TOP 6, 7, 8, 9, 10, 11
+#define RK_BOTH_TOP RK_L_TOP, RK_R_TOP
+
+/*
+ * The bottom row: the two Sofle-style "sometimes" keys and the three thumbs.
+ * It belongs to no column, and the roller push switch is deliberately absent --
+ * it is the one key on each half with no LED of its own.
+ *
+ * Included because the keycaps swallow a lot of light and the limit on how
+ * visible a layer is turns out to be how MANY keys it lights, not how brightly.
+ * These five a side are the cheapest keys to add: nothing else was using them.
+ */
+#define RK_L_THUMB 38, 39, 40, 41, 42
+#define RK_R_THUMB 43, 44, 45, 46, 47
+#define RK_BOTH_THUMB RK_L_THUMB, RK_R_THUMB
+
+/* The two outermost columns of a half, which several layers use as a block. */
+#define RK_L_OUTER2 RK_L_C5, RK_L_C4
+#define RK_R_OUTER2 RK_R_C5, RK_R_C4
+#define RK_BOTH_OUTER2 RK_L_OUTER2, RK_R_OUTER2
 
 /* Both halves' copy of a column, for the layers that are not sided. */
 #define RK_BOTH_C0 RK_L_C0, RK_R_C0
@@ -278,7 +356,7 @@ static const struct rgbkey_layer rgbkey_layers[] = {
     {"gaming", RKS_GAMING, false, {{RK_DIM_RED, RK_KEYS(RGBKEY_WASD)}}},
 
     {"navigation", RKS_NAV, true,
-     {{RK_DIM_GREEN, RK_KEYS(RGBKEY_ARROWS_LEFT, RGBKEY_ARROWS_RIGHT)}}},
+     {{RK_GREEN, RK_KEYS(RK_BOTH_OUTER2, RGBKEY_ARROWS_LEFT, RGBKEY_ARROWS_RIGHT)}}},
 
     /*
      * The GUI is held by the left hand on LGUI+nav and by the right on
@@ -300,17 +378,21 @@ static const struct rgbkey_layer rgbkey_layers[] = {
      * NUMPAD and SYMBOL are entered from the left thumb on this board.
      */
     {"numpad", RKS_NUMPAD, true,
-     {{RK_YELLOW, RK_KEYS(RK_L_C1)}, {RK_CYAN, RK_KEYS(RK_R_C2)}}},
+     {{RK_YELLOW, RK_KEYS(RK_L_TOP, RK_L_C1, RK_L_THUMB)},
+      {RK_CYAN, RK_KEYS(RK_R_TOP, RK_R_C2, RK_R_THUMB)}}},
 
-    {"symbol", RKS_SYMBOL, false, {{RK_BLUE, RK_KEYS(RK_L_C2)}}},
+    {"symbol", RKS_SYMBOL, false,
+     {{RK_BLUE, RK_KEYS(RK_BOTH_TOP, RK_L_C2, RK_BOTH_THUMB)}}},
 
-    {"numeric", RKS_NUMERIC, true, {{RK_CYAN, RK_KEYS(RK_BOTH_C5)}}},
+    {"numeric", RKS_NUMERIC, true,
+     {{RK_CYAN, RK_KEYS(RK_BOTH_TOP, RK_BOTH_C5, RK_BOTH_THUMB)}}},
 
-    {"function", RKS_FUNCTION, false,
-     {{RK_YELLOW, RK_KEYS(RK_BOTH_C0, RK_BOTH_C1)}, {RK_AMBER, RK_KEYS(RK_BOTH_C2)}}},
+    /* The two outermost columns of each half, in red. */
+    {"function", RKS_FUNCTION, false, {{RK_RED, RK_KEYS(RK_BOTH_OUTER2)}}},
 
     {"superscript", RKS_SUPERSCRIPT, true,
-     {{RK_TEAL, RK_KEYS(RK_BOTH_C0, RK_BOTH_C1, RK_BOTH_C2, RK_BOTH_C3, RK_BOTH_C4)}}},
+     {{RK_TEAL, RK_KEYS(RK_BOTH_C0, RK_BOTH_C1, RK_BOTH_C2, RK_BOTH_C3, RK_BOTH_C4,
+                        RK_BOTH_C5, RK_BOTH_THUMB)}}},
 
     /*
      * The one layer where the colours are the point rather than a code.
@@ -324,13 +406,14 @@ static const struct rgbkey_layer rgbkey_layers[] = {
       {RK_BLUE, RK_KEYS(RK_BOTH_C2)},
       {RK_YELLOW, RK_KEYS(RK_BOTH_C3)},
       {RK_CYAN, RK_KEYS(RK_BOTH_C4)},
-      {RK_MAGENTA, RK_KEYS(RK_BOTH_C5)}}},
+      {RK_MAGENTA, RK_KEYS(RK_BOTH_C5, RK_BOTH_THUMB)}}},
 
     {"bluetooth", RKS_BLUETOOTH, false,
-     {{RK_BLUE, RK_KEYS(RK_BOTH_C0, RK_BOTH_C1, RK_BOTH_C2)}}},
+     {{RK_BLUE, RK_KEYS(RK_BOTH_TOP, RK_BOTH_C0, RK_BOTH_C1, RK_BOTH_C2, RK_BOTH_THUMB)}}},
 
     {"system", RKS_SYSTEM, false,
-     {{RK_WHITE, RK_KEYS(RK_BOTH_C0, RK_BOTH_C1)}, {RK_DIM_WHITE, RK_KEYS(RK_BOTH_C2)}}},
+     {{RK_WHITE, RK_KEYS(RK_BOTH_C0, RK_BOTH_C1, RK_BOTH_C5, RK_BOTH_THUMB)},
+      {RK_DIM_WHITE, RK_KEYS(RK_BOTH_C2)}}},
 
     /*
      * Not in rgbzone. The sticky-modifier layer, so each column wears the
@@ -341,7 +424,9 @@ static const struct rgbkey_layer rgbkey_layers[] = {
      {{RK_CTRL, RK_KEYS(RK_BOTH_C1)},
       {RK_SHIFT, RK_KEYS(RK_BOTH_C2)},
       {RK_ALT, RK_KEYS(RK_BOTH_C3)},
-      {RK_GUI, RK_KEYS(RK_BOTH_C4)}}},
+      {RK_GUI, RK_KEYS(RK_BOTH_C4)},
+      /* No modifier of its own, so the spare keys just carry the layer. */
+      {RK_DIM_WHITE, RK_KEYS(RK_BOTH_C0, RK_BOTH_C5, RK_BOTH_THUMB)}}},
 };
 
 #define RGBKEY_LAYER_COUNT ARRAY_SIZE(rgbkey_layers)
@@ -349,31 +434,60 @@ static const struct rgbkey_layer rgbkey_layers[] = {
 /*
  * Home-row mods.
  *
- * This reads whichever modifiers are actually held, so a modifier applied by
- * something other than its home-row key lights the same key. That is
- * deliberate: the question being answered is "which modifier is live", and the
- * home-row key is simply where the answer is drawn.
+ * A modifier lights the home-row key MIRRORING its own, on the opposite half:
+ * hold Ctrl with the left index and the right index's home key lights.
  *
- * Positions from jjb.keymap's QWERTY_LM_IN / QWERTY_RM_IN, which NUMERIC and
- * NAVIGATION repeat: LGUI LALT LSHIFT LCTRL running inward on the left, and
- * RCTRL RSHIFT RALT RGUI running outward on the right.
+ * Lighting the modifier's own key is the obvious design and it cannot work --
+ * the finger holding the key is sitting on top of the LED. The mirror keeps the
+ * home-row position, which is what says WHICH modifier without needing the
+ * colour, while putting the light under a key nothing is covering.
+ *
+ * The positions are the same eight either way, so a left modifier and its right
+ * counterpart light each other's keys.
+ *
+ * Note this puts the light back on the home row, which is one of the rows the
+ * keycaps swallow. If it is still hard to see with no finger on it, then the
+ * obstruction is the cap rather than the hand, and the answer is the top row or
+ * the thumbs -- neither of which can say which modifier by position alone.
+ *
+ * This reads whichever modifiers are actually held, so a modifier applied by
+ * something other than a home-row key lights the same thing. That is
+ * deliberate: the question being answered is "which modifier is live".
  */
 struct rgbkey_hrm {
     zmk_mod_flags_t mod;
-    uint8_t position;
     enum rgbkey_colour colour;
+    /* RGBKEY_POS_NONE terminated, exactly like a layer's key group. */
+    const uint8_t *positions;
 };
 
+/*
+ * Each modifier lights the top TWO keys of its own column, on the opposite half.
+ *
+ * Two obstructions had to be dodged at once. The modifier's own key is under
+ * the finger holding it, so the light goes to the mirroring column on the other
+ * half; and the home row is one of the rows the keycaps swallow, so the top key
+ * of that column carries most of the signal.
+ *
+ * Both are lit rather than just the top one, for twice the light -- and the
+ * second of the two is the opposite hand's own key for that same modifier,
+ * which is a tidy thing for it to be.
+ *
+ * Column still carries the identity -- outermost is GUI, then Alt, Shift, Ctrl
+ * inward, the same order as the home row -- so the four are told apart by
+ * position as well as by colour, and two held together are two separate lights.
+ */
 static const struct rgbkey_hrm rgbkey_hrms[] = {
-    {MOD_LGUI, 13, RK_GUI},   /* LM4, the A key -- tap_hold_layer_lgui */
-    {MOD_LALT, 14, RK_ALT},   /* LM3, S */
-    {MOD_LSFT, 15, RK_SHIFT}, /* LM2, D */
-    {MOD_LCTL, 16, RK_CTRL},  /* LM1, F */
+    /* Left modifiers light the right half's matching column, and vice versa. */
+    {MOD_LGUI, RK_GUI, RK_KEYS(RK_R_C4_TOP2)},
+    {MOD_LALT, RK_ALT, RK_KEYS(RK_R_C3_TOP2)},
+    {MOD_LSFT, RK_SHIFT, RK_KEYS(RK_R_C2_TOP2)},
+    {MOD_LCTL, RK_CTRL, RK_KEYS(RK_R_C1_TOP2)},
 
-    {MOD_RCTL, 19, RK_CTRL},  /* RM1, J */
-    {MOD_RSFT, 20, RK_SHIFT}, /* RM2, K */
-    {MOD_RALT, 21, RK_ALT},   /* RM3, L */
-    {MOD_RGUI, 22, RK_GUI},   /* RM4, the ; key -- tap_hold_layer_rgui */
+    {MOD_RGUI, RK_GUI, RK_KEYS(RK_L_C4_TOP2)},
+    {MOD_RALT, RK_ALT, RK_KEYS(RK_L_C3_TOP2)},
+    {MOD_RSFT, RK_SHIFT, RK_KEYS(RK_L_C2_TOP2)},
+    {MOD_RCTL, RK_CTRL, RK_KEYS(RK_L_C1_TOP2)},
 };
 
 /*
