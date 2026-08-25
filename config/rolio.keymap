@@ -40,9 +40,31 @@
 #define ROLIO_LX_T &trans &trans
 #define ROLIO_RX_T &trans &trans
 
+/*
+ * Soft off, Rolio only.
+ *
+ * CONFIG_ZMK_PM_SOFT_OFF and the wakeup apparatus in both overlays are this
+ * board's; putting &soft_off in the shared layout would fail to build on a
+ * keyboard that has neither. So SYSTEM's left thumbs are overridden here.
+ *
+ * It sits on the OUTER thumb, with the way back out on the inner one, because
+ * the two should not be neighbours: SYSTEM is now only reachable deliberately,
+ * but "power the keyboard off" and "leave this layer" being adjacent is asking
+ * for it.
+ */
+#undef SYSTEM_LH
+#define SYSTEM_LH &soft_off &trans &to HIEROPHANT
+
 /* Roller push switches, left and right. The eyelash_corne binds its equivalent
    inner key (LEC) to &kp C_MUTE; left inert here pending your preference. */
-#define ROLIO_CLICKS &trans &trans
+/*
+ * Roller push switches. Mute on the left, matching the eyelash's inner key.
+ * The right is deliberately still inert -- the trackpad already handles clicks,
+ * so there is nothing obvious it should do, and these two are the only keys on
+ * the board with no LED under them, which makes them poor homes for anything
+ * whose state you would want to see.
+ */
+#define ROLIO_CLICKS &kp C_MUTE &trans
 
 /* Both halves have a roller. Left: volume. Right: page up/down -- matching the
    sofle build. NOTE: the encoders are currently disabled in the shield because

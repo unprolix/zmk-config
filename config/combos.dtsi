@@ -323,15 +323,8 @@ ZMK_COMBO_PLUS_SLOW(i_have, &i_have, LM3, RB0)
 ZMK_COMBO_LAYERS(game_lalt, LALT, LB5, LB4, GAMING)
 
 
-// system layer. would have been with all six thumb keys but that is at least too many for the default config
-// so this just uses the outer four
-/ {
-	combos {
-		combo_system {
-			timeout-ms = <CHORD_TIMEOUT>;
-			key-positions = <LH2 LH1 RH1 RH2>;
-			bindings = <&to SYSTEM>;
-			require-prior-idle-ms = <LONG_PAUSE>;
-		};
-	};
-};
+// system layer is reached by the leader sequence S Y S, and only that.
+//
+// It used to also have a four-thumb chord here. SYSTEM carries &bt BT_CLR_ALL
+// and, on the Rolio, &soft_off -- and a chord of four thumb keys is exactly the
+// kind of thing a palm finds. A leader sequence cannot be hit by accident.

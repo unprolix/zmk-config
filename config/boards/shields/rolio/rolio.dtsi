@@ -122,7 +122,8 @@ RC(2,0) RC(2,1) RC(2,2) RC(2,3) RC(2,4) RC(2,5) RC(2,6)   RC(2,7)  RC(2,8) RC(2,
     };
 
     /* Enabled by rolio_left.overlay: only the central turns trackpad events
-       into pointer movement. zip_scroll_scaler comes from config/mouse.dtsi. */
+       into pointer movement. zip_scroll_scaler is ZMK's own, from
+       zmk/app/dts/input/processors/scaler.dtsi. */
     glidepoint_listener: glidepoint_listener {
         compatible = "zmk,input-listener";
         status = "disabled";

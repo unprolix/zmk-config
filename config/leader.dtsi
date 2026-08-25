@@ -78,6 +78,8 @@ ZMK_LEADER_SEQUENCE(gr_phi, &el_phi, P H I)  // ϕ
 
 ZMK_LEADER_SEQUENCE(gaming,      &to GAMING,     G A M E)
 ZMK_LEADER_SEQUENCE(bluetooth,      &to BLUETOOTH, B T)
+ZMK_LEADER_SEQUENCE(system_layer, &to SYSTEM,    S Y S)  // the only way in; the four-thumb chord is gone
+ZMK_LEADER_SEQUENCE(qwerty_layer, &to QWERTY,    Q W E)
 ZMK_LEADER_SEQUENCE(lighting,    &to LIGHTING,  L E D)  // the only way in now: the joystick click is a mouse button
 
 

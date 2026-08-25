@@ -62,7 +62,7 @@ static uint8_t cached_indicators;
 
 static bool host_caps_lock(void) { return (cached_indicators & HID_LED_CAPS_LOCK) != 0; }
 
-static void refresh(void) {
+static uint32_t refresh(void) {
     zmk_keymap_layer_index_t index = zmk_keymap_highest_layer_active();
     zmk_keymap_layer_id_t id = zmk_keymap_layer_index_to_id(index);
     const char *name = zmk_keymap_layer_name(id);
@@ -72,7 +72,11 @@ static void refresh(void) {
 
     rgbkey_apply(packed);
     rgbkey_relay_send(packed);
+    return packed;
 }
+
+/* Any real event means the picture may have moved; go back to ticking fast. */
+static void rgbkey_tick_now(void);
 
 static int rgbkey_listener(const zmk_event_t *eh) {
 #if IS_ENABLED(CONFIG_ZMK_HID_INDICATORS)
@@ -84,6 +88,7 @@ static int rgbkey_listener(const zmk_event_t *eh) {
     ARG_UNUSED(eh);
 #endif
     refresh();
+    rgbkey_tick_now();
     return ZMK_EV_EVENT_BUBBLE;
 }
 
@@ -106,7 +111,25 @@ ZMK_SUBSCRIPTION(rgbkey_run, zmk_hid_indicators_changed);
  * that boots or reconnects into an unchanged state would otherwise show
  * nothing until the next layer change, so re-send on a timer.
  */
-#define RGBKEY_REFRESH_SECONDS 10
+/*
+ * The tick exists because nothing tells a central that a peripheral has
+ * connected, so a half that reconnects into unchanged state would show nothing
+ * until the next layer change.
+ *
+ * It used to fire every ten seconds forever, which is a wake and a BLE
+ * transmission every ten seconds for the whole hour before deep sleep, to
+ * re-send a picture that had not changed. The local repaint was already
+ * suppressed by the cache in rgbkey_apply; the relay was not.
+ *
+ * Now it backs off: fast while something is actually lit or has just changed,
+ * then progressively slower once the picture has been still for a while. A
+ * reconnecting peripheral still catches up within the slow interval, and an
+ * idle keyboard showing nothing costs almost nothing to keep showing nothing.
+ */
+#define RGBKEY_REFRESH_FAST_SECONDS 10
+#define RGBKEY_REFRESH_SLOW_SECONDS 120
+/* How many unchanged fast ticks before backing off. */
+#define RGBKEY_REFRESH_SETTLE_TICKS 6
 
 static void rgbkey_tick(struct k_work *work);
 static K_WORK_DELAYABLE_DEFINE(rgbkey_tick_work, rgbkey_tick);
@@ -126,13 +149,31 @@ static void rgbkey_tick(struct k_work *work) {
     }
 
     /*
-     * refresh() re-sends to the peripheral every time. Its local repaint is
-     * suppressed when nothing changed, which is what makes this cheap to run
-     * on a timer -- the far half is the only one that needs telling again.
+     * refresh() re-sends to the peripheral every time; the local repaint is
+     * suppressed when nothing changed. Watch the word it would send, and once
+     * it has been the same for a while, stop asking so often.
      */
-    refresh();
+    static uint32_t last_sent;
+    static uint8_t unchanged;
 
-    k_work_reschedule(&rgbkey_tick_work, K_SECONDS(RGBKEY_REFRESH_SECONDS));
+    uint32_t before = last_sent;
+    last_sent = refresh();
+    unchanged = (last_sent == before && unchanged < RGBKEY_REFRESH_SETTLE_TICKS)
+                    ? unchanged + 1
+                    : (last_sent == before ? unchanged : 0);
+
+    bool settled = unchanged >= RGBKEY_REFRESH_SETTLE_TICKS;
+    k_work_reschedule(&rgbkey_tick_work,
+                      K_SECONDS(settled ? RGBKEY_REFRESH_SLOW_SECONDS
+                                        : RGBKEY_REFRESH_FAST_SECONDS));
+}
+
+/*
+ * Bring the tick back to its fast interval after a real event, so the far half
+ * is not waiting out a slow period just as things start happening.
+ */
+static void rgbkey_tick_now(void) {
+    k_work_reschedule(&rgbkey_tick_work, K_SECONDS(RGBKEY_REFRESH_FAST_SECONDS));
 }
 
 static void rgbkey_start(struct k_work *work) {

@@ -169,6 +169,20 @@ static void flush(bool any) {
  * The pattern deliberately marks both ends and the middle of the chain, so it
  * also shows at a glance whether the whole chain is being driven or only part.
  */
+/*
+ * The self-test is a DIAGNOSTIC and is off by default.
+ *
+ * While it runs, strip_write() refuses to paint anything real, so leaving it on
+ * costs the first RGBKEY_SELFTEST_DELAY_SECONDS + RGBKEY_SELFTEST_SECONDS of
+ * every boot -- half a minute with no layer or modifier lighting at all, on a
+ * build that is flashed daily.
+ *
+ * Turn it back on when the strip is in doubt: lit means the hardware path works
+ * and any failure is in the logic; dark means the reverse, and that is a
+ * question no amount of reading the code can answer.
+ */
+#define RGBKEY_SELFTEST 0
+
 #define RGBKEY_SELFTEST_SECONDS 20
 
 /*
@@ -190,7 +204,7 @@ static void flush(bool any) {
  */
 #define RGBKEY_SELFTEST_SEGMENTS 0
 
-static atomic_t selftest_running = ATOMIC_INIT(1);
+static atomic_t selftest_running = ATOMIC_INIT(RGBKEY_SELFTEST);
 
 /* Hoisted out of rgbkey_apply so the self-test can invalidate it on the way out. */
 static atomic_t last = ATOMIC_INIT(-1);
@@ -360,6 +374,9 @@ void rgbkey_apply(uint32_t packed) {
 #define RGBKEY_SELFTEST_DELAY_SECONDS 5
 
 static int rgbkey_strip_init(void) {
+#if !RGBKEY_SELFTEST
+    return 0;
+#else
     /*
      * Everything that touches the strip runs on the one queue, so the
      * self-test and the ordinary repaints can never overlap on `pixels` --
@@ -369,6 +386,7 @@ static int rgbkey_strip_init(void) {
     k_work_reschedule_for_queue(zmk_workqueue_lowprio_work_q(), &selftest_begin_work,
                                 K_SECONDS(RGBKEY_SELFTEST_DELAY_SECONDS));
     return 0;
+#endif
 }
 
 SYS_INIT(rgbkey_strip_init, APPLICATION, CONFIG_APPLICATION_INIT_PRIORITY);

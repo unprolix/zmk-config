@@ -95,6 +95,19 @@ key numbers
 */
 
 
+/*
+ * Pointer and scroll speed. These MUST be set before the include below:
+ * pointing.h guards its defaults with #ifndef, so anything defined afterwards
+ * is simply ignored and the stock 600/10 stand.
+ *
+ * They also have to be spelled ZMK_POINTING_*: the ZMK_MOUSE_* names these were
+ * written as no longer exist, and mouse.h is now a one-line shim for pointing.h.
+ * Two independent reasons the old lines did nothing, which is why the speed
+ * never changed no matter what they said.
+ */
+#define ZMK_POINTING_DEFAULT_MOVE_VAL 1200 // stock is 600
+#define ZMK_POINTING_DEFAULT_SCRL_VAL 20   // stock is 10
+
 #include <dt-bindings/zmk/mouse.h>
 #include <dt-bindings/zmk/rgb.h>
 
@@ -166,9 +179,6 @@ key numbers
    };
 
  */
-
-#define ZMK_MOUSE_DEFAULT_MOVE_VAL 1200  // 600
-#define ZMK_MOUSE_DEFAULT_SCRL_VAL 20    // 10
 
 #define QUICK_TAP_MS 175
 
@@ -788,7 +798,7 @@ MAKE_ADAPTIVE_REPEAT(f_hrk_f23, hmr, R_M4, F23)
 
 #define SYSTEM_LB_IN &trans  &trans  &trans  &trans  &trans
 #define SYSTEM_LB &trans  SYSTEM_LB_IN
-#define SYSTEM_LH &trans &trans &trans
+#define SYSTEM_LH &trans &trans &to HIEROPHANT
 #define SYSTEM_LH_5 &trans &trans SYSTEM_LH
 
 #define SYSTEM_RZ &trans &trans &trans &trans &trans &trans
@@ -798,7 +808,7 @@ MAKE_ADAPTIVE_REPEAT(f_hrk_f23, hmr, R_M4, F23)
 #define SYSTEM_RM SYSTEM_RM_IN  &trans
 #define SYSTEM_RB_IN &trans  &trans  LIGHT_UP  LIGHT_DN  &kp END
 #define SYSTEM_RB SYSTEM_RB_IN  &kp PG_DN
-#define SYSTEM_RH &trans &trans &trans
+#define SYSTEM_RH &to HIEROPHANT &trans &trans
 #define SYSTEM_RH_5 &trans &trans SYSTEM_RH
 
 
