@@ -190,7 +190,7 @@ key numbers
 
 ZMK_HOLD_TAP(smart_num, bindings = <&mo>, <&num_dance>; flavor = "balanced";
              tapping-term-ms = <200>; quick-tap-ms = <QUICK_TAP_MS>;)
-ZMK_TAP_DANCE(num_dance, bindings = <&num_word NUM>, <&sl NUM>;
+ZMK_TAP_DANCE(num_dance, bindings = <&num_word NUM>, <&sl_long NUM>;
               tapping-term-ms = <200>;)
 
 // dedicated auto-layer behaviors so smart NUMPAD/SYMBOL stay active across their layer keys
@@ -261,17 +261,53 @@ ZMK_TAP_DANCE(num_dance, bindings = <&num_word NUM>, <&sl NUM>;
 
 
 
-MAKE_HRM(hml, &kp, &kp, KEYS_R THUMBS) // Left-hand HRMs.
-MAKE_HRM(hmr, &kp, &kp, KEYS_L THUMBS) // Right-hand HRMs.
+// Sticky key for the home-row mods, with a far longer arm window than ZMK's
+// stock &sk.
+//
+// Arming one is already deliberate: 150ms idle before it will engage at all,
+// then a 280ms hold, then a release that touches nothing. Stock &sk then gives
+// you 1000ms to press the target, which is a 1-second deadline at the end of
+// half a second of waiting -- too tight to aim at, and the whole point of
+// arming a modifier is that you are about to do something you have to think
+// about. Five seconds costs nothing: an armed modifier is visible on the strip,
+// and pressing anything at all consumes it.
+//
+// ignore-modifiers is kept from the stock definition, so reaching for a second
+// modifier does not eat the first.
+ZMK_STICKY_KEY(sk_long, bindings = <&kp>; release-after-ms = <5000>; ignore-modifiers;)
+
+// The same for sticky LAYERS. ZMK's &sl is the identical behaviour with &mo as
+// its binding, and the identical 1000ms deadline; quick-release is kept from
+// the stock definition so the layer drops the moment the next key is pressed
+// rather than lingering through it.
+ZMK_STICKY_KEY(sl_long, bindings = <&mo>; release-after-ms = <5000>; quick-release;)
+
+// The hold is &sk, not &kp: a sticky modifier is a SUPERSET of a held one, not
+// an alternative to it. behavior_sticky_key presses its binding immediately, so
+// the modifier is live for the whole hold; on release it checks whether another
+// key was used in the meantime and, if so, releases there and then -- "act like
+// a normal key", in its own words. Holding Ctrl across five keys or a drag is
+// unchanged. What is gained is that holding and releasing WITHOUT using it arms
+// the modifier for the next press instead of doing nothing.
+//
+// Same trick the nav thumbs use with &sl, which is why they feel like both a
+// held layer and a sticky one.
+//
+// The cost is that a hold-then-release that was not meant to arm anything now
+// poisons the following keystroke rather than just its own. If home-row mods
+// start firing on the key AFTER the one that misfired, this is why, and &kp
+// puts it back.
+MAKE_HRM(hml, &sk_long, &kp, KEYS_R THUMBS) // Left-hand HRMs.
+MAKE_HRM(hmr, &sk_long, &kp, KEYS_L THUMBS) // Right-hand HRMs.
 
 // SUPERSCRIPT home-row mods (&sup_uc lives in layer-mod-macros.dtsi): same timings as the ordinary HRMs, but tapping
 // emits a superscript instead of a letter. Without these the SUPERSCRIPT layer
 // would drop every home-row mod for as long as it is toggled on.
-MAKE_HRM(hml_sup, &kp, &sup_uc, KEYS_R THUMBS)
-MAKE_HRM(hmr_sup, &kp, &sup_uc, KEYS_L THUMBS)
+MAKE_HRM(hml_sup, &sk_long, &sup_uc, KEYS_R THUMBS)
+MAKE_HRM(hmr_sup, &sk_long, &sup_uc, KEYS_L THUMBS)
 
-MAKE_HRM_SYM(hml_sym, &kp, &kp, KEYS_R THUMBS) // SYMBOL-layer left HRMs (longer term, more prior-idle).
-MAKE_HRM_SYM(hmr_sym, &kp, &kp, KEYS_L THUMBS) // SYMBOL-layer right HRMs.
+MAKE_HRM_SYM(hml_sym, &sk_long, &kp, KEYS_R THUMBS) // SYMBOL-layer left HRMs (longer term, more prior-idle).
+MAKE_HRM_SYM(hmr_sym, &sk_long, &kp, KEYS_L THUMBS) // SYMBOL-layer right HRMs.
 
 // Top Layer Left/Right
 MAKE_HRM(tll, &mo, &kp, KEYS_R THUMBS)
@@ -296,8 +332,8 @@ MAKE_HRM(tlr, &mo, &kp, KEYS_L THUMBS)
 // Also note: a layer entered through &sl is never seen by a momentary-layer
 // driver, so anything asking "which hand is holding this layer" gets a stale
 // answer for these. Harmless while the colours are symmetrical.
-MAKE_HRM(tll_sticky, &sl, &kp, KEYS_R THUMBS)
-MAKE_HRM(tlr_sticky, &sl, &kp, KEYS_L THUMBS)
+MAKE_HRM(tll_sticky, &sl_long, &kp, KEYS_R THUMBS)
+MAKE_HRM(tlr_sticky, &sl_long, &kp, KEYS_L THUMBS)
 
 #include "build_info.dtsi"
 //#include "tap-hold-layer.dtsi"
@@ -430,7 +466,7 @@ smart_nav_thumb: smart_nav_thumb {
     flavor = "hold-preferred";
     tapping-term-ms = <200>;
     quick-tap-ms = <175>;
-    bindings = <&sl>, <&kp>;
+    bindings = <&sl_long>, <&kp>;
 };
 
 arcane_nav_l: arcane_nav_l {
@@ -439,7 +475,7 @@ arcane_nav_l: arcane_nav_l {
     flavor = "hold-preferred";
     tapping-term-ms = <200>;
     quick-tap-ms = <175>;
-    bindings = <&sl>, <&arcane_left>;
+    bindings = <&sl_long>, <&arcane_left>;
 };
 
 arcane_nav_r: arcane_nav_r {
@@ -448,7 +484,7 @@ arcane_nav_r: arcane_nav_r {
     flavor = "hold-preferred";
     tapping-term-ms = <200>;
     quick-tap-ms = <175>;
-    bindings = <&sl>, <&arcane_right>;
+    bindings = <&sl_long>, <&arcane_right>;
 };
 
 
@@ -475,7 +511,7 @@ arcane_nav_r: arcane_nav_r {
             compatible = "zmk,behavior-tap-dance";
             #binding-cells = <0>;
             tapping-term-ms = <FAST_TAP>;
-            bindings = <&sl NUMERIC>, <&numpad_word NUMPAD>;
+            bindings = <&sl_long NUMERIC>, <&numpad_word NUMPAD>;
         };
 
 	// outer left thumb: tap = sticky SYMBOL, double tap = smart NUMPAD
@@ -483,7 +519,7 @@ arcane_nav_r: arcane_nav_r {
             compatible = "zmk,behavior-tap-dance";
             #binding-cells = <0>;
             tapping-term-ms = <FAST_TAP>;
-            bindings = <&sl SYMBOL>, <&numpad_word NUMPAD>;
+            bindings = <&sl_long SYMBOL>, <&numpad_word NUMPAD>;
         };
 
         LTS: LTS {
@@ -503,7 +539,7 @@ arcane_nav_r: arcane_nav_r {
             quick-tap-ms = <175>;
             require-prior-idle-ms = <HRM_PRIOR_IDLE>;
             flavor = "balanced";
-            bindings = <&mo>, <&sk>;
+            bindings = <&mo>, <&sk_long>;
         };
 
     };
@@ -717,7 +753,7 @@ MAKE_ADAPTIVE_REPEAT(f_hrk_f23, hmr, R_M4, F23)
 #define EXTRA_LZ &trans        &trans    &trans    &trans    &trans    &trans
 #define EXTRA_LT_IN &trans  &kp MENU  &trans  &trans  &kp DELETE
 #define EXTRA_LT &smart_w  EXTRA_LT_IN
-#define EXTRA_LM_IN &sk L_M4  &sk L_M3  &sk L_M2  &sk L_M1  &trans
+#define EXTRA_LM_IN &sk_long L_M4  &sk_long L_M3  &sk_long L_M2  &sk_long L_M1  &trans
 #define EXTRA_LM &trans  EXTRA_LM_IN
 #define EXTRA_LB_IN &trans  &trans  &trans  &trans  &trans
 #define EXTRA_LB &dash_emdash  EXTRA_LB_IN
@@ -728,7 +764,7 @@ MAKE_ADAPTIVE_REPEAT(f_hrk_f23, hmr, R_M4, F23)
 #define EXTRA_RZ &trans      &trans        &trans    &trans           &trans      &trans
 #define EXTRA_RT_IN &kp INSERT  &at_wgyl_org  &trans  &leader  &phone_alt
 #define EXTRA_RT EXTRA_RT_IN  &trans
-#define EXTRA_RM_IN &trans  &sk R_M1  &sk R_M2  &sk R_M3  &sk R_M4
+#define EXTRA_RM_IN &trans  &sk_long R_M1  &sk_long R_M2  &sk_long R_M3  &sk_long R_M4
 #define EXTRA_RM EXTRA_RM_IN  &trans
 #define EXTRA_RB_IN &trans  &trans  &trans  &personal_email  &trans
 #define EXTRA_RB EXTRA_RB_IN  &key_repeat

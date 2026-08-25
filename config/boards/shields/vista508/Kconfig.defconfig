@@ -38,4 +38,10 @@ config LV_Z_MEM_POOL_SIZE
 config LS0XX_VCOM_THREAD_PRIO
     default 11
 
+# The screen shows caps lock from what the HOST reports, so it needs the
+# indicator report. Requested here rather than relying on the lighting shield:
+# the display must not depend on rgbkey being in the build.
+config ZMK_HID_INDICATORS
+    default y
+
 endif # SHIELD_VISTA508

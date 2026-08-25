@@ -34,6 +34,11 @@
 #include <zmk/events/keycode_state_changed.h>
 #include <zmk/hid.h>
 
+#if IS_ENABLED(CONFIG_ZMK_HID_INDICATORS)
+#include <zmk/events/hid_indicators_changed.h>
+#include <zmk/hid_indicators.h>
+#endif
+
 #include "hierophant_img.h"
 #include "vista_canvas.h"
 
@@ -86,6 +91,31 @@ static lv_obj_t *mods_canvas;
 
 static uint8_t emblem_buf[VISTA_CANVAS_BUF_SIZE(HIEROPHANT_W, HIEROPHANT_H)];
 static uint8_t mods_buf[VISTA_CANVAS_BUF_SIZE(VISTA_MOD_ROW_W, VISTA_MOD_ROW_H)];
+
+/*
+ * True while a leader sequence is being entered.
+ *
+ * The leader callback hides the emblem when a sequence starts, but the LAYER
+ * callback runs on any layer change and would happily put it back -- and the
+ * leader key is reached through a layer, so a change arrives in the middle of
+ * every sequence. The result was the emblem drawn underneath the candidate
+ * list. Whoever paints the middle band has to agree on who owns it, so the
+ * layer callback asks this before showing anything.
+ */
+static bool leader_active;
+
+/*
+ * Caps lock, as the host reports it. Bit 1 of the HID keyboard LED report.
+ *
+ * Cached rather than polled: the indicators are stored per endpoint, so a
+ * repaint landing while the endpoint switches reads an empty slot and would
+ * decide caps is off when the host never said so.
+ */
+#define HID_LED_CAPS_LOCK BIT(1)
+
+static uint8_t cached_indicators;
+
+static bool host_caps_lock(void) { return (cached_indicators & HID_LED_CAPS_LOCK) != 0; }
 
 /* The layer that gets an emblem instead of its name. */
 #define EMBLEM_LAYER_NAME "hierophant"
@@ -199,12 +229,31 @@ static void rolio_layer_update_cb(struct rolio_layer_state state) {
         return;
     }
 
-    char text[LAYER_NAME_MAX];
+    char name[LAYER_NAME_MAX];
 
     if (state.label == NULL || strlen(state.label) == 0) {
-        snprintf(text, sizeof(text), "%i", state.index);
+        snprintf(name, sizeof(name), "%i", state.index);
     } else {
-        snprintf(text, sizeof(text), "%s", state.label);
+        snprintf(name, sizeof(name), "%s", state.label);
+    }
+
+    /*
+     * Caps lock never displaces what the band was going to say -- it goes on the
+     * line above. On the base layer that costs only the emblem, which is
+     * decorative; on every other layer the layer name stays and CAPS sits over
+     * it. A modal state where every keystroke comes out wrong until you notice
+     * earns the largest thing on the panel, not a corner glyph competing with
+     * the battery reading.
+     */
+    bool caps = host_caps_lock();
+    bool base = state.label != NULL && strcmp(state.label, EMBLEM_LAYER_NAME) == 0;
+
+    char text[LAYER_NAME_MAX + 8];
+    if (caps) {
+        /* The base layer's name is never shown, so caps stands alone there. */
+        snprintf(text, sizeof(text), base ? "CAPS" : "CAPS\n%s", name);
+    } else {
+        snprintf(text, sizeof(text), "%s", name);
     }
 
     layer_set_text(text);
@@ -214,7 +263,12 @@ static void rolio_layer_update_cb(struct rolio_layer_state state) {
      * shows the emblem rather than repeating a name that never changes. The
      * two share a band and are never both visible.
      */
-    bool emblem = state.label != NULL && strcmp(state.label, EMBLEM_LAYER_NAME) == 0;
+    if (leader_active) {
+        return; /* the leader list owns the band until the sequence ends */
+    }
+
+    /* Caps takes the band, so the emblem stands down while it is on. */
+    bool emblem = base && !caps;
     if (emblem_canvas != NULL) {
         if (emblem) {
             lv_obj_remove_flag(emblem_canvas, LV_OBJ_FLAG_HIDDEN);
@@ -226,6 +280,12 @@ static void rolio_layer_update_cb(struct rolio_layer_state state) {
 }
 
 static struct rolio_layer_state rolio_layer_get_state(const zmk_event_t *eh) {
+#if IS_ENABLED(CONFIG_ZMK_HID_INDICATORS)
+    const struct zmk_hid_indicators_changed *ind = as_zmk_hid_indicators_changed(eh);
+    if (ind != NULL) {
+        cached_indicators = (uint8_t)ind->indicators;
+    }
+#endif
     zmk_keymap_layer_index_t index = zmk_keymap_highest_layer_active();
     return (struct rolio_layer_state){
         .index = index, .label = zmk_keymap_layer_name(zmk_keymap_layer_index_to_id(index))};
@@ -234,6 +294,10 @@ static struct rolio_layer_state rolio_layer_get_state(const zmk_event_t *eh) {
 ZMK_DISPLAY_WIDGET_LISTENER(rolio_layer_status, struct rolio_layer_state, rolio_layer_update_cb,
                             rolio_layer_get_state)
 ZMK_SUBSCRIPTION(rolio_layer_status, zmk_layer_state_changed);
+#if IS_ENABLED(CONFIG_ZMK_HID_INDICATORS)
+/* Caps lock arrives from the host, so the band has to follow it too. */
+ZMK_SUBSCRIPTION(rolio_layer_status, zmk_hid_indicators_changed);
+#endif
 #if IS_ENABLED(CONFIG_ZMK_WIDGET_WPM_STATUS)
 static struct zmk_widget_wpm_status wpm_status_widget;
 #endif
@@ -425,13 +489,15 @@ static void rolio_leader_update_cb(struct zmk_leader_state_changed state) {
         /*
          * Hand the band back. Whether the layer name or the emblem should
          * reappear depends on the layer, so ask the layer widget rather than
-         * guessing here.
+         * guessing here -- and clear the flag first, or it will decline.
          */
+        leader_active = false;
         bold_label_set_text(&leader_bold, "");
         rolio_layer_update_cb(rolio_layer_get_state(NULL));
         return;
     }
 
+    leader_active = true;
     layer_set_hidden(true);
     if (emblem_canvas != NULL) {
         lv_obj_add_flag(emblem_canvas, LV_OBJ_FLAG_HIDDEN);
