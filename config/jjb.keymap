@@ -273,9 +273,20 @@ MAKE_HRM(tlr, &mo, &kp, KEYS_L THUMBS)
 // one key and then let go of -- the layer survives exactly one press. Holding a
 // layer down for the whole of a two-key sequence is the tiring way to do it.
 //
-// FUNCTION and EXTRA are reached the same way, so they get the same treatment;
-// everything else about these matches tll/tlr, including the positional
-// restriction that stops a same-hand roll being read as a hold.
+// EXTRA is reached the same way, so it gets the same treatment; everything else
+// about these matches tll/tlr, including the positional restriction that stops
+// a same-hand roll being read as a hold.
+//
+// FUNCTION DELIBERATELY DOES NOT USE THESE, and must not until its layer moves
+// &sys_reset and &bootloader off the letter positions. Armed rather than held,
+// a single stray press of "," "K" "M" or "J" reaches one of them -- which is
+// how a half ended up sitting in its bootloader with nobody at the keyboard.
+// With &mo you had to still be holding F or B at that moment, which is a
+// deliberate two-handed act; &sl removes that protection.
+//
+// Also note: a layer entered through &sl is never seen by a momentary-layer
+// driver, so anything asking "which hand is holding this layer" gets a stale
+// answer for these. Harmless while the colours are symmetrical.
 MAKE_HRM(tll_sticky, &sl, &kp, KEYS_R THUMBS)
 MAKE_HRM(tlr_sticky, &sl, &kp, KEYS_L THUMBS)
 
