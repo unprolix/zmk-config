@@ -283,16 +283,15 @@ MAKE_HRM(tlr, &mo, &kp, KEYS_L THUMBS)
 // one key and then let go of -- the layer survives exactly one press. Holding a
 // layer down for the whole of a two-key sequence is the tiring way to do it.
 //
-// EXTRA is reached the same way, so it gets the same treatment; everything else
+// FUNCTION and EXTRA are reached the same way, so they get the same treatment; everything else
 // about these matches tll/tlr, including the positional restriction that stops
 // a same-hand roll being read as a hold.
 //
-// FUNCTION DELIBERATELY DOES NOT USE THESE, and must not until its layer moves
-// &sys_reset and &bootloader off the letter positions. Armed rather than held,
-// a single stray press of "," "K" "M" or "J" reaches one of them -- which is
-// how a half ended up sitting in its bootloader with nobody at the keyboard.
-// With &mo you had to still be holding F or B at that moment, which is a
-// deliberate two-handed act; &sl removes that protection.
+// FUNCTION uses these too, but only because &sys_reset and &bootloader have
+// been moved off it to SYSTEM. Armed rather than held, a single stray press of
+// "," "K" "M" or "J" reached one of them -- which is how a half ended up
+// sitting in its bootloader with nobody at the keyboard. Nothing on FUNCTION
+// is destructive now; do not put anything destructive back.
 //
 // Also note: a layer entered through &sl is never seen by a momentary-layer
 // driver, so anything asking "which hand is holding this layer" gets a stale
@@ -694,7 +693,10 @@ MAKE_ADAPTIVE_REPEAT(f_hrk_f23, hmr, R_M4, F23)
 #define FUNCTION_LT &kp F1  FUNCTION_LT_IN
 #define FUNCTION_LM_IN &f_hrk_f14  &f_hrk_f15  &f_hrk_f16  &f_hrk_f17  &kp F18
 #define FUNCTION_LM &kp F13  FUNCTION_LM_IN
-#define FUNCTION_LB_IN &sys_reset  &trans  &bootloader  &trans  &mkp MB5
+// &sys_reset and &bootloader used to live here, under "," and "K". They moved
+// to SYSTEM, which is reached only by a leader sequence -- a layer that can
+// reboot the keyboard should not sit one keypress from the alphabet.
+#define FUNCTION_LB_IN &trans  &trans  &trans  &trans  &mkp MB5
 #define FUNCTION_LB &trans  FUNCTION_LB_IN
 #define FUNCTION_LH &trans &trans &build_time
 #define FUNCTION_LH_5 &trans &trans FUNCTION_LH
@@ -705,7 +707,7 @@ MAKE_ADAPTIVE_REPEAT(f_hrk_f23, hmr, R_M4, F23)
 #define FUNCTION_RT FUNCTION_RT_IN  &kp F12
 #define FUNCTION_RM_IN &kp F19  &f_hrk_f20  &f_hrk_f21  &f_hrk_f22  &f_hrk_f23
 #define FUNCTION_RM FUNCTION_RM_IN  &kp F24
-#define FUNCTION_RB_IN &trans  &trans  &bootloader  &sys_reset  &kp SCROLLLOCK
+#define FUNCTION_RB_IN &trans  &trans  &trans  &trans  &kp SCROLLLOCK
 #define FUNCTION_RB FUNCTION_RB_IN  &kp PAUSE_BREAK
 #define FUNCTION_RH &build_time  &trans  &trans
 #define FUNCTION_RH_5 &trans &trans FUNCTION_RH
@@ -796,7 +798,9 @@ MAKE_ADAPTIVE_REPEAT(f_hrk_f23, hmr, R_M4, F23)
 //#define SYSTEM_LM &bt BT_SEL 0  &hml L_M4 &bt BT_SEL 1  &hml L_M3 &bt BT_SEL 2  &hml L_M2 &bt BT_SEL 3  &hml L_M1 &bt BT_SEL 4 &bt BT_SEL 5
 
 
-#define SYSTEM_LB_IN &trans  &trans  &trans  &trans  &trans
+// Where FUNCTION's reset and bootloader went, in the same positions they had
+// there. SYSTEM is leader-only, so nothing here can be reached by a stray press.
+#define SYSTEM_LB_IN &sys_reset  &trans  &bootloader  &trans  &trans
 #define SYSTEM_LB &trans  SYSTEM_LB_IN
 #define SYSTEM_LH &trans &trans &to HIEROPHANT
 #define SYSTEM_LH_5 &trans &trans SYSTEM_LH
@@ -806,7 +810,7 @@ MAKE_ADAPTIVE_REPEAT(f_hrk_f23, hmr, R_M4, F23)
 #define SYSTEM_RT SYSTEM_RT_IN  &fancy_bt_5
 #define SYSTEM_RM_IN &trans  &trans  &trans  &trans  &trans
 #define SYSTEM_RM SYSTEM_RM_IN  &trans
-#define SYSTEM_RB_IN &trans  &trans  LIGHT_UP  LIGHT_DN  &kp END
+#define SYSTEM_RB_IN &bootloader  &sys_reset  LIGHT_UP  LIGHT_DN  &kp END
 #define SYSTEM_RB SYSTEM_RB_IN  &kp PG_DN
 #define SYSTEM_RH &to HIEROPHANT &trans &trans
 #define SYSTEM_RH_5 &trans &trans SYSTEM_RH
