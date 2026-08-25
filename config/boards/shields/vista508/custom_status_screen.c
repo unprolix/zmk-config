@@ -69,13 +69,29 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #define MODS_LIFT 3
 
 /*
+ * The corner readouts paint their own background rather than letting whatever
+ * is behind them show through.
+ *
+ * The emblem is a full-panel object and the corners sit on top of it. Relying
+ * on it being blank there -- and on the labels being drawn after it -- left the
+ * text unreadable on hardware. An opaque backing makes each readout legible
+ * whatever ends up underneath, which also means the emblem art can change
+ * without silently eating the status line.
+ */
+static void corner_backing(lv_obj_t *label) {
+    lv_obj_set_style_bg_color(label, VISTA_CANVAS_BACKGROUND, LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(label, LV_OPA_COVER, LV_PART_MAIN);
+    lv_obj_set_style_pad_all(label, 1, LV_PART_MAIN);
+}
+
+/*
  * Connection and battery are drawn here rather than with ZMK's own widgets.
  * Those render LVGL glyphs -- WIFI/USB/OK/CLOSE/SETTINGS -- which are compact
  * enough for a nice!view but cryptic, and this panel has room for words.
  * The state comes from the same APIs ZMK's widgets use.
  */
-static lv_obj_t *conn_label;
-static lv_obj_t *batt_label;
+static struct bold_label conn_bold;
+static struct bold_label batt_bold;
 
 /*
  * The base layer gets an emblem instead of its name, and held modifiers get a
@@ -187,6 +203,41 @@ static void bold_label_create(struct bold_label *bl, lv_obj_t *parent, lv_coord_
         lv_label_set_long_mode(l, LV_LABEL_LONG_WRAP);
         lv_obj_set_style_text_align(l, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
         lv_obj_align(l, LV_ALIGN_CENTER, bold_offsets[i][0], bold_offsets[i][1] + dy);
+        lv_label_set_text(l, "");
+        bl->copies[i] = l;
+    }
+}
+
+/*
+ * The same overdraw, for a corner readout.
+ *
+ * These are why the corners were unreadable: a 14px face drawn once. LVGL's
+ * fonts are antialiased, and on a 1-bit panel the grey edge pixels threshold
+ * away -- at this size that removes enough of each glyph to leave fragments
+ * rather than letters. The layer name never had the problem because it is 20px
+ * AND overdrawn; the corners had neither.
+ *
+ * Four copies rather than nine: the corner is 60x18 and a full 3x3 dilation
+ * closes up small glyphs. Right, down and diagonal is enough weight to survive
+ * the threshold without filling in the counters.
+ */
+#define CORNER_BOLD_COPIES 4
+
+static const lv_coord_t corner_bold_offsets[CORNER_BOLD_COPIES][2] = {
+    {0, 0}, {1, 0}, {0, 1}, {1, 1},
+};
+
+static void corner_label_create(struct bold_label *bl, lv_obj_t *parent, lv_align_t align,
+                                lv_text_align_t text_align) {
+    for (size_t i = 0; i < BOLD_COPIES; i++) {
+        bl->copies[i] = NULL;
+    }
+    for (size_t i = 0; i < CORNER_BOLD_COPIES; i++) {
+        lv_obj_t *l = lv_label_create(parent);
+        lv_obj_set_width(l, CORNER_W);
+        lv_obj_set_style_text_font(l, CORNER_FONT, LV_PART_MAIN);
+        lv_obj_set_style_text_align(l, text_align, LV_PART_MAIN);
+        lv_obj_align(l, align, corner_bold_offsets[i][0], corner_bold_offsets[i][1]);
         lv_label_set_text(l, "");
         bl->copies[i] = l;
     }
@@ -314,7 +365,7 @@ struct rolio_conn_state {
 };
 
 static void rolio_conn_update_cb(struct rolio_conn_state state) {
-    if (conn_label == NULL) {
+    if (!bold_label_ready(&conn_bold)) {
         return;
     }
 
@@ -345,7 +396,7 @@ static void rolio_conn_update_cb(struct rolio_conn_state state) {
         break;
     }
 
-    lv_label_set_text(conn_label, text);
+    bold_label_set_text(&conn_bold, text);
 }
 
 static struct rolio_conn_state rolio_conn_get_state(const zmk_event_t *eh) {
@@ -373,7 +424,7 @@ struct rolio_batt_state {
 };
 
 static void rolio_batt_update_cb(struct rolio_batt_state state) {
-    if (batt_label == NULL) {
+    if (!bold_label_ready(&batt_bold)) {
         return;
     }
 
@@ -390,7 +441,7 @@ static void rolio_batt_update_cb(struct rolio_batt_state state) {
         snprintf(text, sizeof(text), "L%d", state.central);
     }
 
-    lv_label_set_text(batt_label, text);
+    bold_label_set_text(&batt_bold, text);
 }
 
 static struct rolio_batt_state rolio_batt_get_state(const zmk_event_t *eh) {
@@ -595,17 +646,9 @@ lv_obj_t *zmk_display_status_screen(void) {
      * spear. These are created after the emblem so they draw over it: LVGL's
      * z-order follows creation order, and the emblem is a full-panel object.
      */
-    conn_label = lv_label_create(screen);
-    lv_obj_set_width(conn_label, CORNER_W);
-    lv_obj_set_style_text_font(conn_label, CORNER_FONT, LV_PART_MAIN);
-    lv_obj_set_style_text_align(conn_label, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN);
-    lv_obj_align(conn_label, LV_ALIGN_TOP_LEFT, 0, 0);
+    corner_label_create(&conn_bold, screen, LV_ALIGN_TOP_LEFT, LV_TEXT_ALIGN_LEFT);
 
-    batt_label = lv_label_create(screen);
-    lv_obj_set_width(batt_label, CORNER_W);
-    lv_obj_set_style_text_font(batt_label, CORNER_FONT, LV_PART_MAIN);
-    lv_obj_set_style_text_align(batt_label, LV_TEXT_ALIGN_RIGHT, LV_PART_MAIN);
-    lv_obj_align(batt_label, LV_ALIGN_TOP_RIGHT, 0, 0);
+    corner_label_create(&batt_bold, screen, LV_ALIGN_TOP_RIGHT, LV_TEXT_ALIGN_RIGHT);
 
     rolio_conn_status_init();
     rolio_batt_status_init();
@@ -648,8 +691,16 @@ lv_obj_t *zmk_display_status_screen(void) {
     lv_obj_set_width(wpm, LV_SIZE_CONTENT);
     lv_obj_set_style_text_font(wpm, CORNER_FONT, LV_PART_MAIN);
     lv_obj_set_style_text_align(wpm, LV_TEXT_ALIGN_RIGHT, LV_PART_MAIN);
+    corner_backing(wpm);
     lv_obj_align(wpm, LV_ALIGN_BOTTOM_RIGHT, 0, 0);
 #endif
+
+    /*
+     * Say the stacking outright instead of inferring it from creation order.
+     * Everything else is a corner readout or the middle band; the emblem is the
+     * only full-panel object and belongs beneath all of them.
+     */
+    lv_obj_move_background(emblem_canvas);
 
     return screen;
 }
