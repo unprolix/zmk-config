@@ -19,6 +19,11 @@
 #include <zmk/keymap.h>
 #include <zmk/rgb_underglow.h>
 
+#if IS_ENABLED(CONFIG_ZMK_HID_INDICATORS)
+#include <zmk/events/hid_indicators_changed.h>
+#include <zmk/hid_indicators.h>
+#endif
+
 #include "rgbkey.h"
 
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
@@ -41,19 +46,43 @@ static enum rgbkey_scene scene_for(const char *name) {
     return RKS_NONE;
 }
 
+/*
+ * Caps lock as the host has it. Bit 1 of the HID keyboard LED report, per the
+ * USB HID usage tables; ZMK carries the report through but names none of the
+ * bits.
+ *
+ * Cached rather than read fresh on every repaint: the indicators are stored per
+ * endpoint, so a repaint landing while the endpoint switches -- or while none is
+ * selected, which happens on every disconnect -- reads an empty slot and decides
+ * caps is off. The host has not changed its mind; we asked at a bad moment.
+ */
+#define HID_LED_CAPS_LOCK BIT(1)
+
+static uint8_t cached_indicators;
+
+static bool host_caps_lock(void) { return (cached_indicators & HID_LED_CAPS_LOCK) != 0; }
+
 static void refresh(void) {
     zmk_keymap_layer_index_t index = zmk_keymap_highest_layer_active();
     zmk_keymap_layer_id_t id = zmk_keymap_layer_index_to_id(index);
     const char *name = zmk_keymap_layer_name(id);
 
-    uint32_t packed = rgbkey_pack(scene_for(name), zmk_hid_get_explicit_mods());
+    uint32_t packed =
+        rgbkey_pack(scene_for(name), zmk_hid_get_explicit_mods(), host_caps_lock());
 
     rgbkey_apply(packed);
     rgbkey_relay_send(packed);
 }
 
 static int rgbkey_listener(const zmk_event_t *eh) {
+#if IS_ENABLED(CONFIG_ZMK_HID_INDICATORS)
+    const struct zmk_hid_indicators_changed *ind = as_zmk_hid_indicators_changed(eh);
+    if (ind != NULL) {
+        cached_indicators = (uint8_t)ind->indicators;
+    }
+#else
     ARG_UNUSED(eh);
+#endif
     refresh();
     return ZMK_EV_EVENT_BUBBLE;
 }
@@ -66,6 +95,10 @@ ZMK_SUBSCRIPTION(rgbkey_run, zmk_layer_state_changed);
  * are read back out of HID state on every keycode instead.
  */
 ZMK_SUBSCRIPTION(rgbkey_run, zmk_keycode_state_changed);
+#if IS_ENABLED(CONFIG_ZMK_HID_INDICATORS)
+/* Caps lock arrives from the host, not from a keypress here. */
+ZMK_SUBSCRIPTION(rgbkey_run, zmk_hid_indicators_changed);
+#endif
 
 /*
  * Nothing tells a central that a peripheral has connected:

@@ -491,16 +491,44 @@ static const struct rgbkey_hrm rgbkey_hrms[] = {
 };
 
 /*
+ * CAPS LOCK.
+ *
+ * Not a layer: the caps layer was retired, because a keyboard-side toggle drifts
+ * from the host's real state the moment anything else presses CAPS. It comes
+ * from the host's HID indicator instead, and is painted over everything else --
+ * no layer's colours matter more than knowing every letter is about to be
+ * capital.
+ *
+ * On the visible surface, so it cannot be the thing that gets swallowed: the
+ * whole top row and the thumbs, both halves.
+ */
+#define RGBKEY_CAPS_COLOUR RK_YELLOW
+#define RGBKEY_CAPS_KEYS   RK_KEYS(RK_BOTH_TOP, RK_BOTH_THUMB)
+
+/*
  * The wire format: a scene in the high byte, the live modifier flags in the
  * low one. Two bytes, against the eight a relayed behaviour can carry.
  */
-static inline uint32_t rgbkey_pack(enum rgbkey_scene scene, zmk_mod_flags_t mods) {
-    return ((uint32_t)scene << 8) | (uint32_t)mods;
+/*
+ * Caps lock rides in the top bit of the scene byte. Only the central hears from
+ * the host, so without carrying it the far half would never show caps at all.
+ */
+#define RGBKEY_CAPS_BIT 0x80
+
+BUILD_ASSERT(RKS_COUNT <= RGBKEY_CAPS_BIT, "Scenes must not collide with the caps bit");
+
+static inline uint32_t rgbkey_pack(enum rgbkey_scene scene, zmk_mod_flags_t mods, bool caps) {
+    uint32_t s = (uint32_t)scene | (caps ? RGBKEY_CAPS_BIT : 0);
+    return (s << 8) | (uint32_t)mods;
 }
 
 static inline enum rgbkey_scene rgbkey_scene_of(uint32_t packed) {
-    enum rgbkey_scene s = (enum rgbkey_scene)((packed >> 8) & 0xFF);
+    enum rgbkey_scene s = (enum rgbkey_scene)((packed >> 8) & ~RGBKEY_CAPS_BIT & 0xFF);
     return s < RKS_COUNT ? s : RKS_NONE;
+}
+
+static inline bool rgbkey_caps_of(uint32_t packed) {
+    return ((packed >> 8) & RGBKEY_CAPS_BIT) != 0;
 }
 
 static inline zmk_mod_flags_t rgbkey_mods_of(uint32_t packed) {

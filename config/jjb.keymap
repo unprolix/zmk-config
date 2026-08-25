@@ -267,6 +267,18 @@ MAKE_HRM_SYM(hmr_sym, &kp, &kp, KEYS_L THUMBS) // SYMBOL-layer right HRMs.
 MAKE_HRM(tll, &mo, &kp, KEYS_R THUMBS)
 MAKE_HRM(tlr, &mo, &kp, KEYS_L THUMBS)
 
+// Sticky variants of the above.
+//
+// The nav thumbs hold to &sl rather than &mo, which is why NAV can be held for
+// one key and then let go of -- the layer survives exactly one press. Holding a
+// layer down for the whole of a two-key sequence is the tiring way to do it.
+//
+// FUNCTION and EXTRA are reached the same way, so they get the same treatment;
+// everything else about these matches tll/tlr, including the positional
+// restriction that stops a same-hand roll being read as a hold.
+MAKE_HRM(tll_sticky, &sl, &kp, KEYS_R THUMBS)
+MAKE_HRM(tlr_sticky, &sl, &kp, KEYS_L THUMBS)
+
 #include "build_info.dtsi"
 //#include "tap-hold-layer.dtsi"
 

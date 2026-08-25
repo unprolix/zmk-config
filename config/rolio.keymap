@@ -30,7 +30,10 @@
    The right pair stays inert -- mirroring these would collide with the right
    half's own thumb behaviours. */
 #define ROLIO_LX &sl SYMBOL  &numpad_word NUMPAD
-#define ROLIO_RX &trans &trans
+/* Mirrors the left pair. Note the order differs: the left pair reads
+   outer-then-inner, the right inner-then-outer, so both put numpad on the
+   fourth thumb key and sticky SYMBOL on the fifth, counting outward. */
+#define ROLIO_RX &numpad_word NUMPAD  &sl SYMBOL
 
 /* Non-base layers inherit rather than re-triggering a layer switch from within
    a layer, so the extras fall through there. */

@@ -309,6 +309,17 @@ static void strip_write(struct k_work *work) {
         }
     }
 
+    /*
+     * Caps lock over the top of all of it. Nothing a layer or a modifier has to
+     * say outranks knowing every letter is about to come out capital.
+     */
+    if (rgbkey_caps_of(packed)) {
+        const uint8_t *const caps = RGBKEY_CAPS_KEYS;
+        for (const uint8_t *pos = caps; *pos != RGBKEY_POS_NONE; pos++) {
+            paint(*pos, RGBKEY_CAPS_COLOUR);
+        }
+    }
+
     bool any = false;
     for (int i = 0; i < STRIP_COUNT; i++) {
         if (pixels[i].r || pixels[i].g || pixels[i].b) {
