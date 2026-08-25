@@ -182,6 +182,20 @@ include:
     cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/rgbzone_salon.conf"
     artifact-name: eyelash_corne_right_salon-rgbzone
 
+  # TEMPORARY: adds the raw-HID bootloader trigger to the bureau. The bureau
+  # had deliberately gone without it -- it is the pair most often used as a
+  # keyboard rather than as a test rig -- but the diagnostics ride the same
+  # channel, and without them a layer that will not activate cannot be watched.
+  # Drop these two entries once the sticky hold-taps are settled.
+  - board: nice_nano@2.0.0/nrf52840/zmk
+    shield: eyelash_corne_left nice_view nice_view_jjb rgbzone dfu
+    cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/rgbzone_bureau.conf"
+    artifact-name: eyelash_corne_left_bureau-dfu
+  - board: nice_nano@2.0.0/nrf52840/zmk
+    shield: eyelash_corne_right nice_view nice_view_jjb rgbzone dfu
+    cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/rgbzone_bureau.conf"
+    artifact-name: eyelash_corne_right_bureau-dfu
+
   # TEMPORARY: adds the raw-HID bootloader trigger to the lavendre. See
   # config/boards/shields/dfu -- this is a development convenience and is
   # meant to be removed, not shipped.
