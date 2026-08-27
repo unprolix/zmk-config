@@ -45,6 +45,34 @@
 
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
+/*
+ * THIS FILE IS COMPILED BY MORE THAN ONE SHIELD.
+ *
+ * vista508 builds it for the Rolio and toucan_display builds it for the
+ * Toucan, which carries the same 144x168 Sharp panel; see
+ * toucan_display/CMakeLists.txt, which reaches across for these sources rather
+ * than keeping a second copy of them. So a Kconfig this file starts depending
+ * on has to be enabled in EVERY such shield's .conf, and forgetting one breaks
+ * that keyboard while the other goes on building perfectly.
+ *
+ * That is not hypothetical: montserrat_18 arrived here with the emblem-crossing
+ * corner readouts, went into vista508.conf alone, and the Toucan's left half
+ * stopped building for a day before anyone noticed.
+ *
+ * The guards below turn that into a build error naming its own fix, stated
+ * where the requirement actually lives instead of in one shield's conf. ADD TO
+ * THEM whenever this file gains a dependency.
+ */
+#if !IS_ENABLED(CONFIG_LV_USE_CANVAS)
+#error "vista508 status screen: needs CONFIG_LV_USE_CANVAS=y in this shield's .conf"
+#endif
+#if !IS_ENABLED(CONFIG_LV_USE_LABEL)
+#error "vista508 status screen: needs CONFIG_LV_USE_LABEL=y in this shield's .conf"
+#endif
+#if !IS_ENABLED(CONFIG_LV_FONT_MONTSERRAT_18)
+#error "vista508 status screen: CORNER_FONT is montserrat 18 -- set CONFIG_LV_FONT_MONTSERRAT_18=y in this shield's .conf"
+#endif
+
 /* Track the panel size from devicetree so this follows any geometry change. */
 #define SCREEN_W DT_PROP(DT_CHOSEN(zephyr_display), width)
 #define SCREEN_H DT_PROP(DT_CHOSEN(zephyr_display), height)
