@@ -55,7 +55,7 @@
      * high side to 1.92M so a fully-charged cell reads as 100%.
      */
     vbatt: vbatt {
-        compatible = "zmk,battery-voltage-divider";
+        compatible = "zmk,battery-voltage-divider-curve";
         io-channels = <&adc 6>;
         output-ohms = <1920000>;
         full-ohms = <(1920000 + 806000)>;

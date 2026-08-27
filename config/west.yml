@@ -145,6 +145,34 @@ manifest:
     # property. The Rolio's panel is mounted upside down, and LVGL cannot
     # software-rotate a 1-bit display (lv_draw_sw_rotate handles L8/RGB565/
     # RGB888/XRGB8888 only), so the rotation has to happen in the driver.
+    # Keeps the PERIPHERAL awake while it is connected to the central.
+    #
+    # ZMK's halves each run their own idle timer off their own key activity, so
+    # a long stretch of typing on the left lets the right deep-sleep underneath
+    # you and then have to reconnect. This hooks ZMK's event system to hold the
+    # peripheral out of deep sleep for as long as the link is up, and gives it
+    # a short, separate timeout for when the central really has gone away.
+    #
+    # Kconfig defaults to y on the peripheral and n on the central, so there is
+    # nothing to set per half. It deliberately does NOT prevent ZMK's idle mode
+    # (displays and LEDs still go dark) -- only deep sleep.
+    - name: zmk-smart-sleep
+      remote: mickiusmousius
+      revision: 81712260a0b6af731f670d72c189b3463079986e  # main as of 2026-08-28
+      path: modules/zmk/smart-sleep
+
+    # Battery percentage as a 21-point LiPo discharge curve instead of ZMK's
+    # straight line, which overstates the low end by 20-odd points, plus
+    # median-of-three ADC sampling so a BLE transmit or a display refresh
+    # sagging the rail does not show up as a sudden drop.
+    #
+    # Drop-in: our vbatt node already matches the vendor's exactly -- same ADC
+    # channel, same 1920000/806000 divider -- so only the compatible changes.
+    - name: zmk-patch-batterylevel
+      remote: mickiusmousius
+      revision: aace0bff517541d97e696fbd7b3a85bce8eff4bd  # main as of 2026-08-28
+      path: modules/drivers/batterylevel
+
     - name: zmk-ls0xxvcom-driver
       remote: mickiusmousius
       revision: fc2043152a0b442d3109fca02955c8c64371e96b  # main as of 2026-08-21

@@ -21,6 +21,25 @@
         serial-vcom-inversion;
         serial-vcom-interval = <17>;
         rotate-180;
+        /*
+         * One SPI transaction per frame instead of one per LINE. Without this
+         * the driver walks the panel a row at a time, so a full redraw is 168
+         * transactions and 168 CPU wakeups; with it the CPU sets up the
+         * transfer and goes back to deep sleep while EasyDMA does the rest.
+         *
+         * Only works because vista508_spi is spi0 declared as
+         * `nordic,nrf-spim` (rolio_left.overlay) -- plain `nordic,nrf-spi` has
+         * no EasyDMA and the property silently does nothing. spi0/1/2 are also
+         * the right choice over spi3, which needs the high-frequency clock and
+         * costs 1-2 mA of base current on the nRF52840.
+         *
+         * Costs about 3.3 KB of SRAM: height * (width/8 + 2).
+         *
+         * Worth more here than it looks. The circle-cube animation repaints the
+         * whole panel every 900 ms, so this is the difference between ~187 and
+         * ~1.1 wakeups per second while it is on screen.
+         */
+        dma-mode;
     };
 };
 
