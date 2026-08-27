@@ -27,6 +27,8 @@
 #include <zmk/events/battery_state_changed.h>
 #include <zmk/events/ble_active_profile_changed.h>
 #include <zmk/events/endpoint_changed.h>
+#include <zmk/activity.h>
+#include <zmk/events/activity_state_changed.h>
 #include <zmk/events/layer_state_changed.h>
 #include <zmk/keymap.h>
 #include <zmk-leader-key/leader_state.h>
@@ -366,8 +368,22 @@ static void panel_redraw(void) {
 static void emblem_animate_work(struct k_work *work);
 static K_WORK_DELAYABLE_DEFINE(emblem_animate, emblem_animate_work);
 
+/*
+ * The animation runs ONLY while the keyboard is being used.
+ *
+ * Without this the timer rearms itself every EMBLEM_FRAME_MS for as long as the
+ * base layer is showing -- which is almost always -- so an untouched keyboard
+ * went on waking the CPU and writing all 144x168 pixels rather more than once a
+ * second, indefinitely. A memory LCD holds its image with no help; repainting
+ * an unchanged screen buys nothing and a turning cube nobody is looking at buys
+ * less than that.
+ *
+ * Reading the state rather than latching it from the event keeps this correct
+ * at construction too, when no activity event has been seen yet.
+ */
 static bool emblem_is_animated(void) {
-    return emblem_shown && current_emblem()->frame_count > 1;
+    return emblem_shown && current_emblem()->frame_count > 1 &&
+           zmk_activity_get_state() == ZMK_ACTIVITY_ACTIVE;
 }
 
 static void emblem_animation_sync(void) {
@@ -388,6 +404,35 @@ static void emblem_animate_work(struct k_work *work) {
     panel_redraw();
     emblem_animation_sync();
 }
+
+/*
+ * Start and stop the animation with the keyboard's activity state.
+ *
+ * Going through ZMK_DISPLAY_WIDGET_LISTENER rather than a bare ZMK_LISTENER is
+ * deliberate: it marshals the callback onto the display work queue, and waking
+ * on ACTIVE repaints the panel, which must not happen from the event thread.
+ */
+struct rolio_activity_state {
+    enum zmk_activity_state state;
+};
+
+static void rolio_activity_update_cb(struct rolio_activity_state state) {
+    ARG_UNUSED(state);
+    if (emblem_is_animated()) {
+        /* Coming back: put the emblem on screen before the next frame is due. */
+        panel_redraw();
+    }
+    emblem_animation_sync();
+}
+
+static struct rolio_activity_state rolio_activity_get_state(const zmk_event_t *eh) {
+    ARG_UNUSED(eh);
+    return (struct rolio_activity_state){.state = zmk_activity_get_state()};
+}
+
+ZMK_DISPLAY_WIDGET_LISTENER(rolio_activity_status, struct rolio_activity_state,
+                            rolio_activity_update_cb, rolio_activity_get_state)
+ZMK_SUBSCRIPTION(rolio_activity_status, zmk_activity_state_changed);
 
 /* Show or hide the art, and start or stop the animation to match. */
 static void emblem_show(bool shown) {
@@ -977,6 +1022,7 @@ lv_obj_t *zmk_display_status_screen(void) {
     lv_obj_align(mods_canvas_right, LV_ALIGN_BOTTOM_RIGHT, 0, -MODS_LIFT);
 
     rolio_mods_status_init();
+    rolio_activity_status_init();
 
     /*
      * WPM along the bottom.
