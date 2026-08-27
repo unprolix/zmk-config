@@ -53,7 +53,20 @@
  * for it.
  */
 #undef SYSTEM_LH
-#define SYSTEM_LH &soft_off &trans &to HIEROPHANT
+#define SYSTEM_LH &soft_off &emblem_home &to HIEROPHANT
+
+/*
+ * Swap the emblem and leave SYSTEM in one press.
+ *
+ * The layer half is deliberately HERE rather than inside the behaviour: which
+ * layer is "home" is a property of this keymap, not of a display toggle, and
+ * the neighbouring key already says HIEROPHANT. Keeping both in one place
+ * means they cannot drift apart.
+ *
+ * SYSTEM is entered with &to, which LOCKS the layer, so only another &to gets
+ * out of it -- an unlocking deactivate is ignored.
+ */
+ZMK_MACRO(emblem_home, bindings = <&emblem_toggle>, <&to HIEROPHANT>;)
 
 /* Roller push switches, left and right. The eyelash_corne binds its equivalent
    inner key (LEC) to &kp C_MUTE; left inert here pending your preference. */

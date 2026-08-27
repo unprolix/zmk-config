@@ -1,0 +1,11 @@
+# Copyright (c) 2026 Jeremy Bornstein
+# SPDX-License-Identifier: MIT
+#
+# Swaps which emblem the status screen shows on the base layer. Local to the
+# central: the peripheral has no display, so this is deliberately NOT relayed.
+
+description: Toggle which emblem the status screen draws
+
+compatible: "zmk,behavior-emblem-toggle"
+
+include: zero_param.yaml

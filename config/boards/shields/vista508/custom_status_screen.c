@@ -39,6 +39,7 @@
 #include <zmk/hid_indicators.h>
 #endif
 
+#include "circlecube_img.h"
 #include "hierophant_img.h"
 #include "vista_canvas.h"
 
@@ -54,44 +55,51 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #define STATUS_MAX 24
 
 /*
- * The emblem is full height, and the status readouts sit in the four corners it
- * leaves blank -- only the narrow spear reaches the top and bottom edges, so
- * each corner has roughly CORNER_W x CORNER_H free. See hierophant_img.h.
- *
- * That is why the corners use a smaller face than the middle of the screen: at
- * the default 20px, "BT2 ok" alone overruns the gap.
+ * The status readouts sit in the top corners. They no longer have to FIT there
+ * -- being XORed, they may cross the art freely -- but they still use a smaller
+ * face than the middle band, because at the default 20px "BT2 unpaired" runs
+ * past the panel edge rather than merely over the emblem.
  */
-#define CORNER_W 60
-#define CORNER_H 18
-#define CORNER_FONT (&lv_font_montserrat_14)
-
-/* How far the modifier glyphs sit above the bottom edge. */
-#define MODS_LIFT 3
-
 /*
- * The corner readouts paint their own background rather than letting whatever
- * is behind them show through.
+ * The corner readouts are XORed into the emblem canvas rather than being labels
+ * laid over it.
  *
- * The emblem is a full-panel object and the corners sit on top of it. Relying
- * on it being blank there -- and on the labels being drawn after it -- left the
- * text unreadable on hardware. An opaque backing makes each readout legible
- * whatever ends up underneath, which also means the emblem art can change
- * without silently eating the status line.
+ * They used to be labels with an opaque backing, which made them legible over
+ * any art at the cost of blanking a box of it. On the hierophant that box fell
+ * in a corner the spear never reaches and went unnoticed; the circle-cube runs
+ * the full width of the panel, and the backing took a visible bite out of the
+ * disc. XOR costs nothing -- see vista_xor_canvas() -- so the readout and the
+ * art both survive wherever they overlap.
+ *
+ * The consequence is that the corners belong to the canvas: they are repainted
+ * whenever it is, and every change to either has to go through panel_redraw().
+ *
+ * 18px, and drawn nine times in a 3x3 neighbourhood. LVGL antialiases its
+ * fonts and a 1-bit panel thresholds the grey away, which at 14 removed enough
+ * of each glyph to leave fragments; overdrawing helped and was not enough on
+ * its own.
  */
-static void corner_backing(lv_obj_t *label) {
-    lv_obj_set_style_bg_color(label, VISTA_CANVAS_BACKGROUND, LV_PART_MAIN);
-    lv_obj_set_style_bg_opa(label, LV_OPA_COVER, LV_PART_MAIN);
-    lv_obj_set_style_pad_all(label, 1, LV_PART_MAIN);
-}
+#define CORNER_H    20
+#define CORNER_FONT (&lv_font_montserrat_18)
+
+/* How far the corner readouts sit below the top edge, and the glyphs above the
+   bottom one. Both keep a stroke off the panel border. */
+#define CORNER_LIFT 1
+#define MODS_LIFT   3
 
 /*
  * Connection and battery are drawn here rather than with ZMK's own widgets.
  * Those render LVGL glyphs -- WIFI/USB/OK/CLOSE/SETTINGS -- which are compact
  * enough for a nice!view but cryptic, and this panel has room for words.
  * The state comes from the same APIs ZMK's widgets use.
+ *
+ * Cached as text because the canvas owns the pixels: a repaint for any reason
+ * -- an emblem swap, an animation step, a layer change -- has to be able to put
+ * these back without waiting for the next connection or battery event.
  */
-static struct bold_label conn_bold;
-static struct bold_label batt_bold;
+static char conn_text[STATUS_MAX];
+static char batt_text[STATUS_MAX];
+static bool batt_shown;
 
 /*
  * The base layer gets an emblem instead of its name, and held modifiers get a
@@ -103,10 +111,102 @@ static struct bold_label batt_bold;
  * a nice!view's entire screen.
  */
 static lv_obj_t *emblem_canvas;
-static lv_obj_t *mods_canvas;
+static lv_obj_t *mods_canvas_left;
+static lv_obj_t *mods_canvas_right;
 
-static uint8_t emblem_buf[VISTA_CANVAS_BUF_SIZE(HIEROPHANT_W, HIEROPHANT_H)];
-static uint8_t mods_buf[VISTA_CANVAS_BUF_SIZE(VISTA_MOD_ROW_W, VISTA_MOD_ROW_H)];
+/*
+ * Two emblems, one canvas.
+ *
+ * The canvas is the FULL PANEL for both of them and each emblem is centred
+ * inside it, rather than the canvas being re-declared at each emblem's own
+ * dimensions. The two are different shapes -- the hierophant is a tall 125x168
+ * and the circle-cube a square 144x144 -- and carrying that difference in the
+ * canvas geometry meant calling lv_canvas_set_buffer() on a live, already
+ * rendered canvas, which took the keyboard down every time the toggle was
+ * pressed. (Not a buffer overrun: the buffer is sized for the larger of the
+ * pair and both fit. Re-buffering in place tears down and rebuilds the image
+ * source under a widget LVGL is still holding.)
+ *
+ * Fixed geometry means lv_canvas_set_buffer() is called exactly once, at
+ * construction, and a toggle is only a fill-and-blit. It costs nothing
+ * visually: the emblem was centred on the panel either way.
+ */
+/*
+ * An emblem is one or more frames of the same size. A still emblem simply has
+ * one; the circle-cube has three, differing only in which face of the inner
+ * cube carries its 50% checkerboard shading, so cycling them turns the cube --
+ * clockwise, which is the frame order, not the model's. See circlecube_img.h.
+ */
+struct emblem {
+    const uint8_t *const *frames;
+    uint8_t frame_count;
+    lv_coord_t w, h, stride;
+};
+
+static const uint8_t *const hierophant_frames[] = {hierophant_bits};
+
+static const struct emblem emblems[] = {
+    {hierophant_frames, ARRAY_SIZE(hierophant_frames), HIEROPHANT_W, HIEROPHANT_H,
+     HIEROPHANT_STRIDE},
+    {circlecube_frames, ARRAY_SIZE(circlecube_frames), CIRCLECUBE_W, CIRCLECUBE_H,
+     CIRCLECUBE_STRIDE},
+};
+
+static uint8_t emblem_choice;
+static uint8_t emblem_frame;
+
+/*
+ * Whether the art is drawn at all.
+ *
+ * The canvas itself is ALWAYS visible, because the corner readouts live in it
+ * now and they are wanted on every layer. What comes and goes is the emblem:
+ * the middle band belongs to the layer name or the leader list on every layer
+ * but the base one.
+ */
+static bool emblem_shown;
+
+/*
+ * The canvas is the panel, not the largest emblem: an emblem may be narrower
+ * than 144 (the hierophant is) and centring it inside a canvas cropped to the
+ * widest of the pair would still be centring it on the panel, but a future
+ * emblem shorter than 168 would sit against the top edge instead of the
+ * middle. Take the geometry from the display and be done with it.
+ */
+#define EMBLEM_BUF_W SCREEN_W
+#define EMBLEM_BUF_H SCREEN_H
+
+BUILD_ASSERT(HIEROPHANT_W <= EMBLEM_BUF_W && HIEROPHANT_H <= EMBLEM_BUF_H,
+             "hierophant emblem is larger than the panel");
+BUILD_ASSERT(CIRCLECUBE_W <= EMBLEM_BUF_W && CIRCLECUBE_H <= EMBLEM_BUF_H,
+             "circle-cube emblem is larger than the panel");
+
+/*
+ * Aligned because LVGL rounds a draw buffer's data pointer UP to
+ * LV_DRAW_BUF_ALIGN; left to its own devices a uint8_t array can be offset by
+ * up to three bytes, which silently costs the last rows of the canvas.
+ */
+static uint8_t emblem_buf[VISTA_CANVAS_BUF_SIZE(EMBLEM_BUF_W, EMBLEM_BUF_H)]
+    __aligned(CONFIG_LV_DRAW_BUF_ALIGN);
+static uint8_t mods_buf_left[VISTA_CANVAS_BUF_SIZE(VISTA_MOD_ROW_W, VISTA_MOD_ROW_H)];
+static uint8_t mods_buf_right[VISTA_CANVAS_BUF_SIZE(VISTA_MOD_ROW_W, VISTA_MOD_ROW_H)];
+
+/*
+ * Scratch for rendering one corner readout before XORing it in.
+ *
+ * Full panel width so the label can be given the whole edge and asked to align
+ * itself within it -- that is what puts the battery hard against the right
+ * margin without measuring the string. Tall enough for the 18px face plus the
+ * pixel the 3x3 dilation adds above and below.
+ *
+ * One buffer serves both corners: everything that draws here runs on the
+ * display work queue, one readout at a time.
+ */
+#define TEXT_SCRATCH_W SCREEN_W
+#define TEXT_SCRATCH_H (CORNER_H + 4)
+
+static lv_obj_t *text_canvas;
+static uint8_t text_buf[VISTA_CANVAS_BUF_SIZE(TEXT_SCRATCH_W, TEXT_SCRATCH_H)]
+    __aligned(CONFIG_LV_DRAW_BUF_ALIGN);
 
 /*
  * True while a leader sequence is being entered.
@@ -119,6 +219,167 @@ static uint8_t mods_buf[VISTA_CANVAS_BUF_SIZE(VISTA_MOD_ROW_W, VISTA_MOD_ROW_H)]
  * layer callback asks this before showing anything.
  */
 static bool leader_active;
+
+/*
+ * Faux-bold by dilation: the same text drawn at every offset in a 3x3
+ * neighbourhood, so each stem grows a pixel in EVERY direction; the first
+ * offset is the undisplaced copy.
+ *
+ * LVGL ships Montserrat in regular weight only -- there is no bold face to
+ * switch to, and generating one offline would mean carrying a second full
+ * glyph set. Overdrawing costs nothing in flash.
+ *
+ * Offsetting only right and down, as this did at first, thickens the stem by a
+ * pixel but also shifts the whole word half a pixel off centre and reads as
+ * blurred rather than bold. Going out in all directions keeps it centred and is
+ * what actually looks heavier.
+ *
+ * Used by both the middle band, where it is drawn as nine stacked labels, and
+ * the corner readouts, where it is nine passes over one scratch canvas.
+ */
+#define BOLD_COPIES 9
+
+static const lv_coord_t bold_offsets[BOLD_COPIES][2] = {
+    {0, 0},  {-1, -1}, {0, -1}, {1, -1}, {-1, 0},
+    {1, 0},  {-1, 1},  {0, 1},  {1, 1},
+};
+
+static const struct emblem *current_emblem(void) {
+    return &emblems[emblem_choice % ARRAY_SIZE(emblems)];
+}
+
+/*
+ * Render one corner readout into the scratch canvas and XOR it into the panel.
+ *
+ * The label is given the full panel width and asked to align itself inside it,
+ * which is what puts the battery hard against the right margin without
+ * measuring the string first.
+ *
+ * Drawn nine times, once at every offset in a 3x3 neighbourhood, so each stem
+ * grows a pixel in EVERY direction. That is the faux-bold the 1-bit panel
+ * needs; offsetting only right and down thickens the stroke but drags the word
+ * half a pixel off centre and reads as blurred rather than bold.
+ */
+static void xor_corner_text(const char *text, lv_text_align_t align) {
+    if (text_canvas == NULL || text == NULL || text[0] == '\0') {
+        return;
+    }
+
+    lv_canvas_fill_bg(text_canvas, VISTA_CANVAS_BACKGROUND, LV_OPA_COVER);
+
+    lv_draw_label_dsc_t dsc;
+    lv_draw_label_dsc_init(&dsc);
+    dsc.color = VISTA_CANVAS_FOREGROUND;
+    dsc.font = CORNER_FONT;
+    dsc.align = align;
+    dsc.text = text;
+
+    lv_layer_t layer;
+    lv_canvas_init_layer(text_canvas, &layer);
+    for (size_t i = 0; i < BOLD_COPIES; i++) {
+        const lv_coord_t dx = bold_offsets[i][0];
+        const lv_coord_t dy = bold_offsets[i][1] + 1; /* room for the top row of the dilation */
+        lv_area_t coords = {dx, dy, dx + TEXT_SCRATCH_W - 1, dy + TEXT_SCRATCH_H - 1};
+        lv_draw_label(&layer, &dsc, &coords);
+    }
+    lv_canvas_finish_layer(text_canvas, &layer);
+
+    vista_xor_canvas(emblem_canvas, 0, CORNER_LIFT, text_canvas);
+}
+
+/*
+ * Repaint the whole panel canvas: background, the emblem if it is showing, and
+ * the corner readouts XORed on top.
+ *
+ * It is all or nothing because the readouts are XORed rather than drawn over.
+ * XOR has no undo -- flipping the same pixels twice restores them, but only if
+ * nothing underneath moved in between -- so the only safe way to change any
+ * part of this canvas is to rebuild it from the background up. That is cheap:
+ * a fill, a blit and two short strings.
+ *
+ * Must run on the display work queue like anything else touching LVGL.
+ */
+static void panel_redraw(void) {
+    if (emblem_canvas == NULL) {
+        return;
+    }
+
+    lv_canvas_fill_bg(emblem_canvas, VISTA_CANVAS_BACKGROUND, LV_OPA_COVER);
+
+    if (emblem_shown) {
+        const struct emblem *e = current_emblem();
+        const uint8_t *bits = e->frames[emblem_frame % e->frame_count];
+        vista_draw_bitmap(emblem_canvas, (EMBLEM_BUF_W - e->w) / 2, (EMBLEM_BUF_H - e->h) / 2, bits,
+                          e->w, e->h, e->stride);
+    }
+
+    xor_corner_text(conn_text, LV_TEXT_ALIGN_LEFT);
+    if (batt_shown) {
+        xor_corner_text(batt_text, LV_TEXT_ALIGN_RIGHT);
+    }
+
+    /*
+     * The canvas holds a plain buffer, so LVGL has no idea its contents
+     * changed; without this the panel keeps showing the previous frame until
+     * something else happens to invalidate the same area.
+     */
+    lv_obj_invalidate(emblem_canvas);
+}
+
+/*
+ * Step the emblem's animation.
+ *
+ * Rearmed only while an animated emblem is actually on screen -- a Sharp memory
+ * LCD costs a line write per changed row, and there is nothing to be gained
+ * from turning a cube nobody is looking at. emblem_show() starts and stops it.
+ */
+#define EMBLEM_FRAME_MS 900
+
+static void emblem_animate_work(struct k_work *work);
+static K_WORK_DELAYABLE_DEFINE(emblem_animate, emblem_animate_work);
+
+static bool emblem_is_animated(void) {
+    return emblem_shown && current_emblem()->frame_count > 1;
+}
+
+static void emblem_animation_sync(void) {
+    if (emblem_is_animated()) {
+        k_work_reschedule_for_queue(zmk_display_work_q(), &emblem_animate,
+                                    K_MSEC(EMBLEM_FRAME_MS));
+    } else {
+        k_work_cancel_delayable(&emblem_animate);
+    }
+}
+
+static void emblem_animate_work(struct k_work *work) {
+    ARG_UNUSED(work);
+    if (!emblem_is_animated()) {
+        return;
+    }
+    emblem_frame = (emblem_frame + 1) % current_emblem()->frame_count;
+    panel_redraw();
+    emblem_animation_sync();
+}
+
+/* Show or hide the art, and start or stop the animation to match. */
+static void emblem_show(bool shown) {
+    if (emblem_shown == shown) {
+        return;
+    }
+    emblem_shown = shown;
+    /* Always begin on the same frame, so a swap looks deliberate. */
+    emblem_frame = 0;
+    panel_redraw();
+    emblem_animation_sync();
+}
+
+/* Called from the toggle behaviour, already on the display queue. */
+void vista_emblem_next(void) {
+    emblem_choice = (emblem_choice + 1) % ARRAY_SIZE(emblems);
+    emblem_frame = 0;
+    panel_redraw();
+    emblem_animation_sync();
+}
 
 /*
  * Caps lock, as the host reports it. Bit 1 of the HID keyboard LED report.
@@ -135,6 +396,16 @@ static bool host_caps_lock(void) { return (cached_indicators & HID_LED_CAPS_LOCK
 
 /* The layer that gets an emblem instead of its name. */
 #define EMBLEM_LAYER_NAME "hierophant"
+
+/*
+ * The battery readout is only shown on this layer.
+ *
+ * Both halves' charge is worth knowing occasionally and never worth a permanent
+ * corner: it changes over hours, and the corner it occupied is the one the
+ * emblem wants. SYSTEM is where the other rarely-needed things live and is
+ * reached deliberately, so it is where to look when the question arises.
+ */
+#define BATTERY_LAYER_NAME "system"
 
 /* Peripheral level arrives by event; there is no polling accessor for it. */
 static uint8_t peripheral_soc;
@@ -167,7 +438,6 @@ static bool peripheral_seen;
  * Montserrat in regular only, and generating a bold face offline would mean
  * carrying a second full glyph set for two labels.
  */
-#define BOLD_COPIES 9
 
 struct bold_label {
     lv_obj_t *copies[BOLD_COPIES];
@@ -191,10 +461,6 @@ static struct bold_label leader_bold;
  * "superscript" already fills the line at this size, so a bigger one would be
  * clipped rather than wrapped.
  */
-static const lv_coord_t bold_offsets[BOLD_COPIES][2] = {
-    {0, 0},  {-1, -1}, {0, -1}, {1, -1}, {-1, 0},
-    {1, 0},  {-1, 1},  {0, 1},  {1, 1},
-};
 
 static void bold_label_create(struct bold_label *bl, lv_obj_t *parent, lv_coord_t dy) {
     for (size_t i = 0; i < BOLD_COPIES; i++) {
@@ -203,41 +469,6 @@ static void bold_label_create(struct bold_label *bl, lv_obj_t *parent, lv_coord_
         lv_label_set_long_mode(l, LV_LABEL_LONG_WRAP);
         lv_obj_set_style_text_align(l, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
         lv_obj_align(l, LV_ALIGN_CENTER, bold_offsets[i][0], bold_offsets[i][1] + dy);
-        lv_label_set_text(l, "");
-        bl->copies[i] = l;
-    }
-}
-
-/*
- * The same overdraw, for a corner readout.
- *
- * These are why the corners were unreadable: a 14px face drawn once. LVGL's
- * fonts are antialiased, and on a 1-bit panel the grey edge pixels threshold
- * away -- at this size that removes enough of each glyph to leave fragments
- * rather than letters. The layer name never had the problem because it is 20px
- * AND overdrawn; the corners had neither.
- *
- * Four copies rather than nine: the corner is 60x18 and a full 3x3 dilation
- * closes up small glyphs. Right, down and diagonal is enough weight to survive
- * the threshold without filling in the counters.
- */
-#define CORNER_BOLD_COPIES 4
-
-static const lv_coord_t corner_bold_offsets[CORNER_BOLD_COPIES][2] = {
-    {0, 0}, {1, 0}, {0, 1}, {1, 1},
-};
-
-static void corner_label_create(struct bold_label *bl, lv_obj_t *parent, lv_align_t align,
-                                lv_text_align_t text_align) {
-    for (size_t i = 0; i < BOLD_COPIES; i++) {
-        bl->copies[i] = NULL;
-    }
-    for (size_t i = 0; i < CORNER_BOLD_COPIES; i++) {
-        lv_obj_t *l = lv_label_create(parent);
-        lv_obj_set_width(l, CORNER_W);
-        lv_obj_set_style_text_font(l, CORNER_FONT, LV_PART_MAIN);
-        lv_obj_set_style_text_align(l, text_align, LV_PART_MAIN);
-        lv_obj_align(l, align, corner_bold_offsets[i][0], corner_bold_offsets[i][1]);
         lv_label_set_text(l, "");
         bl->copies[i] = l;
     }
@@ -299,6 +530,13 @@ static void rolio_layer_update_cb(struct rolio_layer_state state) {
     bool caps = host_caps_lock();
     bool base = state.label != NULL && strcmp(state.label, EMBLEM_LAYER_NAME) == 0;
 
+    /* Battery is a SYSTEM-layer readout; elsewhere the corner is the emblem's. */
+    bool on_system = state.label != NULL && strcmp(state.label, BATTERY_LAYER_NAME) == 0;
+    if (batt_shown != on_system) {
+        batt_shown = on_system;
+        panel_redraw();
+    }
+
     char text[LAYER_NAME_MAX + 8];
     if (caps) {
         /* The base layer's name is never shown, so caps stands alone there. */
@@ -320,13 +558,7 @@ static void rolio_layer_update_cb(struct rolio_layer_state state) {
 
     /* Caps takes the band, so the emblem stands down while it is on. */
     bool emblem = base && !caps;
-    if (emblem_canvas != NULL) {
-        if (emblem) {
-            lv_obj_remove_flag(emblem_canvas, LV_OBJ_FLAG_HIDDEN);
-        } else {
-            lv_obj_add_flag(emblem_canvas, LV_OBJ_FLAG_HIDDEN);
-        }
-    }
+    emblem_show(emblem);
     layer_set_hidden(emblem);
 }
 
@@ -365,10 +597,6 @@ struct rolio_conn_state {
 };
 
 static void rolio_conn_update_cb(struct rolio_conn_state state) {
-    if (!bold_label_ready(&conn_bold)) {
-        return;
-    }
-
     char text[STATUS_MAX];
     enum zmk_transport transport = state.selected.transport;
     bool connected = transport != ZMK_TRANSPORT_NONE;
@@ -396,7 +624,10 @@ static void rolio_conn_update_cb(struct rolio_conn_state state) {
         break;
     }
 
-    bold_label_set_text(&conn_bold, text);
+    if (strcmp(conn_text, text) != 0) {
+        snprintf(conn_text, sizeof(conn_text), "%s", text);
+        panel_redraw();
+    }
 }
 
 static struct rolio_conn_state rolio_conn_get_state(const zmk_event_t *eh) {
@@ -424,10 +655,6 @@ struct rolio_batt_state {
 };
 
 static void rolio_batt_update_cb(struct rolio_batt_state state) {
-    if (!bold_label_ready(&batt_bold)) {
-        return;
-    }
-
     char text[STATUS_MAX];
 
     /*
@@ -441,7 +668,12 @@ static void rolio_batt_update_cb(struct rolio_batt_state state) {
         snprintf(text, sizeof(text), "L%d", state.central);
     }
 
-    bold_label_set_text(&batt_bold, text);
+    if (strcmp(batt_text, text) != 0) {
+        snprintf(batt_text, sizeof(batt_text), "%s", text);
+        if (batt_shown) {
+            panel_redraw();
+        }
+    }
 }
 
 static struct rolio_batt_state rolio_batt_get_state(const zmk_event_t *eh) {
@@ -486,27 +718,53 @@ struct rolio_mods_state {
     zmk_mod_flags_t mods;
 };
 
-static void rolio_mods_update_cb(struct rolio_mods_state state) {
-    if (mods_canvas == NULL) {
+/*
+ * Which glyph goes in which corner, and in what order within it.
+ *
+ * Bottom-left is GUI then ALT; bottom-right is SHIFT then CTRL. Splitting them
+ * is what gives the emblem its lower middle back -- a single row of four held
+ * roughly half the bottom edge, and the circle-cube, which runs the full width
+ * of the panel, visibly lost the corner reserved for GUI.
+ *
+ * The order within each pair is jjb's, not derived from anything: read
+ * outward-in on the left and inward-out on the right and it is GUI, ALT,
+ * SHIFT, CTRL across the bottom.
+ */
+struct mod_slot {
+    enum vista_mod_icon icon;
+    zmk_mod_flags_t mods;
+};
+
+static const struct mod_slot mods_left[VISTA_MOD_GROUP_SLOTS] = {
+    {VISTA_MOD_ICON_GUI, MOD_LGUI | MOD_RGUI},
+    {VISTA_MOD_ICON_ALT, MOD_LALT | MOD_RALT},
+};
+
+static const struct mod_slot mods_right[VISTA_MOD_GROUP_SLOTS] = {
+    {VISTA_MOD_ICON_SHIFT, MOD_LSFT | MOD_RSFT},
+    {VISTA_MOD_ICON_CTRL, MOD_LCTL | MOD_RCTL},
+};
+
+static void mods_group_draw(lv_obj_t *canvas, const struct mod_slot *group,
+                            zmk_mod_flags_t held) {
+    if (canvas == NULL) {
         return;
     }
 
-    lv_canvas_fill_bg(mods_canvas, VISTA_CANVAS_BACKGROUND, LV_OPA_COVER);
-
-    static const zmk_mod_flags_t slot_mods[VISTA_MOD_ICON_SLOTS] = {
-        [VISTA_MOD_ICON_CTRL] = MOD_LCTL | MOD_RCTL,
-        [VISTA_MOD_ICON_SHIFT] = MOD_LSFT | MOD_RSFT,
-        [VISTA_MOD_ICON_ALT] = MOD_LALT | MOD_RALT,
-        [VISTA_MOD_ICON_GUI] = MOD_LGUI | MOD_RGUI,
-    };
+    lv_canvas_fill_bg(canvas, VISTA_CANVAS_BACKGROUND, LV_OPA_COVER);
 
     const lv_coord_t inset = (VISTA_MOD_ICON_SLOT_W - VISTA_MOD_ICON_SIZE) / 2;
-    for (uint8_t slot = 0; slot < VISTA_MOD_ICON_SLOTS; slot++) {
-        if (state.mods & slot_mods[slot]) {
-            vista_draw_mod_icon(mods_canvas, slot * VISTA_MOD_ICON_SLOT_W + inset,
-                                VISTA_MOD_ICON_PAD, (enum vista_mod_icon)slot);
+    for (uint8_t slot = 0; slot < VISTA_MOD_GROUP_SLOTS; slot++) {
+        if (held & group[slot].mods) {
+            vista_draw_mod_icon(canvas, slot * VISTA_MOD_ICON_SLOT_W + inset, VISTA_MOD_ICON_PAD,
+                                group[slot].icon);
         }
     }
+}
+
+static void rolio_mods_update_cb(struct rolio_mods_state state) {
+    mods_group_draw(mods_canvas_left, mods_left, state.mods);
+    mods_group_draw(mods_canvas_right, mods_right, state.mods);
 }
 
 static struct rolio_mods_state rolio_mods_get_state(const zmk_event_t *eh) {
@@ -550,9 +808,7 @@ static void rolio_leader_update_cb(struct zmk_leader_state_changed state) {
 
     leader_active = true;
     layer_set_hidden(true);
-    if (emblem_canvas != NULL) {
-        lv_obj_add_flag(emblem_canvas, LV_OBJ_FLAG_HIDDEN);
-    }
+    emblem_show(false);
 
     char text[LEADER_TEXT_MAX];
     int used = snprintf(text, sizeof(text), "LEADER");
@@ -633,22 +889,24 @@ lv_obj_t *zmk_display_status_screen(void) {
      * layer change.
      */
     emblem_canvas = lv_canvas_create(screen);
-    lv_canvas_set_buffer(emblem_canvas, emblem_buf, HIEROPHANT_W, HIEROPHANT_H,
+    lv_canvas_set_buffer(emblem_canvas, emblem_buf, EMBLEM_BUF_W, EMBLEM_BUF_H,
                          VISTA_CANVAS_COLOR_FORMAT);
-    lv_canvas_fill_bg(emblem_canvas, VISTA_CANVAS_BACKGROUND, LV_OPA_COVER);
-    vista_draw_bitmap(emblem_canvas, 0, 0, hierophant_bits, HIEROPHANT_W, HIEROPHANT_H,
-                      HIEROPHANT_STRIDE);
     lv_obj_align(emblem_canvas, LV_ALIGN_TOP_MID, 0, 0);
-    lv_obj_add_flag(emblem_canvas, LV_OBJ_FLAG_HIDDEN);
 
     /*
-     * Connection top-left, battery top-right, in the gaps either side of the
-     * spear. These are created after the emblem so they draw over it: LVGL's
-     * z-order follows creation order, and the emblem is a full-panel object.
+     * The scratch the corner readouts are rendered into before being XORed in.
+     * A canvas rather than a bare buffer because LVGL will only draw text
+     * through a layer, and lv_canvas_init_layer() needs a canvas object.
+     *
+     * Never shown: it is a drawing surface, not part of the screen. It is still
+     * parented to the screen because an LVGL object needs a parent to exist.
      */
-    corner_label_create(&conn_bold, screen, LV_ALIGN_TOP_LEFT, LV_TEXT_ALIGN_LEFT);
+    text_canvas = lv_canvas_create(screen);
+    lv_canvas_set_buffer(text_canvas, text_buf, TEXT_SCRATCH_W, TEXT_SCRATCH_H,
+                         VISTA_CANVAS_COLOR_FORMAT);
+    lv_obj_add_flag(text_canvas, LV_OBJ_FLAG_HIDDEN);
 
-    corner_label_create(&batt_bold, screen, LV_ALIGN_TOP_RIGHT, LV_TEXT_ALIGN_RIGHT);
+    panel_redraw();
 
     rolio_conn_status_init();
     rolio_batt_status_init();
@@ -670,28 +928,45 @@ lv_obj_t *zmk_display_status_screen(void) {
     rolio_leader_status_init();
 
     /*
-     * Modifier glyphs share the bottom line with WPM: the emblem takes the
-     * whole middle band, so there is no room for a line of their own.
+     * Modifier glyphs, a pair in each bottom corner. The emblem takes the whole
+     * middle band, so there is no room for a line of their own; two pairs leave
+     * the middle of the bottom edge to the art instead of one row of four
+     * taking half of it.
+     *
+     * Both are lifted off the bottom edge: sitting flush, the glyphs' lowest
+     * stroke merged into the panel border and they read as clipped.
      */
-    mods_canvas = lv_canvas_create(screen);
-    lv_canvas_set_buffer(mods_canvas, mods_buf, VISTA_MOD_ROW_W, VISTA_MOD_ROW_H,
+    mods_canvas_left = lv_canvas_create(screen);
+    lv_canvas_set_buffer(mods_canvas_left, mods_buf_left, VISTA_MOD_ROW_W, VISTA_MOD_ROW_H,
                          VISTA_CANVAS_COLOR_FORMAT);
-    lv_canvas_fill_bg(mods_canvas, VISTA_CANVAS_BACKGROUND, LV_OPA_COVER);
-    /*
-     * Lifted off the bottom edge: sitting flush, the glyphs' lowest stroke
-     * merged into the panel border and they read as clipped.
-     */
-    lv_obj_align(mods_canvas, LV_ALIGN_BOTTOM_LEFT, 0, -MODS_LIFT);
+    lv_canvas_fill_bg(mods_canvas_left, VISTA_CANVAS_BACKGROUND, LV_OPA_COVER);
+    lv_obj_align(mods_canvas_left, LV_ALIGN_BOTTOM_LEFT, 0, -MODS_LIFT);
+
+    mods_canvas_right = lv_canvas_create(screen);
+    lv_canvas_set_buffer(mods_canvas_right, mods_buf_right, VISTA_MOD_ROW_W, VISTA_MOD_ROW_H,
+                         VISTA_CANVAS_COLOR_FORMAT);
+    lv_canvas_fill_bg(mods_canvas_right, VISTA_CANVAS_BACKGROUND, LV_OPA_COVER);
+    lv_obj_align(mods_canvas_right, LV_ALIGN_BOTTOM_RIGHT, 0, -MODS_LIFT);
+
     rolio_mods_status_init();
 
-    /* WPM along the bottom. */
+    /*
+     * WPM along the bottom.
+     *
+     * Currently OFF -- CONFIG_ZMK_WIDGET_WPM_STATUS=n in vista508.conf. The
+     * layout is kept so turning the symbol back on restores it, but two things
+     * have moved underneath it since: the bottom-right corner now belongs to
+     * the SHIFT/CTRL glyph pair, and this is still a plain label drawn OVER the
+     * canvas rather than XORed into it, so it will mask whatever art is beneath
+     * exactly as the corner readouts used to. Both want addressing before it
+     * goes back on.
+     */
 #if IS_ENABLED(CONFIG_ZMK_WIDGET_WPM_STATUS)
     zmk_widget_wpm_status_init(&wpm_status_widget, screen);
     lv_obj_t *wpm = zmk_widget_wpm_status_obj(&wpm_status_widget);
     lv_obj_set_width(wpm, LV_SIZE_CONTENT);
     lv_obj_set_style_text_font(wpm, CORNER_FONT, LV_PART_MAIN);
     lv_obj_set_style_text_align(wpm, LV_TEXT_ALIGN_RIGHT, LV_PART_MAIN);
-    corner_backing(wpm);
     lv_obj_align(wpm, LV_ALIGN_BOTTOM_RIGHT, 0, 0);
 #endif
 

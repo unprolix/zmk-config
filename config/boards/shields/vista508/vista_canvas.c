@@ -48,6 +48,45 @@ void vista_draw_bitmap(lv_obj_t *canvas, lv_coord_t x, lv_coord_t y, const uint8
     }
 }
 
+void vista_xor_canvas(lv_obj_t *dst, lv_coord_t x, lv_coord_t y, lv_obj_t *src) {
+    lv_draw_buf_t *dbuf = lv_canvas_get_draw_buf(dst);
+    lv_draw_buf_t *sbuf = lv_canvas_get_draw_buf(src);
+    if (dbuf == NULL || sbuf == NULL) {
+        return;
+    }
+
+    const lv_coord_t dst_w = (lv_coord_t)dbuf->header.w;
+    const lv_coord_t dst_h = (lv_coord_t)dbuf->header.h;
+    const lv_coord_t src_w = (lv_coord_t)sbuf->header.w;
+    const lv_coord_t src_h = (lv_coord_t)sbuf->header.h;
+    const uint32_t dst_stride = lv_draw_buf_width_to_stride(dst_w, VISTA_CANVAS_COLOR_FORMAT);
+    const uint32_t src_stride = lv_draw_buf_width_to_stride(src_w, VISTA_CANVAS_COLOR_FORMAT);
+
+    for (lv_coord_t row = 0; row < src_h; row++) {
+        const lv_coord_t dy = y + row;
+        if (dy < 0 || dy >= dst_h) {
+            continue;
+        }
+        const uint8_t *sp = sbuf->data + (size_t)row * src_stride;
+        uint8_t *dp = dbuf->data + (size_t)dy * dst_stride;
+
+        for (lv_coord_t col = 0; col < src_w; col++) {
+            const lv_coord_t dx = x + col;
+            if (dx < 0 || dx >= dst_w) {
+                continue;
+            }
+            if (VISTA_IS_INK(sp[col])) {
+                /*
+                 * Both values written to these canvases are 0x00 and 0xFF, so a
+                 * full-byte flip is an exact inversion rather than an
+                 * approximation of one.
+                 */
+                dp[dx] ^= 0xFF;
+            }
+        }
+    }
+}
+
 static void icon_line(lv_obj_t *canvas, const lv_point_t *points, uint32_t count) {
     lv_draw_line_dsc_t dsc;
     lv_draw_line_dsc_init(&dsc);

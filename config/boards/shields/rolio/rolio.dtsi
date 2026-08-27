@@ -28,6 +28,20 @@
 };
 
 / {
+    /*
+     * Swaps which emblem the vista508 shows. Declared HERE, in the shared
+     * dtsi, rather than in vista508.overlay: only the left half carries the
+     * display, but both halves compile the same keymap, so a node visible to
+     * only one of them fails the other's build outright. The behaviour is a
+     * no-op on the half with no screen -- see emblem_toggle.c.
+     */
+    behaviors {
+        emblem_toggle: emblem_toggle {
+            compatible = "zmk,behavior-emblem-toggle";
+            #binding-cells = <0>;
+        };
+    };
+
     chosen {
         zmk,physical-layout = &rolio_layout;
         zmk,kscan = &kscan0;

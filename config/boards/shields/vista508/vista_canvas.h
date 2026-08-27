@@ -59,6 +59,35 @@
 #endif
 
 /*
+ * Is an L8 pixel ink? True once it is nearer the ink value than the background,
+ * which is the same threshold the 1-bit panel itself applies. Needed because
+ * LVGL antialiases text, so a glyph arrives as a spread of greys rather than
+ * the two values everything else here writes.
+ */
+#if VISTA_INVERT
+#define VISTA_IS_INK(px) ((px) >= 0x80)
+#else
+#define VISTA_IS_INK(px) ((px) < 0x80)
+#endif
+
+/*
+ * XOR the inked pixels of one canvas into another at (x, y).
+ *
+ * This is how the status readouts sit over the emblem without eating it. They
+ * used to paint an opaque backing, which cost whatever art was underneath --
+ * on the full-width circle-cube that was a visible bite out of the disc. XOR
+ * costs nothing: where the emblem is ink the text comes out blank, and where
+ * the emblem is blank the text comes out ink, so both survive.
+ *
+ * It has to be done in the buffer. LVGL 9 offers only NORMAL, ADDITIVE,
+ * SUBTRACTIVE and MULTIPLY blend modes -- none of them is XOR on a 1-bit
+ * panel -- so no arrangement of label styles can produce this.
+ *
+ * Both canvases must be VISTA_CANVAS_COLOR_FORMAT. Clipped to the destination.
+ */
+void vista_xor_canvas(lv_obj_t *dst, lv_coord_t x, lv_coord_t y, lv_obj_t *src);
+
+/*
  * Blit a 1-bit-per-pixel bitmap, MSB first, a set bit being ink. Writes the
  * canvas buffer directly rather than going through an LVGL image descriptor:
  * the source is already the panel's depth, so there is nothing to scale or
@@ -76,15 +105,23 @@ void vista_draw_bitmap(lv_obj_t *canvas, lv_coord_t x, lv_coord_t y, const uint8
  * canvas rather than a label, drawing them as line art is less work and less
  * flash.
  *
- * The four sit in fixed slots, so a given modifier is always in the same
- * place. Left and right are not distinguished.
+ * Each sits in a fixed slot, so a given modifier is always in the same place.
+ * Left and right are not distinguished.
  */
 /*
- * Sized to the blank bottom-left corner the emblem leaves free, which is about
- * 62x18. Four slots at 15 wide comes to 60.
+ * The four live in two groups of two, one in each bottom corner, rather than
+ * as a single row of four in the bottom-left.
+ *
+ * A four-wide row is about 68px, and on a 144px panel that reserved half the
+ * bottom edge for glyphs that are usually absent -- the circle-cube emblem
+ * runs full width and lost a visible bite out of its lower left to the space
+ * held for GUI. Two pairs cost half as much on either side, and they sit where
+ * the emblem is already thinnest.
  */
 #define VISTA_MOD_ICON_SIZE   13
 #define VISTA_MOD_ICON_SLOTS  4
+/* Slots per corner group. Two groups of two make up the four. */
+#define VISTA_MOD_GROUP_SLOTS 2
 #define VISTA_MOD_ICON_SLOT_W 17
 
 /*
@@ -93,13 +130,12 @@ void vista_draw_bitmap(lv_obj_t *canvas, lv_coord_t x, lv_coord_t y, const uint8
  * the strokes closing up the inside of the GUI square or the Shift arrow.
  *
  * At 3 the strokes spread about a pixel and a half either side of the path, so
- * the slot went to 17 to keep neighbouring glyphs from touching -- four of them
- * come to 68, which still clears the roughly 62-70 the emblem leaves free in
- * this corner. Going further would need the glyphs themselves made smaller,
- * which defeats the point.
+ * the slot went to 17 to keep neighbouring glyphs from touching. A pair comes
+ * to 34, comfortably inside what either bottom corner has free. Going further
+ * would need the glyphs themselves made smaller, which defeats the point.
  */
 #define VISTA_MOD_ICON_STROKE 3
-#define VISTA_MOD_ROW_W (VISTA_MOD_ICON_SLOTS * VISTA_MOD_ICON_SLOT_W)
+#define VISTA_MOD_ROW_W (VISTA_MOD_GROUP_SLOTS * VISTA_MOD_ICON_SLOT_W)
 /*
  * A stroke straddles the path it is drawn along, so half of it falls outside
  * the glyph's nominal box. Without this padding the top and bottom strokes are
