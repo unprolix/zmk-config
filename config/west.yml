@@ -111,9 +111,16 @@ manifest:
     # Also tabulates the sequence names on BOTH halves of a split. The
     # behaviour itself is central-only, so without this a peripheral display
     # cannot name a candidate; with it, only indices need crossing the link.
+    #
+    # And drops transient layers when the leader activates. The leader key sits
+    # on a layer reached with &sl, which stays armed through it -- ZMK releases
+    # a sticky key only on a keycode event and this behaviour raises none -- so
+    # the first sequence key resolved against that layer's sticky mods and the
+    # sequence cancelled on a LEFT_CONTROL it could not match. See
+    # [[leader_sticky_layer]]. Branch: peripheral-names.
     - name: zmk-leader-key
       remote: unprolix
-      revision: 9fbd41de82a48d8188297277b6d793d096349f1f
+      revision: e9359dda605d7df3204480c376a82d5291d360fc
       path: modules/zmk/leader-key
     - name: zmk-tri-state
       path: modules/zmk/tri-state
