@@ -22,7 +22,10 @@
 
 set -uo pipefail
 
-STAGING="$HOME/zmk-flash"
+# Under ~/tmp, not straight in ~. This has to survive a reboot -- a half can sit
+# in its bootloader across one -- so /tmp will not do, but that is no reason to
+# leave a directory in the home directory of every machine a keyboard visits.
+STAGING="$HOME/tmp/zmk-flash"
 MOUNT=/mnt/keeb
 
 # serial -> firmware suffix, human name
