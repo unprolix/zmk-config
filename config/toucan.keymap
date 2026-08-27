@@ -16,6 +16,22 @@
 #include "zmk-helpers/key-labels/42.h"
 #include "jjb.keymap"
 
+/*
+ * Swap the emblem and leave SYSTEM in one press.
+ *
+ * Mirrors the Rolio, which has the same panel and the same screen. The layer
+ * half is HERE rather than inside the behaviour: which layer is "home" is a
+ * property of this keymap, not of a display toggle. SYSTEM is entered with
+ * &to, which LOCKS the layer, so only another &to gets out of it.
+ *
+ * The Toucan has no soft-off, so unlike the Rolio the outer thumb stays as the
+ * shared layout left it.
+ */
+ZMK_MACRO(emblem_home, bindings = <&emblem_toggle>, <&to HIEROPHANT>;)
+
+#undef SYSTEM_LH
+#define SYSTEM_LH &trans &emblem_home &to HIEROPHANT
+
 #define OUTER &none
 
 / {
