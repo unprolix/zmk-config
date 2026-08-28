@@ -1,16 +1,36 @@
 /* Toucan2 display: Sharp memory-in-pixel LS013B7DH05-class, 144x168.
  * nice_view_spi is defined by toucan_left.overlay (spi0 on the xiao).
- * serial-vcom props per the Zephyr 4.1 ls0xx driver (software VCOM). */
+ *
+ * Uses the vendor's zmk-ls0xxvcom-driver fork rather than Zephyr's in-tree
+ * `sharp,ls0xx`, which has neither idle-vcom-interval nor dma-mode -- its
+ * blanking_on() just logs "Unsupported" and returns -ENOTSUP, so on the
+ * in-tree driver the panel toggles VCOM at the active rate forever and
+ * ZMK_DISPLAY_BLANK_ON_IDLE buys nothing.
+ *
+ * No rotate-180 here: unlike the Rolio's, this panel is mounted the right
+ * way up.
+ */
 &nice_view_spi {
     status = "okay";
     toucan_view: ls0xx@0 {
-        compatible = "sharp,ls0xx";
+        compatible = "sharp,ls0xx-vcom";
         spi-max-frequency = <1000000>;
         reg = <0>;
         width = <144>;
         height = <168>;
         serial-vcom-inversion;
+        /* 33ms is what this panel has been running; the Rolio needs 17 to kill
+           an off-axis flicker this one has not shown. Left alone deliberately
+           so the driver swap is the only variable. */
         serial-vcom-interval = <33>;
+        /* Reachable only from blanking_on(), which ZMK calls when
+           ZMK_DISPLAY_BLANK_ON_IDLE is set: idle VCOM drops from ~60 wakeups
+           a second to one. */
+        idle-vcom-interval = <1000>;
+        /* One DMA SPI transaction per frame instead of one per line: 168
+           wakeups down to 1. Costs height * (width/8 + 2) = 3360 bytes of RAM,
+           which is the way to confirm it actually engaged. */
+        dma-mode;
     };
 };
 
