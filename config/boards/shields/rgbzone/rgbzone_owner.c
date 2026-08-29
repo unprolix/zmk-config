@@ -37,7 +37,7 @@
 #include <zmk/events/position_state_changed.h>
 #include <zmk/keymap.h>
 
-#include "rgbzone.h"
+#include "rgbzone_owner.h"
 
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
@@ -84,7 +84,7 @@ void rgbzone_owner_released(uint8_t layer, uint32_t position) {
     }
 }
 
-bool rgbzone_owner_side(uint8_t layer, bool *from_right) {
+bool rgbzone_owner_key(uint8_t layer, bool *from_right, uint8_t *position) {
     int best = -1;
     for (int i = 0; i < RGBZONE_OWNER_MAX; i++) {
         if (rgbzone_owners[i].seq == 0 || rgbzone_owners[i].layer != layer) {
@@ -99,8 +99,17 @@ bool rgbzone_owner_side(uint8_t layer, bool *from_right) {
     if (best < 0) {
         return false;
     }
-    *from_right = rgbzone_owners[best].from_right;
+    if (from_right != NULL) {
+        *from_right = rgbzone_owners[best].from_right;
+    }
+    if (position != NULL) {
+        *position = (uint8_t)rgbzone_owners[best].position;
+    }
     return true;
+}
+
+bool rgbzone_owner_side(uint8_t layer, bool *from_right) {
+    return rgbzone_owner_key(layer, from_right, NULL);
 }
 
 #if DT_HAS_COMPAT_STATUS_OKAY(DT_DRV_COMPAT)

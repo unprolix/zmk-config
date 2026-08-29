@@ -1,0 +1,37 @@
+# SPDX-License-Identifier: MIT
+
+if SHIELD_CORNE_V4_LEFT
+
+config ZMK_KEYBOARD_NAME
+    default "Corne v4"
+
+# The wired transport's central is fixed at build time, so this half is the one
+# the USB cable goes into. There is no runtime handedness to negotiate.
+config ZMK_SPLIT_ROLE_CENTRAL
+    default y
+
+endif # SHIELD_CORNE_V4_LEFT
+
+if SHIELD_CORNE_V4_LEFT || SHIELD_CORNE_V4_RIGHT
+
+config ZMK_SPLIT
+    default y
+
+# One EC11 per half, wired straight to the MCU.
+config EC11
+    default y
+
+# The driver's own default is EC11_TRIGGER_NONE, which builds and initialises
+# perfectly happily and then never reports a single rotation -- the encoder
+# simply does nothing, with no error anywhere to say why. This is a property of
+# the hardware rather than a preference, so it belongs here; EC11_TRIGGER_MODE
+# is a NAMED choice, which is what makes overriding it from a shield defconfig
+# possible at all.
+choice EC11_TRIGGER_MODE
+    default EC11_TRIGGER_GLOBAL_THREAD
+endchoice
+
+endif
+
+# Nothing here turns on the LED strip driver: Zephyr's WS2812_STRIP_RPI_PICO_PIO
+# already defaults y off the devicetree node.

@@ -1,0 +1,29 @@
+# Copyright (c) 2026 The ZMK Contributors
+# SPDX-License-Identifier: MIT
+
+description: |
+  A key that, held while the board powers up, reboots it into the bootloader.
+
+  ZMK's own &bootloader behaviour is a keymap binding, so it needs the keymap
+  running to reach it -- and on a split peripheral it needs the link to the
+  central as well, since the peripheral does not run a keymap at all. That
+  leaves nothing at all for a peripheral whose split link does not work, which
+  on a board with no reachable BOOT button means no way back.
+
+  This is the same idea as QMK's bootmagic and runs in its place: one GPIO,
+  read once at startup, before the keymap, the split transport or USB exist.
+  It works on firmware that is otherwise completely broken. The only thing it
+  needs is that the board boots far enough to run SYS_INIT.
+
+  Requires CONFIG_RETENTION_BOOT_MODE, which is how the reboot is told to stop
+  in the bootloader rather than come back up in the application.
+
+compatible: "zmk,boot-key"
+
+properties:
+  gpios:
+    type: phandle-array
+    required: true
+    description: |
+      The key to check, as it is wired -- normally active-low with a pull-up,
+      the same as every other switch on the board.

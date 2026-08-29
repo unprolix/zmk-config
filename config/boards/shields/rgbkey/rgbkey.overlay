@@ -17,3 +17,33 @@
         };
     };
 };
+
+/*
+ * Ask jjb.keymap to retarget &mo at the recording momentary behaviour, so the
+ * lighting can tell which hand is holding a layer open.
+ *
+ * NOT RGBZONE_PRESENT. That one means "the rgbzone shield is here" and also
+ * gates its own behaviour nodes -- rgbz_up and friends -- which do not exist in
+ * an rgbkey build; borrowing it to get the owner mechanism fails the build on
+ * an undefined rgbz_up label.
+ *
+ * The retarget cannot be done here: &mo comes from behaviors.dtsi, which the
+ * *keymap* includes, and the keymap is preprocessed after every shield overlay,
+ * so the label does not exist yet at this point. Zephyr feeds all the
+ * devicetree sources through one preprocessor run, in order, so a #define set
+ * here does reach the keymap, which is where jjb.keymap acts on it.
+ *
+ * Asked for by the Corne v4 only. The Rolio's rows are not sided, so it would
+ * gain a retargeted &mo and a kilobyte of bookkeeping for a side nothing there
+ * reads -- and that is a behavioural change to a keyboard that already works.
+ *
+ * ASKED FOR BY CORNE_V4_PRESENT, NOT BY CONFIG_SHIELD_CORNE_V4_*. Zephyr runs
+ * its `dts` cmake module before `kconfig`, so autoconf.h does not exist while
+ * the devicetree sources are preprocessed: a `#if defined(CONFIG_...)` here is
+ * always false, silently, and the retarget below simply never happened. The
+ * marker comes from corne_v4.dtsi instead, which the board's own shield overlay
+ * includes ahead of this file in the single preprocessor run.
+ */
+#ifdef CORNE_V4_PRESENT
+#define LAYER_OWNER_PRESENT 1
+#endif

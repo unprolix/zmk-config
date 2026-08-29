@@ -46,8 +46,10 @@ static struct led_rgb pixels[STRIP_COUNT];
  */
 #if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
 #define RGBKEY_OUR_MAP rgbkey_led_left
+#define RGBKEY_WE_ARE_LEFT 1
 #else
 #define RGBKEY_OUR_MAP rgbkey_led_right
+#define RGBKEY_WE_ARE_LEFT 0
 #endif
 
 /*
@@ -137,6 +139,17 @@ static void paint(uint8_t position, enum rgbkey_colour colour) {
     pixels[led].b = rgbkey_palette[colour][2];
 }
 
+/*
+ * How long a clean frame can take before it is worth saying so. 30us a pixel on
+ * the wire, the driver's reset delay after it, and a generous margin on top so
+ * that ordinary jitter is not reported as tearing.
+ */
+#define RGBKEY_FRAME_US_PER_PIXEL 30
+#define RGBKEY_FRAME_SLACK_US     500
+#define RGBKEY_FRAME_SLOW_US      (STRIP_COUNT * RGBKEY_FRAME_US_PER_PIXEL + RGBKEY_FRAME_SLACK_US)
+
+static uint32_t slow_frames;
+
 /* Push whatever is in `pixels` to the chain, bringing the supplies up first. */
 static void flush(bool any) {
     ensure_rail();
@@ -148,8 +161,57 @@ static void flush(bool any) {
          */
         k_msleep(RGBKEY_GATE_SETTLE_MS);
     }
-    if (led_strip_update_rgb(strip, pixels, STRIP_COUNT) != 0) {
+    /*
+     * A FRAME MUST NOT BE INTERRUPTED, AND NOTHING IN THE DRIVER ENFORCES IT.
+     *
+     * ws2812_led_strip_update_rgb() clocks the pixels out with
+     * pio_sm_put_blocking() in a plain loop -- CPU-fed, no DMA. The PIO TX FIFO
+     * is four words deep and a word is one 24-bit pixel, ~30us on the wire, so
+     * there is about 120us of slack between the CPU falling behind and the line
+     * going idle. A WS2812 reads ~50us of idle as END OF FRAME: it latches what
+     * it has and the NEXT pixel written lands back at LED 0.
+     *
+     * So a preemption in the middle of a frame does not drop pixels, it SHIFTS
+     * the tail of the frame onto the head of the chain. What that looks like is
+     * a handful of LEDs at the start of the chain lit in colours meant for keys
+     * further along, differently each time, with the keys that should be lit
+     * sometimes right and sometimes missing. It looks like a table bug and is
+     * not one.
+     *
+     * This runs on the LOW-priority workqueue, so the system workqueue preempts
+     * it -- and on a split central the system workqueue is where the far half's
+     * key events are published. That is why the picture only came apart while a
+     * key on the OTHER half was held: that is the one thing that schedules work
+     * against a repaint.
+     *
+     * k_sched_lock, not irq_lock. The stall that matters is another THREAD, and
+     * ~700us with interrupts off would starve the wired split's read timer,
+     * which drains an 8-byte PIO RX FIFO from an ISR every 200us -- and a wired
+     * split that loses a fragment does not degrade, it hangs for good. Raising
+     * to a cooperative priority stops the preemption while leaving every ISR
+     * free to run; an ISR here is far shorter than the 120us of slack.
+     */
+    uint32_t started = k_cycle_get_32();
+    k_sched_lock();
+    int err = led_strip_update_rgb(strip, pixels, STRIP_COUNT);
+    k_sched_unlock();
+    uint32_t elapsed = k_cyc_to_us_floor32(k_cycle_get_32() - started);
+
+    if (err != 0) {
         LOG_WRN("Failed to update LED strip");
+    }
+
+    /*
+     * A frame is STRIP_COUNT * 30us on the wire plus the driver's reset delay.
+     * Anything far past that was interrupted anyway, which is the one thing
+     * that cannot be seen by looking at the strip -- a torn frame and a wrong
+     * table produce the same wrong pixels. Logged only when it happens, so
+     * silence here is the evidence that it does not.
+     */
+    if (elapsed > RGBKEY_FRAME_SLOW_US) {
+        slow_frames++;
+        LOG_INF("rgbkey: strip write took %uus (>%uus), torn frame likely; %u so far", elapsed,
+                RGBKEY_FRAME_SLOW_US, slow_frames);
     }
 }
 
@@ -301,8 +363,53 @@ static void strip_write(struct k_work *work) {
             if (group->positions == NULL || group->colour == RK_OFF) {
                 continue; /* an unused slot in the row */
             }
+            /*
+             * A sided group belongs to one half or the other. Both halves see
+             * the same table, so each simply drops the groups that are not
+             * about it -- and when nobody knows which hand is holding the
+             * layer, both keep the group rather than one of them guessing.
+             */
+            if (group->side != RK_SIDE_ANY && rgbkey_side_known(packed)) {
+                const bool we_are_right = !RGBKEY_WE_ARE_LEFT;
+                const bool we_hold = (rgbkey_side_is_right(packed) == we_are_right);
+                if ((group->side == RK_SIDE_HOLDING) != we_hold) {
+                    continue;
+                }
+            }
             for (const uint8_t *pos = group->positions; *pos != RGBKEY_POS_NONE; pos++) {
                 paint(*pos, group->colour);
+            }
+        }
+
+        /*
+         * THE KEY HOLDING THE LAYER OPEN, in that layer's own colour -- the nav
+         * thumb goes green while it is holding navigation.
+         *
+         * On a per-key board this is the one thing the eyelash's columns cannot
+         * say: not just "navigation is on" but "this is the key doing it, let go
+         * of it to stop". It costs nothing to find, because the owning position
+         * is already recorded to work out which hand is holding the layer; only
+         * the side used to travel over the split, and now the position does too.
+         *
+         * The far half simply finds no LED for a position on this one, so a
+         * thumb lights on its own half without either half being told which it
+         * is -- the same way every other group here works.
+         *
+         * Painted AFTER the groups so it wins its own pixel, and before caps
+         * lock, which outranks everything.
+         *
+         * The colour is the row's first stated colour rather than a field of its
+         * own. On every layer here the first group IS the layer's identity -- the
+         * green wash on navigation, the blue column on symbol -- so a separate
+         * field would be the same value written twice, and the two would drift.
+         */
+        if (rgbkey_side_known(packed)) {
+            for (size_t g = 0; g < ARRAY_SIZE(row->groups); g++) {
+                if (row->groups[g].positions == NULL || row->groups[g].colour == RK_OFF) {
+                    continue;
+                }
+                paint(rgbkey_owner_pos(packed), row->groups[g].colour);
+                break;
             }
         }
     }
@@ -311,7 +418,28 @@ static void strip_write(struct k_work *work) {
      * Held modifiers last. A layer with no row of its own -- the base layer,
      * where this matters most -- still shows them.
      */
+    /*
+     * WHEN A HELD MODIFIER IS SHOWN AT ALL.
+     *
+     * Two boards want different rules, so the layout header picks one.
+     *
+     * The Rolio decides per layer, with the `hrm` flag on each row. The Corne
+     * v4 follows the eyelash instead, whose rule is that modifiers are shown
+     * only when the layer itself is saying nothing (rgbzone_run.c: `if
+     * (!layer_speaks) overlay_mods(...)`). That matters most on navigation,
+     * where the arrow keys ARE home-row mods: with the per-layer rule, touching
+     * an arrow repaints its column in the modifier's colour and the cluster
+     * appears to flicker under the hand.
+     *
+     * "Says nothing" is a property of the ROW, not of the pixels this half
+     * painted -- a row lighting only the far half must still count as speaking,
+     * or the two halves would disagree about whether to show modifiers.
+     */
+#if RGBKEY_HRM_ONLY_WHEN_LAYER_SILENT
+    if (row == NULL) {
+#else
     if (row == NULL || row->hrm) {
+#endif
         for (size_t i = 0; i < ARRAY_SIZE(rgbkey_hrms); i++) {
             if ((mods & rgbkey_hrms[i].mod) == 0 || rgbkey_hrms[i].positions == NULL) {
                 continue;

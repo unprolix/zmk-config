@@ -1,0 +1,235 @@
+/*
+ * foostan Corne v4 (rev 4.1, "standard" 3x6+3) — shared shield devicetree.
+ *
+ * Pin assignments are from QMK's keyboards/crkbd/rev4_1/info.json and
+ * config.h, which are foostan's own and describe rev 4.1 exactly. Unlike the
+ * Rolio, nothing here had to be found empirically -- EXCEPT the encoders, see
+ * corne_v4_left.overlay.
+ *
+ * The v4 has no key matrix. Every switch gets its own GPIO, so kscan is
+ * zmk,kscan-gpio-direct, which reports a key as (row 0, column <index into
+ * input-gpios>). The transform below is therefore one row of 42 columns, not
+ * the 4x12 the pro-micro Corne uses, and each half's input-gpios are listed in
+ * physical left-to-right, top-to-bottom order so that index == position within
+ * that half. The right half then shifts itself up by 21 with col-offset.
+ *
+ * Column 6 of foostan's matrix (the "ex2" expansion keys) is not populated on
+ * the standard board and is left out entirely.
+ *
+ * SPDX-License-Identifier: MIT
+ */
+
+#include <dt-bindings/zmk/matrix_transform.h>
+#include <dt-bindings/led/led.h>
+
+#include "corne_v4-layout.dtsi"
+
+/*
+ * Keys per half, and hence the right half's column offset into the transform.
+ * 21 keycaps plus the two ex2 expansion switches at the inner edge -- which is
+ * also why foostan's LED chain is 23 a half.
+ */
+#define CORNE_V4_KEYS_PER_HALF 23
+
+&corne_v4_layout {
+    transform = <&default_transform>;
+    kscan = <&kscan0>;
+};
+
+/ {
+    chosen {
+        zmk,kscan = &kscan0;
+        zmk,physical-layout = &corne_v4_layout;
+        zmk,underglow = &led_strip;
+    };
+
+    /*
+     * The 21 keycap positions of each half keep the order they were confirmed
+     * in on hardware (2026-08-29, all 21 left positions correct); the two
+     * expansion switches are APPENDED as indices 21 and 22 rather than slotted
+     * in at the inner edge, precisely so that nothing already verified gets
+     * renumbered. The map below is what puts them back in reading order.
+     *
+     * Left half is kscan columns 0-22, right half 23-45 (via col-offset).
+     */
+    default_transform: keymap_transform_0 {
+        compatible = "zmk,matrix-transform";
+        rows = <1>;
+        columns = <46>;
+        map = <
+RC(0,0)  RC(0,1)  RC(0,2)  RC(0,3)  RC(0,4)  RC(0,5)   RC(0,21) RC(0,44)   RC(0,23) RC(0,24) RC(0,25) RC(0,26) RC(0,27) RC(0,28)
+RC(0,6)  RC(0,7)  RC(0,8)  RC(0,9)  RC(0,10) RC(0,11)  RC(0,22) RC(0,45)   RC(0,29) RC(0,30) RC(0,31) RC(0,32) RC(0,33) RC(0,34)
+RC(0,12) RC(0,13) RC(0,14) RC(0,15) RC(0,16) RC(0,17)                      RC(0,35) RC(0,36) RC(0,37) RC(0,38) RC(0,39) RC(0,40)
+                           RC(0,18) RC(0,19) RC(0,20)                      RC(0,41) RC(0,42) RC(0,43)
+        >;
+    };
+
+    /* input-gpios are filled in per half; see the two overlays. */
+    kscan0: kscan {
+        compatible = "zmk,kscan-gpio-direct";
+        wakeup-source;
+    };
+
+    sensors: sensors {
+        compatible = "zmk,keymap-sensors";
+        sensors = <&encoder_left &encoder_right>;
+        triggers-per-rotation = <20>;
+    };
+
+    /*
+     * Hold this key while plugging the half in and it comes up in the
+     * bootloader. The pin differs per half, so each overlay fills it in.
+     *
+     * This is the only route into the bootloader that survives a broken split
+     * link, and on this board the BOOT button is not reachable with the case
+     * on -- see boot_key.c for why nothing else covers the peripheral.
+     */
+    boot_key: boot_key {
+        compatible = "zmk,boot-key";
+    };
+};
+
+/*
+ * Both encoders are declared on both halves. Only one of them is ever enabled
+ * per build, but zmk,keymap-sensors has to resolve both phandles or the half
+ * without the encoder fails to build -- the same rule that puts the Rolio's
+ * emblem behaviour in its shared dtsi.
+ */
+/ {
+    encoder_left: encoder_left {
+        compatible = "alps,ec11";
+        steps = <80>;
+        status = "disabled";
+    };
+
+    encoder_right: encoder_right {
+        compatible = "alps,ec11";
+        steps = <80>;
+        status = "disabled";
+    };
+};
+
+&pinctrl {
+    /*
+     * The split link. One conductor on the TRRS jack, so one pin, driven only
+     * while transmitting -- see uart_pio_half_duplex.c. Pulled up so the line
+     * reads idle-high when neither half is talking.
+     */
+    split_pio_default: split_pio_default {
+        data_pins {
+            pinmux = <PIO0_P12>;
+            input-enable;
+            bias-pull-up;
+        };
+    };
+
+    ws2812_pio_default: ws2812_pio_default {
+        ws2812 {
+            pinmux = <PIO1_P10>;
+        };
+    };
+};
+
+/*
+ * The half-duplex UART takes two of PIO0's four state machines; the LED strip
+ * gets PIO1 to itself so the two never contend.
+ */
+&pio0 {
+    status = "okay";
+
+    split_uart: split_uart {
+        compatible = "zmk,pico-uart-pio-half-duplex";
+        status = "okay";
+        pinctrl-0 = <&split_pio_default>;
+        pinctrl-names = "default";
+        /*
+         * Bounded by the RECEIVER, not by what the PIO can clock out.
+         *
+         * The RX FIFO is 8 bytes (PIO_FIFO_JOIN_RX) and ZMK empties it by
+         * polling, so the link can only run as fast as those 8 bytes can be
+         * consumed between polls. At 460800 baud a byte lands every 22us --
+         * eight of them in 174us, against a poll period of 1ms. Every reply
+         * longer than 8 bytes lost its tail, arrived as an unparseable
+         * fragment, and wedged the transport (see the note in
+         * corne_v4_left.conf about how a stuck fragment starves the poller).
+         *
+         * At 115200 with the poll period cut to 200us, roughly two bytes
+         * arrive per poll against a depth of eight: about a 3.5x margin, which
+         * survives ordinary scheduling jitter. A whole message is ~3ms, well
+         * inside the 15ms poll cycle. Raise it only alongside a faster drain.
+         */
+        current-speed = <115200>;
+    };
+};
+
+&pio1 {
+    status = "okay";
+
+    pio-ws2812 {
+        compatible = "worldsemi,ws2812-rpi_pico-pio";
+        status = "okay";
+        pinctrl-0 = <&ws2812_pio_default>;
+        pinctrl-names = "default";
+        bit-waveform = <3>, <3>, <4>;
+
+        led_strip: ws2812 {
+            status = "okay";
+            gpios = <&gpio0 10 GPIO_ACTIVE_HIGH>;
+            /*
+             * 23 per half: one under each of the 21 keys, plus the two that
+             * sit at the expansion position. Unlike the eyelash, this really
+             * is per-key.
+             */
+            chain-length = <23>;
+            color-mapping = <LED_COLOR_ID_GREEN LED_COLOR_ID_RED LED_COLOR_ID_BLUE>;
+            /* Plain WS2812 timing: 800kbit/s, 280us latch. */
+            frequency = <800000>;
+            reset-delay = <280>;
+        };
+    };
+};
+
+/ {
+    wired_split {
+        compatible = "zmk,wired-split";
+        device = <&split_uart>;
+        half-duplex;
+    };
+};
+
+/*
+ * foostan specifies a 64x crystal startup delay for this board (QMK's
+ * PICO_XOSC_STARTUP_DELAY_MULTIPLIER). Booting without it risks the PLL coming
+ * up before the oscillator is stable.
+ */
+&xosc {
+    startup-delay-multiplier = <64>;
+};
+
+/*
+ * ZMK's rpi_pico board marks the settings partition read-only, which leaves
+ * CONFIG_SETTINGS_NVS selected with nothing behind it. This keyboard has
+ * genuine settings to keep -- the active layer's lighting state, and anything
+ * else ZMK persists -- so give it back a writable partition.
+ */
+&storage_partition {
+    /delete-property/ read-only;
+};
+
+/*
+ * A marker for the other shields on the build line, because CONFIG_ symbols
+ * cannot be used here.
+ *
+ * Zephyr runs its `dts` cmake module BEFORE `kconfig` (zephyr_default.cmake:
+ * "DTS should be close to kconfig", dts listed first), so autoconf.h does not
+ * exist yet when the devicetree sources are preprocessed and every
+ * `#if defined(CONFIG_SHIELD_...)` in an overlay is silently false. It builds,
+ * it produces no warning, and whatever the guard protected simply never
+ * happens -- which is how rgbkey.overlay's &mo retarget went missing for two
+ * rounds of debugging.
+ *
+ * Overlays ARE preprocessed as one run in shield-list order (here:
+ * corne_v4_<half>.overlay, rgbkey.overlay, corne_v4.keymap, jjb.keymap), so a
+ * plain #define set by the board's own shield reaches everything after it.
+ */
+#define CORNE_V4_PRESENT 1

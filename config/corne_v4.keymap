@@ -1,0 +1,227 @@
+// -*- mode: dts -*-
+/*
+ * foostan Corne v4 (rev 4.1, "ex2") running the shared jjb layout.
+ *
+ * Six columns and three thumbs a side, so the shared layout's full-width row
+ * macros apply unchanged -- but this is the ex2 population, which adds a
+ * two-key column at the inner edge of each half. Those four extra positions
+ * are interleaved below as CORNE_V4_EX_T / CORNE_V4_EX_M, the same way the
+ * Rolio interleaves its roller clicks, giving 46 positions rather than 42.
+ *
+ * CONFIG_WIRELESS is deliberately NOT defined. The v4's MCU is an on-board
+ * RP2040, which has no radio: no BLE profiles, no battery, no soft-off, no
+ * dongle. The shared layout drops its &bt bindings accordingly, and the
+ * BLUETOOTH layer survives as an inert placeholder purely so the layer indices
+ * (LIGHTING=13, BLUETOOTH=14, SYSTEM=15) stay identical across every board.
+ *
+ * The halves are joined by one wire, not by Bluetooth, so the USB cable always
+ * goes into the LEFT half -- the wired transport's central is fixed at build
+ * time.
+ */
+
+#include "zmk-helpers/key-labels/42.h"
+#include "jjb.keymap"
+
+/* Left: volume. Right: page up/down. Matching the Rolio and the sofle.
+   The encoder GPIOs are foostan's first-listed candidates and are not yet
+   confirmed on hardware -- see corne_v4_left.overlay. */
+#define CORNE_V4_SENSORS <&inc_dec_kp C_VOL_UP C_VOL_DN &inc_dec_kp PG_UP PG_DN>
+
+/*
+ * The ex2 expansion column, four keys at the inner edge: upper pair first
+ * (left then right), then the lower pair. The upper key of each half is the
+ * push switch under that half's encoder, so it is bound to match what that
+ * encoder turns -- mute for the volume knob, play/pause for the other.
+ *
+ * The lower key of each half duplicates that half's OUTER THUMB layer access on
+ * a far more comfortable key -- left thumb is sticky SYMBOL, right thumb sticky
+ * NUMERIC (jjb.keymap:518-532), and the outer thumb is the position this layout
+ * leans on hardest. Same layer, same hand, index finger instead of thumb.
+ *
+ * &sl_long, not &mo: SYMBOL has content on BOTH halves (symbol.dtsi:16-21), so
+ * a held momentary layer would lock out the half doing the holding. Sticky
+ * releases the moment it is tapped, which is exactly why the thumb version is
+ * sticky too. Same reason the Rolio puts &sl_long SYMBOL on its extra keys
+ * (rolio.keymap:32).
+ *
+ * The double-tap-for-NUMPAD path deliberately stays on the thumbs alone: these
+ * are plain sticky keys, not the tap-dance, so there is no tap-dance state
+ * shared between two positions to trip over.
+ *
+ * Deliberately the same on every layer. For a layer key that is a feature --
+ * it behaves identically whatever else is held -- and for the media keys it
+ * beats having one move under your finger mid-press.
+ */
+#define CORNE_V4_EX_T &kp C_MUTE        &kp C_PLAY_PAUSE
+#define CORNE_V4_EX_M &sl_long SYMBOL   &sl_long NUMERIC
+
+/ {
+    keymap {
+        compatible = "zmk,keymap";
+
+        hierophant_layer {
+            display-name = "hierophant";
+            bindings = <
+HIEROPHANT_LT CORNE_V4_EX_T HIEROPHANT_RT
+HIEROPHANT_LM CORNE_V4_EX_M HIEROPHANT_RM
+HIEROPHANT_LB HIEROPHANT_RB
+HIEROPHANT_LH HIEROPHANT_RH
+            >;
+            sensor-bindings = CORNE_V4_SENSORS;
+        };
+
+        qwerty_layer {
+            display-name = "qwerty";
+            bindings = <
+QWERTY_LT CORNE_V4_EX_T QWERTY_RT
+QWERTY_LM CORNE_V4_EX_M QWERTY_RM
+QWERTY_LB QWERTY_RB
+QWERTY_LH QWERTY_RH
+            >;
+            sensor-bindings = CORNE_V4_SENSORS;
+        };
+
+        gaming_layer {
+            display-name = "gaming";
+            bindings = <
+GAMING_LT CORNE_V4_EX_T GAMING_RT
+GAMING_LM CORNE_V4_EX_M GAMING_RM
+GAMING_LB GAMING_RB
+GAMING_LH GAMING_RH
+            >;
+            sensor-bindings = CORNE_V4_SENSORS;
+        };
+
+        empty_2_layer {
+            display-name = "empty 2";
+            bindings = <
+EMPTY_2_LT CORNE_V4_EX_T EMPTY_2_RT
+EMPTY_2_LM CORNE_V4_EX_M EMPTY_2_RM
+EMPTY_2_LB EMPTY_2_RB
+EMPTY_2_LH EMPTY_2_RH
+            >;
+        };
+
+        superscript_layer {
+            display-name = "superscript";
+            bindings = <
+SUPERSCRIPT_LT CORNE_V4_EX_T SUPERSCRIPT_RT
+SUPERSCRIPT_LM CORNE_V4_EX_M SUPERSCRIPT_RM
+SUPERSCRIPT_LB SUPERSCRIPT_RB
+SUPERSCRIPT_LH SUPERSCRIPT_RH
+            >;
+        };
+
+        numeric_layer {
+            display-name = "numeric";
+            bindings = <
+NUMERIC_LT CORNE_V4_EX_T NUMERIC_RT
+NUMERIC_LM CORNE_V4_EX_M NUMERIC_RM
+NUMERIC_LB NUMERIC_RB
+NUMERIC_LH NUMERIC_RH
+            >;
+        };
+
+        numpad_layer {
+            display-name = "numpad";
+            bindings = <
+NUMPAD_LT CORNE_V4_EX_T NUMPAD_RT
+NUMPAD_LM CORNE_V4_EX_M NUMPAD_RM
+NUMPAD_LB NUMPAD_RB
+NUMPAD_LH NUMPAD_RH
+            >;
+        };
+
+        symbol_layer {
+            display-name = "symbol";
+            bindings = <
+SYMBOL_LT CORNE_V4_EX_T SYMBOL_RT
+SYMBOL_LM CORNE_V4_EX_M SYMBOL_RM
+SYMBOL_LB SYMBOL_RB
+SYMBOL_LH SYMBOL_RH
+            >;
+        };
+
+        navigation_layer {
+            display-name = "navigation";
+            bindings = <
+NAVIGATION_LT CORNE_V4_EX_T NAVIGATION_RT
+NAVIGATION_LM CORNE_V4_EX_M NAVIGATION_RM
+NAVIGATION_LB NAVIGATION_RB
+NAVIGATION_LH NAVIGATION_RH
+            >;
+        };
+
+        mod_l_nav_layer {
+            display-name = "LGUI+nav";
+            bindings = <
+LGN_LT CORNE_V4_EX_T LGN_RT
+LGN_LM CORNE_V4_EX_M LGN_RM
+LGN_LB LGN_RB
+LGN_LH LGN_RH
+            >;
+        };
+
+        mod_r_nav_layer {
+            display-name = "RGUI+nav";
+            bindings = <
+RGN_LT CORNE_V4_EX_T RGN_RT
+RGN_LM CORNE_V4_EX_M RGN_RM
+RGN_LB RGN_RB
+RGN_LH RGN_RH
+            >;
+        };
+
+        extra_layer {
+            display-name = "extra";
+            bindings = <
+EXTRA_LT CORNE_V4_EX_T EXTRA_RT
+EXTRA_LM CORNE_V4_EX_M EXTRA_RM
+EXTRA_LB EXTRA_RB
+EXTRA_LH EXTRA_RH
+            >;
+        };
+
+        function_layer {
+            display-name = "function";
+            bindings = <
+FUNCTION_LT CORNE_V4_EX_T FUNCTION_RT
+FUNCTION_LM CORNE_V4_EX_M FUNCTION_RM
+FUNCTION_LB FUNCTION_RB
+FUNCTION_LH FUNCTION_RH
+            >;
+        };
+
+        lighting_layer {
+            display-name = "lighting";
+            bindings = <
+LIGHTING_LT CORNE_V4_EX_T LIGHTING_RT
+LIGHTING_LM CORNE_V4_EX_M LIGHTING_RM
+LIGHTING_LB LIGHTING_RB
+LIGHTING_LH LIGHTING_RH
+            >;
+        };
+
+        /* Inert here -- see the CONFIG_WIRELESS note at the top. */
+        bluetooth_layer {
+            display-name = "bluetooth";
+            bindings = <
+BLUETOOTH_LT CORNE_V4_EX_T BLUETOOTH_RT
+BLUETOOTH_LM CORNE_V4_EX_M BLUETOOTH_RM
+BLUETOOTH_LB BLUETOOTH_RB
+BLUETOOTH_LH BLUETOOTH_RH
+            >;
+        };
+
+        system_layer {
+            display-name = "system";
+            bindings = <
+SYSTEM_LT CORNE_V4_EX_T SYSTEM_RT
+SYSTEM_LM CORNE_V4_EX_M SYSTEM_RM
+SYSTEM_LB SYSTEM_RB
+SYSTEM_LH SYSTEM_RH
+            >;
+        };
+
+    }; /* keymap */
+}; // root node

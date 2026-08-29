@@ -1,0 +1,8 @@
+# foostan Corne v4 (rev 4.1, standard 3x6+3) — RP2040 halves, wired split.
+# SPDX-License-Identifier: MIT
+
+config SHIELD_CORNE_V4_LEFT
+    def_bool $(shields_list_contains,corne_v4_left)
+
+config SHIELD_CORNE_V4_RIGHT
+    def_bool $(shields_list_contains,corne_v4_right)

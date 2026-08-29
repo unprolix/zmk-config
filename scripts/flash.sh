@@ -66,6 +66,12 @@ derive_bootloader_family() {
     case "$fname" in
         *rolio*)   echo "rolio" ;;
         *toucan*)  echo "toucan" ;;
+        # Before *corne*, which it would otherwise match. The v4's MCU is an
+        # RP2040 with the stock BOOTSEL mass-storage bootloader, which has
+        # nothing in common with the nice!nano one the eyelash corne uses --
+        # and the family name deliberately shares no substring with "corne",
+        # so mount-device.py's substring matching cannot cross the two.
+        *corne_v4*) echo "rp2040" ;;
         *corne*)   echo "corne" ;;
         *sofle*)   echo "sofle" ;;
         *glove80*) echo "glove80" ;;

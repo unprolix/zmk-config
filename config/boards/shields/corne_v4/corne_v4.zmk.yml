@@ -1,0 +1,13 @@
+file_format: "1"
+id: corne_v4
+name: Corne v4
+type: shield
+url: https://github.com/foostan/crkbd
+requires: [rpi_pico]
+features:
+  - keys
+  - encoder
+  - underglow
+siblings:
+  - corne_v4_left
+  - corne_v4_right

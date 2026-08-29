@@ -1,0 +1,40 @@
+# Copyright (c) 2026 The ZMK Contributors
+# SPDX-License-Identifier: MIT
+
+description: |
+  Single-wire half-duplex UART on an RP2040 PIO block.
+
+  The Corne v4 links its two halves with a single data conductor on the TRRS
+  jack, so one GPIO has to both drive and sample the line. Zephyr's stock
+  raspberrypi,pico-uart-pio takes a separate tx pin and rx pin and leaves the
+  tx pin permanently configured as an output; pointing both at the same GPIO
+  therefore ends with the pin stuck in whichever direction initialised last,
+  and the two halves fight over the line.
+
+  This driver keeps the pin an input (idle-high on its pull-up) and flips it
+  to an output only for as long as it is actually transmitting. The receive
+  state machine is stopped while transmitting, so a half never hears its own
+  output.
+
+  The pinctrl group must name exactly one pin and be called "data_pins". It
+  should set input-enable and bias-pull-up, since the pin spends most of its
+  life receiving.
+
+  Only the polling UART API is implemented, which is what
+  CONFIG_ZMK_SPLIT_WIRED_UART_MODE_POLLING needs.
+
+compatible: "zmk,pico-uart-pio-half-duplex"
+
+include: [uart-controller.yaml, "raspberrypi,pico-pio-device.yaml"]
+
+properties:
+  turnaround-delay-us:
+    type: int
+    default: 200
+    description: |
+      How long the line may sit idle after the last transmitted byte before
+      the driver hands it back to the receiver on its own.
+
+      The driver already returns to receive mode on the first read after a
+      transmission, so this only matters when the other half stops reading
+      after it replies. Rounded up to a whole system tick.

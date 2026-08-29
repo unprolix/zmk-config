@@ -25,6 +25,9 @@
 #endif
 
 #include "rgbkey.h"
+#if RGBKEY_HAS_LAYER_OWNER
+#include "../rgbzone/rgbzone_owner.h"
+#endif
 
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
@@ -69,6 +72,40 @@ static uint32_t refresh(void) {
 
     uint32_t packed =
         rgbkey_pack(scene_for(name), zmk_hid_get_explicit_mods(), host_caps_lock());
+
+    /*
+     * Which hand is holding this layer open, from the momentary behaviour that
+     * opened it. Only the central can know -- it is the half with the keymap --
+     * so it travels to the other side in the packed word.
+     */
+    bool from_right = false;
+    uint8_t owner_pos = 0;
+    bool side_known = false;
+#if RGBKEY_HAS_LAYER_OWNER
+    /* By ID, not by index: the momentary behaviour records binding->param1,
+       which is a layer id (zmk_keymap_layer_activate takes one). The two
+       coincide unless layer reordering is on, so a mismatch here would show
+       up only on some future build. rgbzone_run.c looks it up the same way. */
+    side_known = rgbzone_owner_key((uint8_t)id, &from_right, &owner_pos);
+#endif
+    packed = rgbkey_pack_owner(packed, side_known, from_right, owner_pos);
+
+    /*
+     * Logged on CHANGE only, which is what makes it readable: this runs on
+     * every keycode event, so logging unconditionally buries the transition
+     * you are looking for. A picture that will not settle shows up here as the
+     * same two or three lines repeating -- and it says WHICH of the three
+     * inputs is moving, layer or mods or caps, which the LEDs cannot.
+     */
+    static uint32_t last_logged = ~0u;
+    if (packed != last_logged) {
+        last_logged = packed;
+        LOG_INF("rgbkey: layer=%s scene=%u mods=0x%02x caps=%d held=%s at=%d",
+                name ? name : "(unnamed)", (unsigned)rgbkey_scene_of(packed),
+                (unsigned)rgbkey_mods_of(packed), (int)rgbkey_caps_of(packed),
+                !rgbkey_side_known(packed) ? "?" : (rgbkey_side_is_right(packed) ? "R" : "L"),
+                rgbkey_side_known(packed) ? (int)rgbkey_owner_pos(packed) : -1);
+    }
 
     rgbkey_apply(packed);
     rgbkey_relay_send(packed);

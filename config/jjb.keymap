@@ -366,12 +366,18 @@ MAKE_HRM(tlr_sticky, &sl_long, &kp, KEYS_L THUMBS)
 ZMK_UNICODE_SINGLE(em_dash, N2, N0, N1, N4)
 
 
+// Every &bt and &out binding below is guarded on CONFIG_WIRELESS. A wired-only
+// board (the Corne v4's RP2040 has no radio at all) builds without ZMK_BLE, and
+// an unguarded &bt is not a dead key there -- it is an unresolvable phandle
+// that fails the build outright.
+#ifdef CONFIG_WIRELESS
 BT_MODSEL(0)
 BT_MODSEL(1)
 BT_MODSEL(2)
 BT_MODSEL(3)
 BT_MODSEL(4)
 //BT_MODSEL(5)
+#endif
 
 #include "hierophant.dtsi"		
 
@@ -403,6 +409,7 @@ dash_emdash: dash_emdash {
 };
 
 
+#ifdef CONFIG_WIRELESS
 fancy_bt_0: fancy_bt_0 {
     compatible = "zmk,behavior-mod-morph";
     #binding-cells = <0>;
@@ -443,7 +450,8 @@ fancy_bt_5: fancy_bt_5 {
     #binding-cells = <0>;
     bindings = <&bt BT_SEL 5>, <&bt BT_DISC 5>;
     mods = <(MOD_LSFT|MOD_RSFT)>;
-};		
+};
+#endif // CONFIG_WIRELESS
 
 // the morphed behavior seems to do nothing. have tried 20, 99, and 999 with MOVE_X and MOVE_Y
 msc_up_variable: msc_up_variable {
@@ -826,8 +834,13 @@ MAKE_ADAPTIVE_REPEAT(f_hrk_f23, hmr, R_M4, F23)
 
 #define SYSTEM_LZ &trans &trans &trans &trans &trans &trans
 
+#ifdef CONFIG_WIRELESS
 #define SYSTEM_LT_IN &bt BT_CLR_ALL  &trans  &trans  &trans  &trans
 #define SYSTEM_LT &bt BT_CLR  SYSTEM_LT_IN
+#else
+#define SYSTEM_LT_IN &none  &trans  &trans  &trans  &trans
+#define SYSTEM_LT &none  SYSTEM_LT_IN
+#endif
 
 #define SYSTEM_LM_IN &trans  &trans  &trans  &trans  &trans
 #define SYSTEM_LM &trans  SYSTEM_LM_IN
@@ -842,8 +855,13 @@ MAKE_ADAPTIVE_REPEAT(f_hrk_f23, hmr, R_M4, F23)
 #define SYSTEM_LH_5 &trans &trans SYSTEM_LH
 
 #define SYSTEM_RZ &trans &trans &trans &trans &trans &trans
+#ifdef CONFIG_WIRELESS
 #define SYSTEM_RT_IN &fancy_bt_0  &fancy_bt_1  &fancy_bt_2  &fancy_bt_3  &fancy_bt_4
 #define SYSTEM_RT SYSTEM_RT_IN  &fancy_bt_5
+#else
+#define SYSTEM_RT_IN &none  &none  &none  &none  &none
+#define SYSTEM_RT SYSTEM_RT_IN  &none
+#endif
 #define SYSTEM_RM_IN &trans  &trans  &trans  &trans  &trans
 #define SYSTEM_RM SYSTEM_RM_IN  &trans
 #define SYSTEM_RB_IN &bootloader  &sys_reset  LIGHT_UP  LIGHT_DN  &kp END
@@ -914,12 +932,24 @@ MAKE_ADAPTIVE_REPEAT(f_hrk_f23, hmr, R_M4, F23)
 // ZMK_BLE_PROFILE_COUNT = BT_MAX_PAIRED(6) - SPLIT_PERIPHERALS(1) = 5, so the
 // valid profiles are 0-4 and the old `BT_SEL 5` here was a dead key. Raising
 // CONFIG_BT_MAX_PAIRED to 7 would give a sixth, at the cost of re-pairing.
+#ifdef CONFIG_WIRELESS
 #define BLUETOOTH_LT_IN &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4  &trans
 #define BLUETOOTH_LT &bt BT_SEL 0  BLUETOOTH_LT_IN
 #define BLUETOOTH_LM_IN &bt BT_DISC 1  &bt BT_DISC 2  &bt BT_DISC 3  &bt BT_DISC 4  &bt BT_DISC 5
 #define BLUETOOTH_LM &bt BT_DISC 0  BLUETOOTH_LM_IN
 #define BLUETOOTH_LB_IN &trans  &trans  &trans  &trans  &trans
 #define BLUETOOTH_LB &bt BT_CLR  BLUETOOTH_LB_IN
+#else
+// On a wired-only board this whole layer is a placeholder. It stays in the
+// keymap so that LIGHTING=13 / BLUETOOTH=14 / SYSTEM=15 mean the same thing on
+// every keyboard sharing this layout.
+#define BLUETOOTH_LT_IN &none  &none  &none  &none  &trans
+#define BLUETOOTH_LT &none  BLUETOOTH_LT_IN
+#define BLUETOOTH_LM_IN &none  &none  &none  &none  &none
+#define BLUETOOTH_LM &none  BLUETOOTH_LM_IN
+#define BLUETOOTH_LB_IN &trans  &trans  &trans  &trans  &trans
+#define BLUETOOTH_LB &none  BLUETOOTH_LB_IN
+#endif
 #define BLUETOOTH_LH &trans &trans &to HIEROPHANT
 #define BLUETOOTH_LH_5 &trans &trans BLUETOOTH_LH
 
@@ -927,7 +957,12 @@ MAKE_ADAPTIVE_REPEAT(f_hrk_f23, hmr, R_M4, F23)
 // Output routing. Without these there is no way to force USB or BLE: with both
 // connected ZMK picks USB, and nothing in this config could override that.
 //                       force USB      force BLE      toggle
+#ifdef CONFIG_WIRELESS
 #define BLUETOOTH_RT_IN &out OUT_USB  &out OUT_BLE  &out OUT_TOG  &trans  &trans
+#else
+// USB is the only endpoint there is, so there is nothing to route.
+#define BLUETOOTH_RT_IN &none  &none  &none  &trans  &trans
+#endif
 #define BLUETOOTH_RT BLUETOOTH_RT_IN  &trans
 #define BLUETOOTH_RM_IN &trans  &trans  &trans  &trans  &trans
 #define BLUETOOTH_RM BLUETOOTH_RM_IN  &trans
@@ -1080,13 +1115,17 @@ MAKE_ADAPTIVE_REPEAT(f_hrk_f23, hmr, R_M4, F23)
 }; // root node
 
 /*
- * Per-column lighting needs to know which half is holding a layer open, and
- * the only place that is known for certain is the behaviour that opens it.
- * rgbzone.overlay defines RGBZONE_PRESENT to ask for its own momentary-layer
- * driver, which records the invoking key before activating the layer; without
- * that shield this is not defined and ZMK's own behaviour stands.
+ * Lighting needs to know which half is holding a layer open, and the only place
+ * that is known for certain is the behaviour that opens it. A shield asks for
+ * the recording momentary-layer driver by defining LAYER_OWNER_PRESENT; without
+ * it, ZMK's own behaviour stands.
+ *
+ * Kept separate from RGBZONE_PRESENT, which means specifically "the rgbzone
+ * shield is here" and gates that shield's own behaviour nodes (rgbz_up and
+ * friends). rgbkey wants the owner mechanism WITHOUT those nodes -- defining
+ * RGBZONE_PRESENT to get it fails the build on an undefined rgbz_up label.
  */
-#ifdef RGBZONE_PRESENT
+#if defined(RGBZONE_PRESENT) || defined(LAYER_OWNER_PRESENT)
 &mo {
     compatible = "zmk,behavior-rgbzone-momentary";
 };

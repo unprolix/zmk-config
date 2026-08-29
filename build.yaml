@@ -114,6 +114,80 @@ include:
     cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/rgbkey_rolio.conf"
     artifact-name: rolio_right-rgbkey
 
+  # foostan Corne v4 (rev 4.1, standard 3x6+3). The MCU is an RP2040 soldered
+  # to each half, so this rides the stock rpi_pico board -- same SoC, same 2MB
+  # flash, same UF2 output and boot-mode retention -- and everything specific to
+  # the keyboard lives in the shield, the way the Toucan sits on xiao_ble.
+  #
+  # No BLE: the halves are joined by one wire on the TRRS jack (see
+  # config/boards/shields/corne_v4/uart_pio_half_duplex.c) and the USB cable
+  # always goes into the LEFT half, which is the wired transport's fixed
+  # central.
+  - board: rpi_pico/rp2040/zmk
+    shield: corne_v4_left
+    artifact-name: corne_v4_left
+  - board: rpi_pico/rp2040/zmk
+    shield: corne_v4_right
+    artifact-name: corne_v4_right
+  - board: rpi_pico/rp2040/zmk
+    shield: settings_reset
+    artifact-name: corne_v4-settings_reset
+
+  # TEMPORARY: the raw-HID bootloader trigger, so a flash cycle needs no
+  # keypress. See config/boards/shields/dfu -- a development convenience, meant
+  # to be removed rather than shipped.
+  #
+  # Both halves carry the shield even though RAW_HID is central-only, so that
+  # the peripheral is never left on a build whose central cannot relay
+  # &bootloader to it. Note the relay only gets the RIGHT half as far as
+  # BOOTSEL: it has no USB cable of its own in normal use, and BOOTSEL with no
+  # cable presents no volume to write to. Handsfree covers the left half, which
+  # is the one a keymap change needs.
+  - board: rpi_pico/rp2040/zmk
+    shield: corne_v4_left rgbkey dfu
+    cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/rgbkey_corne_v4.conf"
+    artifact-name: corne_v4_left-dfu
+  - board: rpi_pico/rp2040/zmk
+    shield: corne_v4_right rgbkey dfu
+    cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/rgbkey_corne_v4.conf"
+    artifact-name: corne_v4_right-dfu
+
+  # Per-key lighting. Genuinely per-key on this board -- 23 emitters against 23
+  # switches a side, one under each -- so unlike the eyelash's six-zone columns
+  # every key can be addressed on its own. See config/boards/shields/rgbkey and
+  # its rgbkey_layout_corne_v4.h.
+  - board: rpi_pico/rp2040/zmk
+    shield: corne_v4_left rgbkey
+    cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/rgbkey_corne_v4.conf"
+    artifact-name: corne_v4_left-rgbkey
+  - board: rpi_pico/rp2040/zmk
+    shield: corne_v4_right rgbkey
+    cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/rgbkey_corne_v4.conf"
+    artifact-name: corne_v4_right-rgbkey
+
+  # Per-key lighting with the console attached, for working out why a picture
+  # will not settle. Left half only: it is the central, and the layer and
+  # modifier state that decides the picture lives there.
+  - board: rpi_pico/rp2040/zmk
+    shield: corne_v4_left rgbkey dfu
+    snippet: zmk-usb-logging
+    cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/rgbkey_corne_v4_debug.conf"
+    artifact-name: corne_v4_left-rgbkey-debug
+
+  # Bring-up pair: same firmware plus a USB CDC console, for debugging the
+  # wired split. Flash one half at a time and read /dev/ttyACM*; the half with
+  # the cable powers the other over the TRRS. See config/corne_v4_debug.conf.
+  - board: rpi_pico/rp2040/zmk
+    shield: corne_v4_left
+    snippet: zmk-usb-logging
+    cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/corne_v4_debug.conf"
+    artifact-name: corne_v4_left-debug
+  - board: rpi_pico/rp2040/zmk
+    shield: corne_v4_right
+    snippet: zmk-usb-logging
+    cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/corne_v4_debug.conf"
+    artifact-name: corne_v4_right-debug
+
   # Other boards
   - board: nice_nano@2.0.0/nrf52840/zmk
     shield: sofle_ergomech_left

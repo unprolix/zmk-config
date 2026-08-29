@@ -14,6 +14,7 @@
 
 #include <zephyr/kernel.h>
 
+#include "rgbzone_owner.h"
 #include "zone_map.h"
 #include "zone_palette.h"
 
@@ -68,9 +69,6 @@ void rgbzone_apply(uint32_t packed);
  * the note there for why inference does not work. rgbzone_owner_side()
  * returns false for a layer that was not opened by holding a key.
  */
-void rgbzone_owner_pressed(uint8_t layer, uint32_t position, bool from_right);
-void rgbzone_owner_released(uint8_t layer, uint32_t position);
-bool rgbzone_owner_side(uint8_t layer, bool *from_right);
 
 /* ------------------------------------------------------------------ */
 /* Brightness                                                          */

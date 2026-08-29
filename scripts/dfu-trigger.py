@@ -21,7 +21,13 @@ keyboard. Use --name whenever more than one interface is listed.
 The keyboard exposes a vendor-defined HID interface (usage page 0xFF60, usage
 0x61). Writing the magic below makes it reboot into DFU about a quarter of a
 second later, at which point it enumerates as a mass-storage volume: NICENANO
-on the eyelash, ROLIO-BOOT on the Rolio, XIAO-BOOT on the Toucan.
+on the eyelash, ROLIO-BOOT on the Rolio, XIAO-BOOT on the Toucan, RPI-RP2 on the
+Corne v4.
+
+On the Corne v4 use `--name 'Corne v4'`: the eyelash halves on the same machine
+advertise this usage page too. Note also that `right` there reaches BOOTSEL but
+presents no volume unless that half has a USB cable of its own -- in the normal
+one-cable split only the LEFT half can actually be written handsfree.
 """
 
 import glob

@@ -1,0 +1,87 @@
+/*
+ * Corne v4 right half — split peripheral.
+ *
+ * foostan mirrors the two PCBs, so the right half's pins are in a different
+ * order from the left's; these are its own list from info.json's
+ * split.matrix_pins.right, re-ordered the same way (physical left to right,
+ * top to bottom), which for this half runs index-finger column to outer pinky.
+ *
+ * SPDX-License-Identifier: MIT
+ */
+
+#include "corne_v4.dtsi"
+
+/* Positions 21-41 of the transform. */
+&default_transform {
+    col-offset = <CORNE_V4_KEYS_PER_HALF>;
+};
+
+&kscan0 {
+    input-gpios
+        = <&gpio0 27 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>   //  0  top    index
+        , <&gpio0  1 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>   //  1
+        , <&gpio0  2 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>   //  2
+        , <&gpio0  3 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>   //  3
+        , <&gpio0  9 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>   //  4
+        , <&gpio0  8 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>   //  5  top    outer pinky
+        , <&gpio0 26 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>   //  6  home   index
+        , <&gpio0 28 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>   //  7
+        , <&gpio0  0 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>   //  8
+        , <&gpio0  4 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>   //  9
+        , <&gpio0 14 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>   // 10
+        , <&gpio0 11 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>   // 11  home   outer pinky
+        , <&gpio0 22 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>   // 12  bottom index
+        , <&gpio0 20 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>   // 13
+        , <&gpio0 29 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>   // 14
+        , <&gpio0  5 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>   // 15
+        , <&gpio0 18 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>   // 16
+        , <&gpio0 15 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>   // 17  bottom outer pinky
+        , <&gpio0 19 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>   // 18  thumb  inner
+        , <&gpio0 17 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>   // 19  thumb  middle
+        , <&gpio0 16 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>   // 20  thumb  outer
+        /*
+         * The ex2 expansion pair, foostan matrix column 6 -- different pins on
+         * this mirrored half. Harmless if this half turns out not to have them
+         * fitted: an unconnected input just sits high on its pull-up.
+         */
+        , <&gpio0 25 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>   // 21  expansion upper -- push switch under the encoder
+        , <&gpio0 23 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>   // 22  expansion lower
+        ;
+};
+
+/*
+ * Bootloader escape: GP9, kscan index 4 -- again the second key of the top row
+ * counting in from the outer pinky column, which on this mirrored half is a
+ * different pin. Matches QMK's `split.bootmagic.matrix` [4,1] = GP9.
+ *
+ * This half is the one that really needs it: it is the split peripheral, so
+ * neither the keymap's &bootloader nor the raw-HID trigger can reach it if the
+ * split link is down.
+ */
+&boot_key {
+    gpios = <&gpio0 9 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+};
+
+/*
+ * CONFIRMED ON HARDWARE 2026-08-29, and NOT the same way round as the left.
+ *
+ * The pins are foostan's first-listed rotary position for this half, as on the
+ * left. But where the left needs a-gpios and b-gpios swapped relative to
+ * foostan's pin_a/pin_b, this half wants them in foostan's own order: taking
+ * the left's arrangement on the assumption that the halves would match gave an
+ * encoder that scrolled backwards.
+ *
+ * That is the mirrored PCB artwork showing through rather than an inconsistency
+ * in the data. The two encoders face opposite ways, so turning both "the same
+ * direction" turns them in opposite directions electrically, and the quadrature
+ * pair arrives out of phase between the halves. A split's two encoders should
+ * be expected to disagree here, not to match.
+ *
+ * The other candidate position for this half is {GP6, GP7}. Note that GP5, the
+ * left half's pin, is an ordinary key over here.
+ */
+&encoder_right {
+    status = "okay";
+    a-gpios = <&gpio0 24 (GPIO_ACTIVE_HIGH | GPIO_PULL_UP)>;  // foostan pin_a
+    b-gpios = <&gpio0  7 (GPIO_ACTIVE_HIGH | GPIO_PULL_UP)>;  // foostan pin_b
+};

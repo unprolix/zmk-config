@@ -1,0 +1,77 @@
+/*
+ * Corne v4 left half — split central, the half the USB cable goes into.
+ *
+ * The wired transport has a fixed central chosen at build time, so unlike a
+ * BLE split it is not "whichever half you plug in": it is always this one.
+ *
+ * SPDX-License-Identifier: MIT
+ */
+
+#include "corne_v4.dtsi"
+
+/*
+ * Direct wiring, one GPIO per switch, listed in physical order: top row
+ * outer-pinky to index, then home, then bottom, then the three thumbs.
+ * Switches short to ground, so the pins idle high on their pull-ups.
+ */
+&kscan0 {
+    input-gpios
+        = <&gpio0 22 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>   //  0  top    outer pinky
+        , <&gpio0 20 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>   //  1
+        , <&gpio0 23 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>   //  2
+        , <&gpio0 26 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>   //  3
+        , <&gpio0 29 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>   //  4
+        , <&gpio0  0 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>   //  5  top    index
+        , <&gpio0 19 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>   //  6  home   outer pinky
+        , <&gpio0 18 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>   //  7
+        , <&gpio0 24 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>   //  8
+        , <&gpio0 27 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>   //  9
+        , <&gpio0  1 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>   // 10
+        , <&gpio0  2 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>   // 11  home   index
+        , <&gpio0 17 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>   // 12  bottom outer pinky
+        , <&gpio0 16 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>   // 13
+        , <&gpio0 25 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>   // 14
+        , <&gpio0 28 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>   // 15
+        , <&gpio0  3 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>   // 16
+        , <&gpio0  9 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>   // 17  bottom index
+        , <&gpio0 14 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>   // 18  thumb  outer
+        , <&gpio0 15 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>   // 19  thumb  middle
+        , <&gpio0 11 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>   // 20  thumb  inner
+        /*
+         * The ex2 expansion pair, foostan matrix column 6. Appended rather than
+         * slotted in at the inner edge so the 21 above keep the indices they
+         * were confirmed with on hardware; the shield's transform puts them
+         * back in reading order.
+         */
+        , <&gpio0  4 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>   // 21  expansion upper -- push switch under the encoder
+        , <&gpio0  8 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>   // 22  expansion lower
+        ;
+};
+
+/*
+ * Bootloader escape: GP20, kscan index 1 -- the second key of the top row,
+ * counting in from the outer pinky column. Deliberately the same key QMK used
+ * for bootmagic on this half (info.json `bootmagic.matrix` [0,1] = row 0,
+ * col 1 = GP20), so the gesture is unchanged by the port.
+ */
+&boot_key {
+    gpios = <&gpio0 20 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+};
+
+/*
+ * CONFIRMED ON HARDWARE 2026-08-29: these are the right pins -- of foostan's
+ * two candidate rotary positions for this half ({GP5, GP7} and {GP6, GP7},
+ * sharing pin_b), the first is the one that is fitted.
+ *
+ * a-gpios and b-gpios are SWAPPED relative to foostan's pin_a/pin_b, because
+ * with them the way round info.json lists them the knob counted backwards.
+ *
+ * THE RIGHT HALF IS NOT SWAPPED -- see corne_v4_right.overlay. The two encoders
+ * face opposite ways on mirrored artwork, so they disagree about which pin is
+ * which; assuming the halves would match got the right one backwards.
+ */
+&encoder_left {
+    status = "okay";
+    a-gpios = <&gpio0 7 (GPIO_ACTIVE_HIGH | GPIO_PULL_UP)>;   // foostan pin_b
+    b-gpios = <&gpio0 5 (GPIO_ACTIVE_HIGH | GPIO_PULL_UP)>;   // foostan pin_a
+};

@@ -216,6 +216,14 @@ def match_keyboard_name(keyboard_info, target_name):
        # Board-ID "nRF52840-rolio-463". Distinct from nice!nano and XIAO, so
        # a rolio flash can't grab an eyelash-corne or toucan bootloader.
        'rolio':   ['rolio'],
+       # Corne v4: an RP2040 in BOOTSEL mode, i.e. the stock Raspberry Pi
+       # bootloader — volume RPI-RP2, Model "Raspberry Pi RP2", Board-ID
+       # "RPI-RP2". The family is named "rp2040" rather than anything with
+       # "corne" in it on purpose: the lookup below is substring-based in both
+       # directions, so a "corne_v4" family would also match the eyelash
+       # corne's entry and vice versa, and a stray flash would go to the wrong
+       # keyboard. Nothing here shares a substring with any other family.
+       'rp2040':  ['rp2040',  'rp2', 'raspberry'],
    }
 
    for pattern_name, patterns in keyboard_patterns.items():

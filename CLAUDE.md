@@ -4,7 +4,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a personal ZMK firmware configuration workspace for custom keyboard layouts, specifically optimized for the eyelash corne and sofle ergomech keyboards. The workspace uses Nix, direnv, and Just for streamlined local development, providing a completely isolated build environment with west, zephyr-sdk, and all dependencies.
+This is a personal ZMK firmware configuration workspace for custom keyboard layouts. The workspace uses Nix, direnv, and Just for streamlined local development, providing a completely isolated build environment with west, zephyr-sdk, and all dependencies.
+
+Every keyboard here runs one shared layout, `config/jjb.keymap`, with the same sixteen layers in the same order. The per-board keymaps are thin wrappers that map that layout onto the hardware:
+
+| Keyboard | Board | Notes |
+|---|---|---|
+| eyelash corne | nice!nano v2 | 42 keys + joystick cluster; nice!view; per-column RGB |
+| sofle ergomech | nice!nano v2 | |
+| Rolio ("Rolio Three") | rolio3 (vendored) | 48 positions, roller, trackpad, Sharp panel |
+| Toucan2 | xiao_ble | 36 keys — the 5-column experiment; uses the layout's `_IN` row macros |
+| Corne v4 | rpi_pico | RP2040, **wired only** — no BLE at all; single-wire split link |
 
 ## Key Commands
 
@@ -51,8 +61,11 @@ zmk-workspace/
 ```
 
 ### Configuration Files
-- `config/eyelash_corne.keymap` - Main keymap configuration
-- `config/west.yml` - Dependencies manifest pinned to ZMK v0.3
+- `config/jjb.keymap` - The shared layout every keyboard builds from
+- `config/<keyboard>.keymap` / `.conf` - Per-board wrappers, picked up automatically by ZMK's candidate-name search (shield `rolio_left` -> `config/rolio.keymap`)
+- `config/boards/` - Vendored boards and shields (`boards/rolio/rolio3`, `boards/shields/{rolio,toucan,corne_v4,vista508,nice_view_jjb,rgbzone,...}`)
+- `config/dts/bindings/` - Out-of-tree devicetree bindings for the C in those shields
+- `config/west.yml` - Dependencies manifest; ZMK tracks `main`, Zephyr is pinned to `v4.1.0+zmk-fixes`
 - `build.yaml` - Defines all build targets and variants
 - Various `.dtsi` files in config/ for modular keymap features
 
@@ -72,14 +85,16 @@ zmk-workspace/
 ## Development Notes
 
 - All builds are local by default with dynamically-generated build info
-- The workspace is pinned to ZMK v0.3 for stability
+- ZMK tracks upstream `main` (it was pinned to v0.3.0 once; `just upstream-check` reports drift)
 - Custom functionality added through various ZMK modules
-- Supports multiple keyboard variants (bureau, lavendre, salon variants)
+- Supports multiple eyelash corne units (bureau, lavendre, salon, fuligin, xan), each with its own `.conf`
+- Behaviour nodes the shared keymap references must be declared in a shield's *shared* `.dtsi`: both halves compile the same keymap, so a node visible to only one of them fails the other's build
+- Shield changes need a pristine build (`just build <target> -p`); a stale cmake cache links the old config and still goes green
 - Settings reset firmware available for troubleshooting
 - Keymap visualization powered by keymap-drawer
 
 ## Important Files to Check Before Making Changes
 - `config/west.yml` - Check module versions and dependencies
 - `build.yaml` - Understand build targets before adding new ones
-- `config/eyelash_corne.keymap` - Main keymap logic
+- `config/jjb.keymap` - The shared layout; a change here hits every keyboard, so rebuild them all
 - `.envrc` and `flake.nix` - Development environment setup
