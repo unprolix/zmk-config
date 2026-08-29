@@ -83,6 +83,11 @@ to <em>break a habit</em>, the back half when you want to <em>look something up<
 <tr><td><b>CTRL+SHIFT+&lt;key&gt;</b></td><td>(awkward — two same-hand HRMs fight prior-idle)</td><td><span class="k">H+I</span> adjacent home row — for terminal copy/paste</td></tr>
 </table>
 
+<div class="box"><b>Hold a home-row mod without using it and it stays armed</b> for the next
+key, up to five seconds. So CTRL+X can be <em>hold A, let go, press X</em> — no need to keep
+A down while you reach. Holding it across several keys still works exactly as before; the
+modifier is live for the whole hold either way. Anything you press consumes it.</div>
+
 <div class="box">If your CTRL keypress is misfiring during fast typing, switch to the thumb-pair combo
 <span class="k">LH0+LH1</span>. It's a single-press one-shot CTRL — no HRM timing involved.
 Same for GUI: <span class="k">LH1+LH2</span>.</div>
@@ -170,8 +175,8 @@ comes back fast.</div>
 <tr><td>Hold <code>U</code> or <code>D</code></td><td>Momentary SYMBOL — release to leave</td></tr>
 <tr><td>Hold <code>Q</code> or <code>W</code></td><td>Momentary NUMPAD</td></tr>
 <tr><td>Hold <code>P</code> or <code>G</code></td><td>Momentary NUMERIC</td></tr>
-<tr><td>Hold <code>F</code> or <code>B</code></td><td>FUNCTION (F1–F24) — <b>sticky</b>, arms for one press</td></tr>
-<tr><td>Hold <code>Z</code> or <code>L</code></td><td>EXTRA — <b>sticky</b>: arms the layer for exactly one following press</td></tr>
+<tr><td>Hold <code>F</code> or <code>B</code></td><td>FUNCTION (F1–F24) — <b>sticky</b>, armed for one press or five seconds</td></tr>
+<tr><td>Hold <code>Z</code> or <code>L</code></td><td>EXTRA — <b>sticky</b>, same five-second window</td></tr>
 <tr><td>Hold <code>H</code> / <code>N</code> (pinky home)</td><td>L/R-GUI+NAV — window manager</td></tr>
 <tr><td>Combo <span class="k">LH1+RH1</span></td><td>Switch to NAVIGATION (cross-thumb)</td></tr>
 <tr><td>Combo <span class="k">LH0+RH0</span></td><td>Back to HIEROPHANT from anywhere</td></tr>
@@ -275,6 +280,11 @@ thumb for a sticky shift first.</p>
 <code>HRM_PRIOR_IDLE</code> (150&nbsp;ms), which disables the HRM and forces a tap. Pause briefly
 before the modifier-letter, or fall through to the sticky combos
 (<span class="k">LH0+LH1</span> CTRL, <span class="k">LH1+LH2</span> GUI).</p>
+<p><b>A sticky mod or layer did nothing</b> — arming one is deliberate by design: 150&nbsp;ms
+idle before the hold will engage at all, then a hold long enough to pass the tapping term, then
+a release that touches nothing else. Miss any of those and you get the letter. You then have
+five seconds to press the target — it used to be one, which was too tight to aim at and read
+as the feature being broken.</p>
 <p><b>The arcane key shifted when you wanted a word</b> — more than 650&nbsp;ms passed since the
 letter, so it fell through to sticky-shift. Or the letter has no entry and you got it twice.</p>
 </div>
