@@ -112,7 +112,16 @@ static bool set_gate(bool on) {
     zmk_backlight_off();
 #else
     ARG_UNUSED(on);
-    LOG_WRN("No backlight gate; the strip may stay dark");
+    /*
+     * Once, not on every flush. This board has no gate to own -- its chain is
+     * wired straight to the rail -- so the unconditional warning was one line
+     * per repaint drowning the console it was meant to help.
+     */
+    static bool warned;
+    if (!warned) {
+        warned = true;
+        LOG_WRN("No backlight gate; the strip may stay dark");
+    }
 #endif
     return false;
 }
@@ -146,7 +155,15 @@ static void paint(uint8_t position, enum rgbkey_colour colour) {
  */
 #define RGBKEY_FRAME_US_PER_PIXEL 30
 #define RGBKEY_FRAME_SLACK_US     500
-#define RGBKEY_FRAME_SLOW_US      (STRIP_COUNT * RGBKEY_FRAME_US_PER_PIXEL + RGBKEY_FRAME_SLACK_US)
+/*
+ * The driver sleeps for its reset-delay after the last pixel, and on this board
+ * that is 280us -- a quarter of the budget. Leaving it out made the threshold
+ * 1190us against a ~970us nominal frame, so ordinary jitter reported itself as
+ * tearing. Read it from the devicetree rather than repeating the number.
+ */
+#define RGBKEY_FRAME_RESET_US     DT_PROP_OR(STRIP_NODE, reset_delay, 0)
+#define RGBKEY_FRAME_SLOW_US                                                                       \
+    (STRIP_COUNT * RGBKEY_FRAME_US_PER_PIXEL + RGBKEY_FRAME_RESET_US + RGBKEY_FRAME_SLACK_US)
 
 static uint32_t slow_frames;
 

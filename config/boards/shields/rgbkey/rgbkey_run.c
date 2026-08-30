@@ -65,7 +65,11 @@ static uint8_t cached_indicators;
 
 static bool host_caps_lock(void) { return (cached_indicators & HID_LED_CAPS_LOCK) != 0; }
 
-static uint32_t refresh(void) {
+/*
+ * force_relay: send to the far half even when nothing changed. True only from
+ * the periodic tick, which exists to catch a peripheral that has just come up.
+ */
+static uint32_t refresh(bool force_relay) {
     zmk_keymap_layer_index_t index = zmk_keymap_highest_layer_active();
     zmk_keymap_layer_id_t id = zmk_keymap_layer_index_to_id(index);
     const char *name = zmk_keymap_layer_name(id);
@@ -108,7 +112,28 @@ static uint32_t refresh(void) {
     }
 
     rgbkey_apply(packed);
-    rgbkey_relay_send(packed);
+
+    /*
+     * ONLY WHEN IT CHANGED. This runs on every keycode event -- press AND
+     * release -- and relaying unconditionally put a split command on the wire
+     * for every one of them, whether or not the picture had moved. On a 115200
+     * half-duplex link that is already polling flat out, ordinary typing
+     * overran the central's TX ring: the console filled with
+     * "No room to send command to the peripheral 0", and a command that does
+     * not fit is a command that goes out truncated. ZMK's wired transport does
+     * not degrade when it meets a fragment it cannot parse, it wedges for good
+     * (see the split-link notes), so this was a keyboard that stopped working
+     * under fast typing and stayed stopped.
+     *
+     * The local repaint was already deduplicated inside rgbkey_apply; only the
+     * relay was not.
+     */
+    static uint32_t last_relayed = ~0u;
+    if (force_relay || packed != last_relayed) {
+        last_relayed = packed;
+        rgbkey_relay_send(packed);
+    }
+
     return packed;
 }
 
@@ -124,7 +149,7 @@ static int rgbkey_listener(const zmk_event_t *eh) {
 #else
     ARG_UNUSED(eh);
 #endif
-    refresh();
+    refresh(false);
     rgbkey_tick_now();
     return ZMK_EV_EVENT_BUBBLE;
 }
@@ -194,7 +219,7 @@ static void rgbkey_tick(struct k_work *work) {
     static uint8_t unchanged;
 
     uint32_t before = last_sent;
-    last_sent = refresh();
+    last_sent = refresh(true);
     unchanged = (last_sent == before && unchanged < RGBKEY_REFRESH_SETTLE_TICKS)
                     ? unchanged + 1
                     : (last_sent == before ? unchanged : 0);

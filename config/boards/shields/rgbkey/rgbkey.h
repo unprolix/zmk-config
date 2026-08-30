@@ -67,7 +67,7 @@
 /*
  * The Corne v4 runs dim. It has no battery to spare either way, but all 46
  * emitters draw from the single USB port in the LEFT half -- the right is
- * powered over the TRRS -- and rgbkey writes the strip directly, so ZMK's
+ * powered over the interlink -- and rgbkey writes the strip directly, so ZMK's
  * underglow brightness cap does not apply to it. At full, one colour across
  * every LED is roughly 900mA against a 500mA port budget. This lands near
  * foostan's own max_brightness of 50/255.

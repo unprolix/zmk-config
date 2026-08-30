@@ -20,7 +20,7 @@
 # --debug picks corne_v4_<half>-debug.uf2: identical firmware plus a USB CDC
 # console, for bringing up the wired split. Read it with `screen /dev/ttyACM0
 # 115200` or `cat /dev/ttyACM0`. Flash ONE half at a time and leave the other on
-# the TRRS, which powers it -- never put both halves on USB at once.
+# the interlink, which powers it -- never put both halves on USB at once.
 #
 # GETTING INTO THE BOOTLOADER
 #
@@ -73,9 +73,15 @@
 #
 # CABLE ORDER -- THIS ONE CAN DESTROY HARDWARE
 #
-# Never insert or remove the TRRS cable while either half has power. foostan's
-# build guide and ZMK's own split docs both say the same thing: hot-plugging
-# TRRS can damage the MCU. Unplug USB first, every time.
+# THE INTERLINK ON THIS BOARD IS USB-C, NOT A TRRS JACK (jjb, 2026-08-30), so
+# the usual "never hot-plug it" rule does not apply -- that warning belongs to
+# the nRF boards with 3.5mm jacks, where sliding a TRRS plug in shorts ring to
+# sleeve on the way past and can take the MCU with it. USB-C makes contact in a
+# defined order and is built to be hot-plugged.
+#
+# It is still the thing to suspect FIRST when a half goes quiet. A marginal
+# contact here is silent in both directions and survives a power cycle, which
+# makes it look exactly like wedged firmware; see the split-link notes.
 
 set -uo pipefail
 

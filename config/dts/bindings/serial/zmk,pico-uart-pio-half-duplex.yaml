@@ -4,7 +4,7 @@
 description: |
   Single-wire half-duplex UART on an RP2040 PIO block.
 
-  The Corne v4 links its two halves with a single data conductor on the TRRS
+  The Corne v4 links its two halves with a single data conductor on the interlink
   jack, so one GPIO has to both drive and sample the line. Zephyr's stock
   raspberrypi,pico-uart-pio takes a separate tx pin and rx pin and leaves the
   tx pin permanently configured as an output; pointing both at the same GPIO

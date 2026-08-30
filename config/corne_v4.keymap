@@ -19,7 +19,12 @@
  * time.
  */
 
-#include "zmk-helpers/key-labels/42.h"
+/*
+ * NOT zmk-helpers/key-labels/42.h. The ex2 column is interleaved into the
+ * transform, so every label after the left top row sits two or four positions
+ * further along than a plain 42-key Corne. See config/corne_v4_46.h.
+ */
+#include "corne_v4_46.h"
 #include "jjb.keymap"
 
 /* Left: volume. Right: page up/down. Matching the Rolio and the sofle.

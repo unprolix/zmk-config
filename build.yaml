@@ -173,6 +173,15 @@ include:
     snippet: zmk-usb-logging
     cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/rgbkey_corne_v4_debug.conf"
     artifact-name: corne_v4_left-rgbkey-debug
+  # And the same for the RIGHT half, which is the one with no console of its
+  # own in normal use and therefore the one that goes wrong invisibly. Reading
+  # it costs a cable move: whichever half holds USB powers the other over the
+  # TRRS, so the left is unreachable while this is attached.
+  - board: rpi_pico/rp2040/zmk
+    shield: corne_v4_right rgbkey dfu
+    snippet: zmk-usb-logging
+    cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/rgbkey_corne_v4_debug.conf"
+    artifact-name: corne_v4_right-rgbkey-debug
 
   # Bring-up pair: same firmware plus a USB CDC console, for debugging the
   # wired split. Flash one half at a time and read /dev/ttyACM*; the half with

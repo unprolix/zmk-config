@@ -111,7 +111,7 @@ RC(0,12) RC(0,13) RC(0,14) RC(0,15) RC(0,16) RC(0,17)                      RC(0,
 
 &pinctrl {
     /*
-     * The split link. One conductor on the TRRS jack, so one pin, driven only
+     * The split link. One conductor on the interlink, so one pin, driven only
      * while transmitting -- see uart_pio_half_duplex.c. Pulled up so the line
      * reads idle-high when neither half is talking.
      */
