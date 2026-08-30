@@ -826,28 +826,34 @@ MAKE_ADAPTIVE_REPEAT(f_hrk_f23, hmr, R_M4, F23)
 
 #define SYSTEM_LZ &trans &trans &trans &trans &trans &trans
 
-#define SYSTEM_LT_IN &bt BT_CLR_ALL  &trans  &trans  &trans  &trans
-#define SYSTEM_LT &bt BT_CLR  SYSTEM_LT_IN
+#define SYSTEM_LT_IN &trans  &trans  &trans  &trans  &trans
+#define SYSTEM_LT &trans  SYSTEM_LT_IN
 
 #define SYSTEM_LM_IN &trans  &trans  &trans  &trans  &trans
 #define SYSTEM_LM &trans  SYSTEM_LM_IN
 //#define SYSTEM_LM &bt BT_SEL 0  &hml L_M4 &bt BT_SEL 1  &hml L_M3 &bt BT_SEL 2  &hml L_M2 &bt BT_SEL 3  &hml L_M1 &bt BT_SEL 4 &bt BT_SEL 5
 
 
-// Where FUNCTION's reset and bootloader went, in the same positions they had
-// there. SYSTEM is leader-only, so nothing here can be reached by a stray press.
+// SYSTEM carries the two keys that must not be reachable by accident, and
+// nothing else: it is leader-only, so nothing here can be hit by a stray press.
+// Bluetooth lives on BLUETOOTH and brightness on LIGHTING; a key with a home
+// elsewhere does not want a second one here.
+//
+// Reset and bootloader sit on mirrored positions -- LB1/RB4 and LB3/RB2 are the
+// same finger on each hand -- so which half you are reaching for is the only
+// thing you have to think about, and it is the same reach either way.
 #define SYSTEM_LB_IN &sys_reset  &trans  &bootloader  &trans  &trans
 #define SYSTEM_LB &trans  SYSTEM_LB_IN
 #define SYSTEM_LH &trans &trans &to HIEROPHANT
 #define SYSTEM_LH_5 &trans &trans SYSTEM_LH
 
 #define SYSTEM_RZ &trans &trans &trans &trans &trans &trans
-#define SYSTEM_RT_IN &fancy_bt_0  &fancy_bt_1  &fancy_bt_2  &fancy_bt_3  &fancy_bt_4
-#define SYSTEM_RT SYSTEM_RT_IN  &fancy_bt_5
+#define SYSTEM_RT_IN &trans  &trans  &trans  &trans  &trans
+#define SYSTEM_RT SYSTEM_RT_IN  &trans
 #define SYSTEM_RM_IN &trans  &trans  &trans  &trans  &trans
 #define SYSTEM_RM SYSTEM_RM_IN  &trans
-#define SYSTEM_RB_IN &bootloader  &sys_reset  LIGHT_UP  LIGHT_DN  &kp END
-#define SYSTEM_RB SYSTEM_RB_IN  &kp PG_DN
+#define SYSTEM_RB_IN &trans  &trans  &bootloader  &trans  &sys_reset
+#define SYSTEM_RB SYSTEM_RB_IN  &trans
 #define SYSTEM_RH &to HIEROPHANT &trans &trans
 #define SYSTEM_RH_5 &trans &trans SYSTEM_RH
 
@@ -914,7 +920,7 @@ MAKE_ADAPTIVE_REPEAT(f_hrk_f23, hmr, R_M4, F23)
 // ZMK_BLE_PROFILE_COUNT = BT_MAX_PAIRED(6) - SPLIT_PERIPHERALS(1) = 5, so the
 // valid profiles are 0-4 and the old `BT_SEL 5` here was a dead key. Raising
 // CONFIG_BT_MAX_PAIRED to 7 would give a sixth, at the cost of re-pairing.
-#define BLUETOOTH_LT_IN &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4  &trans
+#define BLUETOOTH_LT_IN &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4  &bt BT_SEL 5
 #define BLUETOOTH_LT &bt BT_SEL 0  BLUETOOTH_LT_IN
 #define BLUETOOTH_LM_IN &bt BT_DISC 1  &bt BT_DISC 2  &bt BT_DISC 3  &bt BT_DISC 4  &bt BT_DISC 5
 #define BLUETOOTH_LM &bt BT_DISC 0  BLUETOOTH_LM_IN
@@ -931,8 +937,10 @@ MAKE_ADAPTIVE_REPEAT(f_hrk_f23, hmr, R_M4, F23)
 #define BLUETOOTH_RT BLUETOOTH_RT_IN  &trans
 #define BLUETOOTH_RM_IN &trans  &trans  &trans  &trans  &trans
 #define BLUETOOTH_RM BLUETOOTH_RM_IN  &trans
+// Clear-all mirrors clear-this-one on the far pinky: the same shape of act, as
+// far from each other as the board allows.
 #define BLUETOOTH_RB_IN &trans  &trans  &trans  &trans  &trans
-#define BLUETOOTH_RB BLUETOOTH_RB_IN  &trans
+#define BLUETOOTH_RB BLUETOOTH_RB_IN  &bt BT_CLR_ALL
 #define BLUETOOTH_RH &to HIEROPHANT &trans &trans
 #define BLUETOOTH_RH_5 &trans &trans BLUETOOTH_RH
 
