@@ -24,40 +24,7 @@ td_shift_word: tap_dance_shift_word {
         tapping-term-ms = <200>;
         bindings = <&sk LSHFT>, <&caps_word>;
 };
-
-
-
-menu_layer: menu_layer {
-    compatible = "zmk,behavior-tap-dance";
-    #binding-cells = <0>;
-    tapping-term-ms = <250>; // 200 is too low
-    bindings = <&kp MENU>, <&num_word NUM>;
-};
         
-menu_hold_mo: menu_hold_mo {
-    compatible = "zmk,behavior-hold-tap";
-    #binding-cells = <2>;
-    tapping-term-ms = <200>;
-    quick-tap-ms = <0>;
-    flavor = "tap-preferred";
-    bindings = <&mo>, <&menu_layer>;
-};
-
-sqt_layer: sqt_layer {
-    compatible = "zmk,behavior-tap-dance";
-    #binding-cells = <0>;
-    tapping-term-ms = <250>; // 200 is too low
-    bindings = <&kp SQT>, <&num_word NUM>;
-};
-        
-sqt_hold_mo: sqt_hold_mo {
-    compatible = "zmk,behavior-hold-tap";
-    #binding-cells = <2>;
-    tapping-term-ms = <200>;
-    quick-tap-ms = <0>;
-    flavor = "tap-preferred";
-    bindings = <&mo>, <&sqt_layer>;
-};
 
 
 /*
