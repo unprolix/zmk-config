@@ -41,11 +41,15 @@
 #include <zmk/hid_indicators.h>
 #endif
 
+#include "bt_names.h"
 #include "circlecube_img.h"
 #include "hierophant_img.h"
 #include "vista_canvas.h"
 
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
+
+/* From ../common/bt_names.c: the host on a profile, by name where it has one. */
+const char *jjb_bt_name_for(uint8_t profile);
 
 /*
  * THIS FILE IS COMPILED BY MORE THAN ONE SHIELD.
@@ -688,8 +692,21 @@ static void rolio_conn_update_cb(struct rolio_conn_state state) {
             snprintf(text, sizeof(text), "BT%d unpaired",
                      zmk_ble_active_profile_index() + 1);
         } else {
-            snprintf(text, sizeof(text), "BT%d %s", zmk_ble_active_profile_index() + 1,
-                     state.profile_connected ? "ok" : "...");
+            /*
+             * Name the host where it can be named: "BT2 quignon" answers the
+             * question "which machine am I typing into", where "BT2 ok" only
+             * says that something is listening.
+             *
+             * The name replaces the state word rather than joining it. Seeing
+             * a name at all means connected -- jjb_bt_name_for() reads the
+             * profile's bonded address, and the corner is only this wide.
+             * Falling back to "ok" keeps the old reading for a host that will
+             * not say what it is called and has no table entry.
+             */
+            const int profile = zmk_ble_active_profile_index();
+            const char *who = state.profile_connected ? jjb_bt_name_for((uint8_t)profile) : NULL;
+            snprintf(text, sizeof(text), "BT%d %s", profile + 1,
+                     who != NULL ? who : (state.profile_connected ? "ok" : "..."));
         }
         break;
     default:

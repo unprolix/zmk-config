@@ -1,6 +1,10 @@
 /*
  * THIS IS THE FILE TO EDIT: which host is on which bluetooth profile.
  *
+ * Shared. Both custom screens build it -- nice_view_jjb for the eyelash and
+ * vista508 for the Rolio and Toucan -- so one table names hosts on every
+ * keyboard, which is the point: they are the same hosts.
+ *
  * The keyboard stores a bonded host's address and nothing else -- ZMK reserves
  * a name field per profile and never fills it -- so "BT2" is all the screen can
  * honestly say. This puts a name to the address.
