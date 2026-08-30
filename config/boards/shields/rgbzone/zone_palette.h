@@ -172,12 +172,22 @@ static const struct zone_layer zone_layers[] = {
                    {ZC_OFF, ZC_OFF, ZC_OFF, ZC_DIM_WHITE, ZC_OFF, ZC_OFF}},
 
     /*
-     * Every colour at once, which is the point: this is the layer where
-     * brightness is set, and a single hue makes it hard to see what a step
-     * does to the dimmer end of the palette.
+     * The columns the controls are in, so the layer says where to press rather
+     * than merely that it is open. Toggle and brighter sit in column 4, dimmer
+     * and the second toggle in column 3; one LED per column is as fine as this
+     * hardware gets, so a column is the answer to "which key", not the key.
+     *
+     * Symmetric because it has to be. LIGHTING is reached with &to, so no key
+     * holds it, so rgbzone has no owning side to resolve pressed[] against and
+     * falls back to whichever hand last held something. An asymmetric row here
+     * would light a different half depending on what you did before. The two
+     * halves mirror, so column 3 and 4 name the same fingers either way.
+     *
+     * White at two weights rather than a colour: the point of this layer is
+     * brightness, and white is the only thing that shows a step honestly.
      */
-    {"lighting",   {ZC_RED, ZC_GREEN, ZC_BLUE, ZC_YELLOW, ZC_CYAN, ZC_MAGENTA},
-                   {ZC_RED, ZC_GREEN, ZC_BLUE, ZC_YELLOW, ZC_CYAN, ZC_MAGENTA}},
+    {"lighting",   {ZC_OFF, ZC_OFF, ZC_OFF, ZC_DIM_WHITE, ZC_WHITE, ZC_OFF},
+                   {ZC_OFF, ZC_OFF, ZC_OFF, ZC_DIM_WHITE, ZC_WHITE, ZC_OFF}},
 
     {"bluetooth",  {ZC_BLUE, ZC_BLUE, ZC_BLUE, ZC_OFF, ZC_OFF, ZC_OFF},
                    {ZC_BLUE, ZC_BLUE, ZC_BLUE, ZC_OFF, ZC_OFF, ZC_OFF}},
