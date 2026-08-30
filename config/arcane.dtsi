@@ -20,7 +20,7 @@ ARCANE_EXPANSION(i, <&kp N>, <&kp G>)
 ARCANE_EXPANSION(j, <&kp U>, <&kp S>, <&kp T>)
 ARCANE_EXPANSION(know, <&kp N>, <&kp O>, <&kp W>)  // K + arcane_right = "know" (was: ku for SFB avoidance, rare)
 ARCANE_EXPANSION(ke, <&kp E>)  // K + arcane_left = "ke" (SFB avoidance for "make", "like", "take", etc.)
-ARCANE_EXPANSION(m, <&kp M>, <&kp E>, <&kp N>, <&kp T>)
+ARCANE_EXPANSION(m, <&kp E>, <&kp N>, <&kp T>)  // the M is already typed; docum -> document
 ARCANE_EXPANSION(n, <&kp I>, <&kp O>, <&kp N>)
 ARCANE_EXPANSION(people, <&kp E>, <&kp O>, <&kp P>, <&kp L>, <&kp E>)  // P + arcane_right = "people" (was: PAS, unused)
 ARCANE_EXPANSION(q, <&kp U>, <&kp E>)
