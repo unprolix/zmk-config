@@ -15,6 +15,8 @@ if(CONFIG_ZMK_DISPLAY AND CONFIG_ZMK_DISPLAY_STATUS_SCREEN_CUSTOM)
 
   if(NOT CONFIG_ZMK_SPLIT OR CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
     zephyr_library_sources(custom_status_screen.c)
+    # Only the central is bonded to a host, so only it has a host to name.
+    zephyr_library_sources(bt_names.c)
   else()
     zephyr_library_sources(peripheral_status_screen.c)
   endif()

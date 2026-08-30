@@ -48,7 +48,10 @@
 
 #include "canvas_util.h"
 #include "hierophant_img.h"
+#include "bt_names.h"
 #include "leader_relay.h"
+
+const char *jjb_bt_name_for(uint8_t profile);
 
 /* The layer that gets an emblem instead of its name. */
 #define HIEROPHANT_LAYER_NAME "hierophant"
@@ -229,8 +232,22 @@ static void draw_panel(void) {
             const char *state = zmk_ble_profile_is_connected(i) ? "live"
                                 : !zmk_ble_profile_is_open(i)   ? "idle"
                                                                 : "--";
-            snprintf(text, sizeof(text), "%c%d %s", i == (uint8_t)active ? '>' : ' ', i + 1,
-                     state);
+            /*
+             * Name the host where it can be named. "2 quignon" answers the
+             * question the layer exists to ask; "2 idle" only says that
+             * something is paired.
+             */
+            const char *who = jjb_bt_name_for(i);
+            if (who != NULL && zmk_ble_profile_is_connected(i)) {
+                snprintf(text, sizeof(text), "%c%d %s", i == (uint8_t)active ? '>' : ' ', i + 1,
+                         who);
+            } else if (who != NULL) {
+                snprintf(text, sizeof(text), "%c%d %s.", i == (uint8_t)active ? '>' : ' ', i + 1,
+                         who);
+            } else {
+                snprintf(text, sizeof(text), "%c%d %s", i == (uint8_t)active ? '>' : ' ', i + 1,
+                         state);
+            }
             jjb_canvas_draw_text(panel_draw, PROFILE_LIST_X, ROW_LAYER + i * PROFILE_ROW_H,
                                  PANEL_W - PROFILE_LIST_X, PROFILE_ROW_H, &list, text);
         }
