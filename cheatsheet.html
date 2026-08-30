@@ -190,8 +190,11 @@ comes back fast.</div>
 bigram without reusing the same finger. (After <code>Q</code>, it repeats instead.)</li>
 <li>Type <code>.</code> then <code>J</code> and you get <span class="out">../</span> — J emits
 <code>./</code> when a dot precedes it.</li>
-<li>After <code>I</code>, the <code>H</code> key produces <code>'t</code> (the "can't" tail;
-the I'd / I'll / I've contractions go via the combos below).</li>
+<li>After <code>N</code>, the <code>H</code> key produces <code>'t</code> — <code>ca</code>,
+<code>n</code>, <code>H</code> gives <span class="out">can't</span>. After <code>I</code> it
+gives a bare <code>'</code>, so <code>I</code>, <code>H</code>, <code>d</code> gives
+<span class="out">I'd</span>. Neither NH nor IH occurs in English, which is what makes the
+key free to do this.</li>
 <li>On SYMBOL: after <code>~</code>, the <code>`</code> key produces <code>/</code>.</li>
 </ul>
 
@@ -279,9 +282,13 @@ thumb for a sticky shift first.</p>
 <code>HRM_PRIOR_IDLE</code> (150&nbsp;ms), which disables the HRM and forces a tap. Pause briefly
 before the modifier-letter, or fall through to the sticky combos
 (<span class="k">LH0+LH1</span> CTRL, <span class="k">LH1+LH2</span> GUI).</p>
-<p><b>A sticky mod or layer did nothing</b> — arming one is deliberate: pause about
-150&nbsp;ms, hold past the tapping term, release without touching anything else. Miss any of
-those and you get the letter. Five seconds then to press the target.</p>
+<p><b>A sticky <em>modifier</em> did nothing</b> — pause about 150&nbsp;ms first, then hold
+past the tapping term and release without touching anything else. Miss any of those and you get
+the letter. Five seconds then to press the target.</p>
+<p><b>FUNCTION or EXTRA armed when you didn't mean it</b> — those two have no idle guard, so
+they can arm mid-word. A same-hand roll is safe (<code>for</code>, <code>fun</code>), but a
+cross-hand one is not: <code>f</code> then a right-hand key can arm FUNCTION, which makes
+<code>fry</code> the word to watch.</p>
 <p><b>The arcane key shifted when you wanted a word</b> — more than 650&nbsp;ms passed since the
 letter, so it fell through to sticky-shift. Or the letter has no entry and you got it twice.</p>
 </div>
