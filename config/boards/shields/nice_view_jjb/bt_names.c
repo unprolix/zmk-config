@@ -7,9 +7,15 @@
  * table in bt_names.h. Failing both, the tail of the address, which is at
  * least distinct per host and is what you need in order to write the entry.
  *
- * The learned names are held in RAM only. They cost a GATT read per connect to
- * recover, which is cheap and self-correcting, and it means a host that gets
- * renamed does not leave a stale name behind in flash.
+ * Learned names are kept in settings, with the address they were learned from.
+ * Only the connected host can answer, so holding them in RAM alone would mean
+ * that after every reboot the list -- the thing this exists for -- showed one
+ * name and four addresses until each host had been switched to in turn.
+ *
+ * Storing the address alongside is what keeps them honest: a profile that has
+ * been re-paired to a different machine does not match, so the old name is
+ * ignored rather than shown against the wrong host. A machine that is merely
+ * renamed corrects itself on its next connect.
  *
  * SPDX-License-Identifier: MIT
  */
@@ -19,6 +25,7 @@
 #include <zephyr/bluetooth/gatt.h>
 #include <zephyr/bluetooth/uuid.h>
 #include <zephyr/kernel.h>
+#include <zephyr/settings/settings.h>
 #include <zephyr/logging/log.h>
 #include <stdio.h>
 #include <string.h>
@@ -35,8 +42,26 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 /* "34:56" plus a terminator. */
 #define JJB_BT_TAIL_MAX 6
 
-static char learned[ZMK_BLE_PROFILE_COUNT][JJB_BT_NAME_MAX];
+struct learned_name {
+    bt_addr_le_t addr;
+    char name[JJB_BT_NAME_MAX];
+};
+
+static struct learned_name learned[ZMK_BLE_PROFILE_COUNT];
 static char tails[ZMK_BLE_PROFILE_COUNT][JJB_BT_TAIL_MAX];
+
+#define SETTINGS_ROOT "jjbbt"
+
+static void learned_save(uint8_t profile) {
+#if IS_ENABLED(CONFIG_SETTINGS)
+    char key[32];
+    snprintf(key, sizeof(key), SETTINGS_ROOT "/%d", profile);
+    int ret = settings_save_one(key, &learned[profile], sizeof(learned[profile]));
+    if (ret < 0) {
+        LOG_WRN("Could not save name for profile %d: %d", profile, ret);
+    }
+#endif
+}
 
 static bool addr_is_set(const bt_addr_le_t *addr) {
     return addr != NULL && bt_addr_le_cmp(addr, BT_ADDR_LE_ANY) != 0;
@@ -74,14 +99,18 @@ const char *jjb_bt_name_for(uint8_t profile) {
         return NULL;
     }
 
-    if (learned[profile][0] != '\0') {
-        return learned[profile];
-    }
-
+    /* The table wins: it is what you said, and a host is free to call itself
+       something useless like "Bluetooth Device". */
     for (size_t i = 0; i < ARRAY_SIZE(jjb_bt_names); i++) {
         if (addr_matches(addr, jjb_bt_names[i].addr)) {
             return jjb_bt_names[i].name;
         }
+    }
+
+    /* Only if it was learned from the machine that is on this profile now. */
+    if (learned[profile].name[0] != '\0' &&
+        bt_addr_le_cmp(&learned[profile].addr, addr) == 0) {
+        return learned[profile].name;
     }
 
     snprintf(tails[profile], sizeof(tails[profile]), "%02x:%02x", addr->a.val[1], addr->a.val[0]);
@@ -105,19 +134,28 @@ static uint8_t name_read_cb(struct bt_conn *conn, uint8_t err, struct bt_gatt_re
         return BT_GATT_ITER_STOP;
     }
 
+    char *name = learned[reading_profile].name;
     size_t n = MIN(length, (uint16_t)(JJB_BT_NAME_MAX - 1));
-    memcpy(learned[reading_profile], data, n);
-    learned[reading_profile][n] = '\0';
+    memcpy(name, data, n);
+    name[n] = '\0';
 
     /* A name that is only spaces or control characters is worse than none. */
     for (size_t i = 0; i < n; i++) {
-        if ((unsigned char)learned[reading_profile][i] < 0x20) {
-            learned[reading_profile][0] = '\0';
+        if ((unsigned char)name[i] < 0x20) {
+            name[0] = '\0';
             return BT_GATT_ITER_STOP;
         }
     }
 
-    LOG_INF("Profile %d is \"%s\"", reading_profile, learned[reading_profile]);
+    const bt_addr_le_t *addr = zmk_ble_profile_address(reading_profile);
+    if (addr == NULL) {
+        name[0] = '\0';
+        return BT_GATT_ITER_STOP;
+    }
+    memcpy(&learned[reading_profile].addr, addr, sizeof(bt_addr_le_t));
+
+    LOG_INF("Profile %d is \"%s\"", reading_profile, name);
+    learned_save(reading_profile);
     return BT_GATT_ITER_STOP;
 }
 
@@ -155,7 +193,15 @@ static void security_changed(struct bt_conn *conn, bt_security_t level, enum bt_
     }
 
     int profile = zmk_ble_profile_index(bt_conn_get_dst(conn));
-    if (profile < 0 || profile >= ZMK_BLE_PROFILE_COUNT || learned[profile][0] != '\0') {
+    if (profile < 0 || profile >= ZMK_BLE_PROFILE_COUNT) {
+        return;
+    }
+
+    /* Already known, and known to be this machine. Asking again would only
+       catch a rename, which the next fresh pairing will catch anyway. */
+    const bt_addr_le_t *addr = zmk_ble_profile_address(profile);
+    if (addr != NULL && learned[profile].name[0] != '\0' &&
+        bt_addr_le_cmp(&learned[profile].addr, addr) == 0) {
         return;
     }
 
@@ -179,6 +225,26 @@ static struct bt_conn_cb conn_callbacks = {
     .security_changed = security_changed,
     .disconnected = disconnected,
 };
+
+#if IS_ENABLED(CONFIG_SETTINGS)
+
+static int learned_load(const char *name, size_t len, settings_read_cb read_cb, void *cb_arg) {
+    unsigned int profile;
+    if (sscanf(name, "%u", &profile) != 1 || profile >= ZMK_BLE_PROFILE_COUNT) {
+        return -ENOENT;
+    }
+    if (len != sizeof(struct learned_name)) {
+        return -EINVAL;
+    }
+    if (read_cb(cb_arg, &learned[profile], sizeof(struct learned_name)) < 0) {
+        learned[profile].name[0] = '\0';
+    }
+    return 0;
+}
+
+SETTINGS_STATIC_HANDLER_DEFINE(jjb_bt_names, SETTINGS_ROOT, NULL, learned_load, NULL, NULL);
+
+#endif /* IS_ENABLED(CONFIG_SETTINGS) */
 
 static int jjb_bt_names_init(void) {
     bt_conn_cb_register(&conn_callbacks);
