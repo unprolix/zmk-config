@@ -572,13 +572,30 @@ arcane_nav_r: arcane_nav_r {
 // ****************************************** GAMING layer
 
 #define GAMING_LZ &trans &trans &trans &trans &trans &trans
+// ESC and CAPS are combos here (see combos.dtsi), which buys back the two outer
+// keys they were sitting on. TAB takes the top one.
+//
+// The pinky gets a third way to the digits, alongside both thumbs. Three is one
+// too many on purpose: which reach turns out to be natural under pressure is
+// not something to decide at a desk, and the losers cost nothing until they are
+// dropped.
 #define GAMING_LT_IN &kp Q  &kp W  &kp E  &kp R  &kp T
-#define GAMING_LT &kp ESC  GAMING_LT_IN
+#define GAMING_LT &kp TAB  GAMING_LT_IN
 #define GAMING_LM_IN &kp A  &kp S  &kp D  &kp F  &kp G
-#define GAMING_LM &kp CAPS  GAMING_LM_IN
+#define GAMING_LM &sl NUMPAD  GAMING_LM_IN
 #define GAMING_LB_IN &kp Z  &kp X  &kp C  &kp V  &kp B
 #define GAMING_LB &kp LSHIFT  GAMING_LB_IN
-#define GAMING_LH &kp LCTRL  &smart_nav_thumb NAV TAB  &hml LALT SPACE                
+// Nothing on these thumbs may be a hold-tap. A game holds crouch, holds jump,
+// holds the scoreboard -- every one of those is a hold that means itself, and
+// a hold-tap reads it as the other thing. Space in particular was an HRM: hold
+// it to jetpack or swim and you got LALT.
+//
+// TAB moved to the top-left key, which frees the middle thumb for digits.
+// Sticky rather than momentary: a held layer is one more thing to keep held
+// while moving, and &sl wants only a tap. Plain &sl, not sl_long -- five
+// seconds is right for prose and wrong here, where a stray press should expire
+// before it eats a movement key.
+#define GAMING_LH &kp LCTRL  &sl NUMPAD  &kp SPACE
 #define GAMING_LH_5 &trans &trans GAMING_LH
 
 #define GAMING_RZ &trans &trans &trans &trans &trans &trans
@@ -588,7 +605,11 @@ arcane_nav_r: arcane_nav_r {
 #define GAMING_RM GAMING_RM_IN  &kp SQT
 #define GAMING_RB_IN &kp N  &kp M  &kp COMMA  &kp DOT  &kp FSLH
 #define GAMING_RB GAMING_RB_IN  &kp RSHIFT
-#define GAMING_RH &hmr RALT SPACE  &smart_nav_thumb NAV BSPC  &kp RETURN
+// The right hand is on the mouse, so these three are nearly dead. RETURN earns
+// its place for chat; the other two are a second space and a backspace nobody
+// reaches for, and both were hold-taps besides. Left as a second digit key and
+// a spare, in reach if the hand comes back to the board.
+#define GAMING_RH &sl NUMPAD  &none  &kp RETURN
 #define GAMING_RH_5 &trans &trans GAMING_RH
 
 // ******************************************  hierophant (alt_alpha) layer
