@@ -240,8 +240,8 @@ def main():
                     # Raised from inside the strip write: what the LEDs got.
                     pk = int.from_bytes(data[7:11], "little")
                     z = [(pk >> (i * 4)) & 0xF for i in range(6)]
-                    print("   WROTE packed=%s  px0=(%d,%d,%d) px1=(%d,%d,%d)"
-                          % (z, data[11], data[12], data[13],
+                    print("%s    WROTE packed=%s  px0=(%d,%d,%d) px1=(%d,%d,%d)"
+                          % (time.strftime("%H:%M:%S"), z, data[11], data[12], data[13],
                              data[14], data[15], data[16]))
                     seen += 1
                     continue
@@ -261,8 +261,11 @@ def main():
                 # value was read from -- they are stored per endpoint.
                 locks = "".join(n for b, n in
                                 ((0x01, "num"), (0x02, "CAPS"), (0x04, "scr")) if ind & b) or "-"
-                print("layer=%-12s idx=%-2d mods=%02x  ind=%02x(%s) ep=%s  L=%s  R=%s"
-                      % (name, layer, mods, ind, locks,
+                # Timestamped: without it these cannot be lined up against a
+                # capture of what the host received, which is the only way to
+                # tell a keymap-synthesised keypress from a real one.
+                print("%s layer=%-12s idx=%-2d mods=%02x  ind=%02x(%s) ep=%s  L=%s  R=%s"
+                      % (time.strftime("%H:%M:%S"), name, layer, mods, ind, locks,
                          {0: "none", 1: "USB", 2: "BLE"}.get(ep, ep), zl, zr))
         except KeyboardInterrupt:
             print()
