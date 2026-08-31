@@ -51,36 +51,62 @@ char_to_keycode() {
    esac
 }
 
-# Parse command-line arguments
-COMMIT_PREFIX=""
+# Parse command-line arguments.
+#
+# The commit is included BY DEFAULT. It used to be opt-in, and nothing passed
+# the flag, so every build said only when it was made -- which is the one thing
+# that cannot answer "what is on this keyboard". A binary's mtime says when it
+# was compiled, not whether it was ever flashed, and on 2026-08-31 that misled
+# two sessions at once: one reflashed 08-28 artifacts for an afternoon, the
+# other read a NEWER file that had never been written to the hardware and drew
+# the opposite conclusion. The commit is the thing worth carrying.
+COMMIT_HASH=""
 while [[ $# -gt 0 ]]; do
   case $1 in
     --commit)
-      if [ -z "$2" ]; then
-        # If no commit hash is provided, try to get the current one
-        COMMIT_HASH=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
-      else
+      # An explicit hash is still honoured; otherwise take the current one.
+      if [ -n "$2" ] && [[ "$2" != --* ]]; then
         COMMIT_HASH="$2"
+        shift 2
+      else
+        shift
       fi
-      COMMIT_PREFIX="Built from commit ${COMMIT_HASH}"
-      shift 2
+      ;;
+    --no-commit)
+      COMMIT_HASH="none"
+      shift
       ;;
     *)
       echo "Unknown option: $1"
-      echo "Usage: $0 [--commit [hash]]"
+      echo "Usage: $0 [--commit [hash]] [--no-commit]"
       exit 1
       ;;
   esac
 done
 
+if [ -z "$COMMIT_HASH" ]; then
+  COMMIT_HASH=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+
+  # A SHA on its own is a lie when the tree has uncommitted changes: it names a
+  # commit whose contents are NOT what got built. Say so. Note this asks about
+  # the tracked tree only -- config/build_info.dtsi is itself generated and
+  # gitignored, so regenerating it cannot make the tree look dirty.
+  if ! git diff --quiet HEAD 2>/dev/null; then
+    COMMIT_HASH="${COMMIT_HASH}+"
+  fi
+fi
+
 # Generate timestamp
 TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
 
-# Set message based on whether commit prefix is provided
-if [ -n "$COMMIT_PREFIX" ]; then
-  MESSAGE="${COMMIT_PREFIX} ${TIMESTAMP}"
-else
+# The keycode table has no plus sign, so a dirty marker would silently become a
+# space. Spell it instead, and keep the whole thing typeable.
+MESSAGE_HASH="${COMMIT_HASH/+/ dirty}"
+
+if [ "$COMMIT_HASH" = "none" ]; then
   MESSAGE="ZMK built ${TIMESTAMP}"
+else
+  MESSAGE="ZMK ${MESSAGE_HASH} built ${TIMESTAMP}"
 fi
 
 # Convert to keycode sequence
@@ -109,7 +135,4 @@ cat > "${OUTPUT_FILE}" << EOF
 };
 EOF
 
-echo "Generated build_info.dtsi with timestamp: $TIMESTAMP"
-if [ -n "$COMMIT_PREFIX" ]; then
-  echo "Commit prefix: $COMMIT_PREFIX"
-fi
+echo "Generated build_info.dtsi: $MESSAGE"
