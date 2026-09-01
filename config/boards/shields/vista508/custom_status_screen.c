@@ -300,14 +300,22 @@ static const lv_coord_t bold_offsets[BOLD_COPIES][2] = {
 /*
  * The corners are LIGHTER than the middle band.
  *
- * The full 3x3 was needed while the readouts were XORed across the emblem,
- * where every stroke was fighting the art behind it. Now that they sit in a
- * cleared box the same weight reads as heavy and blocky, so they take only the
- * centre and the four orthogonal neighbours -- enough to survive LVGL's
- * antialiasing being thresholded away by a 1-bit panel, without the diagonal
- * fill that closes up the counters. Dial to 1 for no dilation at all.
+ * NO DILATION AT ALL. The overdraw existed because the readouts were XORed
+ * across the emblem, where every stroke was fighting the art behind it; five
+ * copies still read as heavy once they sat in a cleared box, and one reads
+ * right.
+ *
+ * That refines what emblem_1bit_rendering says. The rule there -- that LVGL
+ * antialiases and a 1-bit panel thresholds the grey away, so text needs
+ * overdrawing -- was established at 14px over ARTWORK. At 18px on a cleared
+ * background neither applies: the strokes are wide enough to survive
+ * thresholding on their own, and there is nothing behind them to compete with.
+ * Overdraw is for text on top of something, not text in general.
+ *
+ * The offsets are ordered centre, orthogonals, diagonals, so this is a dial:
+ * raise it to 5 for the orthogonal cross or 9 for the full 3x3.
  */
-#define CORNER_BOLD_COPIES 5
+#define CORNER_BOLD_COPIES 1
 
 static const struct emblem *current_emblem(void) {
     return &emblems[emblem_choice % ARRAY_SIZE(emblems)];
