@@ -134,6 +134,7 @@ static uint8_t name_read_cb(struct bt_conn *conn, uint8_t err, struct bt_gatt_re
     read_in_flight = false;
 
     if (err != 0 || data == NULL || length == 0 || reading_profile >= ZMK_BLE_PROFILE_COUNT) {
+        LOG_DBG("Name read gave nothing: err %d, len %d, profile %d", err, length, reading_profile);
         return BT_GATT_ITER_STOP;
     }
 
@@ -176,6 +177,7 @@ static uint8_t name_read_cb(struct bt_conn *conn, uint8_t err, struct bt_gatt_re
 static uint8_t discover_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr,
                            struct bt_gatt_discover_params *params) {
     if (attr == NULL) {
+        LOG_DBG("Host serves no Device Name characteristic");
         read_in_flight = false;
         return BT_GATT_ITER_STOP;
     }
@@ -185,7 +187,9 @@ static uint8_t discover_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr
     read_params.single.handle = bt_gatt_attr_value_handle(attr);
     read_params.single.offset = 0;
 
-    if (bt_gatt_read(conn, &read_params) != 0) {
+    int rc = bt_gatt_read(conn, &read_params);
+    if (rc != 0) {
+        LOG_DBG("Name read could not be started: %d", rc);
         read_in_flight = false;
     }
     return BT_GATT_ITER_STOP;
@@ -197,6 +201,7 @@ static uint8_t discover_cb(struct bt_conn *conn, const struct bt_gatt_attr *attr
  * gets a permission error rather than a retry.
  */
 static void security_changed(struct bt_conn *conn, bt_security_t level, enum bt_security_err err) {
+    LOG_DBG("Security changed: level %d, err %d, read_in_flight %d", level, err, read_in_flight);
     if (err != BT_SECURITY_ERR_SUCCESS || level < BT_SECURITY_L2 || read_in_flight) {
         return;
     }
@@ -208,6 +213,7 @@ static void security_changed(struct bt_conn *conn, bt_security_t level, enum bt_
 
     int profile = zmk_ble_profile_index(bt_conn_get_dst(conn));
     if (profile < 0 || profile >= ZMK_BLE_PROFILE_COUNT) {
+        LOG_DBG("Encrypted peer is on no profile (%d); not a host", profile);
         return;
     }
 
@@ -228,8 +234,12 @@ static void security_changed(struct bt_conn *conn, bt_security_t level, enum bt_
     discover_params.end_handle = BT_ATT_LAST_ATTRIBUTE_HANDLE;
     discover_params.type = BT_GATT_DISCOVER_CHARACTERISTIC;
 
-    if (bt_gatt_discover(conn, &discover_params) != 0) {
+    int rc = bt_gatt_discover(conn, &discover_params);
+    if (rc != 0) {
+        LOG_DBG("Name discovery could not be started: %d", rc);
         read_in_flight = false;
+    } else {
+        LOG_DBG("Asking profile %d what it is called", profile);
     }
 }
 

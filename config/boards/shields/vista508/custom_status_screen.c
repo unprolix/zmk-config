@@ -494,6 +494,15 @@ static uint8_t cached_indicators;
 
 static bool host_caps_lock(void) { return (cached_indicators & HID_LED_CAPS_LOCK) != 0; }
 
+/*
+ * The layer that lists the bluetooth profiles instead of showing its own name.
+ *
+ * The layer exists to answer "which machine am I on, and what else is paired",
+ * and a band reading "bluetooth" answers neither. The keys on it are already
+ * one profile per column; this puts the same five things on the screen.
+ */
+#define BLUETOOTH_LAYER_NAME "bluetooth"
+
 /* The layer that gets an emblem instead of its name. */
 #define EMBLEM_LAYER_NAME "hierophant"
 
@@ -606,6 +615,35 @@ struct rolio_layer_state {
     const char *label;
 };
 
+/*
+ * The profile list, one line each, for the middle band.
+ *
+ * Marker, number, then whoever is on it: a name if the host gave one or the
+ * table knows it, an address tail if it is bonded but anonymous, "--" if the
+ * slot is free. A trailing dot means bonded but not connected right now --
+ * the same shorthand the eyelash uses, so the two keyboards read alike.
+ */
+#define PROFILE_LINE_MAX 24
+
+static void bluetooth_list_text(char *out, size_t len) {
+    const int active = zmk_ble_active_profile_index();
+    int used = 0;
+
+    for (uint8_t i = 0; i < ZMK_BLE_PROFILE_COUNT && used < (int)len - 1; i++) {
+        const char marker = (i == (uint8_t)active) ? '>' : ' ';
+        char line[PROFILE_LINE_MAX];
+
+        if (zmk_ble_profile_is_open(i)) {
+            snprintf(line, sizeof(line), "%c%d --", marker, i + 1);
+        } else {
+            const char *who = jjb_bt_name_for(i);
+            snprintf(line, sizeof(line), "%c%d %s%s", marker, i + 1, who != NULL ? who : "?",
+                     zmk_ble_profile_is_connected(i) ? "" : ".");
+        }
+        used += snprintf(out + used, len - used, "%s%s", used ? "\n" : "", line);
+    }
+}
+
 static void rolio_layer_update_cb(struct rolio_layer_state state) {
     if (!bold_label_ready(&layer_bold)) {
         return;
@@ -635,6 +673,21 @@ static void rolio_layer_update_cb(struct rolio_layer_state state) {
     if (batt_shown != on_system) {
         batt_shown = on_system;
         panel_redraw();
+    }
+
+    /*
+     * The bluetooth layer replaces its own name with the profile list. Caps
+     * still wins the line above it, as everywhere else.
+     */
+    if (state.label != NULL && strcmp(state.label, BLUETOOTH_LAYER_NAME) == 0 && !leader_active) {
+        char list[ZMK_BLE_PROFILE_COUNT * PROFILE_LINE_MAX];
+        bluetooth_list_text(list, sizeof(list));
+        char banner[sizeof(list) + 8];
+        snprintf(banner, sizeof(banner), caps ? "CAPS\n%s" : "%s", list);
+        layer_set_text(banner);
+        emblem_show(false);
+        layer_set_hidden(false);
+        return;
     }
 
     char text[LAYER_NAME_MAX + 8];
@@ -677,6 +730,9 @@ static struct rolio_layer_state rolio_layer_get_state(const zmk_event_t *eh) {
 ZMK_DISPLAY_WIDGET_LISTENER(rolio_layer_status, struct rolio_layer_state, rolio_layer_update_cb,
                             rolio_layer_get_state)
 ZMK_SUBSCRIPTION(rolio_layer_status, zmk_layer_state_changed);
+/* Selecting or clearing a profile changes the list, without changing layer. */
+ZMK_SUBSCRIPTION(rolio_layer_status, zmk_ble_active_profile_changed);
+ZMK_SUBSCRIPTION(rolio_layer_status, zmk_endpoint_changed);
 #if IS_ENABLED(CONFIG_ZMK_HID_INDICATORS)
 /* Caps lock arrives from the host, so the band has to follow it too. */
 ZMK_SUBSCRIPTION(rolio_layer_status, zmk_hid_indicators_changed);
@@ -757,6 +813,8 @@ static void conn_refresh_work_cb(struct k_work *work) {
     ARG_UNUSED(work);
     conn_text[0] = '\0'; /* force the strcmp below to see a change */
     rolio_conn_update_cb(rolio_conn_get_state(NULL));
+    /* The profile list names the same hosts, so it is stale for the same reason. */
+    rolio_layer_update_cb(rolio_layer_get_state(NULL));
 }
 
 ZMK_DISPLAY_WIDGET_LISTENER(rolio_conn_status, struct rolio_conn_state, rolio_conn_update_cb,

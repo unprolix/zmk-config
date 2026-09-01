@@ -30,9 +30,14 @@ struct jjb_bt_name {
 };
 
 static const struct jjb_bt_name jjb_bt_names[] = {
-    /* Fill these in as you pair. Until then a profile shows its address tail,
-       which is exactly what you need to write the entry. */
-    /* {"AA:BB:CC:DD:EE:FF", "quignon"}, */
+    /*
+     * floof. Its BlueZ serves no GAP Device Name characteristic to a connected
+     * peripheral -- the keyboard asks and the discovery comes back empty, which
+     * is why this profile showed "0f:e0" -- so the table is the only way it
+     * gets a name. Expect the same of other Linux hosts; phones and Macs
+     * generally do answer.
+     */
+    {"F0:20:FF:7D:0F:E0", "floof"},
 };
 
 /*

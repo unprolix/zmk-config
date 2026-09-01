@@ -58,6 +58,24 @@ def candidate_devices():
         except OSError:
             desc = b""
 
+        # USB ONLY. Once a keyboard is paired over Bluetooth it presents a
+        # SECOND set of hidraw nodes carrying the same report descriptor, and
+        # writing the magic to those succeeds at the OS level and is then
+        # ignored -- the trigger lives on a USB endpoint. That is the exact
+        # failure this script was written to prevent, arriving by a route the
+        # --name filter cannot see: on a Rolio the USB nodes are called
+        # "ZMK Project Rolio Three" and the Bluetooth ones "Rolio Three", so
+        # --name Rolio matches both and takes whichever sorts first.
+        #
+        # The device's real bus is in the sysfs path, so ask that rather than
+        # trusting a name.
+        try:
+            bus = os.path.realpath(os.path.join(path, "device"))
+        except OSError:
+            continue
+        if "/usb" not in bus:
+            continue
+
         # Usage page 0xFF60 encodes as 06 60 FF in the descriptor.
         if bytes([0x06, USAGE_PAGE & 0xFF, (USAGE_PAGE >> 8) & 0xFF]) in desc:
             found.append((node, name))
