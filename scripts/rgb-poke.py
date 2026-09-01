@@ -35,6 +35,9 @@ MAGIC = b"ZMKRGB!"
 USAGE_PAGE = 0xFF60
 REPORT_SIZE = 32
 
+# Set from --name; restricts every lookup to one keyboard.
+WANT_NAME = None
+
 HALVES = {"left": 0, "central": 0, "right": 1, "peripheral": 1}
 CMD_PIXEL, CMD_ALL, CMD_RELEASE, CMD_REPORT = 1, 2, 3, 4
 
@@ -51,7 +54,13 @@ COLOURS = {
 }
 
 
-def raw_hid_nodes():
+def raw_hid_nodes(name=None):
+    """Raw-HID interfaces, optionally only those of a named keyboard.
+
+    More than one board can carry this channel -- a Rolio and an eyelash on the
+    same machine both do -- and without a name the first one found answers,
+    which looks exactly like the keyboard you meant having gone quiet.
+    """
     found = []
     for path in sorted(glob.glob("/sys/class/hidraw/hidraw*")):
         node = "/dev/" + os.path.basename(path)
@@ -59,9 +68,36 @@ def raw_hid_nodes():
             desc = open(os.path.join(path, "device", "report_descriptor"), "rb").read()
         except OSError:
             continue
-        if bytes([0x06, USAGE_PAGE & 0xFF, (USAGE_PAGE >> 8) & 0xFF]) in desc:
-            found.append(node)
+        if bytes([0x06, USAGE_PAGE & 0xFF, (USAGE_PAGE >> 8) & 0xFF]) not in desc:
+            continue
+        if name is not None:
+            try:
+                uevent = open(os.path.join(path, "device", "uevent")).read()
+            except OSError:
+                continue
+            if name.lower() not in uevent.lower():
+                continue
+        found.append(node)
     return found
+
+
+def announce_ambiguity():
+    """Say so when the choice was not obvious, rather than picking in silence."""
+    nodes = raw_hid_nodes()
+    if len(nodes) > 1 and WANT_NAME is None:
+        names = []
+        for n in nodes:
+            base = os.path.basename(n)
+            try:
+                u = open("/sys/class/hidraw/%s/device/uevent" % base).read()
+                names.append([l.split("=", 1)[1] for l in u.splitlines()
+                              if l.startswith("HID_NAME=")][0])
+            except (OSError, IndexError):
+                names.append(base)
+        uniq = sorted(set(names))
+        if len(uniq) > 1:
+            print("More than one keyboard offers this channel: %s" % ", ".join(uniq))
+            print("Using %s. Pass --name <text> to choose." % nodes[0])
 
 
 # Remembered so a subsequent read uses the interface that actually worked; a
@@ -76,7 +112,7 @@ def send(half, cmd, index=0, rgb=(0, 0, 0)):
     payload += bytes(REPORT_SIZE - len(payload))
     report = bytes([0x00]) + bytes(payload)
 
-    nodes = raw_hid_nodes()
+    nodes = raw_hid_nodes(WANT_NAME)
     if not nodes:
         print("No raw-HID interface found; is the keyboard on the dfu/rgbzone build?")
         return False
@@ -112,10 +148,23 @@ def parse_colour(text):
 
 
 def main():
+    global WANT_NAME
     args = sys.argv[1:]
+
+    # --name picks the keyboard when more than one carries this channel.
+    if "--name" in args:
+        i = args.index("--name")
+        if i + 1 >= len(args):
+            print("--name wants something to match, e.g. --name Bureau")
+            return 1
+        WANT_NAME = args[i + 1]
+        del args[i:i + 2]
+
     if not args or args[0] in ("-h", "--help"):
         print(__doc__)
         return 0
+
+    announce_ambiguity()
 
     half_name = args[0]
     if half_name == "both":
@@ -191,8 +240,8 @@ def main():
                     # Raised from inside the strip write: what the LEDs got.
                     pk = int.from_bytes(data[7:11], "little")
                     z = [(pk >> (i * 4)) & 0xF for i in range(6)]
-                    print("   WROTE packed=%s  px0=(%d,%d,%d) px1=(%d,%d,%d)"
-                          % (z, data[11], data[12], data[13],
+                    print("%s    WROTE packed=%s  px0=(%d,%d,%d) px1=(%d,%d,%d)"
+                          % (time.strftime("%H:%M:%S"), z, data[11], data[12], data[13],
                              data[14], data[15], data[16]))
                     seen += 1
                     continue
@@ -212,8 +261,11 @@ def main():
                 # value was read from -- they are stored per endpoint.
                 locks = "".join(n for b, n in
                                 ((0x01, "num"), (0x02, "CAPS"), (0x04, "scr")) if ind & b) or "-"
-                print("layer=%-12s idx=%-2d mods=%02x  ind=%02x(%s) ep=%s  L=%s  R=%s"
-                      % (name, layer, mods, ind, locks,
+                # Timestamped: without it these cannot be lined up against a
+                # capture of what the host received, which is the only way to
+                # tell a keymap-synthesised keypress from a real one.
+                print("%s layer=%-12s idx=%-2d mods=%02x  ind=%02x(%s) ep=%s  L=%s  R=%s"
+                      % (time.strftime("%H:%M:%S"), name, layer, mods, ind, locks,
                          {0: "none", 1: "USB", 2: "BLE"}.get(ep, ep), zl, zr))
         except KeyboardInterrupt:
             print()

@@ -41,11 +41,32 @@
 #include <zmk/hid_indicators.h>
 #endif
 
+#include "bt_names.h"
 #include "circlecube_img.h"
 #include "hierophant_img.h"
 #include "vista_canvas.h"
 
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
+
+/* From ../common/bt_names.c: the host on a profile, by name where it has one. */
+const char *jjb_bt_name_for(uint8_t profile);
+
+/*
+ * Called by bt_names.c when it learns a host's name, which happens on the BLE
+ * security callback a moment AFTER the profile connects.
+ *
+ * Without this the corner keeps whatever it said at connect time -- an address
+ * tail -- until the next endpoint or profile event happens to repaint it,
+ * which in practice meant the name never appeared at all. That is exactly what
+ * "BT1 4b:de" was.
+ *
+ * Runs in the BLE stack's context, so it must not touch LVGL. It only marks
+ * the cached text stale and asks the display queue to rebuild it.
+ */
+static void conn_refresh_work_cb(struct k_work *work);
+static K_WORK_DEFINE(conn_refresh_work, conn_refresh_work_cb);
+
+void jjb_bt_name_changed(void) { k_work_submit_to_queue(zmk_display_work_q(), &conn_refresh_work); }
 
 /*
  * THIS FILE IS COMPILED BY MORE THAN ONE SHIELD.
@@ -94,12 +115,12 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
  * The corner readouts are XORed into the emblem canvas rather than being labels
  * laid over it.
  *
- * They used to be labels with an opaque backing, which made them legible over
- * any art at the cost of blanking a box of it. On the hierophant that box fell
- * in a corner the spear never reaches and went unnoticed; the circle-cube runs
- * the full width of the panel, and the backing took a visible bite out of the
- * disc. XOR costs nothing -- see vista_xor_canvas() -- so the readout and the
- * art both survive wherever they overlap.
+ * They began as labels with an opaque backing, became an XOR to stop the
+ * backing eating the emblem, and are now a backing again -- but a tight one,
+ * sized to the ink rather than to the label box. The XOR was right on paper and
+ * wrong on the panel: over the circle-cube's 38% of fine detail the text came
+ * out scrambled instead of legible. A status line has to be readable; an
+ * unbitten emblem is merely desirable. See vista_stamp_canvas().
  *
  * The consequence is that the corners belong to the canvas: they are repainted
  * whenever it is, and every change to either has to go through panel_redraw().
@@ -270,16 +291,38 @@ static bool leader_active;
 #define BOLD_COPIES 9
 
 static const lv_coord_t bold_offsets[BOLD_COPIES][2] = {
-    {0, 0},  {-1, -1}, {0, -1}, {1, -1}, {-1, 0},
-    {1, 0},  {-1, 1},  {0, 1},  {1, 1},
+    /* Centre first, then the four orthogonal neighbours, then the diagonals.
+       Ordered so a smaller count is a lighter weight, not a lopsided one. */
+    {0, 0},  {0, -1}, {0, 1}, {-1, 0}, {1, 0},
+    {-1, -1}, {1, -1}, {-1, 1}, {1, 1},
 };
+
+/*
+ * The corners are LIGHTER than the middle band.
+ *
+ * NO DILATION AT ALL. The overdraw existed because the readouts were XORed
+ * across the emblem, where every stroke was fighting the art behind it; five
+ * copies still read as heavy once they sat in a cleared box, and one reads
+ * right.
+ *
+ * That refines what emblem_1bit_rendering says. The rule there -- that LVGL
+ * antialiases and a 1-bit panel thresholds the grey away, so text needs
+ * overdrawing -- was established at 14px over ARTWORK. At 18px on a cleared
+ * background neither applies: the strokes are wide enough to survive
+ * thresholding on their own, and there is nothing behind them to compete with.
+ * Overdraw is for text on top of something, not text in general.
+ *
+ * The offsets are ordered centre, orthogonals, diagonals, so this is a dial:
+ * raise it to 5 for the orthogonal cross or 9 for the full 3x3.
+ */
+#define CORNER_BOLD_COPIES 1
 
 static const struct emblem *current_emblem(void) {
     return &emblems[emblem_choice % ARRAY_SIZE(emblems)];
 }
 
 /*
- * Render one corner readout into the scratch canvas and XOR it into the panel.
+ * Render one corner readout into the scratch canvas and stamp it onto the panel.
  *
  * The label is given the full panel width and asked to align itself inside it,
  * which is what puts the battery hard against the right margin without
@@ -290,7 +333,7 @@ static const struct emblem *current_emblem(void) {
  * needs; offsetting only right and down thickens the stroke but drags the word
  * half a pixel off centre and reads as blurred rather than bold.
  */
-static void xor_corner_text(const char *text, lv_text_align_t align) {
+static void draw_corner_text(const char *text, lv_text_align_t align) {
     if (text_canvas == NULL || text == NULL || text[0] == '\0') {
         return;
     }
@@ -306,7 +349,7 @@ static void xor_corner_text(const char *text, lv_text_align_t align) {
 
     lv_layer_t layer;
     lv_canvas_init_layer(text_canvas, &layer);
-    for (size_t i = 0; i < BOLD_COPIES; i++) {
+    for (size_t i = 0; i < CORNER_BOLD_COPIES; i++) {
         const lv_coord_t dx = bold_offsets[i][0];
         const lv_coord_t dy = bold_offsets[i][1] + 1; /* room for the top row of the dilation */
         lv_area_t coords = {dx, dy, dx + TEXT_SCRATCH_W - 1, dy + TEXT_SCRATCH_H - 1};
@@ -314,7 +357,13 @@ static void xor_corner_text(const char *text, lv_text_align_t align) {
     }
     lv_canvas_finish_layer(text_canvas, &layer);
 
-    vista_xor_canvas(emblem_canvas, 0, CORNER_LIFT, text_canvas);
+    /*
+     * Clear a tight box, then draw into it. The box is sized to the ink, so a
+     * right-aligned battery reading costs only its own width and not the whole
+     * panel. See vista_stamp_canvas() for why this is no longer an XOR.
+     */
+    vista_clear_box(emblem_canvas, 0, CORNER_LIFT, text_canvas);
+    vista_stamp_canvas(emblem_canvas, 0, CORNER_LIFT, text_canvas);
 }
 
 /*
@@ -343,9 +392,9 @@ static void panel_redraw(void) {
                           e->w, e->h, e->stride);
     }
 
-    xor_corner_text(conn_text, LV_TEXT_ALIGN_LEFT);
+    draw_corner_text(conn_text, LV_TEXT_ALIGN_LEFT);
     if (batt_shown) {
-        xor_corner_text(batt_text, LV_TEXT_ALIGN_RIGHT);
+        draw_corner_text(batt_text, LV_TEXT_ALIGN_RIGHT);
     }
 
     /*
@@ -467,6 +516,15 @@ static uint8_t cached_indicators;
 
 static bool host_caps_lock(void) { return (cached_indicators & HID_LED_CAPS_LOCK) != 0; }
 
+/*
+ * The layer that lists the bluetooth profiles instead of showing its own name.
+ *
+ * The layer exists to answer "which machine am I on, and what else is paired",
+ * and a band reading "bluetooth" answers neither. The keys on it are already
+ * one profile per column; this puts the same five things on the screen.
+ */
+#define BLUETOOTH_LAYER_NAME "bluetooth"
+
 /* The layer that gets an emblem instead of its name. */
 #define EMBLEM_LAYER_NAME "hierophant"
 
@@ -579,6 +637,35 @@ struct rolio_layer_state {
     const char *label;
 };
 
+/*
+ * The profile list, one line each, for the middle band.
+ *
+ * Marker, number, then whoever is on it: a name if the host gave one or the
+ * table knows it, an address tail if it is bonded but anonymous, "--" if the
+ * slot is free. A trailing dot means bonded but not connected right now --
+ * the same shorthand the eyelash uses, so the two keyboards read alike.
+ */
+#define PROFILE_LINE_MAX 24
+
+static void bluetooth_list_text(char *out, size_t len) {
+    const int active = zmk_ble_active_profile_index();
+    int used = 0;
+
+    for (uint8_t i = 0; i < ZMK_BLE_PROFILE_COUNT && used < (int)len - 1; i++) {
+        const char marker = (i == (uint8_t)active) ? '>' : ' ';
+        char line[PROFILE_LINE_MAX];
+
+        if (zmk_ble_profile_is_open(i)) {
+            snprintf(line, sizeof(line), "%c%d --", marker, i + 1);
+        } else {
+            const char *who = jjb_bt_name_for(i);
+            snprintf(line, sizeof(line), "%c%d %s%s", marker, i + 1, who != NULL ? who : "?",
+                     zmk_ble_profile_is_connected(i) ? "" : ".");
+        }
+        used += snprintf(out + used, len - used, "%s%s", used ? "\n" : "", line);
+    }
+}
+
 static void rolio_layer_update_cb(struct rolio_layer_state state) {
     if (!bold_label_ready(&layer_bold)) {
         return;
@@ -608,6 +695,21 @@ static void rolio_layer_update_cb(struct rolio_layer_state state) {
     if (batt_shown != on_system) {
         batt_shown = on_system;
         panel_redraw();
+    }
+
+    /*
+     * The bluetooth layer replaces its own name with the profile list. Caps
+     * still wins the line above it, as everywhere else.
+     */
+    if (state.label != NULL && strcmp(state.label, BLUETOOTH_LAYER_NAME) == 0 && !leader_active) {
+        char list[ZMK_BLE_PROFILE_COUNT * PROFILE_LINE_MAX];
+        bluetooth_list_text(list, sizeof(list));
+        char banner[sizeof(list) + 8];
+        snprintf(banner, sizeof(banner), caps ? "CAPS\n%s" : "%s", list);
+        layer_set_text(banner);
+        emblem_show(false);
+        layer_set_hidden(false);
+        return;
     }
 
     char text[LAYER_NAME_MAX + 8];
@@ -650,6 +752,9 @@ static struct rolio_layer_state rolio_layer_get_state(const zmk_event_t *eh) {
 ZMK_DISPLAY_WIDGET_LISTENER(rolio_layer_status, struct rolio_layer_state, rolio_layer_update_cb,
                             rolio_layer_get_state)
 ZMK_SUBSCRIPTION(rolio_layer_status, zmk_layer_state_changed);
+/* Selecting or clearing a profile changes the list, without changing layer. */
+ZMK_SUBSCRIPTION(rolio_layer_status, zmk_ble_active_profile_changed);
+ZMK_SUBSCRIPTION(rolio_layer_status, zmk_endpoint_changed);
 #if IS_ENABLED(CONFIG_ZMK_HID_INDICATORS)
 /* Caps lock arrives from the host, so the band has to follow it too. */
 ZMK_SUBSCRIPTION(rolio_layer_status, zmk_hid_indicators_changed);
@@ -688,8 +793,21 @@ static void rolio_conn_update_cb(struct rolio_conn_state state) {
             snprintf(text, sizeof(text), "BT%d unpaired",
                      zmk_ble_active_profile_index() + 1);
         } else {
-            snprintf(text, sizeof(text), "BT%d %s", zmk_ble_active_profile_index() + 1,
-                     state.profile_connected ? "ok" : "...");
+            /*
+             * Name the host where it can be named: "BT2 quignon" answers the
+             * question "which machine am I typing into", where "BT2 ok" only
+             * says that something is listening.
+             *
+             * The name replaces the state word rather than joining it. Seeing
+             * a name at all means connected -- jjb_bt_name_for() reads the
+             * profile's bonded address, and the corner is only this wide.
+             * Falling back to "ok" keeps the old reading for a host that will
+             * not say what it is called and has no table entry.
+             */
+            const int profile = zmk_ble_active_profile_index();
+            const char *who = state.profile_connected ? jjb_bt_name_for((uint8_t)profile) : NULL;
+            snprintf(text, sizeof(text), "BT%d %s", profile + 1,
+                     who != NULL ? who : (state.profile_connected ? "ok" : "..."));
         }
         break;
     default:
@@ -710,6 +828,15 @@ static struct rolio_conn_state rolio_conn_get_state(const zmk_event_t *eh) {
         .profile_connected = zmk_ble_active_profile_is_connected(),
         .profile_bonded = !zmk_ble_active_profile_is_open(),
     };
+}
+
+/* Rebuild the connection readout from scratch; see jjb_bt_name_changed(). */
+static void conn_refresh_work_cb(struct k_work *work) {
+    ARG_UNUSED(work);
+    conn_text[0] = '\0'; /* force the strcmp below to see a change */
+    rolio_conn_update_cb(rolio_conn_get_state(NULL));
+    /* The profile list names the same hosts, so it is stale for the same reason. */
+    rolio_layer_update_cb(rolio_layer_get_state(NULL));
 }
 
 ZMK_DISPLAY_WIDGET_LISTENER(rolio_conn_status, struct rolio_conn_state, rolio_conn_update_cb,

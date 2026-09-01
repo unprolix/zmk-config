@@ -15,102 +15,13 @@ ONESHOT_OR_TO(FN)
 
 
 
-// Layer + modifier hold macros (parameterized)
-layer_lctrl: layer_lctrl {
-    compatible = "zmk,behavior-macro-one-param";
-    wait-ms = <10>;
-    tap-ms = <10>;
-    #binding-cells = <1>;
-    bindings
-        = <&macro_param_1to1>
-        , <&macro_press &mo MACRO_PLACEHOLDER>
-        , <&macro_press &kp LCTRL>
-        , <&macro_pause_for_release>
-        , <&macro_release &kp LCTRL>
-        , <&macro_param_1to1>
-        , <&macro_release &mo MACRO_PLACEHOLDER>
-        ;
-};
+// Layer + modifier hold macros. Only the GUI pair is bound -- by
+// tap_hold_layer_lgui/rgui, for the pinky nav layers.
 
-layer_rctrl: layer_rctrl {
-    compatible = "zmk,behavior-macro-one-param";
-    wait-ms = <10>;
-    tap-ms = <10>;
-    #binding-cells = <1>;
-    bindings
-        = <&macro_param_1to1>
-        , <&macro_press &mo MACRO_PLACEHOLDER>
-        , <&macro_press &kp RCTRL>
-        , <&macro_pause_for_release>
-        , <&macro_release &kp RCTRL>
-        , <&macro_param_1to1>
-        , <&macro_release &mo MACRO_PLACEHOLDER>
-        ;
-};
 
-layer_lshift: layer_lshift {
-    compatible = "zmk,behavior-macro-one-param";
-    wait-ms = <10>;
-    tap-ms = <10>;
-    #binding-cells = <1>;
-    bindings
-        = <&macro_param_1to1>
-        , <&macro_press &mo MACRO_PLACEHOLDER>
-        , <&macro_press &kp LSHIFT>
-        , <&macro_pause_for_release>
-        , <&macro_release &kp LSHIFT>
-        , <&macro_param_1to1>
-        , <&macro_release &mo MACRO_PLACEHOLDER>
-        ;
-};
 
-layer_rshift: layer_rshift {
-    compatible = "zmk,behavior-macro-one-param";
-    wait-ms = <10>;
-    tap-ms = <10>;
-    #binding-cells = <1>;
-    bindings
-        = <&macro_param_1to1>
-        , <&macro_press &mo MACRO_PLACEHOLDER>
-        , <&macro_press &kp RSHIFT>
-        , <&macro_pause_for_release>
-        , <&macro_release &kp RSHIFT>
-        , <&macro_param_1to1>
-        , <&macro_release &mo MACRO_PLACEHOLDER>
-        ;
-};
 
-layer_lalt: layer_lalt {
-    compatible = "zmk,behavior-macro-one-param";
-    wait-ms = <10>;
-    tap-ms = <10>;
-    #binding-cells = <1>;
-    bindings
-        = <&macro_param_1to1>
-        , <&macro_press &mo MACRO_PLACEHOLDER>
-        , <&macro_press &kp LALT>
-        , <&macro_pause_for_release>
-        , <&macro_release &kp LALT>
-        , <&macro_param_1to1>
-        , <&macro_release &mo MACRO_PLACEHOLDER>
-        ;
-};
 
-layer_ralt: layer_ralt {
-    compatible = "zmk,behavior-macro-one-param";
-    wait-ms = <10>;
-    tap-ms = <10>;
-    #binding-cells = <1>;
-    bindings
-        = <&macro_param_1to1>
-        , <&macro_press &mo MACRO_PLACEHOLDER>
-        , <&macro_press &kp RALT>
-        , <&macro_pause_for_release>
-        , <&macro_release &kp RALT>
-        , <&macro_param_1to1>
-        , <&macro_release &mo MACRO_PLACEHOLDER>
-        ;
-};
 
 /*
  * layer_lgui: Activates a layer and holds LGUI modifier simultaneously

@@ -51,11 +51,13 @@
 #define VISTA_CANVAS_FOREGROUND lv_color_white()
 /* L8: one byte per pixel, 0xFF being white. */
 #define VISTA_CANVAS_INK 0xFF
+#define VISTA_CANVAS_BACKGROUND_RAW 0x00
 #else
 #define VISTA_CANVAS_BACKGROUND lv_color_white()
 #define VISTA_CANVAS_FOREGROUND lv_color_black()
 /* L8: one byte per pixel, 0 being black. */
 #define VISTA_CANVAS_INK 0x00
+#define VISTA_CANVAS_BACKGROUND_RAW 0xFF
 #endif
 
 /*
@@ -71,21 +73,34 @@
 #endif
 
 /*
- * XOR the inked pixels of one canvas into another at (x, y).
+ * Stamp the inked pixels of one canvas into another at (x, y), clearing a tight
+ * box behind them first so the text reads whatever is underneath.
  *
- * This is how the status readouts sit over the emblem without eating it. They
- * used to paint an opaque backing, which cost whatever art was underneath --
- * on the full-width circle-cube that was a visible bite out of the disc. XOR
- * costs nothing: where the emblem is ink the text comes out blank, and where
- * the emblem is blank the text comes out ink, so both survive.
+ * This started out as an XOR, to avoid the opaque backing that had been taking
+ * a bite out of the emblem. On paper XOR is ideal -- ink over ink goes blank,
+ * ink over blank goes ink, so nothing is lost. On the panel it failed: the
+ * circle-cube is 38% ink of fine detail, and text XORed across it is scrambled
+ * rather than legible. Readability is a property the status line has to have;
+ * an unbitten emblem is only one it would be nice to have.
  *
- * It has to be done in the buffer. LVGL 9 offers only NORMAL, ADDITIVE,
- * SUBTRACTIVE and MULTIPLY blend modes -- none of them is XOR on a 1-bit
- * panel -- so no arrangement of label styles can produce this.
+ * So the box comes back, but sized to the INK rather than to the label: the
+ * columns actually written, plus VISTA_TEXT_PAD either side. An empty
+ * right-aligned readout no longer blanks the left of the panel, and a short
+ * string costs only its own width.
  *
  * Both canvases must be VISTA_CANVAS_COLOR_FORMAT. Clipped to the destination.
  */
-void vista_xor_canvas(lv_obj_t *dst, lv_coord_t x, lv_coord_t y, lv_obj_t *src);
+void vista_stamp_canvas(lv_obj_t *dst, lv_coord_t x, lv_coord_t y, lv_obj_t *src);
+
+/* Breathing room between the text and the art it is sitting on. */
+#define VISTA_TEXT_PAD 2
+
+/*
+ * Blank the box vista_stamp_canvas() is about to draw into: the rows of `src`,
+ * and only the columns that carry ink, padded by VISTA_TEXT_PAD. Call it
+ * immediately before the stamp.
+ */
+void vista_clear_box(lv_obj_t *dst, lv_coord_t x, lv_coord_t y, lv_obj_t *src);
 
 /*
  * Blit a 1-bit-per-pixel bitmap, MSB first, a set bit being ink. Writes the

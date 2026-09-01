@@ -15,6 +15,11 @@ if(CONFIG_ZMK_DISPLAY AND CONFIG_ZMK_DISPLAY_STATUS_SCREEN_CUSTOM)
 
   if(NOT CONFIG_ZMK_SPLIT OR CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
     zephyr_library_sources(custom_status_screen.c)
+    # Only the central is bonded to a host, so only it has a host to name.
+    # Lives in ../common because the vista508 screen names hosts too and this
+    # code has nothing to do with either panel -- it is BLE and settings.
+    zephyr_library_include_directories(${CMAKE_CURRENT_LIST_DIR}/../common)
+    zephyr_library_sources(${CMAKE_CURRENT_LIST_DIR}/../common/bt_names.c)
   else()
     zephyr_library_sources(peripheral_status_screen.c)
   endif()

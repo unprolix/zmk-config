@@ -112,8 +112,12 @@ ZMK_SIMPLE_MACRO(dot_slash, <&kp DOT>, <&kp FSLH>)
 			compatible = "zmk,behavior-antecedent-morph";
 			#binding-cells = <0>;
 			defaults = <&kp H>;
+			// One binding per antecedent, in order: after N you are writing
+			// can't or won't, after I you are writing I'd, I'll or I've and
+			// want the apostrophe alone. Both are safe because neither NH
+			// nor IH occurs in English.
 			bindings = <&cant_wont_tail>, <&kp SQT>;
-			antecedents = <I>; // I'd/I'll
+			antecedents = <N I>;
 			max-delay-ms = <LONG_PAUSE>;
 		};
 
@@ -127,57 +131,6 @@ ZMK_SIMPLE_MACRO(dot_slash, <&kp DOT>, <&kp FSLH>)
 			require-prior-idle-ms = <HRM_PRIOR_IDLE>;
 			flavor = "balanced";
 			bindings = <&layer_lgui>, <&adaptive_h_quote>;
-		};
-
-		sqt_minus_thumb: sqt_minus_thumb {
-			compatible = "zmk,behavior-mod-morph";
-			#binding-cells = <0>;
-			bindings = <&kp SQT>, <&kp MINUS>;
-			mods = <(MOD_LSFT|MOD_RSFT)>;
-		};
-
-		dqt_plus_thumb: dqt_plus_thumb {
-			compatible = "zmk,behavior-mod-morph";
-			#binding-cells = <0>;
-			bindings = <&kp DQT>, <&kp PLUS>;
-			mods = <(MOD_LSFT|MOD_RSFT)>;
-		};
-
-		dqt_underscore_thumb: dqt_underscore_thumb {
-			compatible = "zmk,behavior-mod-morph";
-			#binding-cells = <0>;
-			bindings = <&kp DQT>, <&kp UNDERSCORE>;
-			mods = <(MOD_LSFT|MOD_RSFT)>;
-		};
-
-		lts_extra_sqt_minus: lts_extra_sqt_minus {
-			compatible = "zmk,behavior-hold-tap";
-			#binding-cells = <2>;
-			tapping-term-ms = <200>;
-			quick-tap-ms = <175>;
-			require-prior-idle-ms = <HRM_PRIOR_IDLE>;
-			flavor = "balanced";
-			bindings = <&mo>, <&sqt_minus_thumb>;
-		};
-
-		lts_fn_dqt_plus: lts_fn_dqt_plus {
-			compatible = "zmk,behavior-hold-tap";
-			#binding-cells = <2>;
-			tapping-term-ms = <200>;
-			quick-tap-ms = <175>;
-			require-prior-idle-ms = <HRM_PRIOR_IDLE>;
-			flavor = "balanced";
-			bindings = <&mo>, <&dqt_plus_thumb>;
-		};
-
-		lts_fn_dqt_underscore: lts_fn_dqt_underscore {
-			compatible = "zmk,behavior-hold-tap";
-			#binding-cells = <2>;
-			tapping-term-ms = <200>;
-			quick-tap-ms = <175>;
-			require-prior-idle-ms = <HRM_PRIOR_IDLE>;
-			flavor = "balanced";
-			bindings = <&mo>, <&dqt_underscore_thumb>;
 		};
 	};
 	

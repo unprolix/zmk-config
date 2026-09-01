@@ -332,8 +332,17 @@ MAKE_HRM(tlr, &mo, &kp, KEYS_L THUMBS)
 // Also note: a layer entered through &sl is never seen by a momentary-layer
 // driver, so anything asking "which hand is holding this layer" gets a stale
 // answer for these. Harmless while the colours are symmetrical.
-MAKE_HRM(tll_sticky, &sl_long, &kp, KEYS_R THUMBS)
-MAKE_HRM(tlr_sticky, &sl_long, &kp, KEYS_L THUMBS)
+// No require-prior-idle on these, unlike MAKE_HRM: arming a layer is something
+// you do between words, and a guard that refuses within 150ms of the last
+// keystroke refuses exactly when you reach for it mid-flow. The positional
+// restriction still stands, so a same-hand roll cannot be read as a hold.
+#define MAKE_HRM_STICKY(NAME, TRIGGER_POS)                                        \
+  ZMK_HOLD_TAP(NAME, bindings = <&sl_long>, <&kp>; flavor = "balanced";           \
+               tapping-term-ms = <280>; quick-tap-ms = <QUICK_TAP_MS>;            \
+               hold-trigger-key-positions = <TRIGGER_POS>;)
+
+MAKE_HRM_STICKY(tll_sticky, KEYS_R THUMBS)
+MAKE_HRM_STICKY(tlr_sticky, KEYS_L THUMBS)
 
 #include "build_info.dtsi"
 //#include "tap-hold-layer.dtsi"
@@ -366,18 +375,13 @@ MAKE_HRM(tlr_sticky, &sl_long, &kp, KEYS_L THUMBS)
 ZMK_UNICODE_SINGLE(em_dash, N2, N0, N1, N4)
 
 
-// Every &bt and &out binding below is guarded on CONFIG_WIRELESS. A wired-only
-// board (the Corne v4's RP2040 has no radio at all) builds without ZMK_BLE, and
-// an unguarded &bt is not a dead key there -- it is an unresolvable phandle
-// that fails the build outright.
-#ifdef CONFIG_WIRELESS
-BT_MODSEL(0)
-BT_MODSEL(1)
-BT_MODSEL(2)
-BT_MODSEL(3)
-BT_MODSEL(4)
-//BT_MODSEL(5)
-#endif
+// BT_MODSEL puts select, disconnect and clear on one key per profile, told
+// apart by which modifier is held. That compresses profile management to a
+// single row, which mattered when it had to share a layer. BLUETOOTH has rows
+// to spare and spends them: a row of selects above a row of disconnects is
+// there to be read, rather than remembered. Left instantiable, not instantiated.
+//
+// BT_MODSEL(0) .. BT_MODSEL(4)
 
 #include "hierophant.dtsi"		
 
@@ -408,50 +412,6 @@ dash_emdash: dash_emdash {
     mods = <(MOD_LSFT|MOD_RSFT)>;
 };
 
-
-#ifdef CONFIG_WIRELESS
-fancy_bt_0: fancy_bt_0 {
-    compatible = "zmk,behavior-mod-morph";
-    #binding-cells = <0>;
-    bindings = <&bt BT_SEL 0>, <&bt BT_DISC 0>;
-    mods = <(MOD_LSFT|MOD_RSFT)>;
-};		
-
-fancy_bt_1: fancy_bt_1 {
-    compatible = "zmk,behavior-mod-morph";
-    #binding-cells = <0>;
-    bindings = <&bt BT_SEL 1>, <&bt BT_DISC 1>;
-    mods = <(MOD_LSFT|MOD_RSFT)>;
-};		
-
-fancy_bt_2: fancy_bt_2 {
-    compatible = "zmk,behavior-mod-morph";
-    #binding-cells = <0>;
-    bindings = <&bt BT_SEL 2>, <&bt BT_DISC 2>;
-    mods = <(MOD_LSFT|MOD_RSFT)>;
-};		
-
-fancy_bt_3: fancy_bt_3 {
-    compatible = "zmk,behavior-mod-morph";
-    #binding-cells = <0>;
-    bindings = <&bt BT_SEL 3>, <&bt BT_DISC 3>;
-    mods = <(MOD_LSFT|MOD_RSFT)>;
-};		
-
-fancy_bt_4: fancy_bt_4 {
-    compatible = "zmk,behavior-mod-morph";
-    #binding-cells = <0>;
-    bindings = <&bt BT_SEL 4>, <&bt BT_DISC 4>;
-    mods = <(MOD_LSFT|MOD_RSFT)>;
-};		
-
-fancy_bt_5: fancy_bt_5 {
-    compatible = "zmk,behavior-mod-morph";
-    #binding-cells = <0>;
-    bindings = <&bt BT_SEL 5>, <&bt BT_DISC 5>;
-    mods = <(MOD_LSFT|MOD_RSFT)>;
-};
-#endif // CONFIG_WIRELESS
 
 // the morphed behavior seems to do nothing. have tried 20, 99, and 999 with MOVE_X and MOVE_Y
 msc_up_variable: msc_up_variable {
@@ -540,16 +500,6 @@ arcane_nav_r: arcane_nav_r {
             bindings = <&mo>, <&kp>;
         };
 
-        layer_and_oneshot_key: layer_and_oneshot_key {
-            compatible = "zmk,behavior-hold-tap";
-            #binding-cells = <2>;
-            tapping-term-ms = <200>;
-            quick-tap-ms = <175>;
-            require-prior-idle-ms = <HRM_PRIOR_IDLE>;
-            flavor = "balanced";
-            bindings = <&mo>, <&sk_long>;
-        };
-
     };
 
 
@@ -622,13 +572,30 @@ arcane_nav_r: arcane_nav_r {
 // ****************************************** GAMING layer
 
 #define GAMING_LZ &trans &trans &trans &trans &trans &trans
+// ESC and CAPS are combos here (see combos.dtsi), which buys back the two outer
+// keys they were sitting on. TAB takes the top one.
+//
+// The pinky gets a third way to the digits, alongside both thumbs. Three is one
+// too many on purpose: which reach turns out to be natural under pressure is
+// not something to decide at a desk, and the losers cost nothing until they are
+// dropped.
 #define GAMING_LT_IN &kp Q  &kp W  &kp E  &kp R  &kp T
-#define GAMING_LT &kp ESC  GAMING_LT_IN
+#define GAMING_LT &kp TAB  GAMING_LT_IN
 #define GAMING_LM_IN &kp A  &kp S  &kp D  &kp F  &kp G
-#define GAMING_LM &kp CAPS  GAMING_LM_IN
+#define GAMING_LM &sl NUMPAD  GAMING_LM_IN
 #define GAMING_LB_IN &kp Z  &kp X  &kp C  &kp V  &kp B
 #define GAMING_LB &kp LSHIFT  GAMING_LB_IN
-#define GAMING_LH &kp LCTRL  &smart_nav_thumb NAV TAB  &hml LALT SPACE                
+// Nothing on these thumbs may be a hold-tap. A game holds crouch, holds jump,
+// holds the scoreboard -- every one of those is a hold that means itself, and
+// a hold-tap reads it as the other thing. Space in particular was an HRM: hold
+// it to jetpack or swim and you got LALT.
+//
+// TAB moved to the top-left key, which frees the middle thumb for digits.
+// Sticky rather than momentary: a held layer is one more thing to keep held
+// while moving, and &sl wants only a tap. Plain &sl, not sl_long -- five
+// seconds is right for prose and wrong here, where a stray press should expire
+// before it eats a movement key.
+#define GAMING_LH &kp LCTRL  &sl NUMPAD  &kp SPACE
 #define GAMING_LH_5 &trans &trans GAMING_LH
 
 #define GAMING_RZ &trans &trans &trans &trans &trans &trans
@@ -638,7 +605,11 @@ arcane_nav_r: arcane_nav_r {
 #define GAMING_RM GAMING_RM_IN  &kp SQT
 #define GAMING_RB_IN &kp N  &kp M  &kp COMMA  &kp DOT  &kp FSLH
 #define GAMING_RB GAMING_RB_IN  &kp RSHIFT
-#define GAMING_RH &hmr RALT SPACE  &smart_nav_thumb NAV BSPC  &kp RETURN
+// The right hand is on the mouse, so these three are nearly dead. RETURN earns
+// its place for chat; the other two are a second space and a backspace nobody
+// reaches for, and both were hold-taps besides. Left as a second digit key and
+// a spare, in reach if the hand comes back to the board.
+#define GAMING_RH &sl NUMPAD  &none  &kp RETURN
 #define GAMING_RH_5 &trans &trans GAMING_RH
 
 // ******************************************  hierophant (alt_alpha) layer
@@ -834,38 +805,34 @@ MAKE_ADAPTIVE_REPEAT(f_hrk_f23, hmr, R_M4, F23)
 
 #define SYSTEM_LZ &trans &trans &trans &trans &trans &trans
 
-#ifdef CONFIG_WIRELESS
-#define SYSTEM_LT_IN &bt BT_CLR_ALL  &trans  &trans  &trans  &trans
-#define SYSTEM_LT &bt BT_CLR  SYSTEM_LT_IN
-#else
-#define SYSTEM_LT_IN &none  &trans  &trans  &trans  &trans
-#define SYSTEM_LT &none  SYSTEM_LT_IN
-#endif
+#define SYSTEM_LT_IN &trans  &trans  &trans  &trans  &trans
+#define SYSTEM_LT &trans  SYSTEM_LT_IN
 
 #define SYSTEM_LM_IN &trans  &trans  &trans  &trans  &trans
 #define SYSTEM_LM &trans  SYSTEM_LM_IN
 //#define SYSTEM_LM &bt BT_SEL 0  &hml L_M4 &bt BT_SEL 1  &hml L_M3 &bt BT_SEL 2  &hml L_M2 &bt BT_SEL 3  &hml L_M1 &bt BT_SEL 4 &bt BT_SEL 5
 
 
-// Where FUNCTION's reset and bootloader went, in the same positions they had
-// there. SYSTEM is leader-only, so nothing here can be reached by a stray press.
+// SYSTEM carries the two keys that must not be reachable by accident, and
+// nothing else: it is leader-only, so nothing here can be hit by a stray press.
+// Bluetooth lives on BLUETOOTH and brightness on LIGHTING; a key with a home
+// elsewhere does not want a second one here.
+//
+// Reset and bootloader sit on mirrored positions -- LB1/RB4 and LB3/RB2 are the
+// same finger on each hand -- so which half you are reaching for is the only
+// thing you have to think about, and it is the same reach either way.
 #define SYSTEM_LB_IN &sys_reset  &trans  &bootloader  &trans  &trans
 #define SYSTEM_LB &trans  SYSTEM_LB_IN
 #define SYSTEM_LH &trans &trans &to HIEROPHANT
 #define SYSTEM_LH_5 &trans &trans SYSTEM_LH
 
 #define SYSTEM_RZ &trans &trans &trans &trans &trans &trans
-#ifdef CONFIG_WIRELESS
-#define SYSTEM_RT_IN &fancy_bt_0  &fancy_bt_1  &fancy_bt_2  &fancy_bt_3  &fancy_bt_4
-#define SYSTEM_RT SYSTEM_RT_IN  &fancy_bt_5
-#else
-#define SYSTEM_RT_IN &none  &none  &none  &none  &none
-#define SYSTEM_RT SYSTEM_RT_IN  &none
-#endif
+#define SYSTEM_RT_IN &trans  &trans  &trans  &trans  &trans
+#define SYSTEM_RT SYSTEM_RT_IN  &trans
 #define SYSTEM_RM_IN &trans  &trans  &trans  &trans  &trans
 #define SYSTEM_RM SYSTEM_RM_IN  &trans
-#define SYSTEM_RB_IN &bootloader  &sys_reset  LIGHT_UP  LIGHT_DN  &kp END
-#define SYSTEM_RB SYSTEM_RB_IN  &kp PG_DN
+#define SYSTEM_RB_IN &trans  &trans  &bootloader  &trans  &sys_reset
+#define SYSTEM_RB SYSTEM_RB_IN  &trans
 #define SYSTEM_RH &to HIEROPHANT &trans &trans
 #define SYSTEM_RH_5 &trans &trans SYSTEM_RH
 
@@ -933,7 +900,7 @@ MAKE_ADAPTIVE_REPEAT(f_hrk_f23, hmr, R_M4, F23)
 // valid profiles are 0-4 and the old `BT_SEL 5` here was a dead key. Raising
 // CONFIG_BT_MAX_PAIRED to 7 would give a sixth, at the cost of re-pairing.
 #ifdef CONFIG_WIRELESS
-#define BLUETOOTH_LT_IN &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4  &trans
+#define BLUETOOTH_LT_IN &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4  &bt BT_SEL 5
 #define BLUETOOTH_LT &bt BT_SEL 0  BLUETOOTH_LT_IN
 #define BLUETOOTH_LM_IN &bt BT_DISC 1  &bt BT_DISC 2  &bt BT_DISC 3  &bt BT_DISC 4  &bt BT_DISC 5
 #define BLUETOOTH_LM &bt BT_DISC 0  BLUETOOTH_LM_IN
@@ -966,8 +933,16 @@ MAKE_ADAPTIVE_REPEAT(f_hrk_f23, hmr, R_M4, F23)
 #define BLUETOOTH_RT BLUETOOTH_RT_IN  &trans
 #define BLUETOOTH_RM_IN &trans  &trans  &trans  &trans  &trans
 #define BLUETOOTH_RM BLUETOOTH_RM_IN  &trans
+// Clear-all mirrors clear-this-one on the far pinky: the same shape of act, as
+// far from each other as the board allows.
 #define BLUETOOTH_RB_IN &trans  &trans  &trans  &trans  &trans
-#define BLUETOOTH_RB BLUETOOTH_RB_IN  &trans
+#ifdef CONFIG_WIRELESS
+#define BLUETOOTH_RB BLUETOOTH_RB_IN  &bt BT_CLR_ALL
+#else
+// &bt does not exist without ZMK_BLE, and an unguarded one is not a dead key on
+// a wired-only board -- it is an unresolvable phandle that fails the build.
+#define BLUETOOTH_RB BLUETOOTH_RB_IN  &none
+#endif
 #define BLUETOOTH_RH &to HIEROPHANT &trans &trans
 #define BLUETOOTH_RH_5 &trans &trans BLUETOOTH_RH
 
