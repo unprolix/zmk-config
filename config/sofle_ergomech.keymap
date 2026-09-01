@@ -95,17 +95,26 @@ NUMPAD_LH NUMPAD_RH
             >;
         };
 
-
-        numberline_layer {
-            display-name = "#line";
-            bindings = <
-NUMBERLINE_LZ NUMBERLINE_RZ
-NUMBERLINE_LT NUMBERLINE_RT
-NUMBERLINE_LM NUMBERLINE_RM
-NUMBERLINE_LB NUMBERLINE_RB
-NUMBERLINE_LH NUMBERLINE_RH
-            >;
-        };
+        /*
+         * There was a numberline_layer here, and it had to go.
+         *
+         * Nothing defined NUMBERLINE_LZ or any of its siblings -- not in
+         * jjb.keymap, not anywhere in the tree -- so this file has not compiled
+         * for as long as those macros have been absent. `just build all` was
+         * red on this target alone and nothing depended on it, so it went
+         * unnoticed.
+         *
+         * Deleting rather than defining, because the layer was in the wrong
+         * place as well as undefined: the shared layout pins layer INDICES
+         * (SYMBOL 7, LIGHTING 13, BLUETOOTH 14, SYSTEM 15) and every board is
+         * expected to list its layers in that order. Sitting between numpad and
+         * symbol, this one pushed all eleven layers after it along by one, so
+         * every `&mo SYMBOL` on this keyboard would have opened navigation.
+         *
+         * The sofle's number row is not lost with it: it is a full row on every
+         * layer, carried by the _LZ / _RZ row macros the shared layout already
+         * defines, which is why every other layer here has one.
+         */
 
 
         symbol_layer {

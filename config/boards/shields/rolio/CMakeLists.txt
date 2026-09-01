@@ -1,3 +1,10 @@
+# emblem_toggle.c includes <drivers/behavior.h>, which lives in ZMK's app/include
+# rather than on the default shield include path. The rgbkey shield sets this too,
+# which is why rolio_*-rgbkey built while the PLAIN rolio_right did not -- both
+# shields contribute to the same Zephyr library, so rgbkey was supplying the path
+# on rolio's behalf whenever it happened to be on the build line.
+zephyr_library_include_directories(${CMAKE_SOURCE_DIR}/include)
+
 if(CONFIG_ZMK_RGB_UNDERGLOW)
   zephyr_library_sources(rolio_underglow_blank.c)
 endif()
