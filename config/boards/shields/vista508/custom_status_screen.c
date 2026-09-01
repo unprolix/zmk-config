@@ -52,6 +52,23 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 const char *jjb_bt_name_for(uint8_t profile);
 
 /*
+ * Called by bt_names.c when it learns a host's name, which happens on the BLE
+ * security callback a moment AFTER the profile connects.
+ *
+ * Without this the corner keeps whatever it said at connect time -- an address
+ * tail -- until the next endpoint or profile event happens to repaint it,
+ * which in practice meant the name never appeared at all. That is exactly what
+ * "BT1 4b:de" was.
+ *
+ * Runs in the BLE stack's context, so it must not touch LVGL. It only marks
+ * the cached text stale and asks the display queue to rebuild it.
+ */
+static void conn_refresh_work_cb(struct k_work *work);
+static K_WORK_DEFINE(conn_refresh_work, conn_refresh_work_cb);
+
+void jjb_bt_name_changed(void) { k_work_submit_to_queue(zmk_display_work_q(), &conn_refresh_work); }
+
+/*
  * THIS FILE IS COMPILED BY MORE THAN ONE SHIELD.
  *
  * vista508 builds it for the Rolio and toucan_display builds it for the
@@ -98,12 +115,12 @@ const char *jjb_bt_name_for(uint8_t profile);
  * The corner readouts are XORed into the emblem canvas rather than being labels
  * laid over it.
  *
- * They used to be labels with an opaque backing, which made them legible over
- * any art at the cost of blanking a box of it. On the hierophant that box fell
- * in a corner the spear never reaches and went unnoticed; the circle-cube runs
- * the full width of the panel, and the backing took a visible bite out of the
- * disc. XOR costs nothing -- see vista_xor_canvas() -- so the readout and the
- * art both survive wherever they overlap.
+ * They began as labels with an opaque backing, became an XOR to stop the
+ * backing eating the emblem, and are now a backing again -- but a tight one,
+ * sized to the ink rather than to the label box. The XOR was right on paper and
+ * wrong on the panel: over the circle-cube's 38% of fine detail the text came
+ * out scrambled instead of legible. A status line has to be readable; an
+ * unbitten emblem is merely desirable. See vista_stamp_canvas().
  *
  * The consequence is that the corners belong to the canvas: they are repainted
  * whenever it is, and every change to either has to go through panel_redraw().
@@ -283,7 +300,7 @@ static const struct emblem *current_emblem(void) {
 }
 
 /*
- * Render one corner readout into the scratch canvas and XOR it into the panel.
+ * Render one corner readout into the scratch canvas and stamp it onto the panel.
  *
  * The label is given the full panel width and asked to align itself inside it,
  * which is what puts the battery hard against the right margin without
@@ -294,7 +311,7 @@ static const struct emblem *current_emblem(void) {
  * needs; offsetting only right and down thickens the stroke but drags the word
  * half a pixel off centre and reads as blurred rather than bold.
  */
-static void xor_corner_text(const char *text, lv_text_align_t align) {
+static void draw_corner_text(const char *text, lv_text_align_t align) {
     if (text_canvas == NULL || text == NULL || text[0] == '\0') {
         return;
     }
@@ -318,7 +335,13 @@ static void xor_corner_text(const char *text, lv_text_align_t align) {
     }
     lv_canvas_finish_layer(text_canvas, &layer);
 
-    vista_xor_canvas(emblem_canvas, 0, CORNER_LIFT, text_canvas);
+    /*
+     * Clear a tight box, then draw into it. The box is sized to the ink, so a
+     * right-aligned battery reading costs only its own width and not the whole
+     * panel. See vista_stamp_canvas() for why this is no longer an XOR.
+     */
+    vista_clear_box(emblem_canvas, 0, CORNER_LIFT, text_canvas);
+    vista_stamp_canvas(emblem_canvas, 0, CORNER_LIFT, text_canvas);
 }
 
 /*
@@ -347,9 +370,9 @@ static void panel_redraw(void) {
                           e->w, e->h, e->stride);
     }
 
-    xor_corner_text(conn_text, LV_TEXT_ALIGN_LEFT);
+    draw_corner_text(conn_text, LV_TEXT_ALIGN_LEFT);
     if (batt_shown) {
-        xor_corner_text(batt_text, LV_TEXT_ALIGN_RIGHT);
+        draw_corner_text(batt_text, LV_TEXT_ALIGN_RIGHT);
     }
 
     /*
@@ -727,6 +750,13 @@ static struct rolio_conn_state rolio_conn_get_state(const zmk_event_t *eh) {
         .profile_connected = zmk_ble_active_profile_is_connected(),
         .profile_bonded = !zmk_ble_active_profile_is_open(),
     };
+}
+
+/* Rebuild the connection readout from scratch; see jjb_bt_name_changed(). */
+static void conn_refresh_work_cb(struct k_work *work) {
+    ARG_UNUSED(work);
+    conn_text[0] = '\0'; /* force the strcmp below to see a change */
+    rolio_conn_update_cb(rolio_conn_get_state(NULL));
 }
 
 ZMK_DISPLAY_WIDGET_LISTENER(rolio_conn_status, struct rolio_conn_state, rolio_conn_update_cb,

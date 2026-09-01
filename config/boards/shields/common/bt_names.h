@@ -34,3 +34,16 @@ static const struct jjb_bt_name jjb_bt_names[] = {
        which is exactly what you need to write the entry. */
     /* {"AA:BB:CC:DD:EE:FF", "quignon"}, */
 };
+
+/*
+ * The name for a profile: table entry, learned name, or address tail. Never
+ * NULL for a bonded profile.
+ */
+const char *jjb_bt_name_for(uint8_t profile);
+
+/*
+ * Called when a host's name is learned, which is a moment after that profile
+ * connects. Implement it to repaint; the default does nothing. Runs in the BLE
+ * stack's context, so do the work somewhere else.
+ */
+void jjb_bt_name_changed(void);

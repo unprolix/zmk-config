@@ -48,7 +48,7 @@ void vista_draw_bitmap(lv_obj_t *canvas, lv_coord_t x, lv_coord_t y, const uint8
     }
 }
 
-void vista_xor_canvas(lv_obj_t *dst, lv_coord_t x, lv_coord_t y, lv_obj_t *src) {
+void vista_stamp_canvas(lv_obj_t *dst, lv_coord_t x, lv_coord_t y, lv_obj_t *src) {
     lv_draw_buf_t *dbuf = lv_canvas_get_draw_buf(dst);
     lv_draw_buf_t *sbuf = lv_canvas_get_draw_buf(src);
     if (dbuf == NULL || sbuf == NULL) {
@@ -76,13 +76,76 @@ void vista_xor_canvas(lv_obj_t *dst, lv_coord_t x, lv_coord_t y, lv_obj_t *src) 
                 continue;
             }
             if (VISTA_IS_INK(sp[col])) {
-                /*
-                 * Both values written to these canvases are 0x00 and 0xFF, so a
-                 * full-byte flip is an exact inversion rather than an
-                 * approximation of one.
-                 */
-                dp[dx] ^= 0xFF;
+                dp[dx] = VISTA_CANVAS_INK;
             }
+        }
+    }
+}
+
+/*
+ * Which columns of a source canvas carry any ink at all.
+ *
+ * Used to size the backing box to the text rather than to the label, which is
+ * the full panel width -- see vista_stamp_canvas(). Returns false when the
+ * canvas is entirely blank, in which case there is nothing to clear and
+ * nothing to draw.
+ */
+static bool ink_columns(lv_obj_t *src, lv_coord_t *first, lv_coord_t *last) {
+    lv_draw_buf_t *buf = lv_canvas_get_draw_buf(src);
+    if (buf == NULL) {
+        return false;
+    }
+    const lv_coord_t w = (lv_coord_t)buf->header.w;
+    const lv_coord_t h = (lv_coord_t)buf->header.h;
+    const uint32_t stride = lv_draw_buf_width_to_stride(w, VISTA_CANVAS_COLOR_FORMAT);
+
+    bool any = false;
+    for (lv_coord_t row = 0; row < h; row++) {
+        const uint8_t *sp = buf->data + (size_t)row * stride;
+        for (lv_coord_t col = 0; col < w; col++) {
+            if (!VISTA_IS_INK(sp[col])) {
+                continue;
+            }
+            if (!any) {
+                *first = *last = col;
+                any = true;
+            } else if (col < *first) {
+                *first = col;
+            } else if (col > *last) {
+                *last = col;
+            }
+        }
+    }
+    return any;
+}
+
+void vista_clear_box(lv_obj_t *dst, lv_coord_t x, lv_coord_t y, lv_obj_t *src) {
+    lv_coord_t first, last;
+    if (!ink_columns(src, &first, &last)) {
+        return;
+    }
+
+    lv_draw_buf_t *dbuf = lv_canvas_get_draw_buf(dst);
+    lv_draw_buf_t *sbuf = lv_canvas_get_draw_buf(src);
+    if (dbuf == NULL || sbuf == NULL) {
+        return;
+    }
+    const lv_coord_t dst_w = (lv_coord_t)dbuf->header.w;
+    const lv_coord_t dst_h = (lv_coord_t)dbuf->header.h;
+    const uint32_t stride = lv_draw_buf_width_to_stride(dst_w, VISTA_CANVAS_COLOR_FORMAT);
+
+    for (lv_coord_t row = 0; row < (lv_coord_t)sbuf->header.h; row++) {
+        const lv_coord_t dy = y + row;
+        if (dy < 0 || dy >= dst_h) {
+            continue;
+        }
+        uint8_t *dp = dbuf->data + (size_t)dy * stride;
+        for (lv_coord_t col = first - VISTA_TEXT_PAD; col <= last + VISTA_TEXT_PAD; col++) {
+            const lv_coord_t dx = x + col;
+            if (dx < 0 || dx >= dst_w) {
+                continue;
+            }
+            dp[dx] = VISTA_CANVAS_BACKGROUND_RAW;
         }
     }
 }

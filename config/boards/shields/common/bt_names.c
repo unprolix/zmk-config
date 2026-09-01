@@ -36,6 +36,9 @@
 
 LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 
+/* Overridden by a screen that wants to repaint when a name arrives. */
+__weak void jjb_bt_name_changed(void) {}
+
 /* ZMK reserves fifteen; the panel fits nine. Keep ZMK's, cut when drawing. */
 #define JJB_BT_NAME_MAX 16
 
@@ -156,6 +159,17 @@ static uint8_t name_read_cb(struct bt_conn *conn, uint8_t err, struct bt_gatt_re
 
     LOG_INF("Profile %d is \"%s\"", reading_profile, name);
     learned_save(reading_profile);
+
+    /*
+     * Tell whoever is drawing. This lands a moment AFTER the profile connected,
+     * so a screen that only repaints on connection events will already have
+     * settled on the address tail and would keep showing it indefinitely.
+     *
+     * Weak, because not every screen wants to know and the eyelash's does not
+     * implement it yet. Called from the BLE stack's context -- an implementation
+     * must not touch LVGL directly.
+     */
+    jjb_bt_name_changed();
     return BT_GATT_ITER_STOP;
 }
 
