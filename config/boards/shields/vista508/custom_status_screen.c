@@ -291,9 +291,23 @@ static bool leader_active;
 #define BOLD_COPIES 9
 
 static const lv_coord_t bold_offsets[BOLD_COPIES][2] = {
-    {0, 0},  {-1, -1}, {0, -1}, {1, -1}, {-1, 0},
-    {1, 0},  {-1, 1},  {0, 1},  {1, 1},
+    /* Centre first, then the four orthogonal neighbours, then the diagonals.
+       Ordered so a smaller count is a lighter weight, not a lopsided one. */
+    {0, 0},  {0, -1}, {0, 1}, {-1, 0}, {1, 0},
+    {-1, -1}, {1, -1}, {-1, 1}, {1, 1},
 };
+
+/*
+ * The corners are LIGHTER than the middle band.
+ *
+ * The full 3x3 was needed while the readouts were XORed across the emblem,
+ * where every stroke was fighting the art behind it. Now that they sit in a
+ * cleared box the same weight reads as heavy and blocky, so they take only the
+ * centre and the four orthogonal neighbours -- enough to survive LVGL's
+ * antialiasing being thresholded away by a 1-bit panel, without the diagonal
+ * fill that closes up the counters. Dial to 1 for no dilation at all.
+ */
+#define CORNER_BOLD_COPIES 5
 
 static const struct emblem *current_emblem(void) {
     return &emblems[emblem_choice % ARRAY_SIZE(emblems)];
@@ -327,7 +341,7 @@ static void draw_corner_text(const char *text, lv_text_align_t align) {
 
     lv_layer_t layer;
     lv_canvas_init_layer(text_canvas, &layer);
-    for (size_t i = 0; i < BOLD_COPIES; i++) {
+    for (size_t i = 0; i < CORNER_BOLD_COPIES; i++) {
         const lv_coord_t dx = bold_offsets[i][0];
         const lv_coord_t dy = bold_offsets[i][1] + 1; /* room for the top row of the dilation */
         lv_area_t coords = {dx, dy, dx + TEXT_SCRATCH_W - 1, dy + TEXT_SCRATCH_H - 1};
