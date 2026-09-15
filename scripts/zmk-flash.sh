@@ -2,8 +2,8 @@
 #
 # Flash whichever keyboard half is currently in its bootloader.
 #
-# Takes no arguments: it finds the bootloader volume, reads the nRF52840 serial,
-# and picks the matching firmware from ~/zmk-flash. Anything whose serial is
+# It finds the bootloader volume, reads the nRF52840 serial,
+# and picks the matching firmware from ~/tmp/zmk. Anything whose serial is
 # not in the table below is refused rather than guessed at -- several different
 # keyboards get plugged into these machines, and a Rolio once turned up where
 # an eyelash was expected.
@@ -25,7 +25,7 @@ set -uo pipefail
 # Under ~/tmp, not straight in ~. This has to survive a reboot -- a half can sit
 # in its bootloader across one -- so /tmp will not do, but that is no reason to
 # leave a directory in the home directory of every machine a keyboard visits.
-STAGING="$HOME/tmp/zmk-flash"
+STAGING="$HOME/tmp/zmk"
 MOUNT=/mnt/keeb
 
 # serial -> firmware suffix, human name

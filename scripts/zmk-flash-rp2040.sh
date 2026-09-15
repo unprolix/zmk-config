@@ -88,7 +88,7 @@ set -uo pipefail
 # Under ~/tmp, not straight in ~: staging has to survive a reboot -- a half can
 # sit in its bootloader across one -- so /tmp will not do, but that is no reason
 # to leave a directory in the home directory of every machine a keyboard visits.
-STAGING="$HOME/tmp/zmk-flash"
+STAGING="$HOME/tmp/zmk"
 MOUNT=/mnt/keeb
 FLASH_LOG="$STAGING/rp2040-flashes.log"
 
