@@ -40,7 +40,7 @@ static int on_rgbkey_binding_pressed(struct zmk_behavior_binding *binding,
                                      struct zmk_behavior_binding_event event) {
     ARG_UNUSED(event);
 #if IS_ENABLED(CONFIG_ZMK_SPLIT) && !IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
-    rgbkey_apply((uint32_t)binding->param1);
+    rgbkey_apply((uint32_t)binding->param1, (uint32_t)binding->param2);
 #else
     /* The central drives its own strip directly; its copy of this is noise. */
     ARG_UNUSED(binding);
@@ -73,10 +73,11 @@ static const struct behavior_driver_api rgbkey_relay_api = {
 DT_INST_FOREACH_STATUS_OKAY(RGBKEY_INST)
 
 #if !IS_ENABLED(CONFIG_ZMK_SPLIT) || IS_ENABLED(CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
-void rgbkey_relay_send(uint32_t packed) {
+void rgbkey_relay_send(uint32_t packed, uint32_t blink) {
     struct zmk_behavior_binding binding = {
         .behavior_dev = DEVICE_DT_NAME(DT_NODELABEL(rgbkey)),
         .param1 = packed,
+        .param2 = blink,
     };
     struct zmk_behavior_binding_event event = {
         .position = 0,

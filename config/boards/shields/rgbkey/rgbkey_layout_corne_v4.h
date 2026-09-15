@@ -52,6 +52,9 @@
  */
 #define RGBKEY_HAS_LAYER_OWNER 1
 
+/* The bigram mode is the Rolio's alone; this board's lighting is untouched by it. */
+#define RGBKEY_HAS_BLINK 0
+
 /*
  * COLUMNS, as key lists.
  *

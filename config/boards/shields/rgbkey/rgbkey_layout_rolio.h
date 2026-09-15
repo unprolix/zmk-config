@@ -23,6 +23,62 @@
 #define RGBKEY_HAS_LAYER_OWNER 0
 
 /*
+ * THE BIGRAM MODE ("blink", leader B L I N K). This board's only.
+ *
+ * It WINS every key it owns -- over layer rows, modifiers and caps lock -- and
+ * paints them even when it has nothing to say, so a layer colour never shows
+ * through a gap and gets read as part of a character. That is jjb's call, and
+ * so is the rule that goes with it: if the mix gets confusing, the layer rows
+ * change, and only when he says so.
+ *
+ * Laid out on the thumb row, outer to inner, mirrored on the right half:
+ *
+ *     LX1 LX0 | LH2 | LH1    | LH0
+ *     rhythm  | --  | arcane | glyph's fourth LED
+ *
+ * LH2/RH2 are not the mode's; whatever a layer puts there still shows.
+ */
+#define RGBKEY_HAS_BLINK 1
+
+/* Where one character is drawn: its half's inner column top to bottom, then the wide thumb. */
+enum rgbkey_glyph_led {
+    RKG_TOP,
+    RKG_HOME,
+    RKG_BOTTOM,
+    RKG_THUMB,
+    RKG_COUNT
+};
+
+/* Left half: the PREVIOUS character.  LT0, LM0, LB0, LH0. */
+static const uint8_t rgbkey_blink_glyph_left[RKG_COUNT] = {5, 17, 29, 42};
+/* Right half: the NEWEST character.   RT0, RM0, RB0, RH0. */
+static const uint8_t rgbkey_blink_glyph_right[RKG_COUNT] = {6, 18, 32, 43};
+
+/* The arcane keys themselves, LH1 and RH1, lit while that thumb has an expansion waiting. */
+#define RGBKEY_BLINK_ARCANE_LEFT   41
+#define RGBKEY_BLINK_ARCANE_RIGHT  44
+#define RGBKEY_BLINK_ARCANE_COLOUR RK_AMBER
+
+/*
+ * Rhythm, on the two outermost keys of the thumb row. NEAR, the one beside the
+ * thumbs, lights alone for a quick pair; FAR joins it for a slow one. A key
+ * registering twice lights both white on both halves.
+ */
+#define RGBKEY_BLINK_RHYTHM_NEAR_LEFT  39 /* LX0 */
+#define RGBKEY_BLINK_RHYTHM_FAR_LEFT   38 /* LX1 */
+#define RGBKEY_BLINK_RHYTHM_NEAR_RIGHT 46 /* RX0 */
+#define RGBKEY_BLINK_RHYTHM_FAR_RIGHT  47 /* RX1 */
+#define RGBKEY_BLINK_DOUBLED_COLOUR    RK_WHITE
+
+/* The right roller's push switch: a right-half key with no LED, so the map cannot say so. */
+#define RGBKEY_ROLIO_RIGHT_ROLLER_CLICK 31
+
+static inline bool rgbkey_position_is_right(uint8_t position) {
+    return position < RGBKEY_POSITIONS && (rgbkey_led_right[position] != RGBKEY_LED_NONE ||
+                                           position == RGBKEY_ROLIO_RIGHT_ROLLER_CLICK);
+}
+
+/*
  * COLUMNS, as key lists.
  *
  * rgbzone can only address columns -- that is all the eyelash's hardware

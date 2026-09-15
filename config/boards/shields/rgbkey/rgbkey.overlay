@@ -47,3 +47,27 @@
 #ifdef CORNE_V4_PRESENT
 #define LAYER_OWNER_PRESENT 1
 #endif
+
+/*
+ * &blink, the bigram mode's toggle, bound to leader B L I N K.
+ *
+ * The Rolio's only. The Corne v4 carries rgbkey too but has no layout for the
+ * mode (RGBKEY_HAS_BLINK is 0 there), so it gets neither the node nor the
+ * marker.
+ *
+ * RGBKEY_BLINK_PRESENT is what leader.dtsi checks before binding &blink, for the
+ * same reason as LAYER_OWNER_PRESENT above: CONFIG_* is invisible here, and
+ * every other board includes that same leader.dtsi without this shield.
+ */
+#ifndef CORNE_V4_PRESENT
+#define RGBKEY_BLINK_PRESENT 1
+
+/ {
+    behaviors {
+        blink: blink {
+            compatible = "zmk,behavior-rgbkey-blink";
+            #binding-cells = <0>;
+        };
+    };
+};
+#endif

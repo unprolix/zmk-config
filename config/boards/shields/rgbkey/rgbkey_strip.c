@@ -148,6 +148,63 @@ static void paint(uint8_t position, enum rgbkey_colour colour) {
     pixels[led].b = rgbkey_palette[colour][2];
 }
 
+#if RGBKEY_HAS_BLINK
+/*
+ * The bigram mode, painted after everything else so it wins every key it owns.
+ *
+ * Each half draws its own side of the same word: the left half the PREVIOUS
+ * character and its arcane key, the right half the NEWEST and its arcane key, so
+ * the pair reads left to right. Rhythm lights on whichever half typed the second
+ * key of the pair.
+ *
+ * Every owned key is painted even with nothing to show, in RK_OFF: a layer's
+ * colour showing through a gap would read as part of a character.
+ */
+static void paint_blink(uint32_t blink) {
+    const bool left = RGBKEY_WE_ARE_LEFT;
+
+    const uint8_t *const glyph_keys = left ? rgbkey_blink_glyph_left : rgbkey_blink_glyph_right;
+    const char c = (char)(left ? rgbkey_blink_prev(blink) : rgbkey_blink_cur(blink));
+    struct rgbkey_glyph glyph = {RK_OFF, RK_OFF, RK_OFF, RK_OFF};
+    if (c != RGBKEY_BLINK_NO_CHAR) {
+        (void)rgbkey_glyph_of(c, &glyph);
+    }
+    paint(glyph_keys[RKG_TOP], glyph.top);
+    paint(glyph_keys[RKG_HOME], glyph.home);
+    paint(glyph_keys[RKG_BOTTOM], glyph.bottom);
+    paint(glyph_keys[RKG_THUMB], glyph.thumb);
+
+    const bool arcane = left ? rgbkey_blink_arcane_left(blink) : rgbkey_blink_arcane_right(blink);
+    paint(left ? RGBKEY_BLINK_ARCANE_LEFT : RGBKEY_BLINK_ARCANE_RIGHT,
+          arcane ? RGBKEY_BLINK_ARCANE_COLOUR : RK_OFF);
+
+    enum rgbkey_colour closer = RK_OFF;
+    enum rgbkey_colour further = RK_OFF;
+    if (rgbkey_blink_doubled(blink)) {
+        closer = further = RGBKEY_BLINK_DOUBLED_COLOUR;
+    } else if (rgbkey_blink_rhythm_right(blink) != left) {
+        switch (rgbkey_blink_rhythm(blink)) {
+        case RKR_FAST:
+            closer = RK_GREEN;
+            break;
+        case RKR_STEADY:
+            closer = RK_YELLOW;
+            break;
+        case RKR_SLOW:
+            closer = further = RK_YELLOW;
+            break;
+        case RKR_HALTING:
+            closer = further = RK_RED;
+            break;
+        default:
+            break;
+        }
+    }
+    paint(left ? RGBKEY_BLINK_RHYTHM_NEAR_LEFT : RGBKEY_BLINK_RHYTHM_NEAR_RIGHT, closer);
+    paint(left ? RGBKEY_BLINK_RHYTHM_FAR_LEFT : RGBKEY_BLINK_RHYTHM_FAR_RIGHT, further);
+}
+#endif
+
 /*
  * How long a clean frame can take before it is worth saying so. 30us a pixel on
  * the wire, the driver's reset delay after it, and a generous margin on top so
@@ -288,6 +345,8 @@ static atomic_t selftest_running = ATOMIC_INIT(RGBKEY_SELFTEST);
 /* Hoisted out of rgbkey_apply so the self-test can invalidate it on the way out. */
 static atomic_t last = ATOMIC_INIT(-1);
 static atomic_t pending;
+static atomic_t last_blink = ATOMIC_INIT(-1);
+static atomic_t pending_blink;
 
 static void selftest_end(struct k_work *work);
 static K_WORK_DELAYABLE_DEFINE(selftest_end_work, selftest_end);
@@ -341,6 +400,7 @@ static void selftest_end(struct k_work *work) {
 
     /* Nothing has been painted for real yet, so let the next word through. */
     atomic_set(&last, -1);
+    atomic_set(&last_blink, -1);
     atomic_set(&selftest_running, 0);
 }
 
@@ -359,6 +419,9 @@ static void strip_write(struct k_work *work) {
     }
 
     uint32_t packed = (uint32_t)atomic_get(&pending);
+#if RGBKEY_HAS_BLINK
+    uint32_t blink = (uint32_t)atomic_get(&pending_blink);
+#endif
     enum rgbkey_scene scene = rgbkey_scene_of(packed);
     zmk_mod_flags_t mods = rgbkey_mods_of(packed);
 
@@ -479,6 +542,13 @@ static void strip_write(struct k_work *work) {
         }
     }
 
+#if RGBKEY_HAS_BLINK
+    /* Last of all: the bigram mode wins every key it owns, caps lock included. */
+    if (rgbkey_blink_on(blink)) {
+        paint_blink(blink);
+    }
+#endif
+
     bool any = false;
     for (int i = 0; i < STRIP_COUNT; i++) {
         if (pixels[i].r || pixels[i].g || pixels[i].b) {
@@ -492,7 +562,7 @@ static void strip_write(struct k_work *work) {
 
 static K_WORK_DEFINE(strip_work, strip_write);
 
-void rgbkey_apply(uint32_t packed) {
+void rgbkey_apply(uint32_t packed, uint32_t blink) {
     if (!device_is_ready(strip)) {
         return;
     }
@@ -502,12 +572,15 @@ void rgbkey_apply(uint32_t packed) {
      * chance to be preempted mid-transfer, and this is called on every keycode
      * event.
      */
-    if (atomic_get(&last) == (atomic_val_t)packed) {
+    if (atomic_get(&last) == (atomic_val_t)packed &&
+        atomic_get(&last_blink) == (atomic_val_t)blink) {
         return;
     }
     atomic_set(&last, (atomic_val_t)packed);
+    atomic_set(&last_blink, (atomic_val_t)blink);
 
     atomic_set(&pending, (atomic_val_t)packed);
+    atomic_set(&pending_blink, (atomic_val_t)blink);
     k_work_submit_to_queue(zmk_workqueue_lowprio_work_q(), &strip_work);
 }
 

@@ -14,6 +14,11 @@
  *      arrow cluster on navigation, and the far hand's arrow cluster on each
  *      of the two GUI+nav layers.
  *
+ *   3. On the Rolio, the bigram mode (leader B L I N K) draws the last two
+ *      characters typed, the arcane hint and the rhythm, over all of the above
+ *      on the keys it owns. See rgbkey_glyph.h for the alphabet and
+ *      rgbkey_run.c for what it listens to.
+ *
  * Everything else stays dark, which costs nothing: the strip's power gate is
  * only raised when a pixel is actually lit.
  *
@@ -143,6 +148,9 @@ static const uint8_t rgbkey_palette[RK_COUNT][3] = {
     [RK_AMBER] = {RGBKEY_MID, RGBKEY_DIM / 2, 0},
     [RK_TEAL] = {0, RGBKEY_MID, RGBKEY_DIM},
 };
+
+/* The bigram mode's alphabet. Needs the colour enum above; has no board in it. */
+#include "rgbkey_glyph.h"
 
 /*
  * What the active layer lights. Resolved on the central from the layer's
@@ -368,5 +376,85 @@ static inline zmk_mod_flags_t rgbkey_mods_of(uint32_t packed) {
     return (zmk_mod_flags_t)(packed & 0xFF);
 }
 
-/* Light this half's keys from a packed scene-and-modifiers word. */
-void rgbkey_apply(uint32_t packed);
+/*
+ * THE BIGRAM MODE'S WORD, carried in the relay's param2 -- which nothing used
+ * before. The scene word above is untouched, so a board without the mode sends
+ * zero here and draws exactly what it always has.
+ *
+ *   bits  0..6   the previous character, ASCII, 0 for none  -- drawn by the left half
+ *   bits  7..13  the newest character                        -- drawn by the right half
+ *   bits 14..16  the gap between their two presses (enum rgbkey_rhythm)
+ *   bit  17      that gap belongs to the right half: it typed the second key
+ *   bit  18      the left arcane key has an expansion waiting for the last letter
+ *   bit  19      the same for the right arcane key
+ *   bit  20      a key just registered twice, faster than a finger can
+ *   bit  31      the mode is on at all
+ *
+ * Characters rather than glyphs cross the link: seven bits each, and both halves
+ * compile the same alphabet, the same way scenes cross instead of pixels.
+ */
+#define RGBKEY_BLINK_NO_CHAR          RGBKEY_GLYPH_NO_CHAR
+#define RGBKEY_BLINK_CHAR_BITS        7
+#define RGBKEY_BLINK_CHAR_MASK        ((1u << RGBKEY_BLINK_CHAR_BITS) - 1)
+#define RGBKEY_BLINK_PREV_SHIFT       0
+#define RGBKEY_BLINK_CUR_SHIFT        7
+#define RGBKEY_BLINK_RHYTHM_SHIFT     14
+#define RGBKEY_BLINK_RHYTHM_BITS      3
+#define RGBKEY_BLINK_RHYTHM_MASK      ((1u << RGBKEY_BLINK_RHYTHM_BITS) - 1)
+#define RGBKEY_BLINK_RHYTHM_RIGHT_BIT BIT(17)
+#define RGBKEY_BLINK_ARCANE_LEFT_BIT  BIT(18)
+#define RGBKEY_BLINK_ARCANE_RIGHT_BIT BIT(19)
+#define RGBKEY_BLINK_DOUBLED_BIT      BIT(20)
+#define RGBKEY_BLINK_ON_BIT           BIT(31)
+
+BUILD_ASSERT(RGBKEY_BLINK_CUR_SHIFT >= RGBKEY_BLINK_PREV_SHIFT + RGBKEY_BLINK_CHAR_BITS &&
+                 RGBKEY_BLINK_RHYTHM_SHIFT >= RGBKEY_BLINK_CUR_SHIFT + RGBKEY_BLINK_CHAR_BITS &&
+                 RGBKEY_BLINK_RHYTHM_RIGHT_BIT >=
+                     BIT(RGBKEY_BLINK_RHYTHM_SHIFT + RGBKEY_BLINK_RHYTHM_BITS),
+             "Bigram word fields overlap");
+
+/* The gap between a bigram's two presses. NONE: first character, or too long a pause to count. */
+enum rgbkey_rhythm {
+    RKR_NONE = 0,
+    RKR_FAST,
+    RKR_STEADY,
+    RKR_SLOW,
+    RKR_HALTING,
+    RKR_COUNT
+};
+
+BUILD_ASSERT(RKR_COUNT <= RGBKEY_BLINK_RHYTHM_MASK + 1, "Rhythm must fit in its bits");
+
+static inline bool rgbkey_blink_on(uint32_t blink) { return (blink & RGBKEY_BLINK_ON_BIT) != 0; }
+
+static inline uint8_t rgbkey_blink_prev(uint32_t blink) {
+    return (uint8_t)((blink >> RGBKEY_BLINK_PREV_SHIFT) & RGBKEY_BLINK_CHAR_MASK);
+}
+
+static inline uint8_t rgbkey_blink_cur(uint32_t blink) {
+    return (uint8_t)((blink >> RGBKEY_BLINK_CUR_SHIFT) & RGBKEY_BLINK_CHAR_MASK);
+}
+
+static inline enum rgbkey_rhythm rgbkey_blink_rhythm(uint32_t blink) {
+    const uint32_t r = (blink >> RGBKEY_BLINK_RHYTHM_SHIFT) & RGBKEY_BLINK_RHYTHM_MASK;
+    return r < RKR_COUNT ? (enum rgbkey_rhythm)r : RKR_NONE;
+}
+
+static inline bool rgbkey_blink_rhythm_right(uint32_t blink) {
+    return (blink & RGBKEY_BLINK_RHYTHM_RIGHT_BIT) != 0;
+}
+
+static inline bool rgbkey_blink_arcane_left(uint32_t blink) {
+    return (blink & RGBKEY_BLINK_ARCANE_LEFT_BIT) != 0;
+}
+
+static inline bool rgbkey_blink_arcane_right(uint32_t blink) {
+    return (blink & RGBKEY_BLINK_ARCANE_RIGHT_BIT) != 0;
+}
+
+static inline bool rgbkey_blink_doubled(uint32_t blink) {
+    return (blink & RGBKEY_BLINK_DOUBLED_BIT) != 0;
+}
+
+/* Light this half's keys from the packed scene word and the bigram word. */
+void rgbkey_apply(uint32_t packed, uint32_t blink);

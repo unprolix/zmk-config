@@ -5,6 +5,10 @@ zephyr_library_include_directories(${CMAKE_SOURCE_DIR}/include)
 zephyr_library_sources(rgbkey_strip.c)
 zephyr_library_sources(rgbkey_relay.c)
 
+# &blink, the bigram mode's toggle. On both halves, like the emblem toggle, so
+# the label resolves wherever the node exists; it only acts on the central.
+zephyr_library_sources(rgbkey_blink.c)
+
 # Working out the active layer needs the keymap, which only the central has.
 if(NOT CONFIG_ZMK_SPLIT OR CONFIG_ZMK_SPLIT_ROLE_CENTRAL)
   zephyr_library_sources(rgbkey_run.c)

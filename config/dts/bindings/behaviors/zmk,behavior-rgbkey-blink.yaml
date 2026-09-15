@@ -1,0 +1,12 @@
+# Copyright (c) 2026 Jeremy Bornstein
+# SPDX-License-Identifier: MIT
+#
+# Toggles the Rolio's bigram lighting mode: the last two characters typed drawn
+# on the inner columns, with the arcane and rhythm hints on the thumb row. The
+# state lives on the central, so the behaviour is central-local.
+
+description: Toggle the bigram lighting mode
+
+compatible: "zmk,behavior-rgbkey-blink"
+
+include: zero_param.yaml

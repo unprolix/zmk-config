@@ -6,7 +6,8 @@
 # either for itself. GLOBAL locality is what makes ZMK relay it.
 #
 # param1 is the scene in the high byte and the modifier flags in the low one
-# (see rgbkey_pack). param2 is unused.
+# (see rgbkey_pack). param2 is the bigram mode's word (see rgbkey.h), zero on a
+# board without the mode.
 
 description: Relay the active lighting scene and modifiers to split peripherals
 
