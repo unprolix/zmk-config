@@ -150,6 +150,10 @@ draw:
     yq -Yi '.combos.[].l = ["Combos"]' "{{ draw }}/base.yaml"
     keymap -c "{{ draw }}/config.yaml" draw "{{ draw }}/base.yaml" -d "zmk-new_corne/boards/shields/eyelash_corne/eyelash_corne-layouts.dtsi" >"{{ draw }}/keymap.png"
 
+# redraw every layer picture in cheatsheet.html, for the Rolio and the eyelash
+cheatsheet:
+    scripts/cheatsheet-diagrams.py
+
 # initialize west
 init:
     west init -l config

@@ -54,12 +54,14 @@ parse_config:
     "&msc SCRL_RIGHT": Scroll →
 
     # Adaptive keys: the letter is what you press, so it is what the diagram
-    # shows. The corner note is the layer or modifier on hold; anything that
-    # changes with the preceding key is spelled out in the other corner.
+    # shows. The bottom note is the layer or modifier on hold; anything that
+    # changes with the preceding key, or on a double tap, goes on TOP. Never in
+    # the right-hand corner: on the Rolio's narrow and rotated thumb keys a
+    # corner note runs straight into the tap legend.
     "&adaptive_f_repeat": { "t": "F", "h": "fn" }
     "&adaptive_z_repeat": { "t": "Z", "h": "extra" }
     "&adaptive_u_repeat": { "t": "U", "h": "symbol" }
-    "&adaptive_q_base": { "t": "Q", "right": "K after U" }
+    "&adaptive_q_base": { "t": "Q", "s": "K after U" }
     "&adaptive_w_repeat": { "t": "W", "h": "numpad" }
     "&adaptive_d_repeat": { "t": "D", "h": "symbol" }
     "&adaptive_l_repeat": { "t": "L", "h": "extra" }
@@ -72,25 +74,25 @@ parse_config:
     "&adaptive_s_repeat": { "t": "S", "h": "ctrl" }
     "&adaptive_t_repeat": { "t": "T", "h": "shift" }
     "&adaptive_r_repeat": { "t": "R", "h": "alt" }
-    "&adaptive_h_quote": { "t": "H", "right": "'t after I" }
-    "&adaptive_j_dot": { "t": "J", "right": "./ after ." }
-    "&tap_hold_layer_lgui_adaptive LGUI_NAV_L 0": { "t": "H", "h": "gui+nav" }
+    "&adaptive_h_quote": { "t": "H", "s": "N→'t I→'" }
+    "&adaptive_j_dot": { "t": "J", "s": "./ after ." }
+    "&tap_hold_layer_lgui_adaptive LGUI_NAV_L 0": { "t": "H", "h": "gui+nav", "s": "N→'t I→'" }
     "&tap_hold_layer_rgui RGUI_NAV_R N": { "t": "N", "h": "gui+nav" }
 
     "&sqt_dash": { "t": "'", "s": "-", "h": "num" }
     "&dqt_underscore": { "t": "\"", "s": "_", "h": "num" }
     "&dot_colon": { "t": ".", "s": ":" }
 
-    "&backspace_word_delete": { "t": "\u232b", "right": "x2 word" }
-    "&delete_delete_word": { "t": "del", "right": "x2 word" }
+    "&backspace_word_delete": { "t": "\u232b", "s": "x2 word" }
+    "&delete_delete_word": { "t": "del", "s": "x2 word" }
     "&key_repeat": Repeat
 
-    "&lgui_space_tab": { "t": "space", "h": "gui", "right": "x2 tab" }
-    "&rgui_space_ret": { "t": "space", "h": "gui", "right": "x2 enter" }
+    "&lgui_space_tab": { "t": "space", "h": "gui", "s": "x2 tab" }
+    "&rgui_space_ret": { "t": "space", "h": "gui", "s": "x2 enter" }
     "&arcane_left": { "t": "arcane", "h": "nav" }
     "&arcane_right": { "t": "arcane", "h": "nav" }
-    "&sl_sym_or_numpad": { "t": "symbol", "right": "x2 numpad" }
-    "&sl_num_or_word": { "t": "num", "right": "x2 numpad" }
+    "&sl_sym_or_numpad": { "t": "symbol", "s": "x2 numpad" }
+    "&sl_num_or_word": { "t": "num", "s": "x2 numpad" }
 
     # Superscripts drawn as the character they produce, not as a codepoint.
     "&uc 0x1D43 0": "ᵃ"
@@ -149,16 +151,16 @@ parse_config:
     "&adaptive_lpar_repeat": { "t": "(", "h": "ctrl" }
     "&adaptive_rpar_repeat": { "t": ")", "h": "ctrl" }
     "&adaptive_fslh_repeat": { "t": "/", "h": "alt" }
-    "&grave_slash": { "t": "`", "right": "/ after ~" }
+    "&grave_slash": { "t": "`", "s": "/ after ~" }
 
     "&key_layer_SQT_NUM": { "t": "'", "h": "num" }
     "&key_layer_DQT_NUM": { "t": "\"", "h": "num" }
     "&layer_lgui 9": gui+nav
     "&layer_rgui 10": gui+nav
-    "&oneshot_or_to_NAVIGATION": { "t": "nav", "right": "x2 lock" }
+    "&oneshot_or_to_NAVIGATION": { "t": "nav", "s": "x2 lock" }
     "&numpad_word 6": Numpad word
     "&symbol_word 7": Symbol word
-    "&caps_toggle": { "t": "CAPS", "right": "leaves layer" }
+    "&caps_toggle": { "t": "CAPS", "s": "leaves layer" }
     "&leader": Leader
     "&cancel": Cancel
     "&build_time": Build info
@@ -196,7 +198,20 @@ parse_config:
     "&rgbz_dn": Dimmer
 
     "&comma_semicolon": { "t": ",", "right": ";" }
-    "&y_comma_space": { "t": "Y", "right": "space after ," }
+    "&y_comma_space": { "t": "Y", "s": "␣ after ," }
+
+    # NUMPAD: the layer keys and middle thumbs hold through numpad_exit_*,
+    # which leaves NUMPAD before raising the layer. Named for the layer.
+    "&numpad_exit_mo 7": symbol
+    "&numpad_exit_sl 11": extra
+    "&numpad_exit_sl 12": fn
+    "&numpad_exit_sl 8": nav
+
+    "&i_am": "I'm"
+    "&i_will": "I'll"
+    "&i_would": "I'd"
+    "&i_have": "I've"
+    "&dotcom": ".com"
 
     "&mkp LCLK": Left Click
     "&mkp RCLK": Right Click
@@ -232,6 +247,11 @@ parse_config:
     RET: Enter
     SPACE: Spc
     TAB: Tab
+    RETURN: Enter
+    ENTER: Enter
+    DELETE: Del
+    LSHIFT: Shift
+    RSHIFT: Shift
 
     PG_UP: PgUp
     PG_DN: PgDn
