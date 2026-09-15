@@ -40,6 +40,21 @@
 #define ROLIO_LX_T &trans &trans
 #define ROLIO_RX_T &trans &trans
 
+/* NUMPAD is the exception. Falling through gave it sticky SYMBOL on the far
+   keys, which stacks SYMBOL over NUMPAD so SYMBOL's &trans keys type digits,
+   and numpad_word on the near ones. Given the only spare thumb-row keys on any
+   board, spend them on what numeric entry lacks.
+
+   Left pair reads outer-then-inner, so `(` sits left of `)` as written. Both
+   are shifted digits (LS(N9), LS(N0)), which ignore-numbers treats as digits,
+   so an expression stays in word mode.
+
+   Right pair reads inner-then-outer: `=` on the nearer key, and on the far one
+   the silent way out -- numpad_word pressed while word mode is armed turns it
+   off without typing anything, which no key on the 3-thumb boards can do. */
+#define ROLIO_LX_PAD &kp LPAR   &kp RPAR
+#define ROLIO_RX_PAD &kp EQUAL  &numpad_word NUMPAD
+
 /*
  * Soft off, Rolio only.
  *
@@ -157,7 +172,7 @@ ROLIO_LX_T NUMERIC_LH  NUMERIC_RH ROLIO_RX_T
 NUMPAD_LT NUMPAD_RT
 NUMPAD_LM NUMPAD_RM
 NUMPAD_LB ROLIO_CLICKS NUMPAD_RB
-ROLIO_LX_T NUMPAD_LH  NUMPAD_RH ROLIO_RX_T
+ROLIO_LX_PAD NUMPAD_LH  NUMPAD_RH ROLIO_RX_PAD
             >;
         };
 

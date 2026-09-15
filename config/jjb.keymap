@@ -229,6 +229,22 @@ ZMK_TAP_DANCE(num_dance, bindings = <&num_word NUM>, <&sl_long NUM>;
                require-prior-idle-ms = <HRM_SYM_PRIOR_IDLE>;                          \
                hold-trigger-key-positions = <TRIGGER_POS>;)
 
+// NUMPAD home-row mods. Both hands carry a full 0-9 on this layer, so
+// cross-hand digit rolls -- the exact shape a positional hold-tap cannot
+// reject -- are the common case rather than the exception. The tapping term
+// stays at the base 280 (a longer one only widens the window in which a fast
+// roll reads as a hold), and the guard is a raised require-prior-idle: inside a
+// run of digits the mods are simply off, and they come back the moment you
+// pause and reach for one deliberately. Same reasoning as HRM_SYM_PRIOR_IDLE,
+// different cause.
+#define HRM_PAD_PRIOR_IDLE 250
+
+#define MAKE_HRM_PAD(NAME, HOLD, TAP, TRIGGER_POS)                                \
+  ZMK_HOLD_TAP(NAME, bindings = <HOLD>, <TAP>; flavor = "balanced";               \
+               tapping-term-ms = <280>; quick-tap-ms = <QUICK_TAP_MS>;            \
+               require-prior-idle-ms = <HRM_PAD_PRIOR_IDLE>;                      \
+               hold-trigger-key-positions = <TRIGGER_POS>;)
+
 #define MAKE_ADAPTIVE_REPEAT(NAME, HOLD_TAP_BEHAVIOR, LAYER, KEY) \
 		NAME: NAME { \
 			compatible = "zmk,behavior-antecedent-morph"; \
@@ -308,6 +324,43 @@ MAKE_HRM(hmr_sup, &sk_long, &sup_uc, KEYS_L THUMBS)
 
 MAKE_HRM_SYM(hml_sym, &sk_long, &kp, KEYS_R THUMBS) // SYMBOL-layer left HRMs (longer term, more prior-idle).
 MAKE_HRM_SYM(hmr_sym, &sk_long, &kp, KEYS_L THUMBS) // SYMBOL-layer right HRMs.
+
+MAKE_HRM_PAD(hml_pad, &sk_long, &kp, KEYS_R THUMBS) // NUMPAD-layer left HRMs.
+MAKE_HRM_PAD(hmr_pad, &sk_long, &kp, KEYS_L THUMBS) // NUMPAD-layer right HRMs.
+
+// NUMPAD layer keys, mirroring hierophant's top row finger for finger. The
+// hold bindings are the numpad_exit_* macros (layer-mod-macros.dtsi), which
+// drop NUMPAD before raising their target -- see the comment there for why
+// stacking is not enough.
+//
+// These carry HRM_PAD_PRIOR_IDLE where hierophant's sticky pair deliberately
+// carries none. There the keys are Z/F/L/B, rare letters you reach for between
+// words; here they are 0/1/3 and MINUS, typed in fast cross-hand runs, so the
+// guard earns its place exactly as it does on the home row.
+#define MAKE_PAD_LAYER(NAME, HOLD, TRIGGER_POS)                                   \
+  ZMK_HOLD_TAP(NAME, bindings = <HOLD>, <&kp>; flavor = "balanced";               \
+               tapping-term-ms = <280>; quick-tap-ms = <QUICK_TAP_MS>;            \
+               require-prior-idle-ms = <HRM_PAD_PRIOR_IDLE>;                      \
+               hold-trigger-key-positions = <TRIGGER_POS>;)
+
+MAKE_PAD_LAYER(pad_tll, &numpad_exit_mo, KEYS_R THUMBS)        // held (SYMBOL)
+MAKE_PAD_LAYER(pad_tlr, &numpad_exit_mo, KEYS_L THUMBS)
+MAKE_PAD_LAYER(pad_tll_sticky, &numpad_exit_sl, KEYS_R THUMBS) // armed (EXTRA, FN)
+MAKE_PAD_LAYER(pad_tlr_sticky, &numpad_exit_sl, KEYS_L THUMBS)
+
+// NUMPAD middle thumbs. On hierophant these tap the arcane key, which does
+// nothing useful among digits, and hold sticky NAV. Here the tap becomes a
+// numpad key and the hold is still NAV -- but through numpad_exit_sl, because
+// NAV's bottom-left row is all &trans and stacked over NUMPAD it would type
+// 7 8 9 instead of hierophant's letters.
+//
+// Balanced rather than arcane_nav's hold-preferred. Hold-preferred reads ANY
+// key pressed during the hold as a hold, so backspace-then-retype rolled a
+// little late becomes NAV plus an arrow key -- an ordinary motion in numeric
+// entry. Balanced only takes the hold if that other key is also RELEASED first,
+// so a roll stays a tap. quick-tap keeps tap-then-hold as backspace autorepeat.
+ZMK_HOLD_TAP(pad_nav, bindings = <&numpad_exit_sl>, <&kp>; flavor = "balanced";
+             tapping-term-ms = <200>; quick-tap-ms = <QUICK_TAP_MS>;)
 
 // Top Layer Left/Right
 MAKE_HRM(tll, &mo, &kp, KEYS_R THUMBS)
@@ -1030,24 +1083,58 @@ MAKE_ADAPTIVE_REPEAT(f_hrk_f23, hmr, R_M4, F23)
 // ******************************************  NUMPAD layer
 
 #define NUMPAD_LZ &trans &trans &trans &trans &trans &trans
-#define NUMPAD_LT_IN &kp N0  &kp N1  &kp N2  &kp N3  &kp QUESTION
+// Top row carries the layer keys, on the same fingers as hierophant:
+// pinky=FUNCTION ring=EXTRA middle=SYMBOL. The index finger's hierophant key is
+// NUMPAD itself, which is pointless from here, so it stays a plain digit.
+//
+// Inner index: `*`, where `?` was. STAR is LS(N8), so ignore-numbers keeps
+// word mode alive across it without a continue-list entry.
+#define NUMPAD_LT_IN &pad_tll_sticky FN N0  &pad_tll_sticky EXTRA N1  &pad_tll SYMBOL N2  &kp N3  &kp STAR
 #define NUMPAD_LT &kp BSLH  NUMPAD_LT_IN
-#define NUMPAD_LM_IN &kp PLUS  &kp N4  &kp N5  &kp N6  &kp SQT
+// Home row keeps its mods, mirroring hierophant: pinky=LGUI ring=LALT
+// middle=LSHIFT index=LCTRL. Taps are unchanged, so a number typed here is
+// still a number and numpad_word's ignore-numbers keeps the layer alive.
+// Holding one presses a modifier, and a modifier keycode is not in the
+// continue-list -- so the layer drops on the spot and whatever the other hand
+// presses next comes from hierophant. Ctrl+Z during numeric entry is Z, not 7.
+// Comma on the inner index of both hands, on the home row -- the strongest
+// free position, and where a thousands separator wants to be.
+//
+// It canNOT go where `<` and `>` live: those are LS(COMMA) and LS(DOT), with
+// the shift baked into the binding by ZMK, which is the only kind of shift this
+// layer can express. A user-held shift drops NUMPAD before the next key
+// resolves (that is the whole point of the home-row mods here), so anything
+// reached by holding shift is unreachable from this layer. Swapping `<` for a
+// plain COMMA therefore does not keep `<` "under shift" -- it deletes it.
+//
+// The cost is `'` and `"`, which had this slot. Comma is worth more here.
+#define NUMPAD_LM_IN &hml_pad L_M4 PLUS  &hml_pad L_M3 N4  &hml_pad L_M2 N5  &hml_pad L_M1 N6  &kp COMMA
 #define NUMPAD_LM &trans  NUMPAD_LM_IN
 #define NUMPAD_LB_IN &kp DOT  &kp N7  &kp N8  &kp N9  &kp LESS_THAN
 #define NUMPAD_LB &trans  NUMPAD_LB_IN
-#define NUMPAD_LH &kp N0 &trans &trans
+// Thumbs, outer to inner: 0, then `.` (tap) / NAV (hold), then the inner thumb
+// falls through to hierophant's space. Space and enter are not in the
+// continue-list, so they finish the number and leave NUMPAD -- which is right.
+#define NUMPAD_LH &kp N0  &pad_nav NAV DOT  &trans
 #define NUMPAD_LH_5 &trans &trans NUMPAD_LH
 
 
 #define NUMPAD_RZ &trans   &trans &trans &trans  &trans     &trans
-#define NUMPAD_RT_IN &kp N0  &kp N1  &kp N2  &kp N3  &kp MINUS
+// Mirrored: middle=SYMBOL ring=EXTRA pinky=FUNCTION.
+//
+// The inner-index 0 is jjb's zero, in use -- NOT a spare duplicate of the
+// outer thumb's. Do not repurpose it.
+#define NUMPAD_RT_IN &kp N0  &kp N1  &pad_tlr SYMBOL N2  &pad_tlr_sticky EXTRA N3  &pad_tlr_sticky FN MINUS
 #define NUMPAD_RT NUMPAD_RT_IN  &kp FSLH
-#define NUMPAD_RM_IN &kp DQT  &kp N4  &kp N5  &kp N6  &kp PLUS
+// Mirrored on the right: index=RCTRL middle=RSHIFT ring=RALT pinky=RGUI.
+#define NUMPAD_RM_IN &kp COMMA  &hmr_pad R_M1 N4  &hmr_pad R_M2 N5  &hmr_pad R_M3 N6  &hmr_pad R_M4 PLUS
 #define NUMPAD_RM NUMPAD_RM_IN  &trans
 #define NUMPAD_RB_IN &kp GREATER_THAN  &kp N7  &kp N8  &kp N9  &kp DOT
 #define NUMPAD_RB NUMPAD_RB_IN  &trans
-#define NUMPAD_RH &trans &trans &kp N0
+// Inner to outer: hierophant's space/enter, then backspace (tap) / NAV (hold),
+// then 0. Backspace was in numpad_word's continue-list but on no key of this
+// layer; this is the slot NUMERIC already gives it (NUMERIC_RH).
+#define NUMPAD_RH &trans  &pad_nav NAV BSPC  &kp N0
 #define NUMPAD_RH_5 &trans &trans NUMPAD_RH
 
 
