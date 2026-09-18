@@ -6,6 +6,12 @@ if(CONFIG_ZMK_DISPLAY AND CONFIG_ZMK_DISPLAY_STATUS_SCREEN_CUSTOM)
 
   zephyr_library_sources(qube_status_screen.c)
 
+  # Strong Glasgow at 40px, 4bpp, for the layer name. Generated with
+  # lv_font_conv from ~/.fonts/StrongGlasgowRegular-ypAZ.ttf over a deliberately
+  # narrow range -- lowercase, digits, space, hyphen -- because layer names are
+  # all it renders. That is 8.6 KB of glyphs instead of 60 KB for full ASCII.
+  zephyr_library_sources(glasgow_40.c)
+
   # Borrowed, not copied: the hierophant emblem bitmap and the line-art
   # modifier glyphs live with the Rolio's screen, which also serves the Toucan.
   # vista_canvas.c has no panel geometry compiled in, so it draws onto the

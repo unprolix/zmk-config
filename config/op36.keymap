@@ -17,6 +17,20 @@
 
 #define OUTER &none
 
+/*
+ * The emblem's rotation speed, on SYSTEM's right-hand top row: slower under
+ * the index finger, faster beside it. Repeatable -- each press moves one step
+ * along the table, the ends hold rather than wrap, and the bottom of the table
+ * is a full stop.
+ *
+ * The override lives here rather than in the shared layout because no other
+ * board has anything turning on its screen. The behaviour nodes themselves are
+ * declared in boards/shields/op36/op36.dtsi, which all three parts include, so
+ * the halves resolve the label too.
+ */
+#undef SYSTEM_RT_IN
+#define SYSTEM_RT_IN &spin_slower  &spin_faster  &trans  &trans  &trans
+
 / {
     keymap {
         compatible = "zmk,keymap";

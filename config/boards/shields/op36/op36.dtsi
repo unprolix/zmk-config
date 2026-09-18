@@ -28,6 +28,27 @@
         zmk,matrix-transform = &default_transform;
     };
 
+    /*
+     * The emblem's rotation speed, on two keys.
+     *
+     * Declared HERE, in the file all three parts include, rather than in the
+     * qube_display shield that acts on it: the keymap is shared, so a label
+     * only the Qube defines fails the halves' builds. See spin_speed.c.
+     */
+    behaviors {
+        spin_faster: spin_faster {
+            compatible = "zmk,behavior-spin-speed";
+            #binding-cells = <0>;
+            step = <1>;
+        };
+
+        spin_slower: spin_slower {
+            compatible = "zmk,behavior-spin-speed";
+            #binding-cells = <0>;
+            step = <(-1)>;
+        };
+    };
+
     default_transform: keymap_transform_0 {
         compatible = "zmk,matrix-transform";
         columns = <OP36_COLUMNS>;

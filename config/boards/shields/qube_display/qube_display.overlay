@@ -73,7 +73,17 @@
             compatible = "sitronix,st7789v";
             reg = <0>;
             /* What the stock RMK firmware runs the bus at. */
-            mipi-max-frequency = <8000000>;
+            /*
+             * 32 MHz, not the 8 MHz this started at. The emblem turns by
+             * redrawing the whole 240x240 area, which is 115 KB of RGB565 per
+             * frame: at 8 MHz that is 115 ms of SPI and a ceiling of eight
+             * frames a second with the bus saturated. SPIM3 is the nRF52840's
+             * high-speed instance and this is its top speed.
+             *
+             * If the panel ever shows tearing or confetti, this is the first
+             * number to halve.
+             */
+            mipi-max-frequency = <32000000>;
             mipi-mode = "MIPI_DBI_MODE_SPI_4WIRE";
             width = <280>;
             height = <240>;

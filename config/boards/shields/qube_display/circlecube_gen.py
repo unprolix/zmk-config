@@ -1,26 +1,23 @@
 """
-The circle-cube, full panel height, as a still 1-bit LVGL image for the Qube.
+The circle-cube, full panel height, as ONE antialiased greyscale LVGL image.
 
-This is the Rolio's generator (../vista508/circlecube_gen.py) with three
-differences, each forced by the panel rather than by taste:
+This started as the Rolio's generator (../vista508/circlecube_gen.py) and has
+ended up somewhere else, because the panel is different in three ways:
 
-  - 240 px instead of 144, because the Qube's panel is 240 tall and jjb asked
-    for the emblem at full height, centred, with the readouts over it;
-  - ONE frame, not three. The Rolio's three frames shade one cube face each so
-    the cube appears to turn; here the art is a BACKDROP under live text, and
-    a turning cube behind a layer name is movement where none is wanted;
-  - the output is an LVGL I1 image with its palette, not a bare bitmap. The
-    Rolio stamps bits into an L8 canvas; a full-panel L8 canvas here would be
-    67 KB of RAM. An I1 image is 7.2 KB of FLASH and no RAM at all.
+  - 240 px instead of 144, since the Qube's panel is 240 tall and the emblem is
+    wanted at full height, centred, with the readouts over it;
+  - GREYSCALE, not 1-bit. The Rolio's panel has two states per pixel and its
+    generator has to threshold; this one has 65536 colours, so the rasteriser's
+    own antialiasing is kept and the strokes stop crawling;
+  - ONE frame. Rotation is LVGL's job at runtime -- lv_image_set_rotation with
+    the software transform, which handles L8 (lv_draw_sw_transform.c) -- so the
+    emblem turns at whatever angle the screen asks for rather than stepping
+    between pre-rendered frames. Twelve 1-bit frames were 86 KB and still
+    looked choppy; one L8 frame is 57.6 KB and is smooth at any angle.
 
-I1 palette layout, from LVGL 9.3 lv_bin_decoder.c: for an image whose data is a
-C array, `palette = (lv_color32_t *)data` and the pixels start at data + 8.
-lv_color32_t is {blue, green, red, alpha}, so each entry is emitted B,G,R,A.
-
-Entry 0 is the background and MUST match the screen's COLOR_BG, because the
-image is a solid rectangle: every pixel outside the disc is drawn, not skipped.
-Entry 1 is the ink -- dark grey, dark enough that white and light-blue text
-stays readable across it, light enough to read as art on black.
+L8 is a luminance format: each byte is how bright that pixel is, which the
+display driver turns into grey. So INK_LEVEL below is the emblem's brightness
+against a black panel, and everything between 0 and it is antialiasing.
 
 Writes circlecube_img.h next to itself. Run with the model venv:
     env -u PYTHONPATH ~/src/models123/.venv/bin/python circlecube_gen.py
@@ -36,78 +33,71 @@ os.chdir(os.path.expanduser("~/src/models123"))
 import circle_cube_simple as m  # noqa: E402
 
 W = H = 240
-STRIDE = W // 8
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "circlecube_img.h")
 TMP = os.environ.get("TMPDIR", "/tmp")
 
-# B, G, R, A -- lv_color32_t's field order.
-PALETTE = [
-    (0x00, 0x00, 0x00, 0xFF),  # 0: background, = COLOR_BG in the status screen
-    (0x4D, 0x41, 0x3A, 0xFF),  # 1: ink, a cool dark grey
-]
+# How bright the emblem burns against black. Dark enough that white and
+# light-blue text stays readable across it, light enough to read as art.
+INK_LEVEL = 0x4E
+
+# Rendered larger and boxed down, so the strokes carry their own antialiasing
+# rather than relying on the rasteriser at final size.
+SUPERSAMPLE = 3
 
 
 def raster(sketch, name):
-    """Render a sketch to a set of ink pixels, in the emblem's own frame."""
+    """Render a sketch to a W*H list of ink coverages, 0 (none) to 255 (full)."""
     from build123d import ExportSVG
+    from PIL import Image
 
     svg, png = f"{TMP}/{name}.svg", f"{TMP}/{name}.png"
     ex = ExportSVG(scale=1)
     ex.add_layer("emblem", fill_color=(0, 0, 0), line_weight=0)
     ex.add_shape(sketch, layer="emblem")
     ex.write(svg)
+    big = W * SUPERSAMPLE
     subprocess.run(
-        ["rsvg-convert", "-w", str(W), "-h", str(H), "-b", "white", svg, "-o", png],
+        ["rsvg-convert", "-w", str(big), "-h", str(big), "-b", "white", svg, "-o", png],
         check=True,
     )
-    from PIL import Image
-
-    img = Image.open(png).convert("L")
-    assert img.size == (W, H), img.size
-    return {(x, y) for y in range(H) for x in range(W) if img.getpixel((x, y)) < 128}
+    img = Image.open(png).convert("L").resize((W, H), Image.LANCZOS)
+    # The art is drawn black on white, so coverage is the inverse of luminance.
+    return [255 - v for v in img.getdata()]
 
 
-def pack(pixels):
-    """MSB-first within each byte, as LVGL reads an I1 row."""
-    rows = []
-    for y in range(H):
-        row = bytearray(STRIDE)
-        for x in range(W):
-            if (x, y) in pixels:
-                row[x >> 3] |= 0x80 >> (x & 7)
-        rows.append(bytes(row))
-    return rows
-
-
-pixels = raster(m.EMBLEM_SIMPLE, "qube_cc")
-print(f"emblem: {len(pixels)} of {W*H} px ink ({100*len(pixels)/(W*H):.0f}%)", flush=True)
-rows = pack(pixels)
+coverage = raster(m.EMBLEM_SIMPLE, "qube_cc")
+pixels = [min(255, c * INK_LEVEL // 255) for c in coverage]
+lit = sum(1 for p in pixels if p)
+print(f"emblem: {lit} of {W*H} px carry ink ({100*lit/(W*H):.0f}%)", flush=True)
 
 with open(OUT, "w") as f:
     f.write(
         "/*\n"
-        " * The circle-cube at full panel height, 1-bit, generated by\n"
-        " * circlecube_gen.py -- do not hand-edit. See that file for why this is\n"
-        " * one still frame and an I1 image rather than the Rolio's three-frame\n"
-        " * bitmap, and for what the two palette entries mean.\n"
+        " * The circle-cube at full panel height, greyscale, generated by\n"
+        " * circlecube_gen.py -- do not hand-edit.\n"
+        " *\n"
+        " * L8: one byte of luminance per pixel, 0 being the black panel and\n"
+        " * the peak being the emblem's grey. The values between are the\n"
+        " * rasteriser's antialiasing, which is the point of using L8 here: it\n"
+        " * is also the one greyscale format LVGL's software transform can\n"
+        " * rotate, so the screen turns this single frame instead of stepping\n"
+        " * through pre-rendered ones.\n"
         " */\n"
         "\n"
         "#pragma once\n"
         "\n"
         "#include <lvgl.h>\n"
         "\n"
-        f"#define CIRCLECUBE_W      {W}\n"
-        f"#define CIRCLECUBE_H      {H}\n"
-        f"#define CIRCLECUBE_STRIDE {STRIDE}\n"
+        f"#define CIRCLECUBE_W {W}\n"
+        f"#define CIRCLECUBE_H {H}\n"
         "\n"
-        "/* Palette (B,G,R,A per entry) first, then the rows. */\n"
         "static const uint8_t circlecube_map[] = {\n"
     )
-    for entry in PALETTE:
-        f.write("    " + " ".join(f"0x{b:02X}," for b in entry) + "\n")
-    for row in rows:
-        f.write("    " + " ".join(f"0x{b:02X}," for b in row) + "\n")
+    for y in range(H):
+        row = pixels[y * W : (y + 1) * W]
+        for chunk in range(0, W, 24):
+            f.write("    " + " ".join(f"0x{v:02X}," for v in row[chunk : chunk + 24]) + "\n")
     f.write(
         "};\n"
         "\n"
@@ -115,13 +105,13 @@ with open(OUT, "w") as f:
         "    .header =\n"
         "        {\n"
         "            .magic = LV_IMAGE_HEADER_MAGIC,\n"
-        "            .cf = LV_COLOR_FORMAT_I1,\n"
+        "            .cf = LV_COLOR_FORMAT_L8,\n"
         "            .w = CIRCLECUBE_W,\n"
         "            .h = CIRCLECUBE_H,\n"
-        "            .stride = CIRCLECUBE_STRIDE,\n"
+        "            .stride = CIRCLECUBE_W,\n"
         "        },\n"
         "    .data_size = sizeof(circlecube_map),\n"
         "    .data = circlecube_map,\n"
         "};\n"
     )
-print("wrote", OUT, f"({len(PALETTE) * 4 + STRIDE * H} bytes)")
+print("wrote", OUT, f"({W * H} bytes of image data)")

@@ -16,10 +16,13 @@
  * charging the screen stops being polite and puts a red bar across the bottom.
  *
  * The circle-cube is a BACKDROP, not a panel of its own: full panel height,
- * centred, dark grey on black, with every readout drawn over it. It gives way
- * -- hidden outright -- whenever the middle band holds a LIST, because the
- * Rolio established that candidate names over the art are unreadable no matter
- * how the art is dimmed.
+ * centred, grey on black, with every readout drawn over it, turning slowly --
+ * one degree every tenth of a second, which LVGL does by rotating the single
+ * greyscale image rather than by stepping through pre-rendered frames.
+ *
+ * It stays up through the lists too. What a list gets instead is a scrim: the
+ * label paints a near-opaque backing behind its own text, so the cube shows
+ * around the candidates rather than through them.
  *
  * SPDX-License-Identifier: MIT
  */
@@ -73,19 +76,14 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #if !IS_ENABLED(CONFIG_LV_USE_LABEL) || !IS_ENABLED(CONFIG_LV_USE_CANVAS)
 #error "qube status screen: needs CONFIG_LV_USE_LABEL and CONFIG_LV_USE_CANVAS"
 #endif
-#if !IS_ENABLED(CONFIG_LV_USE_IMAGE) || !IS_ENABLED(CONFIG_LV_DRAW_SW_SUPPORT_I1)
-#error "qube status screen: the backdrop is a 1-bit indexed image -- needs LV_USE_IMAGE and I1"
-#endif
-/*
- * With RAM_LOAD on, LVGL converts a whole indexed image to ARGB8888 before
- * drawing it: 240x240x4 is 230 KB and the part has 256. Off, it decodes a row
- * at a time into a line buffer, which is the only way this backdrop fits.
- */
-#if IS_ENABLED(CONFIG_LV_BIN_DECODER_RAM_LOAD)
-#error "qube status screen: CONFIG_LV_BIN_DECODER_RAM_LOAD=y would decode the backdrop to 230 KB"
+#if !IS_ENABLED(CONFIG_LV_USE_IMAGE)
+#error "qube status screen: the backdrop is an image widget -- needs CONFIG_LV_USE_IMAGE"
 #endif
 #if !IS_ENABLED(CONFIG_LV_DRAW_SW_SUPPORT_L8)
-#error "qube status screen: the modifier glyphs are an L8 canvas -- needs CONFIG_LV_DRAW_SW_SUPPORT_L8"
+#error "qube status screen: the emblem is an L8 image -- needs CONFIG_LV_DRAW_SW_SUPPORT_L8"
+#endif
+#if !IS_ENABLED(CONFIG_LV_DRAW_SW_SUPPORT_ARGB8888)
+#error "qube status screen: the modifier row is an ARGB8888 canvas, so it needs alpha"
 #endif
 #if !IS_ENABLED(CONFIG_LV_FONT_MONTSERRAT_14) || !IS_ENABLED(CONFIG_LV_FONT_MONTSERRAT_16) ||      \
     !IS_ENABLED(CONFIG_LV_FONT_MONTSERRAT_20) || !IS_ENABLED(CONFIG_LV_FONT_MONTSERRAT_28)
@@ -128,7 +126,6 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #define COLOR_BAD     0xff5c5c
 #define COLOR_LAYER   0x6cb8ff
 #define COLOR_ALERT   0xb3241f
-#define COLOR_CHIP_BG 0x141922
 
 /* Battery bands. Below the alert level the bottom bar appears. */
 #define BATT_GOOD_PCT  50
@@ -138,7 +135,16 @@ LOG_MODULE_DECLARE(zmk, CONFIG_ZMK_LOG_LEVEL);
 #define FONT_SMALL  (&lv_font_montserrat_14)
 #define FONT_MEDIUM (&lv_font_montserrat_16)
 #define FONT_LARGE  (&lv_font_montserrat_20)
-#define FONT_HUGE   (&lv_font_montserrat_28)
+
+/*
+ * The layer name gets Strong Glasgow at 40px (glasgow_40.c), not a montserrat.
+ * It is the one piece of text on the panel that is read at a glance rather
+ * than examined, so it is worth a display face and the size to carry it.
+ * Everything else stays montserrat, which is built for small sizes and has the
+ * full character set the lists need.
+ */
+LV_FONT_DECLARE(glasgow_40);
+#define FONT_HUGE (&glasgow_40)
 
 /* How often link state and battery are read back from the split transport. */
 #define LINK_POLL_MS 1000
@@ -156,7 +162,74 @@ BUILD_ASSERT(CIRCLECUBE_W <= SCREEN_W && CIRCLECUBE_H <= SCREEN_H,
 #define BACKDROP_X ((SCREEN_W - CIRCLECUBE_W) / 2)
 #define BACKDROP_Y ((SCREEN_H - CIRCLECUBE_H) / 2)
 
+/*
+ * The turn. LVGL rotates the one emblem image itself, in tenths of a degree,
+ * so the step can be as fine as the eye wants rather than as coarse as flash
+ * allows: one degree every tenth of a second is 36 seconds a revolution, slow
+ * enough to be scenery and smooth enough not to read as stepping.
+ */
+#define BACKDROP_STEP_MS     100
+#define BACKDROP_FULL_TENTHS 3600
+
+/*
+ * The speeds the two SYSTEM-layer keys step through, in tenths of a degree per
+ * tick. The first is a full stop, and the default is a degree a tick: 36
+ * seconds a revolution. Each step up is roughly double, so a handful of
+ * presses covers everything from stationary to unmistakably spinning.
+ */
+static const uint8_t backdrop_speeds[] = {0, 2, 5, 10, 20, 40, 80};
+#define BACKDROP_SPEED_DEFAULT 3
+
+/*
+ * A list drawn straight over the art is unreadable, but the art stays: the
+ * LIST takes a scrim instead, painting its own near-opaque backing so the cube
+ * shows around the text rather than through it.
+ */
+#define BAND_SCRIM_OPA    LV_OPA_80
+#define BAND_SCRIM_PAD    8
+#define BAND_SCRIM_RADIUS 10
+
 static lv_obj_t *backdrop;
+static int32_t backdrop_angle;
+static uint8_t backdrop_speed = BACKDROP_SPEED_DEFAULT;
+
+static void backdrop_spin_cb(struct k_work *work);
+static K_WORK_DELAYABLE_DEFINE(backdrop_spin, backdrop_spin_cb);
+
+static void backdrop_spin_cb(struct k_work *work) {
+    ARG_UNUSED(work);
+    const uint8_t tenths = backdrop_speeds[backdrop_speed];
+
+    /*
+     * A stopped emblem is left exactly where it was rather than snapped to
+     * upright: stopping it is for looking at it, and where it happens to be is
+     * as good a place as any.
+     */
+    if (tenths > 0 && backdrop != NULL) {
+        backdrop_angle = (backdrop_angle + tenths) % BACKDROP_FULL_TENTHS;
+        lv_image_set_rotation(backdrop, backdrop_angle);
+    }
+    k_work_reschedule_for_queue(zmk_display_work_q(), &backdrop_spin, K_MSEC(BACKDROP_STEP_MS));
+}
+
+/*
+ * Called from the spin_speed behaviour (../op36/spin_speed.c), already on the
+ * display queue. Positive is faster; zero restores the default. The ends of
+ * the table hold rather than wrap, so leaning on a key parks it at stopped or
+ * at the fastest instead of flipping to the far end.
+ */
+void qube_spin_adjust(int step) {
+    if (step == 0) {
+        backdrop_speed = BACKDROP_SPEED_DEFAULT;
+    } else if (step > 0) {
+        const int room = (int)ARRAY_SIZE(backdrop_speeds) - 1 - backdrop_speed;
+        backdrop_speed += MIN(step, room);
+    } else {
+        backdrop_speed -= MIN(-step, (int)backdrop_speed);
+    }
+    LOG_INF("qube screen: emblem speed %u (%u tenths of a degree a tick)", backdrop_speed,
+            backdrop_speeds[backdrop_speed]);
+}
 
 /* ------------------------------------------------------------------ */
 /* The two halves                                                      */
@@ -186,6 +259,14 @@ struct half_state {
     bool linked;        /* display queue only */
     bool have_batt;
     uint8_t batt;
+    /*
+     * How many times this half has dropped since the Qube booted. On the
+     * screen because a dropping half is the one fault here that a console
+     * cannot be left attached for -- the USB logging build loads the same
+     * workqueue that scans and receives keys, so the measurement changes what
+     * it measures. A number on the panel costs nothing and is always running.
+     */
+    uint16_t drops;
 };
 
 static struct half_state halves[HALF_COUNT];
@@ -265,8 +346,17 @@ static void halves_draw(void) {
         }
 
         char text[TEXT_MAX];
+        /*
+         * The drop count rides along after a dot, and only once a half has
+         * actually dropped: a healthy pair shows nothing but hand and charge.
+         */
+        char drops[TEXT_MAX / 2] = "";
+        if (source >= 0 && halves[source].drops > 0) {
+            snprintf(drops, sizeof(drops), " %u", halves[source].drops);
+        }
+
         if (source < 0 || !halves[source].linked) {
-            snprintf(text, sizeof(text), "%s " LV_SYMBOL_CLOSE, side_initials[c]);
+            snprintf(text, sizeof(text), "%s " LV_SYMBOL_CLOSE "%s", side_initials[c], drops);
             lv_label_set_text(chips[c], text);
             lv_obj_set_style_text_color(chips[c], lv_color_hex(COLOR_BAD), LV_PART_MAIN);
             continue;
@@ -274,7 +364,7 @@ static void halves_draw(void) {
 
         const struct half_state *h = &halves[source];
         if (h->have_batt) {
-            snprintf(text, sizeof(text), "%s %u", side_initials[c], h->batt);
+            snprintf(text, sizeof(text), "%s %u%s", side_initials[c], h->batt, drops);
             lv_obj_set_style_text_color(chips[c], batt_color(h->batt), LV_PART_MAIN);
             if (h->batt < worst_pct) {
                 worst_pct = h->batt;
@@ -330,6 +420,9 @@ static void link_poll_work_cb(struct k_work *work) {
         struct half_state *h = &halves[s];
         if (h->linked != linked[s]) {
             LOG_INF("qube screen: half %u %s", s + 1, linked[s] ? "linked" : "unlinked");
+            if (!linked[s] && h->drops < UINT16_MAX) {
+                h->drops++;
+            }
             h->linked = linked[s];
             changed = true;
         }
@@ -514,13 +607,13 @@ static void band_draw(void) {
     set_hidden(caps_label, (cached_indicators & HID_LED_CAPS_LOCK) == 0);
 
     /*
-     * A list is many short lines in a small face, and the art turns it to
-     * noise. One layer name in 28px survives the cube behind it; a column of
-     * leader candidates or profiles does not, so the art goes away entirely
-     * for as long as one is up.
+     * The emblem stays up through a leader sequence and through the profile
+     * list; what changes is that those lists paint a scrim behind themselves.
+     * A single layer name in 40px needs none -- it reads straight off the art.
      */
     const bool list_showing = leader_active || strcmp(layer_name, BLUETOOTH_LAYER_NAME) == 0;
-    set_hidden(backdrop, list_showing);
+    lv_obj_set_style_bg_opa(band_label, list_showing ? BAND_SCRIM_OPA : LV_OPA_TRANSP,
+                            LV_PART_MAIN);
 
     if (leader_active) {
         band_set(FONT_MEDIUM, COLOR_TEXT, leader_text);
@@ -656,9 +749,25 @@ static const struct mod_slot mod_slots[VISTA_MOD_ICON_SLOTS] = {
     {VISTA_MOD_ICON_CTRL, MOD_LCTL | MOD_RCTL},
 };
 
+/*
+ * ARGB8888, not the Rolio's L8.
+ *
+ * An L8 canvas has no alpha, so filling it to draw the glyphs painted an
+ * opaque black slab across the emblem -- the art vanished wherever the
+ * modifier row sat, whether or not any modifier was held. With alpha the
+ * canvas starts fully transparent and only the strokes are opaque, so the
+ * glyphs sit ON the emblem rather than in a hole cut out of it.
+ *
+ * It costs 4 KB of RAM for a 68x16 row, which is the whole reason this is
+ * affordable here and was not on a full-panel canvas.
+ */
+#define MODS_CANVAS_FORMAT LV_COLOR_FORMAT_ARGB8888
+#define MODS_BUF_SIZE                                                                              \
+    LV_CANVAS_BUF_SIZE(MODS_ROW_W, VISTA_MOD_ROW_H, LV_COLOR_FORMAT_GET_BPP(MODS_CANVAS_FORMAT),   \
+                       LV_DRAW_BUF_STRIDE_ALIGN)
+
 static lv_obj_t *mods_canvas;
-static uint8_t mods_buf[VISTA_CANVAS_BUF_SIZE(MODS_ROW_W, VISTA_MOD_ROW_H)]
-    __aligned(CONFIG_LV_DRAW_BUF_ALIGN);
+static uint8_t mods_buf[MODS_BUF_SIZE] __aligned(CONFIG_LV_DRAW_BUF_ALIGN);
 
 struct qube_mods_state {
     zmk_mod_flags_t mods;
@@ -668,7 +777,7 @@ static void qube_mods_update_cb(struct qube_mods_state state) {
     if (mods_canvas == NULL) {
         return;
     }
-    lv_canvas_fill_bg(mods_canvas, VISTA_CANVAS_BACKGROUND, LV_OPA_COVER);
+    lv_canvas_fill_bg(mods_canvas, lv_color_black(), LV_OPA_TRANSP);
     const lv_coord_t inset = (VISTA_MOD_ICON_SLOT_W - VISTA_MOD_ICON_SIZE) / 2;
     for (uint8_t slot = 0; slot < VISTA_MOD_ICON_SLOTS; slot++) {
         if (state.mods & mod_slots[slot].mods) {
@@ -737,6 +846,9 @@ lv_obj_t *zmk_display_status_screen(void) {
     backdrop = lv_image_create(screen);
     lv_image_set_src(backdrop, &circlecube_img);
     lv_obj_set_pos(backdrop, BACKDROP_X, BACKDROP_Y);
+    /* Turn about the emblem's own centre, not the object's top-left corner. */
+    lv_image_set_pivot(backdrop, CIRCLECUBE_W / 2, CIRCLECUBE_H / 2);
+    lv_image_set_antialias(backdrop, true);
 
     /*
      * Everything a widget callback touches is created BEFORE its _init():
@@ -752,9 +864,11 @@ lv_obj_t *zmk_display_status_screen(void) {
         lv_obj_set_size(chip, CHIP_W, TOP_H);
         lv_obj_set_pos(chip, SCREEN_W - MARGIN - (SIDE_COUNT - c) * (CHIP_W + CHIP_GAP) + CHIP_GAP,
                        TOP_Y - 2);
-        lv_obj_set_style_bg_color(chip, lv_color_hex(COLOR_CHIP_BG), LV_PART_MAIN);
-        lv_obj_set_style_bg_opa(chip, LV_OPA_COVER, LV_PART_MAIN);
-        lv_obj_set_style_radius(chip, TOP_H / 2, LV_PART_MAIN);
+        /*
+         * No pill behind the text. A filled chip is a slab of flat grey across
+         * the emblem, and the colour of the text already says everything the
+         * background was saying.
+         */
 
         chips[c] = text_label(chip, FONT_SMALL, COLOR_MUTED);
         lv_obj_set_width(chips[c], CHIP_W);
@@ -775,11 +889,15 @@ lv_obj_t *zmk_display_status_screen(void) {
     lv_obj_set_style_text_align(band_label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
     lv_obj_set_pos(band_label, MARGIN, BAND_TOP + CAPS_H);
     lv_obj_set_height(band_label, BAND_H);
+    /* The scrim itself; band_draw() turns its opacity on for lists only. */
+    lv_obj_set_style_bg_color(band_label, lv_color_hex(COLOR_BG), LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(band_label, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_pad_all(band_label, BAND_SCRIM_PAD, LV_PART_MAIN);
+    lv_obj_set_style_radius(band_label, BAND_SCRIM_RADIUS, LV_PART_MAIN);
 
     mods_canvas = lv_canvas_create(screen);
-    lv_canvas_set_buffer(mods_canvas, mods_buf, MODS_ROW_W, VISTA_MOD_ROW_H,
-                         VISTA_CANVAS_COLOR_FORMAT);
-    lv_canvas_fill_bg(mods_canvas, VISTA_CANVAS_BACKGROUND, LV_OPA_COVER);
+    lv_canvas_set_buffer(mods_canvas, mods_buf, MODS_ROW_W, VISTA_MOD_ROW_H, MODS_CANVAS_FORMAT);
+    lv_canvas_fill_bg(mods_canvas, lv_color_black(), LV_OPA_TRANSP);
     lv_obj_set_pos(mods_canvas, (SCREEN_W - MODS_ROW_W) / 2, MODS_Y);
 
     /* The charge warning: the one thing allowed to shout. */
@@ -802,6 +920,7 @@ lv_obj_t *zmk_display_status_screen(void) {
 
     halves_draw();
     k_work_reschedule_for_queue(zmk_display_work_q(), &link_poll_work, K_NO_WAIT);
+    k_work_reschedule_for_queue(zmk_display_work_q(), &backdrop_spin, K_MSEC(BACKDROP_STEP_MS));
 
     return screen;
 }

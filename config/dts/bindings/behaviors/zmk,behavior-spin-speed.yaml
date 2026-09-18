@@ -1,0 +1,20 @@
+# Copyright (c) 2026 Jeremy Bornstein
+# SPDX-License-Identifier: MIT
+#
+# How fast the Qube's emblem turns. One instance per key: 'step' says what the
+# key does, so the keymap needs no shared constants.
+
+description: Change how fast the status screen's emblem rotates
+
+compatible: "zmk,behavior-spin-speed"
+
+include: zero_param.yaml
+
+properties:
+  step:
+    type: int
+    required: true
+    description: |
+      How far this key moves along the speed table. Positive is faster,
+      negative slower; the ends of the table hold rather than wrap, and the
+      slowest setting is a full stop. Zero restores the default speed.
