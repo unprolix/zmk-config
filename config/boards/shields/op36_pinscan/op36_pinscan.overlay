@@ -1,0 +1,19 @@
+/*
+ * DIAGNOSTIC ONLY: an OP36 half with no key matrix of its own, so pinscan.c
+ * owns every GPIO. The shared transform keeps op36.keymap building.
+ */
+
+#include "../op36/op36.dtsi"
+
+/ {
+    chosen {
+        zmk,kscan = &pinscan_mock_kscan;
+    };
+
+    pinscan_mock_kscan: pinscan_mock_kscan {
+        compatible = "zmk,kscan-mock";
+        columns = <0>;
+        rows = <0>;
+        events = <0>;
+    };
+};

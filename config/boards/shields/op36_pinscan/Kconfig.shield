@@ -1,0 +1,3 @@
+# DIAGNOSTIC ONLY. See pinscan.c.
+config SHIELD_OP36_PINSCAN
+    def_bool $(shields_list_contains,op36_pinscan)
