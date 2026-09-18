@@ -319,6 +319,33 @@ include:
     cmake-args: -DZMK_EXTRA_CONF_FILE="${GITHUB_WORKSPACE}/config/rgbzone_fuligin.conf"
     artifact-name: eyelash_corne_right_fuligin-rgbzone
 
+  # Ergohaven Omega Point 36 + Qube dongle (board and shield vendored in
+  # config/boards/ergohaven and config/boards/shields/op36; forward-ported from
+  # ergohaven/ergohaven-zmk @ 2026.03.16). The Qube is the central; both halves
+  # are peripherals and type only through it.
+  #
+  # `dfu` (TEMPORARY raw-HID bootloader trigger, at jjb's request 2026-09-15)
+  # rides on the Qube only: it is central-only code, and the halves need none --
+  # the Qube relays &bootloader to either one over the split link. See
+  # scripts/dfu-trigger.py for the qube / peripheral1 / peripheral2 targets.
+  - board: ergohaven/nrf52840/zmk
+    shield: op36_qube qube_display dfu
+    artifact-name: op36_qube
+  # Same, plus a USB CDC console (/dev/serial/by-id/*C81DBEE32545FA9A*).
+  - board: ergohaven/nrf52840/zmk
+    shield: op36_qube qube_display dfu
+    snippet: zmk-usb-logging
+    artifact-name: op36_qube-debug
+  - board: ergohaven/nrf52840/zmk
+    shield: op36_left
+    artifact-name: op36_left
+  - board: ergohaven/nrf52840/zmk
+    shield: op36_right
+    artifact-name: op36_right
+  - board: ergohaven/nrf52840/zmk
+    shield: settings_reset
+    artifact-name: ergohaven-settings_reset
+
   # Settings reset (universal across both sides)
   - board: nice_nano@2.0.0/nrf52840/zmk
     shield: settings_reset

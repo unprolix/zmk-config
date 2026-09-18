@@ -1,0 +1,30 @@
+/*
+ * What the two OP36 halves share and the Qube does not: a key matrix and a
+ * battery.
+ */
+
+#include "op36.dtsi"
+
+/ {
+    chosen {
+        zmk,kscan = &kscan0;
+        zmk,battery = &vbatt;
+    };
+
+    kscan0: kscan {
+        compatible = "zmk,kscan-gpio-matrix";
+        diode-direction = "col2row";
+        wakeup-source;
+    };
+
+    /*
+     * Cell sense on AIN7 (P0.31) through 806k over 1564k. Both vendor
+     * firmwares agree on the channel and the divider.
+     */
+    vbatt: vbatt {
+        compatible = "zmk,battery-voltage-divider";
+        io-channels = <&adc 7>;
+        output-ohms = <1564000>;
+        full-ohms = <(806000 + 1564000)>;
+    };
+};

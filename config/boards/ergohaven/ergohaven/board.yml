@@ -1,0 +1,8 @@
+board:
+  name: ergohaven
+  full_name: Ergohaven E73 nRF52840
+  vendor: ergohaven
+  socs:
+    - name: nrf52840
+      variants:
+        - name: zmk

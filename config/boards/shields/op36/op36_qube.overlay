@@ -1,0 +1,23 @@
+/*
+ * The Qube: the split central, on USB, with no keys of its own.
+ *
+ * Its ST7789V panel (SPI3: SCK P1.11, MOSI P1.10, CS P1.13, DC P0.28,
+ * RST P0.03, backlight P0.02) is not driven yet. The vendor's dongle-screen
+ * module overrides Zephyr's st7789v driver with a pre-MIPI-DBI copy that does
+ * not build on Zephyr 4.1.
+ */
+
+#include "op36.dtsi"
+
+/ {
+    chosen {
+        zmk,kscan = &mock_kscan;
+    };
+
+    mock_kscan: mock_kscan_0 {
+        compatible = "zmk,kscan-mock";
+        columns = <0>;
+        rows = <0>;
+        events = <0>;
+    };
+};

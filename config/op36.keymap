@@ -1,0 +1,187 @@
+// -*- mode: dts -*-
+/*
+ * Ergohaven Omega Point 36 (+ Qube dongle) running the shared jjb layout.
+ *
+ * Same shape as the Toucan: 36 keys on the 42-position transform, outer pinky
+ * column bound &none, inner-5 row segments (X_ROW_IN) from the shared layout.
+ * All three parts -- Qube, left, right -- build this keymap; only the Qube
+ * acts on it.
+ *
+ * No encoder, no pointing device, no lighting.
+ */
+
+#define CONFIG_WIRELESS
+
+#include "zmk-helpers/key-labels/42.h"
+#include "jjb.keymap"
+
+#define OUTER &none
+
+/ {
+    keymap {
+        compatible = "zmk,keymap";
+
+        hierophant_layer {
+            display-name = "hierophant";
+            bindings = <
+OUTER HIEROPHANT_LT_IN  HIEROPHANT_RT_IN OUTER
+OUTER HIEROPHANT_LM_IN  HIEROPHANT_RM_IN OUTER
+OUTER HIEROPHANT_LB_IN  HIEROPHANT_RB_IN OUTER
+HIEROPHANT_LH HIEROPHANT_RH
+            >;
+        };
+
+        qwerty_layer {
+            display-name = "qwerty";
+            bindings = <
+OUTER QWERTY_LT_IN  QWERTY_RT_IN OUTER
+OUTER QWERTY_LM_IN  QWERTY_RM_IN OUTER
+OUTER QWERTY_LB_IN  QWERTY_RB_IN OUTER
+QWERTY_LH QWERTY_RH
+            >;
+        };
+
+        gaming_layer {
+            display-name = "gaming";
+            bindings = <
+OUTER GAMING_LT_IN  GAMING_RT_IN OUTER
+OUTER GAMING_LM_IN  GAMING_RM_IN OUTER
+OUTER GAMING_LB_IN  GAMING_RB_IN OUTER
+GAMING_LH GAMING_RH
+            >;
+        };
+
+        empty_2_layer {
+            display-name = "empty 2";
+            bindings = <
+OUTER EMPTY_2_LT_IN  EMPTY_2_RT_IN OUTER
+OUTER EMPTY_2_LM_IN  EMPTY_2_RM_IN OUTER
+OUTER EMPTY_2_LB_IN  EMPTY_2_RB_IN OUTER
+EMPTY_2_LH EMPTY_2_RH
+            >;
+        };
+
+        superscript_layer {
+            display-name = "superscript";
+            bindings = <
+OUTER SUPERSCRIPT_LT_IN  SUPERSCRIPT_RT_IN OUTER
+OUTER SUPERSCRIPT_LM_IN  SUPERSCRIPT_RM_IN OUTER
+OUTER SUPERSCRIPT_LB_IN  SUPERSCRIPT_RB_IN OUTER
+SUPERSCRIPT_LH SUPERSCRIPT_RH
+            >;
+        };
+
+        numeric_layer {
+            display-name = "numeric";
+            bindings = <
+OUTER NUMERIC_LT_IN  NUMERIC_RT_IN OUTER
+OUTER NUMERIC_LM_IN  NUMERIC_RM_IN OUTER
+OUTER NUMERIC_LB_IN  NUMERIC_RB_IN OUTER
+NUMERIC_LH NUMERIC_RH
+            >;
+        };
+
+        numpad_layer {
+            display-name = "numpad";
+            bindings = <
+OUTER NUMPAD_LT_IN  NUMPAD_RT_IN OUTER
+OUTER NUMPAD_LM_IN  NUMPAD_RM_IN OUTER
+OUTER NUMPAD_LB_IN  NUMPAD_RB_IN OUTER
+NUMPAD_LH NUMPAD_RH
+            >;
+        };
+
+        symbol_layer {
+            display-name = "symbol";
+            bindings = <
+OUTER SYMBOL_LT_IN  SYMBOL_RT_IN OUTER
+OUTER SYMBOL_LM_IN  SYMBOL_RM_IN OUTER
+OUTER SYMBOL_LB_IN  SYMBOL_RB_IN OUTER
+SYMBOL_LH SYMBOL_RH
+            >;
+        };
+
+        navigation_layer {
+            display-name = "navigation";
+            bindings = <
+OUTER NAVIGATION_LT_IN  NAVIGATION_RT_IN OUTER
+OUTER NAVIGATION_LM_IN  NAVIGATION_RM_IN OUTER
+OUTER NAVIGATION_LB_IN  NAVIGATION_RB_IN OUTER
+NAVIGATION_LH NAVIGATION_RH
+            >;
+        };
+
+        mod_l_nav_layer {
+            display-name = "LGUI+nav";
+            bindings = <
+OUTER LGN_LT_IN  LGN_RT_IN OUTER
+OUTER LGN_LM_IN  LGN_RM_IN OUTER
+OUTER LGN_LB_IN  LGN_RB_IN OUTER
+LGN_LH LGN_RH
+            >;
+        };
+
+        mod_r_nav_layer {
+            display-name = "RGUI+nav";
+            bindings = <
+OUTER RGN_LT_IN  RGN_RT_IN OUTER
+OUTER RGN_LM_IN  RGN_RM_IN OUTER
+OUTER RGN_LB_IN  RGN_RB_IN OUTER
+RGN_LH RGN_RH
+            >;
+        };
+
+        extra_layer {
+            display-name = "extra";
+            bindings = <
+OUTER EXTRA_LT_IN  EXTRA_RT_IN OUTER
+OUTER EXTRA_LM_IN  EXTRA_RM_IN OUTER
+OUTER EXTRA_LB_IN  EXTRA_RB_IN OUTER
+EXTRA_LH EXTRA_RH
+            >;
+        };
+
+        function_layer {
+            display-name = "function";
+            bindings = <
+OUTER FUNCTION_LT_IN  FUNCTION_RT_IN OUTER
+OUTER FUNCTION_LM_IN  FUNCTION_RM_IN OUTER
+OUTER FUNCTION_LB_IN  FUNCTION_RB_IN OUTER
+FUNCTION_LH FUNCTION_RH
+            >;
+        };
+
+        /* No lighting hardware; layer kept so shared layer indices
+           (LIGHTING=13, BLUETOOTH=14, SYSTEM=15) stay valid. */
+        lighting_layer {
+            display-name = "lighting";
+            bindings = <
+OUTER LIGHTING_LT_IN  LIGHTING_RT_IN OUTER
+OUTER LIGHTING_LM_IN  LIGHTING_RM_IN OUTER
+OUTER LIGHTING_LB_IN  LIGHTING_RB_IN OUTER
+LIGHTING_LH LIGHTING_RH
+            >;
+        };
+
+        bluetooth_layer {
+            display-name = "bluetooth";
+            bindings = <
+OUTER BLUETOOTH_LT_IN  BLUETOOTH_RT_IN OUTER
+OUTER BLUETOOTH_LM_IN  BLUETOOTH_RM_IN OUTER
+OUTER BLUETOOTH_LB_IN  BLUETOOTH_RB_IN OUTER
+BLUETOOTH_LH BLUETOOTH_RH
+            >;
+        };
+
+        system_layer {
+            display-name = "system";
+            bindings = <
+OUTER SYSTEM_LT_IN  SYSTEM_RT_IN OUTER
+OUTER SYSTEM_LM_IN  SYSTEM_RM_IN OUTER
+OUTER SYSTEM_LB_IN  SYSTEM_RB_IN OUTER
+SYSTEM_LH SYSTEM_RH
+            >;
+        };
+
+    }; /* keymap */
+}; // root node

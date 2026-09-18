@@ -1,0 +1,12 @@
+file_format: "1"
+id: op36
+name: Omega Point 36
+type: shield
+url: https://github.com/ergohaven/ergohaven-zmk
+requires: [ergohaven]
+features:
+  - keys
+siblings:
+  - op36_left
+  - op36_right
+  - op36_qube

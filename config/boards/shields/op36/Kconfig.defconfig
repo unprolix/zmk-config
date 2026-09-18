@@ -1,0 +1,36 @@
+# The Qube is the central: both halves are peripherals and connect only to it.
+# Without the Qube plugged in, neither half types.
+
+if SHIELD_OP36_QUBE
+
+config ZMK_KEYBOARD_NAME
+    default "OP36"
+
+config ZMK_SPLIT_ROLE_CENTRAL
+    default y
+
+config ZMK_SPLIT_BLE_CENTRAL_PERIPHERALS
+    default 2
+
+# Per ZMK's dongle guide: one connection per peripheral plus one per host
+# profile. ZMK_BLE_PROFILE_COUNT defaults to 5.
+config BT_MAX_CONN
+    default 7
+
+config BT_MAX_PAIRED
+    default 7
+
+config ZMK_SPLIT_BLE_CENTRAL_BATTERY_LEVEL_FETCHING
+    default y
+
+config ZMK_SPLIT_BLE_CENTRAL_BATTERY_LEVEL_PROXY
+    default y
+
+endif
+
+if SHIELD_OP36_LEFT || SHIELD_OP36_RIGHT || SHIELD_OP36_QUBE
+
+config ZMK_SPLIT
+    default y
+
+endif

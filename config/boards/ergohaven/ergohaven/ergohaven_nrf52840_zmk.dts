@@ -1,0 +1,112 @@
+/*
+ * Ergohaven E73-2G4M08S1C controller -- the nRF52840 in both OP36 halves and
+ * in the Qube dongle.
+ *
+ * Forward-ported to Zephyr hardware-model v2 from the vendor's HWMv1 board at
+ * ergohaven/ergohaven-zmk (boards/arm/ergohaven, 2026.03.16), which targets
+ * ZMK v0.3.0 / Zephyr 3.5.
+ *
+ * Deliberately NOT carried over from the vendor board:
+ *
+ *   - the blue LED on P1.10 and EXT_POWER on P1.09. Both are template leftovers:
+ *     P1.09 is matrix row 0 on both halves, P1.10 is a matrix pin on both
+ *     halves, and on the Qube P1.10 is the display's MOSI. ZMK's ext-power
+ *     driver would drive P1.09 as an output and kill a row.
+ *   - the board-level vbatt on AIN2. The halves sense the cell on AIN7 (P0.31);
+ *     that divider lives in the op36 shield, and the Qube has no battery.
+ *
+ * SPDX-License-Identifier: MIT
+ */
+
+/dts-v1/;
+#include <nordic/nrf52840_qiaa.dtsi>
+#include <common/nordic/nrf52840_uf2_boot_mode.dtsi>
+
+/ {
+    model = "Ergohaven E73-2G4M08S1C";
+    compatible = "ergohaven,nrf52840";
+
+    chosen {
+        zephyr,code-partition = &code_partition;
+        zephyr,sram = &sram0;
+        zephyr,flash = &flash0;
+    };
+};
+
+&adc {
+    status = "okay";
+};
+
+/*
+ * NO DCDC: both regulators stay in LDO mode.
+ *
+ * The vendor's older ZMK board enabled REG1 DCDC, but the firmware these units
+ * actually shipped with does not: ergohaven/rmk v0.1.8's nrf52840 defaults are
+ * dcdc_reg0 = false and dcdc_reg1 = false, and no OP36/Qube config overrides
+ * them. With REG1 in DCDC mode both halves linked, secured, and then dropped
+ * every 10-30 s with supervision timeouts (HCI 0x08) at -60 dBm, on both ends
+ * of the link -- the signature of a radio whose supply sags under TX, which is
+ * what DCDC mode does on a module without the inductor fitted.
+ */
+
+/*
+ * The left half scans P0.09 (row 2) and P0.10 (column 2), which are NFC1/NFC2
+ * until UICR NFCPINS is programmed. The stock RMK firmware programs it, so the
+ * pins happen to work today -- but that lives in UICR, not in the image, and a
+ * UICR erase would silently kill a row and a column. The firmware owns it here.
+ */
+&uicr {
+    nfct-pins-as-gpios;
+};
+
+&gpiote {
+    status = "okay";
+};
+
+&gpio0 {
+    status = "okay";
+};
+
+&gpio1 {
+    status = "okay";
+};
+
+zephyr_udc0: &usbd {
+    status = "okay";
+};
+
+/*
+ * Adafruit nRF52 bootloader with SoftDevice S140 v6 layout, as on a nice!nano.
+ *
+ * The OP36 halves keep that layout under the stock RMK firmware (it links at
+ * 0x26000). The Qube's stock RMK firmware does NOT: it links at 0x1000 and
+ * overwrites the SoftDevice. Ergohaven ships qube_rmk_to_zmk_reset.uf2
+ * (0x1000-0x26600) to put it back; that has to go on the Qube before any build
+ * from this board will boot there.
+ */
+&flash0 {
+    partitions {
+        compatible = "fixed-partitions";
+        #address-cells = <1>;
+        #size-cells = <1>;
+
+        sd_partition: partition@0 {
+            reg = <0x00000000 0x00026000>;
+        };
+        code_partition: partition@26000 {
+            reg = <0x00026000 0x000c6000>;
+        };
+
+        /*
+         * The flash starting at 0x000ec000 and ending at 0x000f3fff is
+         * reserved for use by the application (settings storage).
+         */
+        storage_partition: partition@ec000 {
+            reg = <0x000ec000 0x00008000>;
+        };
+
+        boot_partition: partition@f4000 {
+            reg = <0x000f4000 0x0000c000>;
+        };
+    };
+};

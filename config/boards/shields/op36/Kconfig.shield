@@ -1,0 +1,8 @@
+config SHIELD_OP36_LEFT
+    def_bool $(shields_list_contains,op36_left)
+
+config SHIELD_OP36_RIGHT
+    def_bool $(shields_list_contains,op36_right)
+
+config SHIELD_OP36_QUBE
+    def_bool $(shields_list_contains,op36_qube)
