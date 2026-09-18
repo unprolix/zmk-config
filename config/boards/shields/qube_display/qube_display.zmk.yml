@@ -1,0 +1,8 @@
+file_format: "1"
+id: qube_display
+name: Qube display
+type: shield
+url: https://github.com/ergohaven/ergohaven-zmk-qube
+requires: [ergohaven]
+features:
+  - display

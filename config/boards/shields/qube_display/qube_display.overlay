@@ -1,0 +1,99 @@
+/*
+ * The Qube's panel: a 1.69" 240x280 ST7789V on SPI3, shown landscape (280x240).
+ *
+ * Pins and init parameters from Ergohaven's own firmwares, which agree:
+ * ergohaven-zmk-qube (boards/shields/qube) and ergohaven/rmk
+ * (keyboards/classic_qube/src/qube.rs, qube_display.rs).
+ *
+ * Zephyr 4.1's st7789v sits behind a MIPI DBI controller node; the vendor's
+ * ZMK module predates that and replaces the in-tree driver with an old copy,
+ * which is why it is not used here.
+ *
+ * LANDSCAPE. The in-tree driver implements only DISPLAY_ORIENTATION_NORMAL, so
+ * the rotation is done in the controller instead: MADCTL = MX | MV (0x60), the
+ * exact value the stock RMK firmware sends for its 90-degree rotation
+ * (lcd-async Rotation::Deg90 -> reverse columns + swap rows/columns). With the
+ * axes swapped, the panel's 20-row offset in the controller's 320-row memory
+ * becomes a column offset.
+ */
+
+#include <zephyr/dt-bindings/mipi_dbi/mipi_dbi.h>
+
+&pinctrl {
+    spi3_qube_default: spi3_qube_default {
+        group1 {
+            psels = <NRF_PSEL(SPIM_SCK, 1, 11)>,
+                    <NRF_PSEL(SPIM_MOSI, 1, 10)>;
+        };
+    };
+
+    spi3_qube_sleep: spi3_qube_sleep {
+        group1 {
+            psels = <NRF_PSEL(SPIM_SCK, 1, 11)>,
+                    <NRF_PSEL(SPIM_MOSI, 1, 10)>;
+            low-power-enable;
+        };
+    };
+};
+
+&spi3 {
+    status = "okay";
+    pinctrl-0 = <&spi3_qube_default>;
+    pinctrl-1 = <&spi3_qube_sleep>;
+    pinctrl-names = "default", "sleep";
+    cs-gpios = <&gpio1 13 GPIO_ACTIVE_LOW>;
+};
+
+/ {
+    chosen {
+        zephyr,display = &qube_panel;
+    };
+
+    /*
+     * Backlight enable. Driven as a plain GPIO by the status screen. Active
+     * high: the stock RMK firmware lights the panel by driving P0.02 high.
+     */
+    qube_backlight {
+        compatible = "gpio-leds";
+        qube_backlight_en: backlight {
+            gpios = <&gpio0 2 GPIO_ACTIVE_HIGH>;
+        };
+    };
+
+    mipi_dbi_qube {
+        compatible = "zephyr,mipi-dbi-spi";
+        spi-dev = <&spi3>;
+        dc-gpios = <&gpio0 28 GPIO_ACTIVE_HIGH>;
+        reset-gpios = <&gpio0 3 GPIO_ACTIVE_LOW>;
+        write-only;
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        qube_panel: st7789v@0 {
+            compatible = "sitronix,st7789v";
+            reg = <0>;
+            /* What the stock RMK firmware runs the bus at. */
+            mipi-max-frequency = <8000000>;
+            mipi-mode = "MIPI_DBI_MODE_SPI_4WIRE";
+            width = <280>;
+            height = <240>;
+            x-offset = <20>;
+            y-offset = <0>;
+            vcom = <0x19>;
+            gctrl = <0x35>;
+            vrhs = <0x12>;
+            vdvs = <0x20>;
+            mdac = <0x60>;
+            gamma = <0x01>;
+            colmod = <0x05>;
+            lcm = <0x2c>;
+            porch-param = [0c 0c 00 33 33];
+            cmd2en-param = [5a 69 02 01];
+            pwctrl1-param = [a4 a1];
+            pvgam-param = [D0 04 0D 11 13 2B 3F 54 4C 18 0D 0B 1F 23];
+            nvgam-param = [D0 04 0C 11 13 2C 3F 44 51 2F 1F 1F 20 23];
+            ram-param = [00 F0];
+            rgb-param = [CD 08 14];
+        };
+    };
+};

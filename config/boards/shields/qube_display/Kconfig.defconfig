@@ -1,0 +1,30 @@
+# SPDX-License-Identifier: MIT
+#
+# Defaults only. A shield `default` loses to an earlier default elsewhere, so
+# everything the panel cannot work without is ALSO set in qube_display.conf.
+
+if SHIELD_QUBE_DISPLAY
+
+config ZMK_DISPLAY
+    default y
+
+choice ZMK_DISPLAY_STATUS_SCREEN
+    default ZMK_DISPLAY_STATUS_SCREEN_CUSTOM
+endchoice
+
+choice ZMK_DISPLAY_WORK_QUEUE
+    default ZMK_DISPLAY_WORK_QUEUE_DEDICATED
+endchoice
+
+choice LV_COLOR_DEPTH
+    default LV_COLOR_DEPTH_16
+endchoice
+
+config LV_Z_BITS_PER_PIXEL
+    default 16
+
+# The screen shows caps lock from what the HOST reports.
+config ZMK_HID_INDICATORS
+    default y
+
+endif # SHIELD_QUBE_DISPLAY
