@@ -54,6 +54,15 @@ serial_to_fw() {
         # suffix once the raw-HID trigger is removed.
         692C03EA68AC36B1) echo "toucan_left-dfu|Toucan Left" ;;
         F3A6B1329E98446C) echo "toucan_right-dfu|Toucan Right" ;;
+        # Ergohaven OP36 + Qube: all three are bare nRF52840 modules whose
+        # bootloader calls itself an nRF52840 DK (volume NRF52BOOT, Board-ID
+        # nRF52840-pca10056-v1), so the serial is the only thing that tells
+        # them apart. Read off the hardware 2026-09-15. Sides confirmed by
+        # unplugging the right half and watching which serial left the bus --
+        # NOT by bootloader timing, which got it backwards once.
+        C81DBEE32545FA9A) echo "op36_qube|OP36 Qube" ;;
+        121ED9D17011A4B5) echo "op36_left|OP36 Left" ;;
+        E6AF7273BDA22812) echo "op36_right|OP36 Right" ;;
         *) return 1 ;;
     esac
 }
@@ -62,8 +71,9 @@ find_bootloader() {
     # NICENANO is the eyelash's; ROLIO-BOOT is the Rolio's; the Toucan (Seeed
     # XIAO nRF52840) uses XIAO-SENSE on the Sense variant and XIAO-BOOT on the
     # plain one, so take either rather than betting on which board is in hand.
+    # NRF52BOOT is the OP36 halves' and the Qube's.
     # Matching on the label rather than on size keeps a stray USB stick out.
-    lsblk -rno NAME,LABEL | awk '$2=="NICENANO" || $2=="ROLIO-BOOT" || $2=="XIAO-SENSE" || $2=="XIAO-BOOT"{print $1; exit}'
+    lsblk -rno NAME,LABEL | awk '$2=="NICENANO" || $2=="ROLIO-BOOT" || $2=="XIAO-SENSE" || $2=="XIAO-BOOT" || $2=="NRF52BOOT"{print $1; exit}'
 }
 
 if [ "${1:-}" = "--list" ]; then

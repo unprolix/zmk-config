@@ -43,7 +43,23 @@ static const uint8_t DFU_MAGIC[] = {'Z', 'M', 'K', 'D', 'F', 'U', '!'};
 #define DFU_MIN_LEN    (DFU_MAGIC_LEN + 2)
 
 #define DFU_TARGET_CENTRAL 0x00
-#define DFU_TARGET_PERIPH  0x01
+
+/*
+ * 0x01 is the first peripheral (split source 0), 0x02 the second, and so on.
+ * An ordinary split has one; a dongle such as the OP36's Qube has one per half.
+ * Source numbers follow bond order, not side -- whichever half lands in its
+ * bootloader, the flash script picks its image by serial.
+ */
+#define DFU_TARGET_PERIPH_FIRST 0x01
+
+#if defined(CONFIG_ZMK_SPLIT_BLE_CENTRAL_PERIPHERALS)
+#define DFU_PERIPHERAL_COUNT CONFIG_ZMK_SPLIT_BLE_CENTRAL_PERIPHERALS
+#elif IS_ENABLED(CONFIG_ZMK_SPLIT)
+#define DFU_PERIPHERAL_COUNT 1
+#else
+/* Not a split: there is nothing to relay to, only this device itself. */
+#define DFU_PERIPHERAL_COUNT 0
+#endif
 
 /*
  * Deferred rather than done inline: this arrives on the USB HID callback's
@@ -61,12 +77,23 @@ static void dfu_fire(struct k_work *work) {
     struct zmk_behavior_binding_event event = {
         .position = 0,
         .timestamp = k_uptime_get(),
-        .source = (dfu_target == DFU_TARGET_PERIPH) ? 0
-                                                    : ZMK_POSITION_STATE_CHANGE_SOURCE_LOCAL,
     };
 
-    LOG_WRN("DFU requested over raw HID for %s",
-            dfu_target == DFU_TARGET_PERIPH ? "peripheral" : "central");
+#if IS_ENABLED(CONFIG_ZMK_SPLIT)
+    /*
+     * The event only carries a source on a split build. Anywhere else the
+     * listener has already rejected every target but the central.
+     */
+    const bool central = dfu_target == DFU_TARGET_CENTRAL;
+    event.source = central ? ZMK_POSITION_STATE_CHANGE_SOURCE_LOCAL
+                           : (uint8_t)(dfu_target - DFU_TARGET_PERIPH_FIRST);
+    if (!central) {
+        LOG_WRN("DFU requested over raw HID for peripheral source %d", event.source);
+    } else
+#endif
+    {
+        LOG_WRN("DFU requested over raw HID for the central");
+    }
 
     int err = zmk_behavior_invoke_binding(&binding, event, true);
     if (err) {
@@ -98,7 +125,9 @@ static int dfu_hid_listener(const zmk_event_t *eh) {
         return ZMK_EV_EVENT_BUBBLE;
     }
 
-    if (target != DFU_TARGET_CENTRAL && target != DFU_TARGET_PERIPH) {
+    if (target != DFU_TARGET_CENTRAL &&
+        (target < DFU_TARGET_PERIPH_FIRST ||
+         target >= DFU_TARGET_PERIPH_FIRST + DFU_PERIPHERAL_COUNT)) {
         LOG_WRN("DFU command rejected: unknown target %d", target);
         return ZMK_EV_EVENT_BUBBLE;
     }

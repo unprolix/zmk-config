@@ -35,7 +35,23 @@ import os
 import sys
 
 MAGIC = b"ZMKDFU!"
-TARGETS = {"left": 0x00, "central": 0x00, "right": 0x01, "peripheral": 0x01}
+# left/right name the halves of an ordinary split, where the left IS the
+# central. A dongle is different: the OP36's Qube is the central and both halves
+# are peripherals, numbered by bond order rather than side --
+#     scripts/dfu-trigger.py qube --name OP36
+#     scripts/dfu-trigger.py peripheral1 --name OP36
+#     scripts/dfu-trigger.py peripheral2 --name OP36
+# Which half answers to which number does not matter for flashing:
+# scripts/zmk-flash.sh picks the image by the serial of whatever is in bootloader.
+TARGETS = {
+    "left": 0x00,
+    "central": 0x00,
+    "qube": 0x00,
+    "right": 0x01,
+    "peripheral": 0x01,
+    "peripheral1": 0x01,
+    "peripheral2": 0x02,
+}
 
 # The vendor-defined page the firmware's raw-HID descriptor advertises.
 USAGE_PAGE = 0xFF60
