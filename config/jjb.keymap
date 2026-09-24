@@ -292,6 +292,19 @@ ZMK_TAP_DANCE(num_dance, bindings = <&num_word NUM>, <&sl_long NUM>;
 // modifier does not eat the first.
 ZMK_STICKY_KEY(sk_long, bindings = <&kp>; release-after-ms = <5000>; ignore-modifiers;)
 
+// The thumb's sticky Shift, wrapped so that a Backspace after the letter it
+// shifted puts it back (boards/shields/common/sticky_shift_redo.c). Only this
+// one: a home-row Shift goes through &sk_long and is never re-armed.
+/ {
+    behaviors {
+        sk_redo: sticky_shift_redo {
+            compatible = "zmk,behavior-sticky-shift-redo";
+            #binding-cells = <1>;
+            bindings = <&sk>;
+        };
+    };
+};
+
 // The same for sticky LAYERS. ZMK's &sl is the identical behaviour with &mo as
 // its binding, and the identical 1000ms deadline; quick-release is kept from
 // the stock definition so the layer drops the moment the next key is pressed

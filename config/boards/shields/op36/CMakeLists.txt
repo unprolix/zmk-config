@@ -8,3 +8,8 @@ zephyr_library_include_directories(${CMAKE_SOURCE_DIR}/include)
 # a null binding, which faults the moment the key is pressed. Building it
 # everywhere, against a weak no-op, keeps the three in step.
 zephyr_library_sources(spin_speed.c)
+
+# Re-arms a one-shot Shift after a Backspace (see ../common/sticky_shift_redo.c).
+# Shared by every keyboard here; on a peripheral the file compiles to nothing,
+# since only a central has keycode events to listen to.
+zephyr_library_sources(${CMAKE_CURRENT_LIST_DIR}/../common/sticky_shift_redo.c)

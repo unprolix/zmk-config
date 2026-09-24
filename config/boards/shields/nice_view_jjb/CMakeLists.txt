@@ -24,3 +24,10 @@ if(CONFIG_ZMK_DISPLAY AND CONFIG_ZMK_DISPLAY_STATUS_SCREEN_CUSTOM)
     zephyr_library_sources(peripheral_status_screen.c)
   endif()
 endif()
+
+# Outside the display condition: this is keyboard behaviour, not screen.
+zephyr_library_include_directories(${CMAKE_SOURCE_DIR}/include)
+# Re-arms a one-shot Shift after a Backspace (see ../common/sticky_shift_redo.c).
+# Shared by every keyboard here; on a peripheral the file compiles to nothing,
+# since only a central has keycode events to listen to.
+zephyr_library_sources(${CMAKE_CURRENT_LIST_DIR}/../common/sticky_shift_redo.c)

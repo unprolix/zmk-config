@@ -1,0 +1,19 @@
+# Copyright (c) 2026 Jeremy Bornstein
+# SPDX-License-Identifier: MIT
+#
+# A sticky key that Backspace knows how to put back. Forwards press and release
+# to the sticky key in `bindings` with its own parameter, and marks the result
+# as the kind of Shift that a following Backspace may re-arm
+# (boards/shields/common/sticky_shift_redo.c). The home-row mods' &sk_long is
+# deliberately NOT one of these.
+
+description: Sticky Shift that a Backspace re-arms
+
+compatible: "zmk,behavior-sticky-shift-redo"
+
+include: one_param.yaml
+
+properties:
+  bindings:
+    type: phandles
+    required: true

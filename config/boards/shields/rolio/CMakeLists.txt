@@ -15,3 +15,8 @@ endif()
 # null behaviour binding, which faults the moment the key is pressed. Building
 # it on both halves, against a weak no-op, keeps the two in step.
 zephyr_library_sources(emblem_toggle.c)
+
+# Re-arms a one-shot Shift after a Backspace (see ../common/sticky_shift_redo.c).
+# Shared by every keyboard here; on a peripheral the file compiles to nothing,
+# since only a central has keycode events to listen to.
+zephyr_library_sources(${CMAKE_CURRENT_LIST_DIR}/../common/sticky_shift_redo.c)

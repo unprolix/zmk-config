@@ -56,14 +56,14 @@ arcane_left_default: arcane_left_default {
         compatible = "zmk,behavior-tap-dance";
         #binding-cells = <0>;
         tapping-term-ms = <300>;
-        bindings = <&sk LSHIFT>, <&caps_word>, <&kp CAPS>;
+        bindings = <&sk_redo LSHIFT>, <&caps_word>, <&kp CAPS>;
 };
  
 arcane_right_default: arcane_right_default {
         compatible = "zmk,behavior-tap-dance";
         #binding-cells = <0>;
         tapping-term-ms = <300>;
-        bindings = <&sk RSHIFT>, <&caps_word>, <&kp CAPS>;
+        bindings = <&sk_redo RSHIFT>, <&caps_word>, <&kp CAPS>;
 };
  
 arcane_left: arcane_left {

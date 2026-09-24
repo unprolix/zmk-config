@@ -13,3 +13,10 @@ zephyr_library_sources(uart_pio_half_duplex.c)
 # is the difference between a bad flash being an inconvenience and being a
 # disassembly job.
 zephyr_library_sources(boot_key.c)
+
+# ZMK headers (zmk/..., drivers/behavior.h) for the shared listener below.
+zephyr_library_include_directories(${CMAKE_SOURCE_DIR}/include)
+# Re-arms a one-shot Shift after a Backspace (see ../common/sticky_shift_redo.c).
+# Shared by every keyboard here; on a peripheral the file compiles to nothing,
+# since only a central has keycode events to listen to.
+zephyr_library_sources(${CMAKE_CURRENT_LIST_DIR}/../common/sticky_shift_redo.c)
