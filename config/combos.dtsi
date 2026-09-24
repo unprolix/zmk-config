@@ -14,6 +14,19 @@
 #define COMBO_TIMEOUT_LESSSLOW 30
 #define COMBO_PREIDLE_LESSSLOW 60
 
+// A combo with a key on each half pays the split link's skew on top of the
+// human one. On an ordinary split that skew is nil: one half IS the central,
+// and the other's presses ride a single connection. Behind a dongle both
+// halves are separate BLE peripherals on independent connection schedules, so
+// two presses that left the fingers together can reach the central a
+// connection event or more apart -- the OP36's i+d never matched at 30 ms and
+// did at 150. A board that needs it defines this before including the layout
+// (config/op36.keymap); the same-hand timeouts above are deliberately not
+// overridable, since those windows were tuned against rolls, not radios.
+#ifndef COMBO_CROSS_SKEW
+#define COMBO_CROSS_SKEW 0
+#endif
+
 
 
 #define ZMK_COMBO_SIMPLE(name, keycode, pos1, pos2) \
@@ -161,6 +174,32 @@
     }; \
 };
 
+// Cross-half combos: the PLUS / PLUS_SLOW / FAST shapes above with
+// COMBO_CROSS_SKEW added to the window. Use these for any pair that spans the
+// halves, whatever board it is written for, so a dongle build picks up the
+// allowance without the combo list knowing about it.
+#define ZMK_COMBO_DEF(name, behavior, keypos, window, preidle) \
+/ { \
+    combos { \
+        compatible = "zmk,combos"; \
+    combo_##name { \
+        timeout-ms = <window>; \
+        key-positions = <keypos>; \
+        bindings = <behavior>; \
+        require-prior-idle-ms = <preidle>; \
+    }; \
+    }; \
+};
+
+#define ZMK_COMBO_CROSS(name, behavior, pos1, pos2) \
+    ZMK_COMBO_DEF(name, behavior, pos1 pos2, (CHORD_TIMEOUT + COMBO_CROSS_SKEW), COMBO_PREIDLE_FAST)
+
+#define ZMK_COMBO_CROSS_SLOW(name, behavior, pos1, pos2) \
+    ZMK_COMBO_DEF(name, behavior, pos1 pos2, (COMBO_TIMEOUT_SLOW + COMBO_CROSS_SKEW), COMBO_PREIDLE_SUPERSLOW)
+
+#define ZMK_COMBO_CROSS_FAST(name, behavior, pos1, pos2) \
+    ZMK_COMBO_DEF(name, behavior, pos1 pos2, (COMBO_TIMEOUT_FAST + COMBO_CROSS_SKEW), COMBO_PREIDLE_FAST)
+
 
 // top row
 ZMK_COMBO_FAST(esc_2, ESC, LT5, LT4)
@@ -216,7 +255,7 @@ ZMK_COMBO_PLUS_FAST(gui_r, &sk RGUI, RM1, RM4)	// double skip!
 
 // cross-side
 
-ZMK_COMBO_PLUS(tab_cross, &kp TAB, LM1, RM1)
+ZMK_COMBO_CROSS(tab_cross, &kp TAB, LM1, RM1)
 
 // bottom row
 ZMK_COMBO_FAST(backslash, BSLH, LB5, LB4)
@@ -241,9 +280,9 @@ ZMK_SIMPLE_MACRO(dotcom, <&kp DOT>, <&kp C>, <&kp O>, <&kp M>)
 ZMK_COMBO_PLUS(dotcom, &dotcom, RB1, RB4) // dot and C on hierophant
 
 // thumbs
-ZMK_COMBO_PLUS(to_hierophant, &to HIEROPHANT, LH0, RH0) // inner thumb keys
-ZMK_COMBO_PLUS(navigation, &to NAVIGATION, LH1, RH1) // middle thumb keys
-ZMK_COMBO_FAST(printscreen, PRINTSCREEN, LH2, RH2) // outer thumb keys; screenshot
+ZMK_COMBO_CROSS(to_hierophant, &to HIEROPHANT, LH0, RH0) // inner thumb keys
+ZMK_COMBO_CROSS(navigation, &to NAVIGATION, LH1, RH1) // middle thumb keys
+ZMK_COMBO_CROSS_FAST(printscreen, &kp PRINTSCREEN, LH2, RH2) // outer thumb keys; screenshot
 
 // same-side thumb combos: one-shot CTRL (inner+middle thumbs)
 ZMK_COMBO_PLUS(sk_lctrl_thumb, &sk LCTRL, LH0, LH1)
@@ -302,23 +341,23 @@ ZMK_COMBO_SLOW(pipe, PIPE, RM5, RB5)
 
 // bottom row
 
-ZMK_COMBO_PLUS_SLOW(qwerty, &to QWERTY, LB5, RB5)
+ZMK_COMBO_CROSS_SLOW(qwerty, &to QWERTY, LB5, RB5)
 
 
 // wild ones
 
 // contractions
 ZMK_SIMPLE_MACRO(i_am, <&kp I>, <&kp SQT>, <&kp M>, <&kp SPACE>)
-ZMK_COMBO_PLUS_SLOW(i_am, &i_am, LM3, RB2)
+ZMK_COMBO_CROSS_SLOW(i_am, &i_am, LM3, RB2)
 
 ZMK_SIMPLE_MACRO(i_will, <&kp I>, <&kp SQT>, <&kp L>, <&kp L>, <&kp SPACE>)
-ZMK_COMBO_PLUS_SLOW(i_will, &i_will, LM3, RT3)
+ZMK_COMBO_CROSS_SLOW(i_will, &i_will, LM3, RT3)
 
 ZMK_SIMPLE_MACRO(i_would, <&kp I>, <&kp SQT>, <&kp D>, <&kp SPACE>)
-ZMK_COMBO_PLUS_SLOW(i_would, &i_would, LM3, RT2)
+ZMK_COMBO_CROSS_SLOW(i_would, &i_would, LM3, RT2)
 
 ZMK_SIMPLE_MACRO(i_have, <&kp I>, <&kp SQT>, <&kp V>, <&kp E>, <&kp SPACE>)
-ZMK_COMBO_PLUS_SLOW(i_have, &i_have, LM3, RB0)
+ZMK_COMBO_CROSS_SLOW(i_have, &i_have, LM3, RB0)
 
 // for specific layers
 

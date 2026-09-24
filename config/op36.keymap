@@ -12,6 +12,17 @@
 
 #define CONFIG_WIRELESS
 
+/*
+ * The Qube is a dongle: both halves are separate BLE peripherals, each on its
+ * own connection schedule, so a pair of presses spanning the halves reaches
+ * the central further apart than the fingers made them. Widen the cross-half
+ * combo windows (combos.dtsi) by that much. i+d never matched at the shared
+ * 30 ms and did at 150; 40 extra is the first guess between the two, not a
+ * measurement -- the two links are polled 7.5 ms apart at most, and a missed
+ * connection event costs another interval or two.
+ */
+#define COMBO_CROSS_SKEW 40
+
 #include "zmk-helpers/key-labels/42.h"
 #include "jjb.keymap"
 
