@@ -261,16 +261,19 @@ static const struct rgbkey_layer rgbkey_layers[] = {
     {"RGUI+nav", RKS_RGUI_NAV, true, {{RK_DIM_WHITE, RK_KEYS(RGBKEY_ARROWS_LEFT)}}},
 
     /*
-     * Carried over from rgbzone, column for column. Where its rows are stated
-     * relative to "the half holding the key", the holding half is fixed here:
-     * NUMPAD and SYMBOL are entered from the left thumb on this board.
+     * The same on both halves. These were one-sided -- yellow left and cyan
+     * right on numpad, blue col 2 on the left only for symbol -- carried over
+     * from rgbzone with the holding hand pinned to the left. jjb retired the
+     * one-sided scheme for NUMPAD and SYMBOL on 2026-09-22, when both became
+     * sticky layers. Numpad keeps its two colours: yellow as the wash, cyan
+     * for col 2.
      */
     {"numpad", RKS_NUMPAD, true,
-     {{RK_YELLOW, RK_KEYS(RK_L_TOP, RK_L_C1, RK_L_THUMB)},
-      {RK_CYAN, RK_KEYS(RK_R_TOP, RK_R_C2, RK_R_THUMB)}}},
+     {{RK_YELLOW, RK_KEYS(RK_BOTH_TOP, RK_BOTH_C1, RK_BOTH_THUMB)},
+      {RK_CYAN, RK_KEYS(RK_BOTH_C2)}}},
 
     {"symbol", RKS_SYMBOL, false,
-     {{RK_BLUE, RK_KEYS(RK_BOTH_TOP, RK_L_C2, RK_BOTH_THUMB)}}},
+     {{RK_BLUE, RK_KEYS(RK_BOTH_TOP, RK_BOTH_C2, RK_BOTH_THUMB)}}},
 
     {"numeric", RKS_NUMERIC, true,
      {{RK_CYAN, RK_KEYS(RK_BOTH_TOP, RK_BOTH_C5, RK_BOTH_THUMB)}}},

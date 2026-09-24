@@ -34,7 +34,9 @@ ZMK_SIMPLE_MACRO(dot_slash, <&kp DOT>, <&kp FSLH>)
 			flavor = "balanced";
 			hold-trigger-on-release;
 			hold-trigger-key-positions = <KEYS_L THUMBS>;
-			bindings = <&mo>, <&adaptive_q_base>;
+			// Sticky like tll/tlr: held and released unused, NUMPAD
+			// stays armed for one key.
+			bindings = <&sl_long>, <&adaptive_q_base>;
 		};
 
 

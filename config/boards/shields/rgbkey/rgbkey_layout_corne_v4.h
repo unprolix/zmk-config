@@ -201,23 +201,24 @@ static const struct rgbkey_layer rgbkey_layers[] = {
     /* Base: dark. Held modifiers paint over this from rgbkey_hrms below. */
 
     /*
-     * Yellow on the holding side, cyan on col 2 of the other -- stated relative
-     * to the hand, exactly as the eyelash states it, now that the hand is
-     * known. Both halves' columns are listed; each half keeps the group that is
-     * about it.
+     * Yellow col 1 and cyan col 2, the same on both halves. This was sided --
+     * yellow on the holding hand, cyan on the other -- until NUMPAD became a
+     * sticky layer (tll/tlr in jjb.keymap), which the owner tracking cannot
+     * see; jjb retired the one-sided scheme for NUMPAD and SYMBOL on
+     * 2026-09-22.
      */
     {"numpad", RKS_NUMPAD, true,
-     {{RK_YELLOW, RK_KEYS(RK_L_C1, RK_R_C1), RK_SIDE_HOLDING},
-      {RK_CYAN, RK_KEYS(RK_L_C2, RK_R_C2), RK_SIDE_OTHER}}},
+     {{RK_YELLOW, RK_KEYS(RK_L_C1, RK_R_C1)},
+      {RK_CYAN, RK_KEYS(RK_L_C2, RK_R_C2)}}},
 
     /*
      * SYMBOL is reachable from EITHER hand -- MAKE_ADAPTIVE_REPEAT puts it on
-     * adaptive_u_repeat (left) and adaptive_d_repeat (right) -- which is what
-     * made pinning it to the left wrong: held from the right it lit the far
-     * half and nothing at all under the hand doing the holding.
+     * adaptive_u_repeat (left) and adaptive_d_repeat (right) -- so it lights
+     * col 2 on both halves rather than guessing which hand holds it. Sided
+     * until SYMBOL went sticky; see numpad above.
      */
     {"symbol", RKS_SYMBOL, false,
-     {{RK_BLUE, RK_KEYS(RK_L_C2, RK_R_C2), RK_SIDE_HOLDING}}},
+     {{RK_BLUE, RK_KEYS(RK_L_C2, RK_R_C2)}}},
 
     /*
      * Either thumb reaches navigation, so the green column follows the hand

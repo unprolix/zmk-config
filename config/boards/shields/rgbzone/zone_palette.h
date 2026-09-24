@@ -129,12 +129,19 @@ static const struct zone_layer zone_layers[] = {
     {"hierophant", {ZC_OFF, ZC_OFF, ZC_OFF, ZC_OFF, ZC_OFF, ZC_OFF},
                    {ZC_OFF, ZC_OFF, ZC_OFF, ZC_OFF, ZC_OFF, ZC_OFF}},
 
-    /* Yellow on the pressed side, cyan on col 2 of the other hand. */
-    {"numpad",     {ZC_OFF, ZC_YELLOW, ZC_OFF, ZC_OFF, ZC_OFF, ZC_OFF},
-                   {ZC_OFF, ZC_OFF, ZC_CYAN, ZC_OFF, ZC_OFF, ZC_OFF}},
+    /*
+     * Both halves alike, not sided. NUMPAD and SYMBOL are reached through
+     * sticky layers now (tll/tlr in jjb.keymap), and a layer entered through
+     * &sl never tells the owner tracking which hand opened it -- a sided row
+     * would light whichever half last held something. jjb retired the
+     * one-sided scheme for these two on 2026-09-22. Numpad keeps both of its
+     * colours, yellow col 1 and cyan col 2, on each half.
+     */
+    {"numpad",     {ZC_OFF, ZC_YELLOW, ZC_CYAN, ZC_OFF, ZC_OFF, ZC_OFF},
+                   {ZC_OFF, ZC_YELLOW, ZC_CYAN, ZC_OFF, ZC_OFF, ZC_OFF}},
 
     {"symbol",     {ZC_OFF, ZC_OFF, ZC_BLUE, ZC_OFF, ZC_OFF, ZC_OFF},
-                   {ZC_OFF, ZC_OFF, ZC_OFF, ZC_OFF, ZC_OFF, ZC_OFF}},
+                   {ZC_OFF, ZC_OFF, ZC_BLUE, ZC_OFF, ZC_OFF, ZC_OFF}},
 
     {"navigation", {ZC_OFF, ZC_GREEN, ZC_OFF, ZC_OFF, ZC_OFF, ZC_OFF},
                    {ZC_OFF, ZC_OFF, ZC_OFF, ZC_OFF, ZC_OFF, ZC_OFF}},

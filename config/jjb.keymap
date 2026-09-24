@@ -362,9 +362,20 @@ MAKE_PAD_LAYER(pad_tlr_sticky, &numpad_exit_sl, KEYS_L THUMBS)
 ZMK_HOLD_TAP(pad_nav, bindings = <&numpad_exit_sl>, <&kp>; flavor = "balanced";
              tapping-term-ms = <200>; quick-tap-ms = <QUICK_TAP_MS>;)
 
-// Top Layer Left/Right
-MAKE_HRM(tll, &mo, &kp, KEYS_R THUMBS)
-MAKE_HRM(tlr, &mo, &kp, KEYS_L THUMBS)
+// Top Layer Left/Right: SYMBOL on U/D, NUMERIC on P/G, NUMPAD on W.
+//
+// Held through &sl_long rather than &mo, the same trick the home-row mods use
+// with &sk_long. A sticky layer is a superset of a momentary one: held and used,
+// it releases the moment the other key does, exactly like &mo; held and released
+// UNUSED, it stays armed for the next key instead of doing nothing. The guards
+// are MAKE_HRM's -- prior-idle and the positional restriction -- because U, D,
+// P and G are common letters, unlike the Z/F/L/B that tll_sticky can leave
+// unguarded.
+//
+// The cost is the one the HRMs already carry: a letter held too long now also
+// turns the NEXT key into a symbol or digit, where before it only lost itself.
+MAKE_HRM(tll, &sl_long, &kp, KEYS_R THUMBS)
+MAKE_HRM(tlr, &sl_long, &kp, KEYS_L THUMBS)
 
 // Sticky variants of the above.
 //
@@ -384,7 +395,8 @@ MAKE_HRM(tlr, &mo, &kp, KEYS_L THUMBS)
 //
 // Also note: a layer entered through &sl is never seen by a momentary-layer
 // driver, so anything asking "which hand is holding this layer" gets a stale
-// answer for these. Harmless while the colours are symmetrical.
+// answer for these. Harmless while the colours are symmetrical -- which is why
+// NUMPAD and SYMBOL lost their one-sided lighting when tll/tlr went sticky.
 // No require-prior-idle on these, unlike MAKE_HRM: arming a layer is something
 // you do between words, and a guard that refuses within 150ms of the last
 // keystroke refuses exactly when you reach for it mid-flow. The positional
