@@ -1,13 +1,15 @@
-ZMK_SIMPLE_MACRO(cant_wont_tail, <&kp SQT>, <&kp T>)
 ZMK_SIMPLE_MACRO(dot_slash, <&kp DOT>, <&kp FSLH>)
 / {
 	
 	/*
 
-	won't, can't  (no NH in english)
 	i'd, i'll, i've (no IH)
 	they're (no YH)
 
+	won't / can't used to be here too -- H after N typed 't -- and jjb
+	took it out: it fired on real words more than it saved keystrokes.
+	Removed again 2026-10-01 after it crept back in; do not re-add it
+	as a "fix" for the antecedent list.
 
 	*/
 
@@ -114,12 +116,11 @@ ZMK_SIMPLE_MACRO(dot_slash, <&kp DOT>, <&kp FSLH>)
 			compatible = "zmk,behavior-antecedent-morph";
 			#binding-cells = <0>;
 			defaults = <&kp H>;
-			// One binding per antecedent, in order: after N you are writing
-			// can't or won't, after I you are writing I'd, I'll or I've and
-			// want the apostrophe alone. Both are safe because neither NH
-			// nor IH occurs in English.
-			bindings = <&cant_wont_tail>, <&kp SQT>;
-			antecedents = <N I>;
+			// After I you are writing I'd, I'll or I've and want the
+			// apostrophe alone. Safe because IH does not occur in English.
+			// (N is deliberately NOT an antecedent -- see the note above.)
+			bindings = <&kp SQT>;
+			antecedents = <I>;
 			max-delay-ms = <LONG_PAUSE>;
 		};
 

@@ -74,7 +74,7 @@ parse_config:
     "&adaptive_s_repeat": { "t": "S", "h": "ctrl" }
     "&adaptive_t_repeat": { "t": "T", "h": "shift" }
     "&adaptive_r_repeat": { "t": "R", "h": "alt" }
-    "&adaptive_h_quote": { "t": "H", "s": "N→'t I→'" }
+    "&adaptive_h_quote": { "t": "H", "s": "I→'" }
     "&adaptive_j_dot": { "t": "J", "s": "./ after ." }
     "&tap_hold_layer_lgui_adaptive LGUI_NAV_L 0": { "t": "H", "h": "gui+nav", "s": "N→'t I→'" }
     "&tap_hold_layer_rgui RGUI_NAV_R N": { "t": "N", "h": "gui+nav" }
