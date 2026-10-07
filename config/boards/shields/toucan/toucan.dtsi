@@ -5,8 +5,6 @@
 #include <dt-bindings/zmk/matrix_transform.h>
 #include <physical_layouts.dtsi>
 
-//#define TOUCAN_WIN_MODE
-
 / {
     /*
      * Swaps which emblem the display shows. Declared HERE, in the shared dtsi,
@@ -110,38 +108,6 @@
 };
 
 / {
-    input_processors {
-        zip_zoom_mapper: zip_zoom_mapper {
-            compatible = "zmk,input-processor-zoom";
-            #input-processor-cells = <0>;
-            event-code = <INPUT_REL_MISC>;
-            sensitivity = <10>;
-            /* Linux desktop: apps zoom with Ctrl+- / Ctrl+= */
-            bindings = <&kp LC(MINUS)>, <&kp LC(EQUAL)>;
-            track-remainders;
-        };
-
-        is_touching_processor:is_touching_processor {
-            compatible = "zmk,input-processor-behaviors";
-            #input-processor-cells = <0>;
-
-            codes = <INPUT_BTN_TOUCH>;       // watch for the 'touch' pseudo button
-            bindings  = <&mo 8>;             // NAVIGATION layer (mouse buttons on right bottom row)
-        };
-
-        swipe_button_mapper: swipe_button_mapper {
-            compatible = "zmk,input-processor-behaviors";
-            #input-processor-cells = <0>;
-            codes = <INPUT_BTN_NORTH INPUT_BTN_EAST INPUT_BTN_SOUTH INPUT_BTN_WEST>;
-#ifdef TOUCAN_WIN_MODE
-            bindings = <&kp LG(TAB)>, <&kp LG(RIGHT)>, <&kp LG(D)>, <&kp LG(LEFT)>;
-#else
-            bindings = <&kp LC(LG(UP))>, <&kp LC(LG(RIGHT))>, <&kp LC(LG(DOWN))>, <&kp LC(LG(LEFT))>;
-#endif
-        };
-    };
-
-
     split_inputs {
         #address-cells = <1>;
         #size-cells = <0>;
@@ -156,15 +122,15 @@
         compatible = "zmk,input-listener";
         status = "disabled";
         device = <&trackpad_split>;
-        /* is_touching_processor deliberately not in the list: it would hold the
-           scroller layer active while touching, turning all pointer motion into
-           scroll. Keymap layer numbers here refer to jjb.keymap indices. */
-        input-processors = <&zip_xy_scaler 100 100>, <&zip_scroll_scaler 1 20>, <&zip_zoom_mapper>, <&swipe_button_mapper>;
+        /* Scales are beekeeb's for the circular (Cirque) pad; the X inversion is
+           the x-invert their driver did on the right half. Keymap layer numbers
+           here refer to jjb.keymap indices. */
+        input-processors = <&zip_xy_transform INPUT_TRANSFORM_X_INVERT>, <&zip_xy_scaler 250 100>;
         scroller {
             layers = <8>;    /* NAVIGATION held -> trackpad scrolls */
             input-processors = <
                 &zip_xy_to_scroll_mapper
-                &zip_scroll_scaler 1 20
+                &zip_scroll_scaler 1 5
                 &zip_scroll_transform INPUT_TRANSFORM_X_INVERT
             >;
         };

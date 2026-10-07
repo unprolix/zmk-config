@@ -65,8 +65,8 @@ include:
 
   # TEMPORARY: adds the raw-HID bootloader trigger to the Toucan. See
   # config/boards/shields/dfu -- this is a development convenience and is
-  # meant to be removed, not shipped. Both halves live on plaquette and the
-  # trackpad is dead pending an RMA, so every flash cycle here is remote.
+  # meant to be removed, not shipped. Every flash cycle of the Toucan is
+  # remote: neither half's reset button is handy once it is in use.
   #
   # The trigger is central-only (RAW_HID depends on ZMK_SPLIT_ROLE_CENTRAL);
   # the right half carries the shield anyway so both sides of a cycle come
