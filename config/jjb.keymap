@@ -390,6 +390,21 @@ ZMK_HOLD_TAP(pad_nav, bindings = <&numpad_exit_sl>, <&kp>; flavor = "balanced";
 MAKE_HRM(tll, &sl_long, &kp, KEYS_R THUMBS)
 MAKE_HRM(tlr, &sl_long, &kp, KEYS_L THUMBS)
 
+// SYMBOL on U/D: tll/tlr with a shorter prior-idle. Symbols are reached for
+// mid-word -- `foo(`, `x_y`, `a/b` -- so the 150ms HRM guard refused the hold
+// exactly when it was wanted and typed the letter instead. The positional
+// restriction still stops a same-hand roll from reading as a hold.
+#define TL_SYM_PRIOR_IDLE 75
+
+#define MAKE_TL_SYM(NAME, TRIGGER_POS)                                            \
+  ZMK_HOLD_TAP(NAME, bindings = <&sl_long>, <&kp>; flavor = "balanced";           \
+               tapping-term-ms = <280>; quick-tap-ms = <QUICK_TAP_MS>;            \
+               require-prior-idle-ms = <TL_SYM_PRIOR_IDLE>;                       \
+               hold-trigger-key-positions = <TRIGGER_POS>;)
+
+MAKE_TL_SYM(tll_sym, KEYS_R THUMBS)
+MAKE_TL_SYM(tlr_sym, KEYS_L THUMBS)
+
 // Sticky variants of the above.
 //
 // The nav thumbs hold to &sl rather than &mo, which is why NAV can be held for

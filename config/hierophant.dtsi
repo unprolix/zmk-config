@@ -47,8 +47,8 @@ ZMK_SIMPLE_MACRO(dot_slash, <&kp DOT>, <&kp FSLH>)
 
 		MAKE_ADAPTIVE_REPEAT(adaptive_w_repeat, tlr, NUMPAD, W)
 
-		MAKE_ADAPTIVE_REPEAT(adaptive_u_repeat, tll, SYMBOL, U)
-		MAKE_ADAPTIVE_REPEAT(adaptive_d_repeat, tlr, SYMBOL, D)
+		MAKE_ADAPTIVE_REPEAT(adaptive_u_repeat, tll_sym, SYMBOL, U)
+		MAKE_ADAPTIVE_REPEAT(adaptive_d_repeat, tlr_sym, SYMBOL, D)
 
 		MAKE_ADAPTIVE_REPEAT(adaptive_z_repeat, tll_sticky, EXTRA, Z)
 		MAKE_ADAPTIVE_REPEAT(adaptive_l_repeat, tlr_sticky, EXTRA, L)
